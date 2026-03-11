@@ -1,0 +1,11 @@
+{
+  "name": "scantorenov",
+  "version": "1.0.0",
+  "description": "Scantorenov — Scan 3D & Maîtrise d'Œuvre",
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.30.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}
