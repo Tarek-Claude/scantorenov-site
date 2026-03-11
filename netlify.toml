@@ -1,0 +1,36 @@
+# ── Configuration Netlify — Scantorenov ──────────────────────────────
+
+[build]
+  functions = "netlify/functions"
+  publish    = "."
+
+# ── Redirections propres ─────────────────────────────────────────────
+[[redirects]]
+  from   = "/connexion"
+  to     = "/connexion.html"
+  status = 200
+
+[[redirects]]
+  from   = "/espace-client"
+  to     = "/espace-client.html"
+  status = 200
+
+[[redirects]]
+  from   = "/accueil"
+  to     = "/index.html"
+  status = 200
+
+# ── Headers de sécurité ──────────────────────────────────────────────
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Frame-Options        = "SAMEORIGIN"
+    X-Content-Type-Options = "nosniff"
+    Referrer-Policy        = "strict-origin-when-cross-origin"
+
+# ── Netlify Identity ─────────────────────────────────────────────────
+# Activez Identity dans votre dashboard Netlify :
+# Site settings → Identity → Enable Identity
+
+[context.production.environment]
+  NODE_VERSION = "18"
