@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Connexion — Scantorenov</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&family=Inter:wght@300;400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <script src="https://identity.netlify.com/v1/netlify-identity-widget.js"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body { height: 100%; }
+    body { font-family: 'Inter', sans-serif; background: #060C18; color: #E8F2FA; overflow: hidden; }
+    :root {
+      --bg:    #060C18;
+      --mid:   #0A1422;
+      --card:  #0D1A2E;
+      --blue:  #4AB8E8;
+      --bl:    #7FCEEF;
+      --dim:   #2A6B95;
+      --glow:  rgba(74,184,232,0.15);
+      --muted: #6E92AA;
+      --border:rgba(74,184,232,0.14);
+    }
+    .layout { display: flex; height: 100vh; }
+    .brand-panel {
+      width: 42%;
+      background: linear-gradient(160deg, #060C18 0%, #0A1830 60%, #060C18 100%);
+      border-right: 1px solid var(--border);
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      padding: 60px 50px;
+      position: relative; overflow: hidden;
+    }
+    .brand-panel::before {
+      content: '';
+      position: absolute; top: -200px; right: -200px;
+      width: 500px; height: 500px;
+      background: radial-gradient(circle, rgba(74,184,232,0.08) 0%, transparent 70%);
+    }
+    canvas#bg { position: absolute; inset: 0; opacity: 0.35; pointer-events: none; }
+    .brand-logo { display: flex; align-items: center; gap: 14px; margin-bottom: 56px; z-index: 1; }
+    .logo-icon { width: 48px; height: 48px; }
+    .logo-icon svg { width: 100%; height: 100%; }
+    .logo-texts { display: flex; flex-direction: column; }
+    .logo-name { font-family: 'Space Grotesk', sans-serif; font-weight: 600; font-size: 1.15rem; color: #fff; }
+    .logo-tag  { font-size: 0.6rem; font-weight: 500; letter-spacing: 0.28em; text-transform: uppercase; color: var(--blue); }
+    .brand-quote { font-family: 'Cormorant Garamond', serif; font-size: 1.9rem; font-weight: 300; font-style: italic; line-height: 1.4; text-align: center; color: #fff; max-width: 340px; z-index: 1; margin-bottom: 40px; }
+    .brand-quote em { color: var(--blue); font-style: normal; }
+    .brand-divider { width: 40px; height: 1px; background: var(--blue); margin: 0 auto 28px; z-index: 1; }
+    .brand-sub { font-size: 0.82rem; color: var(--muted); text-align: center; line-height: 1.75; max-width: 300px; z-index: 1; }
+    .brand-pills { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; margin-top: 36px; z-index: 1; }
+    .pill { font-size: 0.68rem; font-weight: 500; letter-spacing: 0.1em; padding: 5px 14px; border: 1px solid rgba(74,184,232,0.22); color: var(--muted); background: rgba(74,184,232,0.05); }
+    .form-panel { flex: 1; display: flex; align-items: center; justify-content: center; padding: 40px 60px; background: var(--bg); }
+    .form-box { width: 100%; max-width: 420px; }
+    .form-tabs { display: flex; gap: 0; margin-bottom: 36px; border-bottom: 1px solid var(--border); }
+    .tab-btn { flex: 1; padding: 12px; font-size: 0.78rem; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; background: none; border: none; cursor: pointer; color: var(--muted); border-bottom: 2px solid transparent; transition: all 0.25s; margin-bottom: -1px; }
+    .tab-btn.active { color: var(--blue); border-bottom-color: var(--blue); }
+    .form-title { font-family: 'Cormorant Garamond', serif; font-size: 2rem; font-weight: 300; margin-bottom: 8px; color: #fff; }
+    .form-title em { font-style: italic; color: var(--blue); }
+    .form-intro { font-size: 0.85rem; color: var(--muted); margin-bottom: 32px; line-height: 1.65; }
+    .f-group { margin-bottom: 18px; }
+    .f-label { display: block; font-size: 0.68rem; font-weight: 600; letter-spacing: 0.18em; text-transform: uppercase; color: var(--muted); margin-bottom: 8px; }
+    .f-input { width: 100%; background: rgba(255,255,255,0.04); border: 1px solid rgba(74,184,232,0.15); padding: 13px 16px; color: #E8F2FA; font-size: 0.9rem; font-family: 'Inter', sans-serif; outline: none; transition: border-color 0.25s; }
+    .f-input:focus { border-color: var(--blue); }
+    .f-input::placeholder { color: rgba(110,146,170,0.45); }
+    .f-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+    .btn-submit { width: 100%; padding: 14px; background: var(--blue); color: #060C18; border: none; cursor: pointer; font-size: 0.8rem; font-weight: 700; letter-spacing: 0.18em; text-transform: uppercase; transition: all 0.3s; margin-top: 6px; }
+    .btn-submit:hover { background: var(--bl); box-shadow: 0 8px 32px rgba(74,184,232,0.38); }
+    .form-note { font-size: 0.75rem; color: var(--muted); text-align: center; margin-top: 16px; line-height: 1.65; }
+    .back-link { display: inline-flex; align-items: center; gap: 8px; font-size: 0.75rem; color: var(--muted); text-decoration: none; margin-top: 28px; letter-spacing: 0.08em; text-transform: uppercase; transition: color 0.2s; }
+    .back-link:hover { color: var(--blue); }
+    .error-msg { background: rgba(255,80,80,0.08); border: 1px solid rgba(255,80,80,0.25); color: #ff9090; font-size: 0.82rem; padding: 10px 14px; margin-bottom: 16px; display: none; }
+    .success-msg { background: rgba(74,184,232,0.08); border: 1px solid rgba(74,184,232,0.25); color: var(--blue); font-size: 0.82rem; padding: 10px 14px; margin-bottom: 16px; display: none; }
+    @media (max-width: 780px) { .brand-panel { display: none; } .form-panel { padding: 40px 24px; } }
+  </style>
+</head>
+<body>
+<div class="layout">
+  <div class="brand-panel">
+    <canvas id="bg"></canvas>
+    <div class="brand-logo">
+      <div class="logo-icon">
+        <svg viewBox="0 0 46 46" fill="none">
+          <defs><filter id="g"><feGaussianBlur stdDeviation="2.5" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs>
+          <path d="M8 14 C8 10 11 8 16 8 L26 8 C30 8 32 10 32 13 C32 16 30 18 26 19 L16 21 C12 22 8 24 8 28 C8 32 11 34 16 34 L28 34" stroke="#4AB8E8" stroke-width="2" stroke-linecap="round" fill="none" filter="url(#g)"/>
+          <path d="M20 8 L20 38 M20 8 L30 8 C34 8 37 10 37 14 C37 18 34 20 30 20 L20 20 M30 20 L38 38" stroke="#4AB8E8" stroke-width="2" stroke-linecap="round" fill="none" filter="url(#g)"/>
+          <circle cx="8" cy="14" r="2" fill="#4AB8E8" filter="url(#g)"/>
+        </svg>
+      </div>
+      <div class="logo-texts">
+        <span class="logo-name">scantorenov<span style="color:var(--blue)">.com</span></span>
+        <span class="logo-tag">Précision d'Intérieur</span>
+      </div>
+    </div>
+    <p class="brand-quote">Votre projet de rénovation, <em>entièrement maîtrisé</em> depuis votre espace.</p>
+    <div class="brand-divider"></div>
+    <p class="brand-sub">Accédez à vos visites virtuelles 3D, simulez vos travaux avec l'IA et suivez l'avancement de votre chantier en temps réel.</p>
+    <div class="brand-pills">
+      <span class="pill">Scan Matterport</span>
+      <span class="pill">Simulation IA</span>
+      <span class="pill">Suivi chantier</span>
+      <span class="pill">Devis en ligne</span>
+    </div>
+  </div>
+  <div class="form-panel">
+    <div class="form-box">
+      <div class="form-tabs">
+        <button class="tab-btn active" id="tabLogin" onclick="showTab('login')">Connexion</button>
+        <button class="tab-btn" id="tabRegister" onclick="showTab('register')">Créer un compte</button>
+      </div>
+      <div id="loginForm">
+        <h1 class="form-title">Bon retour,<br><em>Tarek</em>.</h1>
+        <p class="form-intro">Connectez-vous à votre espace client pour accéder à vos visites virtuelles et vos documents.</p>
+        <div class="error-msg" id="loginError"></div>
+        <form onsubmit="handleLogin(event)">
+          <div class="f-group">
+            <label class="f-label">Adresse e-mail</label>
+            <input type="email" class="f-input" id="loginEmail" placeholder="votre@email.com" required />
+          </div>
+          <div class="f-group">
+            <label class="f-label">Mot de passe</label>
+            <input type="password" class="f-input" id="loginPass" placeholder="••••••••" required />
+          </div>
+          <button type="submit" class="btn-submit" id="loginBtn">Accéder à mon espace →</button>
+        </form>
+        <p class="form-note">Mot de passe oublié ? <a href="#" onclick="resetPass()" style="color:var(--blue);text-decoration:none;">Réinitialiser</a></p>
+      </div>
+      <div id="registerForm" style="display:none;">
+        <h1 class="form-title">Créer votre<br><em>espace client</em>.</h1>
+        <p class="form-intro">Inscrivez-vous pour accéder à votre espace personnel Scantorenov.</p>
+        <div class="error-msg" id="regError"></div>
+        <div class="success-msg" id="regSuccess"></div>
+        <form onsubmit="handleRegister(event)">
+          <div class="f-row">
+            <div class="f-group">
+              <label class="f-label">Prénom</label>
+              <input type="text" class="f-input" id="regFirst" placeholder="Prénom" required />
+            </div>
+            <div class="f-group">
+              <label class="f-label">Nom</label>
+              <input type="text" class="f-input" id="regLast" placeholder="Nom" required />
+            </div>
+          </div>
+          <div class="f-group">
+            <label class="f-label">Adresse e-mail</label>
+            <input type="email" class="f-input" id="regEmail" placeholder="votre@email.com" required />
+          </div>
+          <div class="f-group">
+            <label class="f-label">Mot de passe</label>
+            <input type="password" class="f-input" id="regPass" placeholder="8 caractères minimum" minlength="8" required />
+          </div>
+          <button type="submit" class="btn-submit" id="regBtn">Créer mon espace →</button>
+        </form>
+        <p class="form-note">En créant un compte, vous acceptez nos <a href="index.html#contact" style="color:var(--blue);text-decoration:none;">conditions générales</a>.</p>
+      </div>
+      <a href="index.html" class="back-link">← Retour au site</a>
+    </div>
+  </div>
+</div>
+<script>
+  const c = document.getElementById('bg');
+  const ctx = c.getContext('2d');
+  let pts;
+  function initBg() {
+    c.width  = c.parentElement.offsetWidth;
+    c.height = c.parentElement.offsetHeight;
+    pts = Array.from({length:50},()=>({x:Math.random()*c.width,y:Math.random()*c.height,vx:(Math.random()-.5)*.25,vy:(Math.random()-.5)*.25}));
+  }
+  function drawBg(){
+    ctx.clearRect(0,0,c.width,c.height);
+    pts.forEach(p=>{p.x+=p.vx;p.y+=p.vy;if(p.x<0||p.x>c.width)p.vx*=-1;if(p.y<0||p.y>c.height)p.vy*=-1;ctx.beginPath();ctx.arc(p.x,p.y,1,0,Math.PI*2);ctx.fillStyle='rgba(74,184,232,0.7)';ctx.fill();});
+    for(let i=0;i<pts.length;i++)for(let j=i+1;j<pts.length;j++){const dx=pts[i].x-pts[j].x,dy=pts[i].y-pts[j].y,d=Math.sqrt(dx*dx+dy*dy);if(d<100){ctx.beginPath();ctx.moveTo(pts[i].x,pts[i].y);ctx.lineTo(pts[j].x,pts[j].y);ctx.strokeStyle='rgba(74,184,232,'+0.15*(1-d/100)+')';ctx.lineWidth=.5;ctx.stroke();}}
+    requestAnimationFrame(drawBg);
+  }
+  initBg(); drawBg();
+  window.addEventListener('resize', initBg);
+  function showTab(t) {
+    document.getElementById('loginForm').style.display    = t==='login'    ? '' : 'none';
+    document.getElementById('registerForm').style.display = t==='register' ? '' : 'none';
+    document.getElementById('tabLogin').classList.toggle('active',    t==='login');
+    document.getElementById('tabRegister').classList.toggle('active', t==='register');
+  }
+  netlifyIdentity.on('init', user => { if (user) window.location.href = 'espace-client.html'; });
+  netlifyIdentity.on('login', user => { netlifyIdentity.close(); window.location.href = 'espace-client.html'; });
+  netlifyIdentity.on('error', err => console.error('Identity error', err));
+  function handleLogin(e) {
+    e.preventDefault();
+    const btn = document.getElementById('loginBtn');
+    btn.textContent = 'Connexion…'; btn.disabled = true;
+    netlifyIdentity.open('login');
+    btn.textContent = 'Accéder à mon espace →'; btn.disabled = false;
+  }
+  function handleRegister(e) {
+    e.preventDefault();
+    const btn = document.getElementById('regBtn');
+    btn.textContent = 'Création…'; btn.disabled = true;
+    netlifyIdentity.open('signup');
+    btn.textContent = 'Créer mon espace →'; btn.disabled = false;
+  }
+  function resetPass() { netlifyIdentity.open('forgotten'); }
+</script>
+</body>
+</html>
