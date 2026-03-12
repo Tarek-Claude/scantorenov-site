@@ -44,6 +44,13 @@
   </style>
 </head>
 <body>
+<!-- Redirect identity tokens (confirmation, recovery, invite) to /connexion -->
+<script>
+var h=window.location.hash||'';
+if(h.indexOf('confirmation_token')>-1||h.indexOf('recovery_token')>-1||h.indexOf('invite_token')>-1||h.indexOf('access_token')>-1){
+  window.location.replace('/connexion'+h);
+}
+</script>
 
 <nav>
   <a href="#" class="logo">SCANTO<span>RENOV</span></a>
