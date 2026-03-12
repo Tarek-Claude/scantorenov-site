@@ -3,57 +3,40 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Espace Client â Scantorenov</title>
+  <title>Espace Client - Scantorenov</title>
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400&family=Inter:wght@300;400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet" />
   <script src="https://identity.netlify.com/v1/netlify-identity-widget.js"></script>
   <style>
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-    :root { --bg: #060C18; --card: #0D1A2E; --blue: #4AB8E8; --bl: #7FCEEF; --muted: #6E92AA; --border: rgba(74,184,232,0.13); }
-    body { font-family: 'Inter', sans-serif; background: var(--bg); color: #E8F2FA; min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; }
-
-    .auth-guard { text-align: center; padding: 40px; }
-    .auth-guard h1 { font-family: 'Cormorant Garamond', serif; font-size: 2rem; font-weight: 300; margin-bottom: 16px; }
-    .auth-guard p { color: var(--muted); font-size: 0.9rem; margin-bottom: 32px; }
-    .auth-btn {
-      padding: 13px 32px; background: var(--blue); color: var(--bg); border: none;
-      font-size: 0.82rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase;
-      cursor: pointer; transition: background 0.2s; text-decoration: none; display: inline-block;
-    }
-    .auth-btn:hover { background: var(--bl); }
-    .back-link { display: block; margin-top: 20px; color: var(--muted); font-size: 0.8rem; text-decoration: none; }
-    .back-link:hover { color: var(--blue); }
-
-    .dashboard { display: none; width: 100%; max-width: 900px; padding: 40px 24px; }
-    .dashboard.visible { display: block; }
-    .dash-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 40px; }
-    .dash-logo { font-family: 'Space Grotesk', sans-serif; font-size: 1rem; font-weight: 600; color: #fff; }
-    .dash-logo span { color: var(--blue); }
-    .dash-user { font-size: 0.82rem; color: var(--muted); }
-    .dash-logout { color: var(--blue); background: none; border: 1px solid var(--border); padding: 7px 16px; font-size: 0.75rem; cursor: pointer; margin-left: 14px; transition: all 0.2s; }
-    .dash-logout:hover { border-color: var(--blue); }
-
-    .dash-welcome { font-family: 'Cormorant Garamond', serif; font-size: 1.8rem; font-weight: 300; margin-bottom: 12px; }
-    .dash-desc { color: var(--muted); font-size: 0.9rem; margin-bottom: 40px; line-height: 1.6; }
-
-    .dash-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 16px; }
-    .dash-card {
-      background: var(--card); border: 1px solid var(--border); padding: 28px 24px;
-      transition: border-color 0.3s;
-    }
-    .dash-card:hover { border-color: rgba(74,184,232,0.35); }
-    .dc-icon { font-size: 1.6rem; margin-bottom: 14px; }
-    .dc-title { font-family: 'Space Grotesk', sans-serif; font-size: 0.92rem; font-weight: 600; margin-bottom: 8px; }
-    .dc-desc { font-size: 0.8rem; color: var(--muted); line-height: 1.5; }
-    .dc-badge { display: inline-block; margin-top: 12px; font-size: 0.65rem; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; padding: 3px 10px; background: rgba(74,184,232,0.1); color: var(--blue); border: 1px solid rgba(74,184,232,0.2); }
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    :root{--bg:#060C18;--card:#0D1A2E;--blue:#4AB8E8;--bl:#7FCEEF;--muted:#6E92AA;--border:rgba(74,184,232,0.13)}
+    body{font-family:'Inter',sans-serif;background:var(--bg);color:#E8F2FA;min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center}
+    .auth-guard{text-align:center;padding:40px}
+    .auth-guard h1{font-family:'Cormorant Garamond',serif;font-size:2rem;font-weight:300;margin-bottom:32px}
+    .auth-btn{padding:13px 32px;background:var(--blue);color:var(--bg);border:none;font-size:0.82rem;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;cursor:pointer;transition:background 0.2s;text-decoration:none;display:inline-block}
+    .auth-btn:hover{background:var(--bl)}
+    .back-link{display:block;margin-top:20px;color:var(--muted);font-size:0.8rem;text-decoration:none}
+    .back-link:hover{color:var(--blue)}
+    .dashboard{display:none;width:100%;max-width:900px;padding:40px 24px}
+    .dashboard.visible{display:block}
+    .dash-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:40px}
+    .dash-logo{font-family:'Space Grotesk',sans-serif;font-size:1rem;font-weight:600;color:#fff}
+    .dash-logo span{color:var(--blue)}
+    .dash-user{font-size:0.82rem;color:var(--muted)}
+    .dash-logout{color:var(--blue);background:none;border:1px solid var(--border);padding:7px 16px;font-size:0.75rem;cursor:pointer;margin-left:14px;transition:all 0.2s}
+    .dash-logout:hover{border-color:var(--blue)}
+    .dash-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:16px}
+    .dash-card{background:var(--card);border:1px solid var(--border);padding:28px 24px;transition:border-color 0.3s;min-height:140px}
+    .dash-card:hover{border-color:rgba(74,184,232,0.35)}
+    .dc-icon{font-size:1.6rem;margin-bottom:14px}
+    .dc-title{font-family:'Space Grotesk',sans-serif;font-size:0.92rem;font-weight:600}
   </style>
 </head>
 <body>
 
 <div class="auth-guard" id="authGuard">
   <h1>Espace Client</h1>
-  <p>Connectez-vous pour acceder a votre tableau de bord personnel.</p>
   <button class="auth-btn" onclick="netlifyIdentity.open()">Se connecter</button>
-  <a href="index.html" class="back-link">Retour au site</a>
+  <a href="index.html" class="back-link">Retour</a>
 </div>
 
 <div class="dashboard" id="dashboard">
@@ -64,38 +47,28 @@
       <button class="dash-logout" onclick="netlifyIdentity.logout()">Deconnexion</button>
     </div>
   </div>
-  <h2 class="dash-welcome">Bienvenue dans votre espace</h2>
-  <p class="dash-desc">Votre espace client est en cours de finalisation. Les fonctionnalites suivantes seront bientot disponibles.</p>
   <div class="dash-grid">
     <div class="dash-card">
       <div class="dc-icon">&#x1F3E0;</div>
-      <div class="dc-title">Visite Virtuelle 3D</div>
-      <div class="dc-desc">Explorez vos espaces scannes en immersion totale avec Matterport.</div>
-      <div class="dc-badge">Bientot disponible</div>
+      <div class="dc-title">Visite 3D</div>
     </div>
     <div class="dash-card">
       <div class="dc-icon">&#x1F916;</div>
       <div class="dc-title">Assistant IA</div>
-      <div class="dc-desc">Posez vos questions sur votre projet de renovation a notre assistant intelligent.</div>
-      <div class="dc-badge">Bientot disponible</div>
     </div>
     <div class="dash-card">
       <div class="dc-icon">&#x1F4CB;</div>
-      <div class="dc-title">Devis & Signature</div>
-      <div class="dc-desc">Consultez vos devis et signez electroniquement en toute securite.</div>
-      <div class="dc-badge">Bientot disponible</div>
+      <div class="dc-title">Devis</div>
     </div>
     <div class="dash-card">
       <div class="dc-icon">&#x1F4C5;</div>
-      <div class="dc-title">Planning Projet</div>
-      <div class="dc-desc">Suivez l'avancement de vos travaux etape par etape.</div>
-      <div class="dc-badge">Bientot disponible</div>
+      <div class="dc-title">Planning</div>
     </div>
   </div>
 </div>
 
 <script>
-  const netlifyIdentity = window.netlifyIdentity;
+  var netlifyIdentity = window.netlifyIdentity;
   function showDashboard(user) {
     document.getElementById('authGuard').style.display = 'none';
     document.getElementById('dashboard').classList.add('visible');
