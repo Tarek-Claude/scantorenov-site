@@ -23,6 +23,9 @@
     .hero h1{font-family:'Cormorant Garamond',serif;font-size:clamp(2.2rem,5vw,4rem);font-weight:300;line-height:1.15;max-width:800px;position:relative}
     .hero-cta{display:inline-block;padding:14px 36px;background:var(--blue);color:var(--bg);font-size:0.82rem;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;text-decoration:none;transition:background 0.2s;position:relative;margin-top:40px}
     .hero-cta:hover{background:var(--bl)}
+    .matterport-section{padding:60px 24px;background:#0A1422;border-top:1px solid var(--border)}
+    .matterport-container{max-width:900px;margin:0 auto;position:relative;aspect-ratio:16/9;overflow:hidden;border:1px solid var(--border);box-shadow:0 8px 32px rgba(74,184,232,0.1)}
+    .matterport-container iframe{position:absolute;top:0;left:0;width:100%;height:100%;border:none}
     section{padding:100px 48px;max-width:1200px;margin:0 auto}
     .section-label{font-size:0.65rem;font-weight:600;letter-spacing:0.3em;text-transform:uppercase;color:var(--blue);margin-bottom:16px}
     section h2{font-family:'Cormorant Garamond',serif;font-size:2.2rem;font-weight:300;margin-bottom:40px}
@@ -40,7 +43,7 @@
     .contact-form button:hover{background:var(--bl)}
     footer{border-top:1px solid var(--border);padding:40px 48px;display:flex;align-items:center;justify-content:space-between;font-size:0.78rem;color:var(--muted)}
     footer a{color:var(--blue);text-decoration:none}
-    @media(max-width:768px){nav{padding:0 20px}.nav-links{display:none}section{padding:60px 20px}.contact-grid{grid-template-columns:1fr}}
+    @media(max-width:768px){nav{padding:0 20px}.nav-links{display:none}section{padding:60px 20px}.contact-grid{grid-template-columns:1fr}.matterport-section{padding:40px 16px}}
   </style>
 </head>
 <body>
@@ -51,7 +54,6 @@ if(h.indexOf('confirmation_token')>-1||h.indexOf('recovery_token')>-1||h.indexOf
   window.location.replace('/connexion'+h);
 }
 </script>
-
 <nav>
   <a href="#" class="logo">SCANTO<span>RENOV</span></a>
   <ul class="nav-links">
@@ -60,12 +62,17 @@ if(h.indexOf('confirmation_token')>-1||h.indexOf('recovery_token')>-1||h.indexOf
   </ul>
   <a href="connexion.html" class="nav-cta">Espace Client</a>
 </nav>
-
 <div class="hero">
   <h1>Scantorenov</h1>
   <a href="#contact" class="hero-cta">Nous contacter</a>
 </div>
-
+<!-- VISITE VIRTUELLE MATTERPORT (RESPONSIVE) -->
+<div class="matterport-section">
+  <div class="matterport-container">
+    <iframe src="https://my.matterport.com/show/?m=DKQ6zroSLKj" allowfullscreen allow="autoplay; fullscreen; web-share; xr-spatial-tracking;"></iframe>
+  </div>
+</div>
+<!-- FIN VISITE VIRTUELLE -->
 <section id="services">
   <div class="section-label">Services</div>
   <h2>Nos services</h2>
@@ -84,7 +91,6 @@ if(h.indexOf('confirmation_token')>-1||h.indexOf('recovery_token')>-1||h.indexOf
     </div>
   </div>
 </section>
-
 <section id="contact">
   <div class="section-label">Contact</div>
   <h2>Contact</h2>
@@ -99,11 +105,9 @@ if(h.indexOf('confirmation_token')>-1||h.indexOf('recovery_token')>-1||h.indexOf
     </form>
   </div>
 </section>
-
 <footer>
   <span>2026 Scantorenov</span>
   <a href="connexion.html">Espace Client</a>
 </footer>
-
 </body>
 </html>
