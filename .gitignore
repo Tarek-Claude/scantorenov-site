@@ -1,0 +1,21 @@
+# Node.js and Netlify project
+
+# Node modules
+node_modules/
+
+# Environment variables
+.env
+
+# Netlify build cache
+.netlify/
+
+# Visual Studio Code settings
+.vscode/
+
+# Operating System files
+.DS_Store
+Thumbs.db
+
+# Build artifacts
+/build/
+/dist/
