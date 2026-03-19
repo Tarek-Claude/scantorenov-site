@@ -258,8 +258,8 @@
       color: var(--blue); background: rgba(74,184,232,0.06);
     }
     .synthese-steps {
-      display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-      gap: 16px; margin-bottom: 32px;
+      display: grid; grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
     }
     .synthese-step {
       padding: 20px; background: rgba(255,255,255,0.02);
@@ -273,7 +273,7 @@
     .step-label {
       font-size: 0.76rem; color: var(--muted); line-height: 1.5;
     }
-    .synthese-actions { display: flex; gap: 14px; flex-wrap: wrap; }
+    .synthese-actions { display: flex; gap: 14px; flex-wrap: wrap; margin-bottom: 32px; padding-bottom: 28px; border-bottom: 1px solid var(--border); }
     .btn-primary {
       padding: 14px 32px; background: var(--blue); color: var(--bg);
       border: none; font-size: 0.78rem; font-weight: 700;
@@ -314,7 +314,7 @@
       .welcome-text { font-size: 0.84rem; }
       .marcel-container { height: 440px; }
       .synthese-container { padding: 28px 20px; }
-      .synthese-steps { grid-template-columns: 1fr 1fr; }
+      .synthese-steps { grid-template-columns: repeat(2, 1fr); }
     }
   </style>
 </head>
@@ -472,6 +472,14 @@
     <h2 class="section-title">Synth&#232;se et transmission</h2>
     <p class="section-desc">Lorsque votre avant-projet est pr&#234;t, transmettez-le &#224; notre &#233;quipe. Un chef de projet d&#233;di&#233; prendra le relais.</p>
     <div class="synthese-container">
+      <div class="synthese-actions">
+        <button class="btn-outline" onclick="window.print()">
+          T&#233;l&#233;charger la synth&#232;se (PDF)
+        </button>
+        <button class="btn-primary" id="btnTransmettre" disabled>
+          Transmettre mon avant-projet &#8594;
+        </button>
+      </div>
       <div class="synthese-header">
         <h3>&#201;tapes suivantes apr&#232;s transmission</h3>
         <span class="synthese-badge">&#x23F3; En attente de votre validation</span>
@@ -479,28 +487,28 @@
       <div class="synthese-steps">
         <div class="synthese-step">
           <div class="step-num">01</div>
-          <div class="step-label">Attribution d&#8217;un<br>chef de projet</div>
+          <div class="step-label">Chef de projet<br>attribu&#233;</div>
         </div>
         <div class="synthese-step">
           <div class="step-num">02</div>
-          <div class="step-label">Projet d&#233;taill&#233;<br>et chiffr&#233;</div>
+          <div class="step-label">Sp&#233;cifications<br>et budget</div>
         </div>
         <div class="synthese-step">
           <div class="step-num">03</div>
-          <div class="step-label">Aides financi&#232;res<br>et banques</div>
+          <div class="step-label">Financement et<br>aides publiques</div>
         </div>
         <div class="synthese-step">
           <div class="step-num">04</div>
-          <div class="step-label">Consultation<br>entreprises</div>
+          <div class="step-label">Phasage et d&#233;lais<br>pr&#233;visionnels</div>
         </div>
-      </div>
-      <div class="synthese-actions">
-        <button class="btn-primary" id="btnTransmettre" disabled>
-          Transmettre mon avant-projet &#8594;
-        </button>
-        <button class="btn-outline" onclick="window.print()">
-          T&#233;l&#233;charger la synth&#232;se (PDF)
-        </button>
+        <div class="synthese-step">
+          <div class="step-num">05</div>
+          <div class="step-label">Recherche et consultation<br>d&#8217;entreprises</div>
+        </div>
+        <div class="synthese-step">
+          <div class="step-num">06</div>
+          <div class="step-label">Choix d&#8217;entreprise<br>et planification</div>
+        </div>
       </div>
     </div>
   </div>
