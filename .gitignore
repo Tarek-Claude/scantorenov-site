@@ -1,0 +1,15 @@
+# Dépendances
+node_modules/
+package-lock.json
+
+# Variables d'environnement — NE JAMAIS COMMITTER
+.env
+.env.local
+.env.*.local
+
+# Netlify
+.netlify/
+
+# OS
+.DS_Store
+Thumbs.db
