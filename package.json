@@ -7,5 +7,8 @@
   },
   "engines": {
     "node": ">=18.0.0"
+  },
+  "devDependencies": {
+    "http-server": "^14.1.1"
   }
 }

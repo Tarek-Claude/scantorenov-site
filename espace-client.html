@@ -18,11 +18,11 @@
       min-height: 100vh;
     }
     :root {
-      --bg: #060C18; --mid: #0A1422; --card: #0D1A2E;
-      --blue: #4AB8E8; --bl: #7FCEEF; --dim: #2A6B95;
-      --glow: rgba(74,184,232,0.15); --muted: #6E92AA;
-      --border: rgba(74,184,232,0.13);
-      --text: #E8F2FA; --text-soft: #B8CFE0;
+      --bg: #F5F2ED; --mid: #EDE8E0; --card: #FFFFFF;
+      --blue: #2D5F3E; --bl: #3A7A50; --dim: #1A5F6A;
+      --glow: rgba(45,95,62,0.15); --muted: #8A8A8A;
+      --border: rgba(42,42,42,0.1);
+      --text: #2A2A2A; --text-soft: #5A5A5A;
     }
 
     /* ── AUTH GUARD ── */
@@ -36,12 +36,12 @@
     }
     .auth-guard p { color: var(--muted); margin-bottom: 32px; font-size: 0.9rem; }
     .auth-btn {
-      padding: 14px 36px; background: var(--blue); color: var(--bg);
+      padding: 14px 36px; background: var(--blue); color: #FFFFFF;
       border: none; font-size: 0.82rem; font-weight: 700;
       letter-spacing: 0.12em; text-transform: uppercase;
       cursor: pointer; transition: all 0.3s; text-decoration: none;
     }
-    .auth-btn:hover { background: var(--bl); box-shadow: 0 8px 32px rgba(74,184,232,0.3); }
+    .auth-btn:hover { background: var(--bl); box-shadow: 0 8px 32px rgba(45,95,62,0.3); }
     .back-link {
       display: inline-block; margin-top: 24px; color: var(--muted);
       font-size: 0.78rem; text-decoration: none; letter-spacing: 0.06em;
@@ -53,12 +53,12 @@
       position: sticky; top: 0; z-index: 100;
       height: 64px; display: flex; align-items: center;
       justify-content: space-between; padding: 0 40px;
-      background: rgba(6,12,24,0.92); backdrop-filter: blur(14px);
+      background: rgba(255,255,255,0.85); backdrop-filter: blur(14px);
       border-bottom: 1px solid var(--border);
     }
     .dash-logo {
       font-family: 'Space Grotesk', sans-serif; font-size: 1.05rem;
-      font-weight: 600; color: #fff; text-decoration: none;
+      font-weight: 600; color: var(--text); text-decoration: none;
     }
     .dash-logo span { color: var(--blue); }
     .dash-nav-right { display: flex; align-items: center; gap: 16px; }
@@ -69,7 +69,7 @@
       letter-spacing: 0.1em; text-transform: uppercase;
       cursor: pointer; transition: all 0.25s;
     }
-    .dash-logout:hover { border-color: var(--blue); background: rgba(74,184,232,0.06); }
+    .dash-logout:hover { border-color: var(--blue); background: rgba(45,95,62,0.06); }
 
     /* ── MAIN CONTAINER ── */
     .dash-main {
@@ -79,31 +79,201 @@
     .dash-main.visible { display: block; }
 
     /* ── SECTION: WELCOME ── */
+    /* ── WELCOME: HERO ── */
     .welcome-section {
-      padding: 56px 0 40px; border-bottom: 1px solid var(--border);
-      margin-bottom: 48px;
+      padding: 64px 0 48px; border-bottom: 1px solid var(--border);
+      margin-bottom: 56px;
+    }
+    .welcome-hero {
+      text-align: center; margin-bottom: 48px;
+    }
+    .welcome-logo {
+      width: 72px; height: auto; margin-bottom: 20px;
     }
     .welcome-greeting {
       font-family: 'Cormorant Garamond', serif;
-      font-size: 2rem; font-weight: 300; margin-bottom: 32px;
+      font-size: 2.2rem; font-weight: 300; margin-bottom: 12px;
+      line-height: 1.3;
     }
     .welcome-greeting em { color: var(--blue); font-style: italic; }
-    .welcome-text {
-      color: var(--text-soft); font-size: 0.9rem; line-height: 2;
-      max-width: 860px; text-align: justify;
+    .welcome-baseline {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1rem; font-style: italic; font-weight: 300;
+      color: var(--blue); letter-spacing: 0.06em;
     }
-    .welcome-text p { margin-bottom: 14px; }
+
+    /* ── WELCOME: QUOTE ── */
+    .welcome-quote {
+      max-width: 700px; margin: 0 auto 48px; text-align: center;
+      padding: 32px 40px; position: relative;
+    }
+    .welcome-quote::before {
+      content: '\201C'; position: absolute; top: -8px; left: 50%;
+      transform: translateX(-50%); font-family: 'Cormorant Garamond', serif;
+      font-size: 4rem; color: var(--blue); opacity: 0.2; line-height: 1;
+    }
+    .welcome-quote p {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.2rem; font-weight: 300; font-style: italic;
+      color: var(--text); line-height: 1.8;
+    }
+
+    /* ── WELCOME: PILLARS ── */
+    .welcome-pillars {
+      display: grid; grid-template-columns: repeat(3, 1fr);
+      gap: 24px; margin-bottom: 48px;
+    }
+    .welcome-pillar {
+      background: var(--card); border: 1px solid var(--border);
+      border-radius: 12px; padding: 32px 28px; text-align: center;
+      box-shadow: 0 2px 16px rgba(0,0,0,0.04);
+      transition: transform 0.3s, box-shadow 0.3s;
+    }
+    .welcome-pillar:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 6px 28px rgba(0,0,0,0.08);
+    }
+    .welcome-pillar-icon {
+      font-size: 2rem; margin-bottom: 16px;
+    }
+    .welcome-pillar h3 {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 0.88rem; font-weight: 600; color: var(--text);
+      margin-bottom: 10px;
+    }
+    .welcome-pillar p {
+      color: var(--text-soft); font-size: 0.82rem; line-height: 1.7;
+    }
+
+    /* ── WELCOME: MARCEL INTRO ── */
+    .welcome-marcel {
+      display: flex; gap: 36px; align-items: flex-start;
+      background: var(--card); border: 1px solid var(--border);
+      border-radius: 12px; padding: 36px 40px; margin-bottom: 48px;
+      box-shadow: 0 2px 16px rgba(0,0,0,0.04);
+    }
+    .welcome-marcel-avatar {
+      width: 64px; height: 64px; border-radius: 50%; flex-shrink: 0;
+      background: linear-gradient(135deg, var(--blue), #1A5F6A);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.8rem;
+    }
+    .welcome-marcel-content { flex: 1; }
+    .welcome-marcel-content h3 {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 1rem; font-weight: 600; color: var(--text);
+      margin-bottom: 12px;
+    }
+    .welcome-marcel-content p {
+      color: var(--text-soft); font-size: 0.88rem; line-height: 1.85;
+      margin-bottom: 10px;
+    }
+    .welcome-marcel-content p:last-child { margin-bottom: 0; }
+
+    /* ── WELCOME: TEAM ── */
+    .welcome-team {
+      display: flex; gap: 36px; align-items: flex-start;
+      background: var(--card); border: 1px solid var(--border);
+      border-radius: 12px; padding: 36px 40px; margin-bottom: 48px;
+      box-shadow: 0 2px 16px rgba(0,0,0,0.04);
+    }
+    .welcome-team-avatar {
+      width: 64px; height: 64px; border-radius: 50%; flex-shrink: 0;
+      background: linear-gradient(135deg, var(--terracotta, #C4745A), #D4956E);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.8rem;
+    }
+    .welcome-team-content { flex: 1; }
+    .welcome-team-content h3 {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 1rem; font-weight: 600; color: var(--text);
+      margin-bottom: 12px;
+    }
+    .welcome-team-content p {
+      color: var(--text-soft); font-size: 0.88rem; line-height: 1.85;
+      margin-bottom: 10px;
+    }
+    .welcome-team-content p:last-child { margin-bottom: 0; }
+    .welcome-team-roles {
+      display: flex; flex-wrap: wrap; gap: 8px; margin-top: 16px;
+    }
+    .welcome-team-role {
+      display: inline-flex; align-items: center; gap: 6px;
+      padding: 5px 14px; background: rgba(196,116,90,0.08);
+      border: 1px solid rgba(196,116,90,0.15); border-radius: 20px;
+      font-size: 0.76rem; font-weight: 500; color: var(--text-soft);
+    }
+    .welcome-team-role span { font-size: 0.85rem; }
+    .team-cta {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 0.95rem; font-weight: 600; color: var(--blue);
+      margin-top: 24px; display: block; text-align: center;
+    }
+
+    /* ── WELCOME: SIGNATURE ── */
     .welcome-signature {
-      margin-top: 28px; padding-top: 20px;
+      display: flex; align-items: center; gap: 16px;
+      margin-top: 32px; padding-top: 28px;
       border-top: 1px solid var(--border);
-      font-size: 0.85rem; color: var(--text);
     }
+    .sig-line {
+      width: 40px; height: 2px; background: var(--blue); flex-shrink: 0;
+    }
+    .sig-content { font-size: 0.85rem; color: var(--text); }
     .welcome-signature .sig-name {
       font-family: 'Space Grotesk', sans-serif;
       font-weight: 600; font-size: 0.9rem;
     }
     .welcome-signature .sig-title {
       color: var(--muted); font-size: 0.78rem; margin-top: 2px;
+    }
+
+    @media (max-width: 768px) {
+      .welcome-pillars { grid-template-columns: 1fr; }
+      .welcome-marcel { flex-direction: column; align-items: center; text-align: center; padding: 28px 24px; }
+      .welcome-team { flex-direction: column; align-items: center; text-align: center; padding: 28px 24px; }
+      .welcome-team-roles { justify-content: center; }
+      .welcome-quote { padding: 24px 16px; }
+    }
+
+    /* ── ACTIVATION NOTICE ── */
+    .activation-notice {
+      margin-top: 40px; padding: 32px 36px;
+      background: var(--card); border: 1px solid var(--border);
+      border-left: 4px solid var(--blue);
+      box-shadow: 0 2px 12px rgba(0,0,0,0.04);
+    }
+    .activation-notice-header {
+      display: flex; align-items: center; gap: 12px; margin-bottom: 16px;
+    }
+    .activation-notice-icon {
+      font-size: 1.6rem; flex-shrink: 0;
+    }
+    .activation-notice-title {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 0.95rem; font-weight: 600; color: var(--text);
+    }
+    .activation-notice-text {
+      color: var(--text-soft); font-size: 0.88rem; line-height: 1.8;
+      max-width: 760px;
+    }
+    .activation-notice-text p { margin-bottom: 10px; }
+    .activation-notice-text strong { color: var(--text); }
+    .activation-notice-cta {
+      display: inline-flex; align-items: center; gap: 8px;
+      margin-top: 16px; padding: 12px 28px;
+      background: var(--blue); color: #FFFFFF;
+      border: none; font-size: 0.76rem; font-weight: 700;
+      letter-spacing: 0.1em; text-transform: uppercase;
+      cursor: not-allowed; opacity: 0.55;
+      transition: all 0.3s;
+    }
+    .activation-notice-badge {
+      display: inline-block; margin-left: 12px;
+      font-size: 0.65rem; font-weight: 600; letter-spacing: 0.08em;
+      text-transform: uppercase; padding: 3px 10px;
+      background: rgba(196,116,90,0.1); border: 1px solid rgba(196,116,90,0.25);
+      color: #C4745A; vertical-align: middle;
     }
 
     /* ── SECTION TITLES ── */
@@ -125,7 +295,7 @@
     .matterport-frame {
       width: 100%; aspect-ratio: 16/9; position: relative;
       background: var(--card); border: 1px solid var(--border);
-      overflow: hidden; box-shadow: 0 8px 40px rgba(0,0,0,0.35);
+      overflow: hidden; box-shadow: 0 8px 40px rgba(0,0,0,0.1);
     }
     .matterport-frame iframe {
       position: absolute; top: 0; left: 0;
@@ -137,12 +307,112 @@
       align-items: center; justify-content: center;
       color: var(--muted); text-align: center; padding: 24px;
     }
+    /* ── Placeholder visite virtuelle en attente ── */
+    .matterport-pending {
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      text-align: center; padding: 60px 32px;
+      background: linear-gradient(135deg, rgba(45,95,62,0.04) 0%, rgba(237,232,224,0.6) 100%);
+      border: 1px dashed rgba(45,95,62,0.25); min-height: 360px;
+    }
+    .matterport-pending .mp-icon {
+      font-size: 3.2rem; margin-bottom: 24px; opacity: 0.7;
+      animation: mp-pulse 2.5s ease-in-out infinite;
+    }
+    @keyframes mp-pulse { 0%,100%{ opacity:0.5; transform:scale(1); } 50%{ opacity:0.9; transform:scale(1.05); } }
+    .matterport-pending h3 {
+      font-family: 'Cormorant Garamond', serif; font-size: 1.4rem;
+      font-weight: 300; color: var(--text); margin-bottom: 12px;
+    }
+    .matterport-pending p {
+      color: var(--muted); font-size: 0.88rem; line-height: 1.7; max-width: 440px;
+    }
+    .matterport-pending .mp-email-note {
+      margin-top: 20px; font-size: 0.78rem; color: var(--blue); opacity: 0.8;
+      display: flex; align-items: center; gap: 8px;
+    }
     .placeholder-icon { font-size: 3rem; margin-bottom: 16px; opacity: 0.5; }
     .placeholder-label {
       font-family: 'Space Grotesk', sans-serif;
       font-size: 0.9rem; font-weight: 600; margin-bottom: 6px; color: var(--text-soft);
     }
     .placeholder-hint { font-size: 0.78rem; max-width: 400px; line-height: 1.6; }
+
+    /* ── DONNÉES DU BIEN ── */
+    .property-data-container {
+      background: var(--card); border: 1px solid var(--border);
+      padding: 32px 36px; position: relative;
+    }
+    .property-data-container::before {
+      content: ''; position: absolute; top: 0; left: 0; right: 0;
+      height: 2px; background: linear-gradient(90deg, var(--blue), transparent);
+    }
+    .pd-header {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-bottom: 24px; flex-wrap: wrap; gap: 12px;
+    }
+    .pd-header h3 {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 1rem; font-weight: 600;
+    }
+    .pd-source {
+      font-size: 0.68rem; font-weight: 600; letter-spacing: 0.1em;
+      text-transform: uppercase; padding: 4px 12px;
+      border: 1px solid rgba(45,95,62,0.2);
+      color: var(--muted); background: rgba(45,95,62,0.04);
+    }
+    .pd-grid {
+      display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+      gap: 16px; margin-bottom: 24px;
+    }
+    .pd-card {
+      padding: 20px; background: rgba(0,0,0,0.02);
+      border: 1px solid var(--border); transition: border-color 0.3s;
+    }
+    .pd-card:hover { border-color: rgba(45,95,62,0.3); }
+    .pd-card-icon {
+      font-size: 1.4rem; margin-bottom: 10px;
+    }
+    .pd-card-label {
+      font-size: 0.68rem; font-weight: 700; letter-spacing: 0.15em;
+      text-transform: uppercase; color: var(--muted); margin-bottom: 6px;
+    }
+    .pd-card-value {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 1.3rem; font-weight: 700; color: var(--blue);
+      margin-bottom: 4px;
+    }
+    .pd-card-detail {
+      font-size: 0.76rem; color: var(--text-soft); line-height: 1.5;
+    }
+    .pd-rooms-title {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 0.88rem; font-weight: 600; margin-bottom: 14px;
+      padding-bottom: 10px; border-bottom: 1px solid var(--border);
+    }
+    .pd-rooms-list {
+      display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 10px;
+    }
+    .pd-room {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 12px 16px; background: rgba(0,0,0,0.02);
+      border: 1px solid var(--border); font-size: 0.84rem;
+    }
+    .pd-room-name { color: var(--text-soft); }
+    .pd-room-area {
+      font-family: 'Space Grotesk', sans-serif;
+      font-weight: 600; color: var(--blue);
+    }
+    .pd-loading {
+      text-align: center; padding: 32px; color: var(--muted); font-size: 0.85rem;
+    }
+    .pd-loading-spinner {
+      display: inline-block; width: 20px; height: 20px;
+      border: 2px solid var(--border); border-top-color: var(--blue);
+      border-radius: 50%; animation: pd-spin 0.8s linear infinite;
+      margin-right: 10px; vertical-align: middle;
+    }
+    @keyframes pd-spin { to { transform: rotate(360deg); } }
 
     /* ── MARCEL (CHAT) ── */
     .marcel-container {
@@ -154,7 +424,7 @@
       display: flex; align-items: center; gap: 14px;
       padding: 18px 24px;
       border-bottom: 1px solid var(--border);
-      background: rgba(74,184,232,0.03);
+      background: rgba(45,95,62,0.04);
     }
     .marcel-avatar {
       width: 44px; height: 44px; border-radius: 50%;
@@ -179,15 +449,15 @@
     }
     .msg.marcel {
       align-self: flex-start;
-      background: rgba(74,184,232,0.07);
-      border: 1px solid rgba(74,184,232,0.12);
+      background: rgba(45,95,62,0.06);
+      border: 1px solid rgba(45,95,62,0.12);
       border-radius: 2px 14px 14px 14px;
       color: var(--text-soft);
     }
     .msg.user {
       align-self: flex-end;
       background: var(--blue);
-      color: var(--bg);
+      color: #FFFFFF;
       border-radius: 14px 2px 14px 14px;
       font-weight: 500;
     }
@@ -200,18 +470,122 @@
       border: none; color: var(--text); font-family: 'Inter', sans-serif;
       font-size: 0.88rem; outline: none;
     }
-    .marcel-input::placeholder { color: rgba(110,146,170,0.45); }
+    .marcel-input::placeholder { color: rgba(90,90,90,0.45); }
     .marcel-send {
       padding: 16px 24px; background: var(--blue); border: none;
-      color: var(--bg); font-size: 0.78rem; font-weight: 700;
+      color: #FFFFFF; font-size: 0.78rem; font-weight: 700;
       letter-spacing: 0.1em; text-transform: uppercase;
       cursor: pointer; transition: background 0.2s;
     }
     .marcel-send:hover { background: var(--bl); }
-    .msg.thinking { opacity: 0.55; font-style: italic; }
-    .marcel-input:disabled { opacity: 0.4; cursor: wait; }
 
-    /* ── RESULTATS SIMULATIONS ── */
+    /* ── IMAGE DANS LE CHAT ── */
+    .msg-image {
+      max-width: 100%; border-radius: 8px; margin-top: 10px;
+      border: 1px solid var(--border); cursor: pointer;
+      transition: transform 0.3s;
+    }
+    .msg-image:hover { transform: scale(1.02); }
+    .msg-image-loading {
+      display: flex; align-items: center; gap: 10px;
+      padding: 16px; background: rgba(196,116,90,0.06);
+      border: 1px solid rgba(196,116,90,0.15); border-radius: 8px;
+      margin-top: 10px; color: var(--muted); font-size: 0.82rem;
+    }
+    .gen-spinner {
+      display: inline-block; width: 16px; height: 16px;
+      border: 2px solid var(--border); border-top-color: #C4745A;
+      border-radius: 50%; animation: pd-spin 0.8s linear infinite;
+    }
+
+    /* ── GALERIE DYNAMIQUE (visuels générés) ── */
+    .generated-gallery {
+      display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 20px; margin-top: 20px;
+    }
+    .gen-card {
+      background: var(--card); border: 1px solid var(--border);
+      overflow: hidden; transition: border-color 0.3s, transform 0.3s;
+    }
+    .gen-card:hover { border-color: rgba(196,116,90,0.4); transform: translateY(-2px); }
+    .gen-card img {
+      width: 100%; aspect-ratio: 16/10; object-fit: cover;
+      border-bottom: 1px solid var(--border);
+    }
+    .gen-card-body { padding: 16px 20px; }
+    .gen-card-body h4 {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 0.86rem; font-weight: 600; margin-bottom: 4px;
+    }
+    .gen-card-body p { color: var(--muted); font-size: 0.76rem; line-height: 1.5; }
+    .gen-card-badge {
+      display: inline-block; font-size: 0.6rem; font-weight: 700;
+      letter-spacing: 0.1em; text-transform: uppercase; margin-top: 6px;
+      padding: 3px 8px; background: rgba(196,116,90,0.08);
+      border: 1px solid rgba(196,116,90,0.2); color: #C4745A;
+    }
+
+    /* ── RÉSUMÉ AVANT-PROJET ── */
+    .ap-summary {
+      background: var(--card); border: 1px solid var(--border);
+      padding: 36px; margin-bottom: 28px; position: relative;
+    }
+    .ap-summary::before {
+      content: ''; position: absolute; top: 0; left: 0; right: 0;
+      height: 3px; background: linear-gradient(90deg, var(--blue), #C4745A, var(--blue));
+    }
+    .ap-summary-header {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-bottom: 24px; flex-wrap: wrap; gap: 12px;
+    }
+    .ap-summary-header h3 {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 1.05rem; font-weight: 600;
+      display: flex; align-items: center; gap: 10px;
+    }
+    .ap-summary-header h3 .ap-icon { font-size: 1.2rem; }
+    .ap-badge-progress {
+      font-size: 0.66rem; font-weight: 700; letter-spacing: 0.12em;
+      text-transform: uppercase; padding: 5px 14px;
+      background: rgba(196,116,90,0.1); border: 1px solid rgba(196,116,90,0.25);
+      color: #C4745A;
+    }
+    .ap-grid {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 20px;
+      margin-bottom: 24px;
+    }
+    .ap-item {
+      padding: 18px 20px; background: rgba(0,0,0,0.02);
+      border: 1px solid var(--border);
+    }
+    .ap-item-label {
+      font-size: 0.66rem; font-weight: 700; letter-spacing: 0.15em;
+      text-transform: uppercase; color: var(--muted); margin-bottom: 8px;
+    }
+    .ap-item-value {
+      font-size: 0.88rem; color: var(--text-soft); line-height: 1.65;
+    }
+    .ap-item-value strong { color: var(--text); }
+    .ap-item.full-width { grid-column: 1 / -1; }
+    .ap-travaux-list {
+      list-style: none; padding: 0; margin: 0;
+      display: grid; grid-template-columns: 1fr 1fr; gap: 8px;
+    }
+    .ap-travaux-list li {
+      font-size: 0.84rem; color: var(--text-soft); line-height: 1.5;
+      padding: 8px 12px; background: rgba(45,95,62,0.04);
+      border-left: 2px solid var(--blue);
+    }
+    .ap-budget-bar {
+      margin-top: 16px; height: 8px; background: rgba(0,0,0,0.05);
+      border-radius: 4px; overflow: hidden;
+    }
+    .ap-budget-fill {
+      height: 100%; border-radius: 4px;
+      background: linear-gradient(90deg, var(--blue), #C4745A);
+    }
+
+    /* ── VISUELS SIMULATIONS ── */
     .simulations-grid {
       display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
       gap: 20px;
@@ -220,11 +594,11 @@
       background: var(--card); border: 1px solid var(--border);
       overflow: hidden; transition: border-color 0.3s, transform 0.3s;
     }
-    .sim-card:hover { border-color: rgba(74,184,232,0.35); transform: translateY(-2px); }
+    .sim-card:hover { border-color: rgba(45,95,62,0.35); transform: translateY(-2px); }
     .sim-card-visual {
       aspect-ratio: 16/10; background: var(--mid);
       display: flex; align-items: center; justify-content: center;
-      border-bottom: 1px solid var(--border);
+      border-bottom: 1px solid var(--border); position: relative; overflow: hidden;
     }
     .sim-card-visual .placeholder-icon { font-size: 2.2rem; margin-bottom: 8px; }
     .sim-card-visual .placeholder-label { font-size: 0.78rem; }
@@ -234,12 +608,37 @@
       font-size: 0.88rem; font-weight: 600; margin-bottom: 6px;
     }
     .sim-card-body p { color: var(--muted); font-size: 0.78rem; line-height: 1.6; }
+    .sim-card-tag {
+      display: inline-block; font-size: 0.62rem; font-weight: 700;
+      letter-spacing: 0.1em; text-transform: uppercase;
+      padding: 3px 10px; margin-top: 8px;
+      background: rgba(45,95,62,0.08); border: 1px solid rgba(45,95,62,0.2);
+      color: var(--blue);
+    }
     .sim-empty {
       grid-column: 1 / -1; text-align: center;
       padding: 48px 24px; color: var(--muted);
     }
     .sim-empty-icon { font-size: 2.4rem; margin-bottom: 12px; opacity: 0.4; }
     .sim-empty p { font-size: 0.85rem; }
+
+    /* ── VISUELS SVG ARCHITECTURAUX ── */
+    .archi-visual {
+      width: 100%; height: 100%; position: absolute; inset: 0;
+    }
+    .archi-visual svg { width: 100%; height: 100%; }
+
+    /* ── SUGGESTIONS MARCEL ── */
+    .suggestions-header {
+      display: flex; align-items: center; gap: 10px;
+      margin-bottom: 8px;
+    }
+    .suggestions-header .marcel-mini-avatar {
+      width: 28px; height: 28px; border-radius: 50%;
+      background: linear-gradient(135deg, var(--blue), var(--dim));
+      display: flex; align-items: center; justify-content: center;
+      font-size: 0.85rem; flex-shrink: 0;
+    }
 
     /* ── SYNTHESE AVANT-PROJET ── */
     .synthese-container {
@@ -256,15 +655,15 @@
     .synthese-badge {
       font-size: 0.68rem; font-weight: 600; letter-spacing: 0.12em;
       text-transform: uppercase; padding: 5px 14px;
-      border: 1px solid rgba(74,184,232,0.25);
-      color: var(--blue); background: rgba(74,184,232,0.06);
+      border: 1px solid rgba(45,95,62,0.25);
+      color: var(--blue); background: rgba(45,95,62,0.06);
     }
     .synthese-steps {
-      display: grid; grid-template-columns: repeat(3, 1fr);
-      gap: 16px;
+      display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 16px; margin-bottom: 32px;
     }
     .synthese-step {
-      padding: 20px; background: rgba(255,255,255,0.02);
+      padding: 20px; background: rgba(0,0,0,0.02);
       border: 1px solid var(--border); text-align: center;
     }
     .step-num {
@@ -275,21 +674,21 @@
     .step-label {
       font-size: 0.76rem; color: var(--muted); line-height: 1.5;
     }
-    .synthese-actions { display: flex; gap: 14px; flex-wrap: wrap; margin-bottom: 32px; padding-bottom: 28px; border-bottom: 1px solid var(--border); }
+    .synthese-actions { display: flex; gap: 14px; flex-wrap: wrap; }
     .btn-primary {
-      padding: 14px 32px; background: var(--blue); color: var(--bg);
+      padding: 14px 32px; background: var(--blue); color: #FFFFFF;
       border: none; font-size: 0.78rem; font-weight: 700;
       letter-spacing: 0.12em; text-transform: uppercase;
       cursor: pointer; transition: all 0.3s;
     }
-    .btn-primary:hover { background: var(--bl); box-shadow: 0 8px 32px rgba(74,184,232,0.3); }
+    .btn-primary:hover { background: var(--bl); box-shadow: 0 8px 32px rgba(45,95,62,0.3); }
     .btn-primary:disabled {
       background: var(--dim); opacity: 0.4; cursor: not-allowed;
       box-shadow: none;
     }
     .btn-outline {
       padding: 14px 32px; background: transparent;
-      border: 1px solid var(--border); color: var(--muted);
+      border: 1px solid var(--border); color: var(--text-soft);
       font-size: 0.78rem; font-weight: 600;
       letter-spacing: 0.12em; text-transform: uppercase;
       cursor: pointer; transition: all 0.25s;
@@ -305,18 +704,133 @@
     /* ── SCROLLBAR ── */
     ::-webkit-scrollbar { width: 6px; }
     ::-webkit-scrollbar-track { background: transparent; }
-    ::-webkit-scrollbar-thumb { background: rgba(74,184,232,0.2); border-radius: 3px; }
-    ::-webkit-scrollbar-thumb:hover { background: rgba(74,184,232,0.4); }
+    ::-webkit-scrollbar-thumb { background: rgba(45,95,62,0.2); border-radius: 3px; }
+    ::-webkit-scrollbar-thumb:hover { background: rgba(45,95,62,0.4); }
 
     /* ── RESPONSIVE ── */
     @media (max-width: 768px) {
       .dash-nav { padding: 0 20px; }
       .dash-main { padding: 0 16px 60px; }
       .welcome-greeting { font-size: 1.6rem; }
-      .welcome-text { font-size: 0.84rem; }
       .marcel-container { height: 440px; }
       .synthese-container { padding: 28px 20px; }
-      .synthese-steps { grid-template-columns: repeat(2, 1fr); }
+      .synthese-steps { grid-template-columns: 1fr 1fr; }
+    }
+
+    /* ══════════════════════════════════════════════════════════════
+       RAPPORT AVANT-PROJET — overlay + impression PDF
+       ══════════════════════════════════════════════════════════════ */
+    .rapport-overlay {
+      display: none; position: fixed; inset: 0; z-index: 9999;
+      background: rgba(0,0,0,0.85); overflow-y: auto;
+      padding: 20px; justify-content: center;
+    }
+    .rapport-overlay.visible { display: flex; }
+    .rapport-container {
+      background: #fff; color: #1a1a1a; max-width: 800px; width: 100%;
+      margin: auto; font-family: 'Inter', sans-serif; font-size: 11px;
+      line-height: 1.6; position: relative;
+    }
+    .rapport-close {
+      position: fixed; top: 24px; right: 32px; z-index: 10000;
+      background: var(--blue); color: #fff; border: none; padding: 10px 20px;
+      font-size: 0.8rem; font-weight: 600; cursor: pointer; letter-spacing: 0.08em;
+    }
+    .rapport-page {
+      padding: 48px 52px; min-height: 1100px; position: relative;
+      border-bottom: 2px dashed #ddd;
+    }
+    .rapport-page:last-child { border-bottom: none; }
+    .rp-header {
+      display: flex; align-items: center; justify-content: space-between;
+      border-bottom: 3px solid #2D5F3E; padding-bottom: 16px; margin-bottom: 32px;
+    }
+    .rp-logo { font-family: 'Space Grotesk', sans-serif; font-size: 1.3rem; font-weight: 700; color: #060C18; }
+    .rp-logo span { color: #2D5F3E; }
+    .rp-date { font-size: 0.75rem; color: #888; }
+    .rp-title {
+      font-family: 'Cormorant Garamond', serif; font-size: 1.8rem;
+      font-weight: 300; color: #060C18; margin-bottom: 6px;
+    }
+    .rp-subtitle { font-size: 0.82rem; color: #666; margin-bottom: 32px; }
+    .rp-section-title {
+      font-family: 'Space Grotesk', sans-serif; font-size: 0.72rem;
+      font-weight: 700; letter-spacing: 0.2em; text-transform: uppercase;
+      color: #2D5F3E; margin: 28px 0 12px; padding-bottom: 6px;
+      border-bottom: 1px solid #e8e8e8;
+    }
+    .rp-info-grid {
+      display: grid; grid-template-columns: 140px 1fr;
+      gap: 6px 16px; margin-bottom: 20px; font-size: 0.85rem;
+    }
+    .rp-info-label { font-weight: 600; color: #444; }
+    .rp-info-value { color: #1a1a1a; }
+    .rp-demande {
+      background: #f5f8fc; border-left: 3px solid #2D5F3E;
+      padding: 14px 18px; margin: 12px 0 20px; font-size: 0.85rem;
+      color: #333; font-style: italic; line-height: 1.7;
+    }
+    .rp-stats {
+      display: flex; gap: 20px; margin: 16px 0 24px;
+    }
+    .rp-stat {
+      flex: 1; background: #f5f8fc; padding: 16px; text-align: center;
+      border: 1px solid #e0e8f0;
+    }
+    .rp-stat-value {
+      font-family: 'Space Grotesk', sans-serif; font-size: 1.6rem;
+      font-weight: 700; color: #2D5F3E;
+    }
+    .rp-stat-label { font-size: 0.72rem; color: #666; margin-top: 4px; }
+    .rp-programme {
+      font-size: 0.85rem; color: #333; line-height: 1.8;
+      margin: 12px 0;
+    }
+    .rp-programme p { margin-bottom: 8px; }
+    .rp-visuels-grid {
+      display: grid; grid-template-columns: repeat(2, 1fr);
+      gap: 16px; margin-top: 16px;
+    }
+    .rp-visuel-card { border: 1px solid #e0e8f0; overflow: hidden; }
+    .rp-visuel-card img {
+      width: 100%; height: 180px; object-fit: cover; display: block;
+    }
+    .rp-visuel-caption {
+      padding: 8px 12px; font-size: 0.75rem; color: #444;
+      background: #f9fafb;
+    }
+    .rp-footer {
+      position: absolute; bottom: 20px; left: 52px; right: 52px;
+      text-align: center; font-size: 0.68rem; color: #aaa;
+      border-top: 1px solid #eee; padding-top: 10px;
+    }
+    .rp-watermark {
+      font-size: 0.65rem; color: #bbb; margin-top: 24px; text-align: center;
+    }
+    .rp-btn-print {
+      position: fixed; top: 24px; right: 140px; z-index: 10000;
+      background: var(--text); color: #fff; border: none; padding: 10px 20px;
+      font-size: 0.8rem; font-weight: 600; cursor: pointer; letter-spacing: 0.08em;
+    }
+
+    /* ── IMPRESSION PDF ── */
+    @media print {
+      body * { visibility: hidden; }
+      .rapport-overlay, .rapport-overlay * { visibility: visible; }
+      .rapport-overlay {
+        display: block !important; position: static;
+        background: none; padding: 0; overflow: visible;
+      }
+      .rapport-container { max-width: none; box-shadow: none; }
+      .rapport-page {
+        page-break-after: always; border-bottom: none;
+        min-height: auto; padding: 36px 40px;
+      }
+      .rapport-page:last-child { page-break-after: avoid; }
+      .rapport-close, .rp-btn-print { display: none !important; }
+      .rp-visuels-grid { break-inside: avoid; }
+      .rp-visuel-card { break-inside: avoid; }
+      @page { margin: 12mm; size: A4; }
     }
   </style>
 </head>
@@ -338,7 +852,7 @@
 
 <!-- NAV -->
 <nav class="dash-nav" id="dashNav" style="display:none">
-  <a href="index.html" class="dash-logo">SCANTO<span>RENOV</span></a>
+  <a href="index.html" class="dash-logo"><img src="logo-scantorenov.webp" alt="Scantorenov" style="height:36px;width:auto;vertical-align:middle;margin-right:8px;">Scanto<span>renov</span></a>
   <div class="dash-nav-right">
     <span class="dash-user-name" id="dashUserName"></span>
     <button class="dash-logout" id="logoutBtn">D&#233;connexion</button>
@@ -349,30 +863,90 @@
 
   <!-- ═══════════  1. MESSAGE D'ACCUEIL  ═══════════ -->
   <section class="welcome-section">
-    <h1 class="welcome-greeting">Bienvenue <em id="welcomeName">Client</em>, et merci d&#8217;avoir choisi Scantorenov.</h1>
-    <div class="welcome-text">
-      <p>Vous entrez ici dans un espace pens&#233; afin de vous accompagner dans la conception, l&#8217;organisation et la conduite de votre projet de r&#233;novation, avec une clart&#233; et une fluidit&#233; in&#233;dites.</p>
-      <p>Fini les allers&#8209;retours, les sentiments d&#8217;incompr&#233;hension et les pertes de temps.<br>
-      Ici, tout est simple, intuitif, transparent et pr&#233;cis.<br>
-      Vous avancez &#224; votre rythme : rapidement, ou pas &#224; pas.</p>
-      <p>Lors de notre visite du bien &#224; r&#233;nover, nous avons scann&#233; et collect&#233; l&#8217;ensemble des donn&#233;es permettant de le caract&#233;riser de la mani&#232;re la plus fid&#232;le possible.</p>
-      <p>Ici, gr&#226;ce &#224; la visite virtuelle, vous acc&#233;dez &#224; son jumeau num&#233;rique. Un double fid&#232;le au r&#233;el, observable et modifiable &#224; souhait. Un objet ludique, agile, id&#233;al pour donner libre cours &#224; votre imagination.</p>
-      <p>En compl&#233;ment, afin de vous aider &#224; concr&#233;tiser vos pens&#233;es, nous vous invitons &#224; confier vos id&#233;es, vos envies, vos doutes &#224; <strong>Marcel</strong>.</p>
-      <p>Plus qu&#8217;un agent de discussion, Marcel a &#233;t&#233; con&#231;u dans le but de vous aider &#224; fa&#231;onner un avant&#8209;projet fid&#232;le &#224; votre vision.<br>
-      Il avance en douceur, port&#233; par la sagesse tranquille de l&#8217;&#233;l&#233;phant.<br>
-      Humble et attentif, il &#233;coute vos intentions, lit les lignes de votre espace, donne forme &#224; vos envies et vous conseille si vous le souhaitez.</p>
-      <p>Toujours fid&#232;le &#224; votre vision, il vous accompagne vers des solutions durables, en accord avec votre budget et vos d&#233;lais.<br>
-      Gr&#226;ce aux outils et proc&#233;d&#233;s les plus avanc&#233;s, Marcel r&#233;v&#232;le, &#233;claire et sublime votre imagination.</p>
-      <p>Une fois cette premi&#232;re &#233;tape franchie, nos &#233;quipes humaines prennent le relais : assistants administratifs, conseillers, architectes, ing&#233;nieurs, &#233;nerg&#233;ticiens, chefs d&#8217;&#233;quipes, ouvriers sp&#233;cialis&#233;s&#8230;</p>
-      <p>La technologie et les techniques sont des outils puissants mis au service de l&#8217;humain.<br>
-      Chez Scantorenov, nous avons &#224; c&#339;ur de vous offrir une exp&#233;rience de r&#233;novation profond&#233;ment humaine, align&#233;e sur vos aspirations et finalit&#233;s de votre projet.</p>
-      <p>Investisseur attentif &#224; son budget, jeune couple en qu&#234;te d&#8217;un foyer chaleureux, retrait&#233;s souhaitant pr&#233;server leur autonomie&#8230;<br>
-      Pour nous, chaque projet est une fen&#234;tre ouverte sur votre avenir.</p>
-      <p><strong>Maintenant, c&#8217;est parti, &#224; vous de projeter !</strong></p>
+
+    <!-- HERO -->
+    <div class="welcome-hero">
+      <img src="logo-scantorenov.webp" alt="Scantorenov" class="welcome-logo" />
+      <h1 class="welcome-greeting">Bienvenue, <em id="welcomeName">Client</em>.</h1>
+      <div class="welcome-baseline">Votre espace de r&#233;novation personnalis&#233;</div>
     </div>
+
+    <!-- CITATION -->
+    <div class="welcome-quote">
+      <p>Fini les allers-retours, les sentiments d&#8217;incompr&#233;hension et les pertes de temps. Ici, tout est simple, intuitif, transparent et pr&#233;cis. Vous avancez &#224; votre rythme&nbsp;: rapidement, ou pas &#224; pas.</p>
+    </div>
+
+    <!-- 3 PILIERS -->
+    <div class="welcome-pillars">
+      <div class="welcome-pillar">
+        <div class="welcome-pillar-icon">&#x1F3E0;</div>
+        <h3>Jumeau num&#233;rique</h3>
+        <p>Votre bien a &#233;t&#233; scann&#233; et num&#233;ris&#233; en 3D haute d&#233;finition. Explorez-le comme si vous y &#233;tiez, depuis n&#8217;importe quel appareil, &#224; tout moment.</p>
+      </div>
+      <div class="welcome-pillar">
+        <div class="welcome-pillar-icon">&#x1F3A8;</div>
+        <h3>Simulations visuelles</h3>
+        <p>Visualisez vos id&#233;es avant de les r&#233;aliser. L&#8217;intelligence artificielle g&#233;n&#232;re des simulations r&#233;alistes &#224; partir de vos souhaits et de votre espace.</p>
+      </div>
+      <div class="welcome-pillar">
+        <div class="welcome-pillar-icon">&#x1F4CB;</div>
+        <h3>Avant-projet structur&#233;</h3>
+        <p>Votre vision prend forme dans un document clair et complet, pr&#234;t &#224; &#234;tre transmis &#224; nos &#233;quipes pour l&#8217;&#233;laboration d&#8217;un devis pr&#233;cis.</p>
+      </div>
+    </div>
+
+    <!-- MARCEL -->
+    <div class="welcome-marcel">
+      <div class="welcome-marcel-avatar">&#x1F418;</div>
+      <div class="welcome-marcel-content">
+        <h3>Marcel, votre assistant de r&#233;novation</h3>
+        <p>Plus qu&#8217;un agent de discussion, Marcel a &#233;t&#233; con&#231;u pour vous aider &#224; fa&#231;onner un avant-projet fid&#232;le &#224; votre vision. Port&#233; par la sagesse tranquille de l&#8217;&#233;l&#233;phant, il &#233;coute vos intentions, donne forme &#224; vos envies et vous conseille si vous le souhaitez.</p>
+        <p>Toujours align&#233; sur vos aspirations, il vous accompagne vers des solutions durables, en accord avec votre budget et vos d&#233;lais. Gr&#226;ce aux outils les plus avanc&#233;s, Marcel r&#233;v&#232;le, &#233;claire et sublime votre imagination.</p>
+      </div>
+    </div>
+
+    <!-- EQUIPE HUMAINE -->
+    <div class="welcome-team">
+      <div class="welcome-team-avatar">&#x1F91D;</div>
+      <div class="welcome-team-content">
+        <h3>Le relais humain, au c&#339;ur de chaque projet</h3>
+        <p>Une fois votre avant-projet finalis&#233; avec Marcel, nos &#233;quipes prennent le relais. La technologie &#233;claire le chemin, mais ce sont des femmes et des hommes de m&#233;tier qui le construisent.</p>
+        <p>Chaque intervenant est s&#233;lectionn&#233; pour son expertise et son engagement envers la qualit&#233;. Du premier conseil &#224; la livraison de votre chantier, vous &#234;tes accompagn&#233; par des professionnels d&#233;di&#233;s.</p>
+        <div class="welcome-team-roles">
+          <div class="welcome-team-role"><span>&#x1F4AC;</span> Conseillers</div>
+          <div class="welcome-team-role"><span>&#x1F3D7;</span> Architectes</div>
+          <div class="welcome-team-role"><span>&#x2699;</span> Ing&#233;nieurs</div>
+          <div class="welcome-team-role"><span>&#x1F33F;</span> &#201;nerg&#233;ticiens</div>
+          <div class="welcome-team-role"><span>&#x1F477;</span> Chefs d&#8217;&#233;quipes</div>
+          <div class="welcome-team-role"><span>&#x1F6E0;</span> Ouvriers sp&#233;cialis&#233;s</div>
+        </div>
+      </div>
+    </div>
+    <div class="team-cta">Maintenant, c&#8217;est parti &#8212; &#224; vous de projeter, <em id="welcomeNameEnd">Client</em>&nbsp;!</div>
+
+    <!-- SIGNATURE -->
     <div class="welcome-signature">
-      <div class="sig-name">Tarek BECHAR</div>
-      <div class="sig-title">Pr&#233;sident fondateur de scantorenov.com et du bureau d&#8217;&#233;tudes R&#233;no&#8217;Island</div>
+      <div class="sig-line"></div>
+      <div class="sig-content">
+        <div class="sig-name">Tarek BECHAR</div>
+        <div class="sig-title">Pr&#233;sident fondateur de scantorenov.com et du bureau d&#8217;&#233;tudes R&#233;no&#8217;Island</div>
+      </div>
+    </div>
+
+    <!-- ACTIVATION / PAIEMENT -->
+    <div class="activation-notice" id="activationNotice">
+      <div class="activation-notice-header">
+        <span class="activation-notice-icon">&#x1F513;</span>
+        <div class="activation-notice-title">Activez votre espace pour d&#233;bloquer l&#8217;ensemble des fonctionnalit&#233;s</div>
+      </div>
+      <div class="activation-notice-text">
+        <p>L&#8217;acc&#232;s &#224; votre <strong>visite virtuelle 3D</strong>, &#224; l&#8217;assistant <strong>Marcel</strong>, aux <strong>simulations visuelles</strong> et &#224; la <strong>transmission de votre avant-projet</strong> sera pleinement op&#233;rationnel apr&#232;s r&#232;glement de la prestation de scan 3D.</p>
+        <p>Le paiement s&#8217;effectue en toute s&#233;curit&#233;, directement depuis cet espace, via notre module de paiement en ligne. Une fois le r&#232;glement confirm&#233;, l&#8217;int&#233;gralit&#233; de vos outils sera activ&#233;e instantan&#233;ment.</p>
+      </div>
+      <button class="activation-notice-cta" disabled>
+        &#x1F512; R&#233;gler ma prestation
+      </button>
+      <span class="activation-notice-badge">Bient&#244;t disponible</span>
     </div>
   </section>
 
@@ -381,8 +955,47 @@
     <div class="section-label">Jumeau num&#233;rique</div>
     <h2 class="section-title">Votre visite virtuelle 3D</h2>
     <p class="section-desc">Explorez le jumeau num&#233;rique de votre bien. Naviguez librement dans chaque pi&#232;ce, prenez des mesures et projetez vos id&#233;es.</p>
-    <div class="matterport-frame" id="matterportFrame">
-      <iframe src="https://my.matterport.com/show/?m=DKQ6zroSLKj" allowfullscreen allow="autoplay; fullscreen; web-share; xr-spatial-tracking;"></iframe>
+    <!-- Iframe Matterport — affichée si le lien est disponible -->
+    <div class="matterport-frame" id="matterportFrame" style="display:none">
+      <iframe id="matterportIframe"
+              allowfullscreen
+              allow="autoplay; fullscreen; web-share; xr-spatial-tracking;">
+      </iframe>
+    </div>
+    <!-- Placeholder — affich&#233; si pas encore de visite virtuelle -->
+    <div class="matterport-pending" id="matterportPending">
+      <div class="mp-icon">&#x1F3E0;</div>
+      <h3>Votre visite virtuelle Matterport sera prochainement accessible et visible ici</h3>
+      <p>Notre &#233;quipe pr&#233;pare actuellement le jumeau num&#233;rique de votre bien. D&#232;s qu&#8217;il sera en ligne, vous pourrez naviguer librement dans chaque pi&#232;ce, prendre des mesures et commencer &#224; projeter vos id&#233;es de r&#233;novation.</p>
+      <div class="mp-email-note">&#x2709; Vous recevrez un e-mail d&#232;s sa mise en ligne</div>
+    </div>
+  </div>
+
+  <!-- ═══════════  2b. DONNÉES DU BIEN  ═══════════ -->
+  <div class="section-block">
+    <div class="section-label">Caract&#233;ristiques</div>
+    <h2 class="section-title">Donn&#233;es de votre bien</h2>
+    <p class="section-desc">Informations extraites automatiquement depuis le scan 3D de votre bien.</p>
+    <div class="property-data-container" id="propertyDataContainer">
+      <div class="pd-loading" id="pdLoading">
+        <span class="pd-loading-spinner"></span>
+        Extraction des donn&#233;es depuis le jumeau num&#233;rique&#8230;
+      </div>
+      <div id="pdContent" style="display:none">
+        <div class="pd-header">
+          <h3 id="pdBienName">Votre bien</h3>
+          <span class="pd-source">Source : Scan Matterport 3D</span>
+        </div>
+        <div class="pd-grid" id="pdGrid">
+          <!-- Rempli dynamiquement par JS -->
+        </div>
+        <div id="pdRoomsSection" style="display:none">
+          <div class="pd-rooms-title">D&#233;tail par pi&#232;ce</div>
+          <div class="pd-rooms-list" id="pdRoomsList">
+            <!-- Rempli dynamiquement par JS -->
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 
@@ -400,62 +1013,62 @@
         </div>
       </div>
       <div class="marcel-messages" id="marcelMessages">
-        <div class="msg marcel">
+        <div class="msg marcel" id="marcelWelcomeMsg">
           Bonjour ! Je suis Marcel, votre assistant de r&#233;novation. &#x1F418;<br><br>
-          Je suis l&#224; pour vous aider &#224; imaginer, structurer et affiner votre projet. Dites-moi : qu&#8217;avez-vous en t&#234;te pour votre espace ?
+          Je pr&#233;pare votre accueil personnalis&#233;&#8230;
         </div>
       </div>
       <div class="marcel-input-bar">
         <input type="text" class="marcel-input" id="marcelInput"
                placeholder="D&#233;crivez vos envies, posez une question&#8230;"
                onkeydown="if(event.key==='Enter')sendMarcel()" />
+        <button class="marcel-send" onclick="generateVisual()" style="background:rgba(196,116,90,0.9);letter-spacing:0.06em;" title="G&#233;n&#233;rer un visuel IA &#224; partir de votre description">&#x1F3A8; Visuel</button>
         <button class="marcel-send" onclick="sendMarcel()">Envoyer</button>
       </div>
     </div>
   </div>
 
   <!-- ═══════════  4. RESULTATS SIMULATIONS  ═══════════ -->
-  <div class="section-block">
+  <div class="section-block" id="simulationsSection" style="display:none">
     <div class="section-label">Simulations</div>
     <h2 class="section-title">Vos r&#233;sultats de simulation</h2>
-    <p class="section-desc">Retrouvez ici les visuels et les visites virtuelles g&#233;n&#233;r&#233;s avec l&#8217;aide de Marcel, au fil de vos &#233;changes.</p>
+
+    <!-- ── 4a. RÉSUMÉ AVANT-PROJET (rempli dynamiquement) ── -->
+    <div class="ap-summary" id="apSummary" style="display:none">
+      <div class="ap-summary-header">
+        <h3><span class="ap-icon">&#x1F4CB;</span> R&#233;sum&#233; de l&#8217;avant-projet</h3>
+        <span class="ap-badge-progress">&#x1F418; &#201;labor&#233; avec Marcel</span>
+      </div>
+      <div class="ap-grid" id="apGrid">
+        <!-- Rempli dynamiquement par les échanges avec Marcel -->
+      </div>
+    </div>
+
+    <!-- ── 4b. VISUELS AVANT-PROJET (remplis dynamiquement) ── -->
     <div class="simulations-grid" id="simulationsGrid">
-      <!-- Exemples de cartes de simulation (remplac&#233;es dynamiquement) -->
-      <div class="sim-card">
-        <div class="sim-card-visual">
-          <div class="placeholder-content" style="position:relative">
-            <div class="placeholder-icon">&#x1F3A8;</div>
-            <div class="placeholder-label">Simulation #1</div>
-          </div>
-        </div>
-        <div class="sim-card-body">
-          <h4>Exemple &#8212; Salon</h4>
-          <p>Les visuels de vos simulations appara&#238;tront ici au fur et &#224; mesure de votre travail avec Marcel.</p>
-        </div>
+      <!-- Rempli dynamiquement par JS lors de la génération de visuels -->
+    </div>
+
+    <!-- ── 4b-bis. GALERIE VISUELS GÉNÉRÉS PAR MARCEL ── -->
+    <div style="margin-top: 40px;" id="generatedSection" style="display:none">
+      <div class="section-label">Visuels IA</div>
+      <h2 class="section-title" style="font-size:1.3rem; margin-bottom:6px;">Visuels g&#233;n&#233;r&#233;s par Marcel</h2>
+      <p class="section-desc">Rendus produits par l&#8217;IA &#224; partir de vos &#233;changes avec Marcel. Cliquez sur un visuel pour l&#8217;agrandir.</p>
+      <div class="generated-gallery" id="generatedGallery">
+        <!-- Rempli dynamiquement par JS -->
       </div>
-      <div class="sim-card">
-        <div class="sim-card-visual">
-          <div class="placeholder-content" style="position:relative">
-            <div class="placeholder-icon">&#x1F3A8;</div>
-            <div class="placeholder-label">Simulation #2</div>
-          </div>
-        </div>
-        <div class="sim-card-body">
-          <h4>Exemple &#8212; Cuisine</h4>
-          <p>Visite virtuelle modifi&#233;e ou visuel g&#233;n&#233;r&#233; par l&#8217;IA, selon les possibilit&#233;s.</p>
-        </div>
+    </div>
+
+    <!-- ── 4c. SUGGESTIONS MARCEL (remplies dynamiquement) ── -->
+    <div style="margin-top: 40px; display:none;" id="suggestionsSection">
+      <div class="suggestions-header">
+        <div class="marcel-mini-avatar">&#x1F418;</div>
+        <div class="section-label" style="margin-bottom:0">Suggestions Marcel</div>
       </div>
-      <div class="sim-card">
-        <div class="sim-card-visual">
-          <div class="placeholder-content" style="position:relative">
-            <div class="placeholder-icon">&#x2795;</div>
-            <div class="placeholder-label">Nouvelle simulation</div>
-          </div>
-        </div>
-        <div class="sim-card-body">
-          <h4>Lancer une simulation</h4>
-          <p>Discutez avec Marcel pour g&#233;n&#233;rer un nouveau visuel de votre projet.</p>
-        </div>
+      <h2 class="section-title" style="font-size:1.3rem; margin-bottom:6px;">Alternatives propos&#233;es par Marcel</h2>
+      <p class="section-desc">Marcel a imagin&#233; des variantes bas&#233;es sur votre avant-projet. Explorez-les pour affiner votre vision.</p>
+      <div class="simulations-grid" id="suggestionsGrid">
+        <!-- Rempli dynamiquement -->
       </div>
     </div>
   </div>
@@ -466,17 +1079,17 @@
     <h2 class="section-title">Synth&#232;se et transmission</h2>
     <p class="section-desc">Lorsque votre avant-projet est pr&#234;t, transmettez-le &#224; notre &#233;quipe. Un chef de projet d&#233;di&#233; prendra le relais.</p>
     <div class="synthese-container">
-      <div class="synthese-actions">
-        <button class="btn-outline" onclick="window.print()">
-          T&#233;l&#233;charger la synth&#232;se (PDF)
-        </button>
-        <button class="btn-primary" id="btnTransmettre" disabled>
-          Transmettre mon avant-projet &#8594;
-        </button>
-      </div>
       <div class="synthese-header">
         <h3>&#201;tapes suivantes apr&#232;s transmission</h3>
         <span class="synthese-badge">&#x23F3; En attente de votre validation</span>
+      </div>
+      <div class="synthese-actions" style="margin-bottom: 28px;">
+        <button class="btn-outline" onclick="generateRapport()">
+          T&#233;l&#233;charger la synth&#232;se (PDF)
+        </button>
+        <button class="btn-primary" id="btnTransmettre" onclick="submitAvantProjet()">
+          Transmettre mon avant-projet &#8594;
+        </button>
       </div>
       <div class="synthese-steps">
         <div class="synthese-step">
@@ -511,7 +1124,7 @@
 
 <!-- FOOTER -->
 <footer class="dash-footer" id="dashFooter" style="display:none">
-  &#169; 2025 Scantorenov &#8212; Tous droits r&#233;serv&#233;s &#183;
+  &#169; 2026 Scantorenov &#8212; Tous droits r&#233;serv&#233;s &#183;
   <a href="index.html" style="color:var(--blue);text-decoration:none;">Retour au site</a>
 </footer>
 
@@ -536,6 +1149,8 @@ function showDashboard(user) {
 
   document.getElementById('dashUserName').textContent = fullName;
   document.getElementById('welcomeName').textContent = firstName;
+  var endNameEl = document.getElementById('welcomeNameEnd');
+  if (endNameEl) endNameEl.textContent = firstName;
 }
 
 function showLogin() {
@@ -547,9 +1162,75 @@ function showLogin() {
 }
 
 if (netlifyIdentity) {
-  netlifyIdentity.on('init', function(user) { if (user) showDashboard(user); });
+  netlifyIdentity.on('init', function(user) { if (user) showDashboard(user); else checkLocalStorage(); });
   netlifyIdentity.on('login', function(user) { showDashboard(user); });
   netlifyIdentity.on('logout', function() { showLogin(); });
+} else {
+  checkLocalStorage();
+}
+
+/* Fallback : connexion.html stocke le token manuellement dans localStorage
+   Le widget Identity ne le reconnaît pas toujours → on vérifie nous-mêmes */
+function checkLocalStorage() {
+  try {
+    var stored = JSON.parse(localStorage.getItem('gotrue.user'));
+    if (stored && stored.token && stored.token.access_token) {
+      // Vérifier que le token n'est pas expiré
+      if (stored.token.expires_at && stored.token.expires_at > Date.now()) {
+        // Valider le token auprès de l'API Identity
+        fetch('/.netlify/identity/user', {
+          headers: { 'Authorization': 'Bearer ' + stored.token.access_token }
+        })
+        .then(function(r) {
+          if (r.ok) return r.json();
+          throw new Error('Token invalide');
+        })
+        .then(function(userData) {
+          showDashboard(userData);
+        })
+        .catch(function() {
+          localStorage.removeItem('gotrue.user');
+          showLogin();
+        });
+      } else {
+        // Token expiré → tenter un refresh
+        refreshToken(stored);
+      }
+    }
+  } catch(e) { /* pas de données stockées */ }
+}
+
+function refreshToken(stored) {
+  if (!stored.token || !stored.token.refresh_token) return;
+  fetch('/.netlify/identity/token', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+    body: 'grant_type=refresh_token&refresh_token=' + encodeURIComponent(stored.token.refresh_token)
+  })
+  .then(function(r) {
+    if (!r.ok) throw new Error('Refresh failed');
+    return r.json();
+  })
+  .then(function(tokenData) {
+    return fetch('/.netlify/identity/user', {
+      headers: { 'Authorization': 'Bearer ' + tokenData.access_token }
+    }).then(function(r) { return r.json(); })
+      .then(function(userData) {
+        userData.token = {
+          access_token: tokenData.access_token,
+          token_type: tokenData.token_type,
+          expires_in: tokenData.expires_in,
+          refresh_token: tokenData.refresh_token,
+          expires_at: Date.now() + tokenData.expires_in * 1000
+        };
+        localStorage.setItem('gotrue.user', JSON.stringify(userData));
+        showDashboard(userData);
+      });
+  })
+  .catch(function() {
+    localStorage.removeItem('gotrue.user');
+    showLogin();
+  });
 }
 
 document.getElementById('logoutBtn').addEventListener('click', function() {
@@ -558,27 +1239,104 @@ document.getElementById('logoutBtn').addEventListener('click', function() {
   window.location.href = 'connexion.html';
 });
 
-/* ── Donn\u00e9es du bien (Matterport) ── */
-var MATTERPORT_MODEL_ID = 'DKQ6zroSLKj';
-var bienData = null;
+/* ── Marcel chat — historique conversationnel ── */
+var marcelHistory = [];
+var clientMatterportData = null; // Données Matterport injectées dans le contexte Marcel
+var marcelTypingDiv = null;
 
-function chargerDonneesBien() {
-  fetch('/.netlify/functions/get-bien?id=' + MATTERPORT_MODEL_ID)
-    .then(function(r) { return r.json(); })
-    .then(function(data) {
-      bienData = data;
-      console.log('[Marcel] Donn\u00e9es du bien charg\u00e9es :', data.titre);
-    })
-    .catch(function(err) {
-      console.warn('[Marcel] Impossible de charger les donn\u00e9es du bien :', err);
-    });
+// Active le bouton "Transmettre" dès que le client a échangé avec Marcel
+function checkEnableTransmission() {
+  var userMessages = marcelHistory.filter(function(m) { return m.role === 'user'; });
+  if (userMessages.length >= 1) {
+    var btn = document.getElementById('btnTransmettre');
+    if (btn && btn.textContent.indexOf('✓') === -1) {
+      btn.disabled = false;
+    }
+  }
 }
 
-/* Charger les donn\u00e9es d\u00e8s que possible */
-chargerDonneesBien();
+/* ── Marcel — message d'accueil personnalisé basé sur le projet client ── */
+function initMarcelWelcome() {
+  var user = currentUser;
+  if (!user) return;
 
-/* ── Marcel chat ── */
-var chatHistory = [];
+  var email = user.email;
+  var firstName = (user.user_metadata && user.user_metadata.full_name)
+    ? user.user_metadata.full_name.split(' ')[0]
+    : '';
+  var clientData = CLIENT_PROJETS[email] || null;
+  var projet = clientData ? clientData.demande : null;
+  var welcomeEl = document.getElementById('marcelWelcomeMsg');
+
+  // Pas de description de projet → message générique
+  if (!projet) {
+    welcomeEl.innerHTML = 'Bonjour' + (firstName ? ' ' + firstName : '') + ' ! Je suis Marcel, votre assistant de r\u00e9novation. \uD83D\uDC18<br><br>'
+      + 'Je suis l\u00e0 pour vous aider \u00e0 imaginer, structurer et affiner votre projet. Dites-moi\u00a0: qu\u2019avez-vous en t\u00eate pour votre espace\u00a0?';
+    return;
+  }
+
+  // Description disponible → demander à Marcel de construire un accueil personnalisé
+  welcomeEl.innerHTML = '<span class="pd-loading-spinner" style="margin-right:8px;vertical-align:middle;"></span> Marcel pr\u00e9pare votre accueil personnalis\u00e9\u2026 \uD83D\uDC18';
+
+  // Préparer les données Matterport pour injection dans le contexte Marcel
+  var matterportInfo = clientData.matterport_data || null;
+  clientMatterportData = matterportInfo; // Stocker globalement pour tous les échanges
+  var matterportContext = '';
+  if (matterportInfo) {
+    matterportContext = '\n\nVoici les donn\u00e9es pr\u00e9cises du bien issues du scan 3D Matterport :\n'
+      + '- Surface totale : ' + matterportInfo.surface_totale + '\n';
+    if (matterportInfo.niveaux) {
+      matterportInfo.niveaux.forEach(function(n) {
+        matterportContext += '\n' + n.nom + ' (' + n.surface + ') :\n';
+        n.pieces.forEach(function(p) {
+          matterportContext += '  \u2022 ' + p.nom + ' : ' + p.surface + (p.dimensions ? ' (' + p.dimensions + ')' : '') + '\n';
+        });
+      });
+    }
+    if (matterportInfo.annexes) {
+      matterportContext += '\nAnnexes :\n';
+      matterportInfo.annexes.forEach(function(a) {
+        matterportContext += '  \u2022 ' + a.nom + ' : ' + a.dimensions + ' (' + a.emplacement + ')\n';
+      });
+    }
+  }
+
+  var introPrompt = 'Le client s\'appelle ' + (firstName || 'Client') + '. '
+    + 'Voici la description de son projet de r\u00e9novation, telle qu\'il l\'a r\u00e9dig\u00e9e lors de sa demande : \n\n'
+    + '\"' + projet + '\"'
+    + matterportContext + '\n\n'
+    + 'R\u00e9dige un message d\'accueil chaleureux et personnalis\u00e9 (2-3 paragraphes max). '
+    + 'Montre que tu connais parfaitement son bien en mentionnant naturellement des donn\u00e9es pr\u00e9cises (surface, niveaux, nombre de pi\u00e8ces, disposition). '
+    + 'Ne r\u00e9v\u00e8le PAS que ces donn\u00e9es viennent d\'un fichier \u2014 parle comme si tu avais visit\u00e9 les lieux. '
+    + 'Ne propose aucune piste de r\u00e9flexion, aucune suggestion, aucune liste d\'id\u00e9es. '
+    + 'Termine simplement en l\'invitant \u00e0 exprimer librement ce \u00e0 quoi il pense, ce qu\'il imagine, ce qu\'il souhaite.';
+
+  fetch('/.netlify/functions/chat', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      messages: [{ role: 'user', content: introPrompt }],
+      propertyData: matterportInfo
+    })
+  })
+  .then(function(r) {
+    if (!r.ok) throw new Error('API indisponible');
+    return r.json();
+  })
+  .then(function(data) {
+    var reply = data.content || '';
+    welcomeEl.innerHTML = reply.replace(/\n/g, '<br>');
+    // Ajouter au contexte conversationnel pour que Marcel se souvienne de son intro
+    marcelHistory.push({ role: 'assistant', content: reply });
+  })
+  .catch(function(err) {
+    console.warn('Marcel intro error:', err);
+    // Fallback : message générique enrichi avec la description
+    welcomeEl.innerHTML = 'Bonjour' + (firstName ? ' ' + firstName : '') + ' ! Je suis Marcel, votre assistant de r\u00e9novation. \uD83D\uDC18<br><br>'
+      + 'J\u2019ai pris connaissance de votre projet\u00a0: <em>' + projet + '</em><br><br>'
+      + 'Je suis l\u00e0 pour vous aider \u00e0 structurer et affiner ce projet. Par quoi souhaitez-vous commencer\u00a0?';
+  });
+}
 
 function sendMarcel() {
   var input = document.getElementById('marcelInput');
@@ -586,54 +1344,755 @@ function sendMarcel() {
   if (!text) return;
 
   appendMsg('user', text);
-  chatHistory.push({ role: 'user', content: text });
+  marcelHistory.push({ role: 'user', content: text });
+  checkEnableTransmission();
   input.value = '';
   input.disabled = true;
 
-  /* Indicateur "Marcel r\u00e9fl\u00e9chit..." */
-  var thinkingId = appendMsg('marcel', 'Marcel r\u00e9fl\u00e9chit\u2026 \uD83D\uDC18', true);
+  // Indicateur de frappe
+  showTyping();
 
   fetch('/.netlify/functions/chat', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ messages: chatHistory, bien: bienData })
+    body: JSON.stringify({
+      messages: marcelHistory,
+      propertyData: clientMatterportData || null
+    })
   })
   .then(function(r) {
     if (!r.ok) throw new Error('API indisponible');
     return r.json();
   })
   .then(function(data) {
-    removeMsg(thinkingId);
-    var reply = data.content || data.reply || data.response || 'Je r\u00e9fl\u00e9chis\u2026';
+    hideTyping();
+    var reply = data.content || 'Je r\u00e9fl\u00e9chis\u2026';
     appendMsg('marcel', reply);
-    chatHistory.push({ role: 'assistant', content: reply });
+    marcelHistory.push({ role: 'assistant', content: reply });
     input.disabled = false;
     input.focus();
   })
-  .catch(function() {
-    removeMsg(thinkingId);
-    appendMsg('marcel', 'Je ne suis pas joignable pour le moment. V\u00e9rifiez qu\u2019Ollama est lanc\u00e9. \uD83D\uDC18');
+  .catch(function(err) {
+    hideTyping();
+    appendMsg('marcel', 'Je rencontre un probl\u00e8me technique. V\u00e9rifiez qu\u2019Ollama est bien lanc\u00e9 sur votre machine. \uD83D\uDC18');
+    console.error('Marcel error:', err);
     input.disabled = false;
     input.focus();
   });
 }
 
-function appendMsg(role, text, isTemp) {
+function showTyping() {
   var container = document.getElementById('marcelMessages');
-  var div = document.createElement('div');
-  var id = 'msg-' + Date.now();
-  div.id = id;
-  div.className = 'msg ' + role + (isTemp ? ' thinking' : '');
-  div.textContent = text;
-  container.appendChild(div);
+  marcelTypingDiv = document.createElement('div');
+  marcelTypingDiv.className = 'msg marcel';
+  marcelTypingDiv.innerHTML = '<em style="opacity:0.6">Marcel r\u00e9fl\u00e9chit\u2026 \uD83D\uDC18</em>';
+  container.appendChild(marcelTypingDiv);
   container.scrollTop = container.scrollHeight;
-  return id;
 }
 
-function removeMsg(id) {
-  var el = document.getElementById(id);
-  if (el) el.remove();
+function hideTyping() {
+  if (marcelTypingDiv) { marcelTypingDiv.remove(); marcelTypingDiv = null; }
+}
+
+function appendMsg(role, text) {
+  var container = document.getElementById('marcelMessages');
+  var div = document.createElement('div');
+  div.className = 'msg ' + role;
+  div.innerHTML = text.replace(/\n/g, '<br>');
+  container.appendChild(div);
+  container.scrollTop = container.scrollHeight;
+}
+
+/* ── G\u00e9n\u00e9ration de visuels IA (Pollinations.ai) ── */
+var generatedCount = 0;
+
+function generateVisual() {
+  var input = document.getElementById('marcelInput');
+  var text = input.value.trim();
+  if (!text) {
+    // Si pas de texte, utiliser le dernier message de Marcel comme contexte
+    var lastMarcel = marcelHistory.filter(function(m) { return m.role === 'assistant'; });
+    if (lastMarcel.length > 0) {
+      text = 'G\u00e9n\u00e8re un visuel de : ' + lastMarcel[lastMarcel.length - 1].content.substring(0, 200);
+    } else {
+      appendMsg('marcel', 'D\u00e9crivez d\u2019abord ce que vous souhaitez visualiser, puis cliquez sur \uD83C\uDFA8 Visuel. \uD83D\uDC18');
+      return;
+    }
+  }
+
+  input.value = '';
+  appendMsg('user', '\uD83C\uDFA8 Demande de visuel : ' + text);
+
+  // Afficher le chargement dans le chat
+  var container = document.getElementById('marcelMessages');
+  var loadingDiv = document.createElement('div');
+  loadingDiv.className = 'msg marcel';
+  loadingDiv.innerHTML = '<div class="msg-image-loading"><span class="gen-spinner"></span>Marcel g\u00e9n\u00e8re votre visuel\u2026 \uD83D\uDC18</div>';
+  container.appendChild(loadingDiv);
+  container.scrollTop = container.scrollHeight;
+
+  // Construire le prompt enrichi pour l'architecture (en anglais pour de meilleurs r\u00e9sultats)
+  var fullPrompt = 'professional architectural interior design visualization, photorealistic, modern renovation, high quality render, natural lighting, French home, contemporary warm minimalist, ' + text;
+
+  // Appel via la Netlify Function (proxy s\u00e9curis\u00e9)
+  fetch('/.netlify/functions/generate-image', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ prompt: fullPrompt })
+  })
+  .then(function(r) { return r.json(); })
+  .then(function(data) {
+    if (data.error) throw new Error(data.error);
+    loadingDiv.remove();
+    showGeneratedImage(container, data.imageUrl, text);
+  })
+  .catch(function() {
+    // Fallback : image de d\u00e9mo (picsum) en attendant que Pollinations soit r\u00e9tabli
+    var seed = Math.floor(Math.random() * 1000);
+    var fallbackUrl = 'https://picsum.photos/seed/' + seed + '/1024/768';
+
+    loadingDiv.innerHTML = '<div class="msg-image-loading"><span class="gen-spinner"></span>Marcel pr\u00e9pare un visuel de d\u00e9mo\u2026 \uD83D\uDC18</div>';
+
+    var img = new Image();
+    img.onload = function() {
+      loadingDiv.remove();
+      showGeneratedImage(container, fallbackUrl, text + ' [d\u00e9mo]');
+    };
+    img.onerror = function() {
+      loadingDiv.remove();
+      appendMsg('marcel', 'Le service de g\u00e9n\u00e9ration de visuels est temporairement indisponible. R\u00e9essayez dans quelques minutes. \uD83D\uDC18');
+    };
+    img.src = fallbackUrl;
+  });
+}
+
+function showGeneratedImage(container, imageUrl, description) {
+  var imgMsg = document.createElement('div');
+  imgMsg.className = 'msg marcel';
+  imgMsg.innerHTML = 'Voici le visuel que j\u2019ai imagin\u00e9 pour vous \uD83D\uDC18<br>'
+    + '<img src="' + imageUrl + '" class="msg-image" alt="Visuel g\u00e9n\u00e9r\u00e9 par Marcel" '
+    + 'onclick="window.open(this.src, \'_blank\')" loading="lazy" />';
+  container.appendChild(imgMsg);
+  container.scrollTop = container.scrollHeight;
+  addToGallery(imageUrl, description);
+}
+
+function addToGallery(imageUrl, description) {
+  generatedCount++;
+  var gallery = document.getElementById('generatedGallery');
+  var section = document.getElementById('generatedSection');
+
+  // Afficher les sections simulations + galerie si c'est le premier visuel
+  if (section) section.style.display = '';
+  var simSection = document.getElementById('simulationsSection');
+  if (simSection) simSection.style.display = '';
+
+  var card = document.createElement('div');
+  card.className = 'gen-card';
+
+  var shortDesc = description.length > 60 ? description.substring(0, 60) + '\u2026' : description;
+  var now = new Date();
+  var time = now.getHours() + 'h' + (now.getMinutes() < 10 ? '0' : '') + now.getMinutes();
+
+  card.innerHTML = '<img src="' + imageUrl + '" alt="Visuel #' + generatedCount + '" '
+    + 'onclick="window.open(this.src, \'_blank\')" style="cursor:pointer" />'
+    + '<div class="gen-card-body">'
+    + '<h4>Visuel #' + generatedCount + ' \u2014 ' + time + '</h4>'
+    + '<p>' + shortDesc + '</p>'
+    + '<span class="gen-card-badge">\uD83C\uDFA8 G\u00e9n\u00e9r\u00e9 par Marcel IA</span>'
+    + '</div>';
+
+  gallery.insertBefore(card, gallery.firstChild);
+}
+
+/* ── Matterport SDK — extraction des donn\u00e9es du bien ── */
+window.__propertyData = null;
+
+function renderPropertyData(data) {
+  var loading = document.getElementById('pdLoading');
+  var content = document.getElementById('pdContent');
+  var grid = document.getElementById('pdGrid');
+  var roomsList = document.getElementById('pdRoomsList');
+  var roomsSection = document.getElementById('pdRoomsSection');
+  var bienName = document.getElementById('pdBienName');
+
+  if (!loading || !content) return;
+
+  // Nom du bien
+  if (data.model && data.model.name) {
+    bienName.textContent = data.model.name;
+  }
+
+  // Cartes r\u00e9capitulatives
+  var cards = [];
+  var totalArea = 0;
+  var roomCount = data.rooms ? data.rooms.length : 0;
+  var floorCount = data.floors ? data.floors.length : 0;
+
+  if (data.rooms) {
+    data.rooms.forEach(function(r) {
+      if (r.area) totalArea += r.area;
+    });
+  }
+
+  cards.push({
+    icon: '\uD83D\uDCCF',
+    label: 'Surface totale',
+    value: totalArea > 0 ? (Math.round(totalArea * 10) / 10) + ' m\u00B2' : '\u2014',
+    detail: 'Mesur\u00E9e par scan 3D'
+  });
+
+  cards.push({
+    icon: '\uD83D\uDEAA',
+    label: 'Pi\u00E8ces',
+    value: roomCount > 0 ? roomCount : '\u2014',
+    detail: roomCount > 0 ? 'D\u00E9tect\u00E9es automatiquement' : 'En attente du SDK'
+  });
+
+  cards.push({
+    icon: '\uD83C\uDFE2',
+    label: 'Niveaux',
+    value: floorCount > 0 ? floorCount : '\u2014',
+    detail: floorCount > 0 ? data.floors.map(function(f){return f.name}).join(', ') : 'En attente du SDK'
+  });
+
+  cards.push({
+    icon: '\uD83D\uDCCD',
+    label: 'R\u00E9f\u00E9rence scan',
+    value: data.model ? data.model.sid : 'DKQ6zroSLKj',
+    detail: 'Identifiant Matterport'
+  });
+
+  if (data.type) {
+    cards.push({
+      icon: '\uD83C\uDFE0',
+      label: 'Type de bien',
+      value: data.type,
+      detail: data.annee ? 'Ann\u00E9es ' + data.annee : ''
+    });
+  }
+
+  if (data.etat) {
+    cards.push({
+      icon: '\uD83D\uDD27',
+      label: '\u00C9tat g\u00E9n\u00E9ral',
+      value: data.etat,
+      detail: data.etatDetail || ''
+    });
+  }
+
+  grid.innerHTML = '';
+  cards.forEach(function(c) {
+    var div = document.createElement('div');
+    div.className = 'pd-card';
+    div.innerHTML = '<div class="pd-card-icon">' + c.icon + '</div>'
+      + '<div class="pd-card-label">' + c.label + '</div>'
+      + '<div class="pd-card-value">' + c.value + '</div>'
+      + '<div class="pd-card-detail">' + c.detail + '</div>';
+    grid.appendChild(div);
+  });
+
+  // D\u00E9tail par pi\u00E8ce
+  if (data.rooms && data.rooms.length > 0) {
+    roomsList.innerHTML = '';
+    data.rooms.forEach(function(r) {
+      var div = document.createElement('div');
+      div.className = 'pd-room';
+      div.innerHTML = '<span class="pd-room-name">' + (r.name || 'Pi\u00E8ce') + '</span>'
+        + '<span class="pd-room-area">' + (r.area ? (Math.round(r.area * 10) / 10) + ' m\u00B2' : '\u2014') + '</span>';
+      roomsList.appendChild(div);
+    });
+    roomsSection.style.display = '';
+  }
+
+  loading.style.display = 'none';
+  content.style.display = '';
+}
+
+function initMatterportSDK() {
+  var iframe = document.getElementById('matterportIframe');
+  if (!iframe || !window.MP_SDK) {
+    useFallbackData();
+    return;
+  }
+
+  var sdkKey = 'b9a411fbbe9cb8a0b9fcff249832cad8';
+
+  window.MP_SDK.connect(iframe, sdkKey, '3.10')
+    .then(function(sdk) {
+      console.log('Matterport SDK connect\u00e9');
+      return Promise.all([
+        sdk.Model.getData(),
+        sdk.Floor.getData(),
+        sdk.Room && sdk.Room.getData ? sdk.Room.getData() : Promise.resolve(null)
+      ]).then(function(results) {
+        var modelData = results[0];
+        var floors = results[1];
+        var rooms = results[2];
+
+        window.__propertyData = {
+          model: {
+            sid: modelData.sid || 'DKQ6zroSLKj',
+            name: modelData.name || 'Bien du client'
+          },
+          floors: floors ? floors.map(function(f, i) {
+            return { id: f.id, index: i, name: f.name || ('Niveau ' + i) };
+          }) : [],
+          rooms: rooms ? rooms.map(function(r) {
+            return {
+              id: r.id,
+              name: r.name || 'Pi\u00e8ce',
+              floorIndex: r.floorIndex,
+              area: r.area ? Math.round(r.area * 100) / 100 : null
+            };
+          }) : []
+        };
+
+        console.log('Donn\u00e9es du bien extraites:', window.__propertyData);
+        renderPropertyData(window.__propertyData);
+      });
+    })
+    .catch(function(err) {
+      console.warn('SDK Matterport non disponible:', err.message);
+      useFallbackData();
+    });
+}
+
+function useFallbackData() {
+  // Donn\u00e9es r\u00e9elles du scan — \u00e0 compl\u00e9ter au fur et \u00e0 mesure
+  window.__propertyData = {
+    model: { sid: 'DKQ6zroSLKj', name: '\u00C9tat des lieux \u2014 R\u00E9novation suite abandon de chantier' },
+    type: 'Pavillon',
+    annee: '60-70',
+    etat: 'Abandon de chantier',
+    etatDetail: 'R\u00E9novation compl\u00E8te \u00E0 pr\u00E9voir',
+    floors: [
+      { id: 0, index: 0, name: 'Rez-de-chauss\u00E9e' },
+      { id: 1, index: 1, name: '\u00C9tage' }
+    ],
+    rooms: [
+      { name: 'Entr\u00E9e', area: 6.2, floorIndex: 0 },
+      { name: 'S\u00E9jour / Salon', area: 28.5, floorIndex: 0 },
+      { name: 'Cuisine', area: 12.8, floorIndex: 0 },
+      { name: 'WC', area: 1.8, floorIndex: 0 },
+      { name: 'Couloir', area: 5.4, floorIndex: 1 },
+      { name: 'Chambre 1', area: 14.2, floorIndex: 1 },
+      { name: 'Chambre 2', area: 11.6, floorIndex: 1 },
+      { name: 'Chambre 3', area: 10.8, floorIndex: 1 },
+      { name: 'Salle de bains', area: 6.1, floorIndex: 1 },
+      { name: 'WC \u00E9tage', area: 1.5, floorIndex: 1 }
+    ]
+  };
+  renderPropertyData(window.__propertyData);
+}
+
+// ══════════════════════════════════════════════════════════════════
+//  TABLE DES PROJETS CLIENTS
+//  Recopiez ici la description saisie par le client dans le
+//  formulaire de contact lors de sa demande d'ouverture de compte.
+//  Marcel s'en servira pour construire un message d'accueil
+//  personnalisé dès la première connexion du client.
+// ══════════════════════════════════════════════════════════════════
+var CLIENT_PROJETS = {
+  'tr.kaptation@gmail.com': {
+    nom: 'TR KAPTATION',
+    adresse: '12 rue des Lilas, 93100 Montreuil',
+    type_bien: 'Pavillon ann\u00e9es 60-70 \u2014 216,7 m\u00b2 sur 2 niveaux ind\u00e9pendants',
+    demande: 'R\u00e9novation compl\u00e8te d\'un pavillon ann\u00e9es 60-70 de 216,7 m\u00b2 sur 2 niveaux ind\u00e9pendants (2 logements), suite \u00e0 abandon de chantier. Souhait d\'ouvrir la cuisine sur le s\u00e9jour, r\u00e9nover les salles de bains, isoler et moderniser les menuiseries.',
+    matterport_data: {
+      surface_totale: '216,7 m\u00b2',
+      titre_scan: '\u00c9tat des lieux de r\u00e9novation suite abandon de chantier',
+      niveaux: [
+        {
+          nom: '\u00c9tage 1 (Rez-de-chauss\u00e9e sur\u00e9lev\u00e9)',
+          surface: '116,1 m\u00b2',
+          pieces: [
+            { nom: 'Salon', surface: '34,0 m\u00b2', dimensions: '4,61 m x 7,59 m' },
+            { nom: 'Chambre 1', surface: '17,1 m\u00b2', dimensions: '4,61 m x 3,71 m' },
+            { nom: 'Chambre 2', surface: '13,7 m\u00b2', dimensions: '3,84 m x 3,59 m' },
+            { nom: 'Cuisine', surface: '12,0 m\u00b2', dimensions: '3,96 m x 3,03 m' },
+            { nom: 'Couloir principal', surface: '11,1 m\u00b2', dimensions: '1,77 m x 6,34 m' },
+            { nom: 'Salle de bain', surface: '6,0 m\u00b2', dimensions: '3,80 m x 1,99 m' },
+            { nom: 'Couloir entr\u00e9e', surface: '5,3 m\u00b2', dimensions: '3,80 m x 1,38 m' },
+            { nom: 'WC / Autre', surface: '1,2 m\u00b2', dimensions: '1,56 m x 0,78 m' },
+            { nom: 'Placard', surface: '1,1 m\u00b2', dimensions: '0,64 m x 1,76 m' }
+          ]
+        },
+        {
+          nom: '\u00c9tage 2',
+          surface: '100,6 m\u00b2',
+          pieces: [
+            { nom: 'Salle de jeux', surface: '19,1 m\u00b2', dimensions: '4,72 m x 4,17 m' },
+            { nom: 'Salle Bonus', surface: '15,7 m\u00b2', dimensions: '3,66 m x 4,20 m' },
+            { nom: 'Cuisine / Salle \u00e0 manger', surface: '13,0 m\u00b2' },
+            { nom: 'Chambre 3', surface: '12,4 m\u00b2' },
+            { nom: 'Chambre 4', surface: '11,7 m\u00b2', dimensions: '3,63 m x 3,21 m' },
+            { nom: 'Couloir', surface: '5,8 m\u00b2' },
+            { nom: 'Salle de bain', surface: '4,0 m\u00b2', dimensions: '3,62 m x 1,11 m' },
+            { nom: 'Escalier', surface: '2,7 m\u00b2', dimensions: '2,88 m x 0,95 m' },
+            { nom: 'WC / Autre', surface: '1,8 m\u00b2', dimensions: '2,27 m x 0,78 m' }
+          ]
+        }
+      ],
+      annexes: [
+        { nom: 'Garage', dimensions: '5,59 m x 2,90 m', emplacement: 'Ext\u00e9rieur RDC' }
+      ]
+    }
+  },
+  'guillaumeolmo@gmail.com': {
+    nom: 'Guillaume OLMO',
+    adresse: '25 boulevard Voltaire, 75011 Paris',
+    type_bien: 'Appartement \u2014 65 m\u00b2',
+    demande: 'R\u00e9novation d\'un appartement de 65m\u00b2 \u00e0 Paris. Modernisation compl\u00e8te avec ouverture cuisine/s\u00e9jour et r\u00e9fection salle de bains.'
+  }
+  // ══════════════════════════════════════════════════════════
+  //  Ajouter ici les prochains clients :
+  //  'email@client.com': {
+  //    nom: 'Pr\u00e9nom NOM',
+  //    adresse: 'Adresse du bien \u00e0 r\u00e9nover',
+  //    type_bien: 'Type et surface du bien',
+  //    demande: 'Description du projet',
+  //    matterport_data: {                    // ← Optionnel, si scan réalisé
+  //      surface_totale: 'XX m²',
+  //      niveaux: [ { nom: 'RDC', surface: 'XX m²', pieces: [...] } ]
+  //    }
+  //  },
+  // ══════════════════════════════════════════════════════════
+};
+
+// ══════════════════════════════════════════════════════════════════
+//  TABLE DES VISITES VIRTUELLES PAR CLIENT
+//  Pour ajouter une visite : ajouter l'email et le modelId Matterport
+//  Le modelId se trouve dans l'URL Matterport : my.matterport.com/show/?m=XXXXXX
+// ══════════════════════════════════════════════════════════════════
+var CLIENT_MATTERPORT = {
+  'tr.kaptation@gmail.com': 'DKQ6zroSLKj',
+  'guillaumeolmo@gmail.com': 'DKQ6zroSLKj'
+  // Ajouter ici les prochains clients :
+  // 'email@client.com': 'MODEL_ID_MATTERPORT',
+};
+
+function initMatterportSection() {
+  var user = currentUser;
+  var meta = (user && user.app_metadata) || (user && user.user_metadata) || {};
+
+  // Priorité : 1) métadonnées du compte, 2) table CLIENT_MATTERPORT
+  var modelId = meta.matterport_id || (user && CLIENT_MATTERPORT[user.email]) || null;
+
+  var frameEl = document.getElementById('matterportFrame');
+  var pendingEl = document.getElementById('matterportPending');
+  var iframeEl = document.getElementById('matterportIframe');
+  var dataSection = document.getElementById('propertyDataContainer');
+
+  if (modelId) {
+    // Visite disponible → afficher l'iframe
+    var sdkKey = 'b9a411fbbe9cb8a0b9fcff249832cad8';
+    // Ne PAS inclure applicationKey dans l'URL iframe (cause un blocage par referrer mismatch en local)
+    // L'applicationKey est uniquement utilisée lors du SDK.connect() pour l'extraction de données
+    iframeEl.src = 'https://my.matterport.com/show/?m=' + modelId + '&play=1&qs=1';
+    frameEl.style.display = '';
+    pendingEl.style.display = 'none';
+    if (dataSection) dataSection.style.display = '';
+
+    // Charger le SDK pour extraire les données
+    var script = document.createElement('script');
+    script.src = 'https://static.matterport.com/showcase-sdk/latest.js';
+    script.onload = function() { setTimeout(initMatterportSDK, 2000); };
+    script.onerror = function() { useFallbackData(); };
+    document.head.appendChild(script);
+  } else {
+    // Pas encore de visite → placeholder
+    frameEl.style.display = 'none';
+    pendingEl.style.display = '';
+    if (dataSection) dataSection.style.display = 'none';
+  }
+}
+
+// Lancer après que showDashboard ait été appelé
+var _origShowDashboard = showDashboard;
+showDashboard = function(user) {
+  _origShowDashboard(user);
+  initMatterportSection();
+  initMarcelWelcome();
+};
+
+/* ══════════════════════════════════════════════════════════════
+   GÉNÉRATION DU RAPPORT AVANT-PROJET (PDF)
+   ══════════════════════════════════════════════════════════════ */
+
+// Collecter les visuels sélectionnés par le client (depuis la galerie)
+function getGeneratedVisuals() {
+  var imgs = document.querySelectorAll('#generatedGallery .gen-card img');
+  var visuals = [];
+  for (var i = 0; i < imgs.length; i++) {
+    var card = imgs[i].closest('.gen-card');
+    var caption = card ? card.querySelector('h4') : null;
+    visuals.push({
+      src: imgs[i].src,
+      caption: caption ? caption.textContent : 'Visuel #' + (i + 1)
+    });
+  }
+  return visuals;
+}
+
+// Extraire le programme de travaux depuis l'historique Marcel
+function extractProgramme() {
+  if (!marcelHistory || marcelHistory.length === 0) return null;
+  // Chercher dans les messages de Marcel les éléments liés aux travaux
+  var travaux = [];
+  for (var i = 0; i < marcelHistory.length; i++) {
+    var msg = marcelHistory[i];
+    if (msg.role === 'assistant' && msg.content) {
+      // Chercher les lignes qui parlent de travaux
+      var lines = msg.content.split('\n');
+      for (var j = 0; j < lines.length; j++) {
+        var l = lines[j].trim();
+        if (l.match(/^[-\u2022\u2013*]\s/) && l.length > 15) {
+          travaux.push(l.replace(/^[-\u2022\u2013*]\s*/, ''));
+        }
+      }
+    }
+  }
+  return travaux.length > 0 ? travaux : null;
+}
+
+function generateRapport() {
+  var user = currentUser;
+  if (!user) return;
+
+  var email = user.email;
+  var clientData = CLIENT_PROJETS[email] || {};
+  var meta = user.user_metadata || {};
+  var fullName = clientData.nom || meta.full_name || email;
+  var adresse = clientData.adresse || 'Non renseign\u00e9e';
+  var typeBien = clientData.type_bien || 'Non renseign\u00e9';
+  var demande = clientData.demande || 'Aucune description disponible.';
+
+  // Données du bien
+  var propData = window.__propertyData || null;
+  var surface = propData && propData.summary ? propData.summary.totalArea : null;
+  var nbPieces = propData && propData.rooms ? propData.rooms.length : null;
+  var nbNiveaux = propData && propData.floors ? propData.floors.length : null;
+
+  // Visuels générés
+  var visuals = getGeneratedVisuals();
+  var nbSimulations = generatedCount || 0;
+
+  // Programme de travaux
+  var programme = extractProgramme();
+
+  // Date
+  var now = new Date();
+  var dateStr = now.toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' });
+
+  // ── Construire le HTML du rapport ──
+  var html = '';
+
+  // ═══ PAGE 1 : Identification + Synthèse ═══
+  html += '<div class="rapport-page">';
+  html += '<div class="rp-header">';
+  html += '<div class="rp-logo">Scanto<span>renov</span></div>';
+  html += '<div class="rp-date">Rapport g\u00e9n\u00e9r\u00e9 le ' + dateStr + '</div>';
+  html += '</div>';
+  html += '<div class="rp-title">Rapport d\u2019avant-projet</div>';
+  html += '<div class="rp-subtitle">Document de synth\u00e8se \u2014 Espace client Scantorenov</div>';
+
+  // Identification client
+  html += '<div class="rp-section-title">Identification du client</div>';
+  html += '<div class="rp-info-grid">';
+  html += '<div class="rp-info-label">Client</div><div class="rp-info-value">' + fullName + '</div>';
+  html += '<div class="rp-info-label">E-mail</div><div class="rp-info-value">' + email + '</div>';
+  html += '<div class="rp-info-label">Adresse du bien</div><div class="rp-info-value">' + adresse + '</div>';
+  html += '<div class="rp-info-label">Type de bien</div><div class="rp-info-value">' + typeBien + '</div>';
+  if (surface) html += '<div class="rp-info-label">Surface totale</div><div class="rp-info-value">' + surface + ' m\u00b2</div>';
+  if (nbPieces) html += '<div class="rp-info-label">Nombre de pi\u00e8ces</div><div class="rp-info-value">' + nbPieces + '</div>';
+  if (nbNiveaux) html += '<div class="rp-info-label">Niveaux</div><div class="rp-info-value">' + nbNiveaux + '</div>';
+  html += '</div>';
+
+  // Demande initiale
+  html += '<div class="rp-section-title">Demande initiale du client</div>';
+  html += '<div class="rp-demande">\u00ab\u00a0' + demande + '\u00a0\u00bb</div>';
+
+  // Statistiques
+  html += '<div class="rp-section-title">Synth\u00e8se de l\u2019avant-projet</div>';
+  html += '<div class="rp-stats">';
+  html += '<div class="rp-stat"><div class="rp-stat-value">' + nbSimulations + '</div><div class="rp-stat-label">Visuels g\u00e9n\u00e9r\u00e9s</div></div>';
+  html += '<div class="rp-stat"><div class="rp-stat-value">' + marcelHistory.length + '</div><div class="rp-stat-label">\u00c9changes avec Marcel</div></div>';
+  if (nbPieces) html += '<div class="rp-stat"><div class="rp-stat-value">' + nbPieces + '</div><div class="rp-stat-label">Pi\u00e8ces analys\u00e9es</div></div>';
+  html += '</div>';
+
+  // Programme de travaux
+  html += '<div class="rp-section-title">Programme de travaux envisag\u00e9</div>';
+  html += '<div class="rp-programme">';
+  if (programme && programme.length > 0) {
+    html += '<ul style="padding-left:18px;margin:0;">';
+    for (var t = 0; t < Math.min(programme.length, 10); t++) {
+      html += '<li>' + programme[t] + '</li>';
+    }
+    html += '</ul>';
+  } else {
+    html += '<p style="color:#888;font-style:italic;">Le programme de travaux sera d\u00e9taill\u00e9 au fil des \u00e9changes avec Marcel. Continuez \u00e0 discuter de votre projet pour enrichir cette section.</p>';
+  }
+  html += '</div>';
+
+  html += '<div class="rp-footer">Scantorenov \u00b7 scantorenov.com \u00b7 contact@scantorenov.com \u00b7 Document g\u00e9n\u00e9r\u00e9 automatiquement</div>';
+  html += '</div>';
+
+  // ═══ PAGE 2+ : Visuels sélectionnés ═══
+  if (visuals.length > 0) {
+    // 4 visuels par page max
+    for (var p = 0; p < visuals.length; p += 4) {
+      html += '<div class="rapport-page">';
+      html += '<div class="rp-header">';
+      html += '<div class="rp-logo">Scanto<span>renov</span></div>';
+      html += '<div class="rp-date">Visuels de l\u2019avant-projet \u2014 ' + fullName + '</div>';
+      html += '</div>';
+      html += '<div class="rp-section-title">Visuels g\u00e9n\u00e9r\u00e9s par Marcel (' + (p + 1) + '-' + Math.min(p + 4, visuals.length) + ' sur ' + visuals.length + ')</div>';
+      html += '<div class="rp-visuels-grid">';
+      for (var v = p; v < Math.min(p + 4, visuals.length); v++) {
+        html += '<div class="rp-visuel-card">';
+        html += '<img src="' + visuals[v].src + '" alt="' + visuals[v].caption + '" />';
+        html += '<div class="rp-visuel-caption">' + visuals[v].caption + '</div>';
+        html += '</div>';
+      }
+      html += '</div>';
+      html += '<div class="rp-watermark">Ce document est un outil d\u2019aide \u00e0 la r\u00e9flexion. Les visuels sont g\u00e9n\u00e9r\u00e9s par intelligence artificielle et ont une valeur illustrative. Seul le devis \u00e9tabli par le ma\u00eetre d\u2019\u0153uvre fait foi.</div>';
+      html += '<div class="rp-footer">Scantorenov \u00b7 scantorenov.com \u00b7 Page ' + (Math.floor(p / 4) + 2) + '</div>';
+      html += '</div>';
+    }
+  }
+
+  // Injecter dans l'overlay
+  document.getElementById('rapportContent').innerHTML = html;
+  document.getElementById('rapportOverlay').classList.add('visible');
+}
+
+/* ══════════════════════════════════════════════════════════════
+   TRANSMISSION DE L'AVANT-PROJET
+   ══════════════════════════════════════════════════════════════ */
+
+function submitAvantProjet() {
+  var user = currentUser;
+  if (!user) return;
+
+  // Confirmation
+  var ok = confirm(
+    'Êtes-vous sûr de vouloir transmettre votre avant-projet ?\n\n'
+    + 'Un récapitulatif vous sera envoyé par email et notre équipe '
+    + 'prendra en charge votre dossier dans les plus brefs délais.'
+  );
+  if (!ok) return;
+
+  var btn = document.getElementById('btnTransmettre');
+  var badge = document.querySelector('.synthese-badge');
+  var email = user.email;
+  var clientData = CLIENT_PROJETS[email] || {};
+  var meta = user.user_metadata || {};
+
+  // Collecter toutes les données
+  var fullName = clientData.nom || meta.full_name || email;
+  var adresse = clientData.adresse || 'Non renseignée';
+  var typeBien = clientData.type_bien || 'Non renseigné';
+  var demande = clientData.demande || 'Aucune description.';
+  var visuals = getGeneratedVisuals();
+  var programme = extractProgramme();
+
+  // État de chargement
+  btn.disabled = true;
+  btn.textContent = 'Transmission en cours…';
+  if (badge) {
+    badge.textContent = '⏳ Transmission en cours…';
+    badge.style.borderColor = 'rgba(232,168,74,0.4)';
+    badge.style.color = '#e8a84a';
+  }
+
+  // Préparer la conversation (limiter à 50 derniers messages)
+  var conversationToSend = marcelHistory.slice(-50).map(function(m) {
+    return { role: m.role, content: m.content };
+  });
+
+  var payload = {
+    clientName: fullName,
+    clientEmail: email,
+    adresse: adresse,
+    typeBien: typeBien,
+    demande: demande,
+    nbSimulations: generatedCount || 0,
+    nbEchanges: marcelHistory.length,
+    programme: programme || [],
+    visuels: visuals.map(function(v) { return { src: v.src, caption: v.caption }; }),
+    conversation: conversationToSend
+  };
+
+  fetch('/.netlify/functions/submit-avantprojet', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload)
+  })
+  .then(function(res) { return res.json().then(function(d) { return { ok: res.ok, data: d }; }); })
+  .then(function(result) {
+    if (result.ok && result.data.success) {
+      // Succès
+      btn.textContent = '✓ Avant-projet transmis';
+      btn.style.background = '#2ecc71';
+      btn.style.borderColor = '#2ecc71';
+      btn.disabled = true;
+
+      if (badge) {
+        badge.textContent = '✓ Transmis le ' + result.data.date;
+        badge.style.borderColor = 'rgba(46,204,113,0.4)';
+        badge.style.color = '#2ecc71';
+        badge.style.background = 'rgba(46,204,113,0.08)';
+      }
+
+      // Notification dans le chat Marcel
+      appendMsg('marcel',
+        '🎉 Votre avant-projet a bien été transmis à notre équipe ! '
+        + 'Un email de confirmation vous a été envoyé à **' + email + '**.\n\n'
+        + 'Un chef de projet dédié va maintenant être attribué à votre dossier. '
+        + 'Nous reviendrons vers vous très rapidement pour les prochaines étapes.'
+      );
+    } else {
+      throw new Error(result.data.error || 'Erreur lors de la transmission');
+    }
+  })
+  .catch(function(err) {
+    console.error('Erreur transmission:', err);
+    btn.disabled = false;
+    btn.textContent = 'Transmettre mon avant-projet →';
+
+    if (badge) {
+      badge.textContent = '⏳ En attente de votre validation';
+      badge.style.borderColor = '';
+      badge.style.color = '';
+      badge.style.background = '';
+    }
+
+    alert(
+      'Une erreur est survenue lors de la transmission.\n\n'
+      + 'Veuillez réessayer dans quelques instants. '
+      + 'Si le problème persiste, contactez-nous à contact@scantorenov.com'
+    );
+  });
+}
+
+function closeRapport() {
+  document.getElementById('rapportOverlay').classList.remove('visible');
+}
+
+function printRapport() {
+  window.print();
 }
 </script>
+
+<!-- ═══ OVERLAY RAPPORT AVANT-PROJET ═══ -->
+<div class="rapport-overlay" id="rapportOverlay">
+  <button class="rp-btn-print" onclick="printRapport()">&#x1F5A8; Imprimer / PDF</button>
+  <button class="rapport-close" onclick="closeRapport()">&#x2715; Fermer</button>
+  <div class="rapport-container" id="rapportContent">
+    <!-- Rempli dynamiquement par generateRapport() -->
+  </div>
+</div>
+
 </body>
 </html>

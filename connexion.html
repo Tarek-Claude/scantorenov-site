@@ -10,19 +10,22 @@
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     html, body { height: 100%; }
-    body { font-family: 'Inter', sans-serif; background: #060C18; color: #E8F2FA; overflow: hidden; }
+    body { font-family: 'Inter', sans-serif; background: #F5F2ED; color: #2A2A2A; overflow: hidden; }
     :root {
-      --bg: #060C18; --mid: #0A1422; --card: #0D1A2E;
-      --blue: #4AB8E8; --bl: #7FCEEF; --dim: #2A6B95;
-      --glow: rgba(74,184,232,0.15); --muted: #6E92AA;
-      --border:rgba(74,184,232,0.14);
+      --bg: #F5F2ED; --card: #FFFFFF;
+      --green: #2D5F3E; --green-hover: #3A7A50;
+      --blue: #2D5F3E; --bl: #3A7A50;
+      --terracotta: #C4745A; --teal: #1A5F6A;
+      --muted: #8A8A8A; --border: rgba(42,42,42,0.1);
+      --text: #2A2A2A; --text-soft: #5A5A5A;
+      --shadow: 0 2px 20px rgba(0,0,0,0.06);
     }
     .layout { display: flex; height: 100vh; }
 
     /* ── LEFT BRAND PANEL ─────────────────────────── */
     .brand-panel {
       width: 42%;
-      background: linear-gradient(160deg, #060C18 0%, #0A1830 60%, #060C18 100%);
+      background: linear-gradient(160deg, #EDE8E0 0%, #E5DFD5 60%, #F5F2ED 100%);
       border-right: 1px solid var(--border);
       display: flex; flex-direction: column; align-items: center; justify-content: center;
       padding: 60px 50px; position: relative; overflow: hidden;
@@ -30,7 +33,7 @@
     .brand-panel::before {
       content: ''; position: absolute; top: -200px; right: -200px;
       width: 500px; height: 500px;
-      background: radial-gradient(circle, rgba(74,184,232,0.08) 0%, transparent 70%);
+      background: radial-gradient(circle, rgba(45,95,62,0.08) 0%, transparent 70%);
     }
     canvas#bg { position: absolute; inset: 0; opacity: 0.35; pointer-events: none; }
 
@@ -38,76 +41,69 @@
     .logo-icon { width: 48px; height: 48px; }
     .logo-icon svg { width: 100%; height: 100%; }
     .logo-texts { display: flex; flex-direction: column; }
-    .logo-name { font-family: 'Space Grotesk', sans-serif; font-weight: 600; font-size: 1.15rem; color: #fff; }
-    .logo-tag { font-size: 0.6rem; font-weight: 500; letter-spacing: 0.28em; text-transform: uppercase; color: var(--blue); }
+    .logo-name { font-family: 'Space Grotesk', sans-serif; font-weight: 600; font-size: 1.15rem; color: var(--text); }
+    .logo-tag { font-size: 0.6rem; font-weight: 500; letter-spacing: 0.28em; text-transform: uppercase; color: var(--green); }
 
     .brand-quote {
       font-family: 'Cormorant Garamond', serif; font-size: 1.9rem; font-weight: 300;
-      font-style: italic; line-height: 1.4; text-align: center; color: #fff;
+      font-style: italic; line-height: 1.4; text-align: center; color: var(--text);
       max-width: 340px; z-index: 1; margin-bottom: 40px;
     }
-    .brand-quote em { color: var(--blue); font-style: normal; }
-    .brand-divider { width: 40px; height: 1px; background: var(--blue); margin: 0 auto 28px; z-index: 1; }
-    .brand-sub { font-size: 0.82rem; color: var(--muted); text-align: center; line-height: 1.75; max-width: 300px; z-index: 1; }
+    .brand-quote em { color: var(--green); font-style: normal; }
+    .brand-divider { width: 40px; height: 1px; background: var(--green); margin: 0 auto 28px; z-index: 1; }
+    .brand-sub { font-size: 0.82rem; color: var(--text-soft); text-align: center; line-height: 1.75; max-width: 300px; z-index: 1; }
 
     .brand-pills { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; margin-top: 36px; z-index: 1; }
     .pill {
       font-size: 0.68rem; font-weight: 500; letter-spacing: 0.1em;
-      padding: 5px 14px; border: 1px solid rgba(74,184,232,0.22);
-      color: var(--muted); background: rgba(74,184,232,0.05);
+      padding: 5px 14px; border: 1px solid rgba(45,95,62,0.22);
+      color: var(--text-soft); background: rgba(45,95,62,0.05);
     }
 
     /* ── RIGHT FORM PANEL ─────────────────────────── */
-    .form-panel { flex: 1; display: flex; align-items: center; justify-content: center; padding: 40px 60px; background: var(--bg); }
+    .form-panel { flex: 1; display: flex; align-items: center; justify-content: center; padding: 40px 60px; background: var(--card); }
     .form-box { width: 100%; max-width: 420px; }
 
-    .form-tabs { display: flex; gap: 0; margin-bottom: 36px; border-bottom: 1px solid var(--border); }
-    .tab-btn {
-      flex: 1; padding: 12px; font-size: 0.78rem; font-weight: 600;
-      letter-spacing: 0.12em; text-transform: uppercase; background: none;
-      border: none; cursor: pointer; color: var(--muted);
-      border-bottom: 2px solid transparent; transition: all 0.25s; margin-bottom: -1px;
-    }
-    .tab-btn.active { color: var(--blue); border-bottom-color: var(--blue); }
+    /* Tabs supprimés — connexion uniquement */
 
-    .form-title { font-family: 'Cormorant Garamond', serif; font-size: 2rem; font-weight: 300; margin-bottom: 8px; color: #fff; }
-    .form-title em { font-style: italic; color: var(--blue); }
-    .form-intro { font-size: 0.85rem; color: var(--muted); margin-bottom: 32px; line-height: 1.65; }
+    .form-title { font-family: 'Cormorant Garamond', serif; font-size: 2rem; font-weight: 300; margin-bottom: 8px; color: var(--text); }
+    .form-title em { font-style: italic; color: var(--green); }
+    .form-intro { font-size: 0.85rem; color: var(--text-soft); margin-bottom: 32px; line-height: 1.65; }
 
     .f-group { margin-bottom: 18px; }
-    .f-label { display: block; font-size: 0.68rem; font-weight: 600; letter-spacing: 0.18em; text-transform: uppercase; color: var(--muted); margin-bottom: 8px; }
+    .f-label { display: block; font-size: 0.68rem; font-weight: 600; letter-spacing: 0.18em; text-transform: uppercase; color: var(--text-soft); margin-bottom: 8px; }
     .f-input {
-      width: 100%; background: rgba(255,255,255,0.04);
-      border: 1px solid rgba(74,184,232,0.15); padding: 13px 16px;
-      color: #E8F2FA; font-size: 0.9rem; font-family: 'Inter', sans-serif;
+      width: 100%; background: rgba(0,0,0,0.03);
+      border: 1px solid var(--border); padding: 13px 16px;
+      color: var(--text); font-size: 0.9rem; font-family: 'Inter', sans-serif;
       outline: none; transition: border-color 0.25s;
     }
-    .f-input:focus { border-color: var(--blue); }
-    .f-input::placeholder { color: rgba(110,146,170,0.45); }
+    .f-input:focus { border-color: var(--green); }
+    .f-input::placeholder { color: rgba(0,0,0,0.3); }
     .f-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
 
     .btn-submit {
-      width: 100%; padding: 14px; background: var(--blue); color: #060C18;
+      width: 100%; padding: 14px; background: var(--green); color: #FFFFFF;
       border: none; cursor: pointer; font-size: 0.8rem; font-weight: 700;
       letter-spacing: 0.18em; text-transform: uppercase; transition: all 0.3s; margin-top: 6px;
     }
-    .btn-submit:hover { background: var(--bl); box-shadow: 0 8px 32px rgba(74,184,232,0.38); }
+    .btn-submit:hover { background: var(--green-hover); box-shadow: 0 8px 32px rgba(45,95,62,0.38); }
 
-    .form-note { font-size: 0.75rem; color: var(--muted); text-align: center; margin-top: 16px; line-height: 1.65; }
+    .form-note { font-size: 0.75rem; color: var(--text-soft); text-align: center; margin-top: 16px; line-height: 1.65; }
     .back-link {
       display: inline-flex; align-items: center; gap: 8px;
-      font-size: 0.75rem; color: var(--muted); text-decoration: none;
+      font-size: 0.75rem; color: var(--text-soft); text-decoration: none;
       margin-top: 28px; letter-spacing: 0.08em; text-transform: uppercase; transition: color 0.2s;
     }
-    .back-link:hover { color: var(--blue); }
+    .back-link:hover { color: var(--green); }
 
     .error-msg {
       background: rgba(255,80,80,0.08); border: 1px solid rgba(255,80,80,0.25);
       color: #ff9090; font-size: 0.82rem; padding: 10px 14px; margin-bottom: 16px; display: none;
     }
     .success-msg {
-      background: rgba(74,184,232,0.08); border: 1px solid rgba(74,184,232,0.25);
-      color: var(--blue); font-size: 0.82rem; padding: 10px 14px; margin-bottom: 16px; display: none;
+      background: rgba(45,95,62,0.08); border: 1px solid rgba(45,95,62,0.25);
+      color: var(--green); font-size: 0.82rem; padding: 10px 14px; margin-bottom: 16px; display: none;
     }
 
     @media (max-width: 780px) {
@@ -122,17 +118,10 @@
     <div class="brand-panel">
       <canvas id="bg"></canvas>
       <div class="brand-logo">
-        <div class="logo-icon">
-          <svg viewBox="0 0 46 46" fill="none">
-            <defs><filter id="g"><feGaussianBlur stdDeviation="2.5" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs>
-            <path d="M8 14 C8 10 11 8 16 8 L26 8 C30 8 32 10 32 13 C32 16 30 18 26 19 L16 21 C12 22 8 24 8 28 C8 32 11 34 16 34 L28 34" stroke="#4AB8E8" stroke-width="2" stroke-linecap="round" fill="none" filter="url(#g)"/>
-            <path d="M20 8 L20 38 M20 8 L30 8 C34 8 37 10 37 14 C37 18 34 20 30 20 L20 20 M30 20 L38 38" stroke="#4AB8E8" stroke-width="2" stroke-linecap="round" fill="none" filter="url(#g)"/>
-            <circle cx="8" cy="14" r="2" fill="#4AB8E8" filter="url(#g)"/>
-          </svg>
-        </div>
+        <img src="logo-scantorenov.webp" alt="Scantorenov" style="height:56px;width:auto;" />
         <div class="logo-texts">
-          <span class="logo-name">scantorenov<span style="color:var(--blue)">.com</span></span>
-          <span class="logo-tag">Pr&#233;cision d&#8217;Int&#233;rieur</span>
+          <span class="logo-name">scantorenov<span style="color:var(--green)">.com</span></span>
+          <span class="logo-tag">La Vision Consciente</span>
         </div>
       </div>
 
@@ -151,15 +140,10 @@
     <!-- FORM RIGHT -->
     <div class="form-panel">
       <div class="form-box">
-        <div class="form-tabs">
-          <button class="tab-btn active" id="tabLogin" onclick="showTab('login')">Connexion</button>
-          <button class="tab-btn" id="tabRegister" onclick="showTab('register')">Cr&#233;er un compte</button>
-        </div>
-
-        <!-- LOGIN FORM -->
+        <!-- LOGIN FORM (seul onglet — la cr&#233;ation de compte se fait sur demande via le formulaire de contact) -->
         <div id="loginForm">
-          <h1 class="form-title">Bon retour,<br><em id="userName">&#8230;</em>.</h1>
-          <p class="form-intro">Connectez-vous &#224; votre espace client pour acc&#233;der &#224; vos visites virtuelles et vos documents.</p>
+          <h1 class="form-title">Espace Client</h1>
+          <p class="form-intro">Connectez-vous afin d&#8217;acc&#233;der aux fonctionnalit&#233;s de votre espace client.</p>
           <div class="error-msg" id="loginError"></div>
           <form onsubmit="handleLogin(event)">
             <div class="f-group">
@@ -172,37 +156,8 @@
             </div>
             <button type="submit" class="btn-submit" id="loginBtn">Acc&#233;der &#224; mon espace &#8594;</button>
           </form>
-          <p class="form-note">Mot de passe oubli&#233; ? <a href="#" onclick="resetPass()" style="color:var(--blue);text-decoration:none;">R&#233;initialiser</a></p>
-        </div>
-
-        <!-- REGISTER FORM -->
-        <div id="registerForm" style="display:none;">
-          <h1 class="form-title">Cr&#233;er votre<br><em>espace client</em>.</h1>
-          <p class="form-intro">Inscrivez-vous pour acc&#233;der &#224; votre espace personnel Scantorenov.</p>
-          <div class="error-msg" id="regError"></div>
-          <div class="success-msg" id="regSuccess"></div>
-          <form onsubmit="handleRegister(event)">
-            <div class="f-row">
-              <div class="f-group">
-                <label class="f-label">Pr&#233;nom</label>
-                <input type="text" class="f-input" id="regFirst" placeholder="Pr&#233;nom" required />
-              </div>
-              <div class="f-group">
-                <label class="f-label">Nom</label>
-                <input type="text" class="f-input" id="regLast" placeholder="Nom" required />
-              </div>
-            </div>
-            <div class="f-group">
-              <label class="f-label">Adresse e-mail</label>
-              <input type="email" class="f-input" id="regEmail" placeholder="votre@email.com" required />
-            </div>
-            <div class="f-group">
-              <label class="f-label">Mot de passe</label>
-              <input type="password" class="f-input" id="regPass" placeholder="8 caract&#232;res minimum" minlength="8" required />
-            </div>
-            <button type="submit" class="btn-submit" id="regBtn">Cr&#233;er mon espace &#8594;</button>
-          </form>
-          <p class="form-note">En cr&#233;ant un compte, vous acceptez nos <a href="index.html#contact" style="color:var(--blue);text-decoration:none;">conditions g&#233;n&#233;rales</a>.</p>
+          <p class="form-note">Mot de passe oubli&#233; ? <a href="#" onclick="resetPass()" style="color:var(--green);text-decoration:none;">R&#233;initialiser</a></p>
+          <p class="form-note" style="margin-top:24px; line-height:1.7;">Pas encore de compte ?<br><a href="index.html#contact" style="color:var(--green);text-decoration:none;">Contactez-nous</a> pour d&#233;marrer votre projet de r&#233;novation.</p>
         </div>
 
         <a href="index.html" class="back-link">&#8592; Retour au site</a>
@@ -222,20 +177,12 @@ function initBg() {
 }
 function drawBg(){
   ctx.clearRect(0,0,c.width,c.height);
-  pts.forEach(function(p){p.x+=p.vx;p.y+=p.vy;if(p.x<0||p.x>c.width)p.vx*=-1;if(p.y<0||p.y>c.height)p.vy*=-1;ctx.beginPath();ctx.arc(p.x,p.y,1,0,Math.PI*2);ctx.fillStyle='rgba(74,184,232,0.7)';ctx.fill();});
-  for(var i=0;i<pts.length;i++)for(var j=i+1;j<pts.length;j++){var dx=pts[i].x-pts[j].x,dy=pts[i].y-pts[j].y,d=Math.sqrt(dx*dx+dy*dy);if(d<100){ctx.beginPath();ctx.moveTo(pts[i].x,pts[i].y);ctx.lineTo(pts[j].x,pts[j].y);ctx.strokeStyle='rgba(74,184,232,'+(0.15*(1-d/100))+')';ctx.lineWidth=.5;ctx.stroke();}}
+  pts.forEach(function(p){p.x+=p.vx;p.y+=p.vy;if(p.x<0||p.x>c.width)p.vx*=-1;if(p.y<0||p.y>c.height)p.vy*=-1;ctx.beginPath();ctx.arc(p.x,p.y,1,0,Math.PI*2);ctx.fillStyle='rgba(45,95,62,0.5)';ctx.fill();});
+  for(var i=0;i<pts.length;i++)for(var j=i+1;j<pts.length;j++){var dx=pts[i].x-pts[j].x,dy=pts[i].y-pts[j].y,d=Math.sqrt(dx*dx+dy*dy);if(d<100){ctx.beginPath();ctx.moveTo(pts[i].x,pts[i].y);ctx.lineTo(pts[j].x,pts[j].y);ctx.strokeStyle='rgba(45,95,62,'+(0.15*(1-d/100))+')';ctx.lineWidth=.5;ctx.stroke();}}
   requestAnimationFrame(drawBg);
 }
 initBg(); drawBg();
 window.addEventListener('resize', initBg);
-
-/* ── Tab switching ── */
-function showTab(t) {
-  document.getElementById('loginForm').style.display = t==='login' ? '' : 'none';
-  document.getElementById('registerForm').style.display = t==='register' ? '' : 'none';
-  document.getElementById('tabLogin').classList.toggle('active', t==='login');
-  document.getElementById('tabRegister').classList.toggle('active', t==='register');
-}
 
 /* ── Netlify Identity (direct API) ── */
 var API = '/.netlify/identity';
@@ -246,18 +193,7 @@ var _hasToken = _hash.indexOf('confirmation_token') > -1
              || _hash.indexOf('recovery_token') > -1
              || _hash.indexOf('invite_token') > -1;
 
-/* Show dynamic user name from localStorage */
-try {
-  var _stored = JSON.parse(localStorage.getItem('gotrue.user'));
-  if (_stored && _stored.user_metadata && _stored.user_metadata.full_name) {
-    var _firstName = _stored.user_metadata.full_name.split(' ')[0];
-    document.getElementById('userName').textContent = _firstName;
-  } else {
-    document.getElementById('userName').textContent = 'Client';
-  }
-} catch(e) {
-  document.getElementById('userName').textContent = 'Client';
-}
+/* Titre statique — plus de nom dynamique */
 
 /* Auto-redirect if already logged in — but NOT when processing a token */
 if (!_hasToken) {
@@ -270,46 +206,6 @@ if (!_hasToken) {
 netlifyIdentity.on('login', function(user) {
   window.location.href = 'espace-client.html';
 });
-
-/* ── Register handler (direct API call) ── */
-function handleRegister(e) {
-  e.preventDefault();
-  var btn = document.getElementById('regBtn');
-  var errEl = document.getElementById('regError');
-  var sucEl = document.getElementById('regSuccess');
-  errEl.style.display = 'none';
-  sucEl.style.display = 'none';
-  btn.textContent = 'Cr\u00e9ation...'; btn.disabled = true;
-
-  var first = document.getElementById('regFirst').value.trim();
-  var last  = document.getElementById('regLast').value.trim();
-  var email = document.getElementById('regEmail').value.trim();
-  var pass  = document.getElementById('regPass').value;
-
-  fetch(API + '/signup', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      email: email,
-      password: pass,
-      data: { full_name: first + ' ' + last }
-    })
-  })
-  .then(function(r) {
-    if (!r.ok) return r.json().then(function(d) { throw new Error(d.msg || d.error_description || 'Erreur lors de la cr\u00e9ation.'); });
-    return r.json();
-  })
-  .then(function() {
-    sucEl.textContent = 'Compte cr\u00e9\u00e9 ! V\u00e9rifiez votre email pour confirmer votre inscription.';
-    sucEl.style.display = 'block';
-    btn.textContent = 'Cr\u00e9er mon espace \u2192'; btn.disabled = false;
-  })
-  .catch(function(err) {
-    errEl.textContent = err.message;
-    errEl.style.display = 'block';
-    btn.textContent = 'Cr\u00e9er mon espace \u2192'; btn.disabled = false;
-  });
-}
 
 /* ── Login handler (direct API call) ── */
 function handleLogin(e) {
