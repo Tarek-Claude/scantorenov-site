@@ -1,25 +1,16 @@
-const nodemailer = require('nodemailer');
-
 exports.handler = async (event) => {
   const { payload } = JSON.parse(event.body);
   const { nom, email, telephone, sujet, message } = payload.data || {};
 
-  // Vérification minimale
   if (!email || !nom) {
     console.log('Soumission ignorée : données manquantes', payload.data);
     return { statusCode: 200, body: 'OK — données insuffisantes' };
   }
 
-  // Transporter Gmail SMTP
-  const transporter = nodemailer.createTransport({
-    service: 'gmail',
-    auth: {
-      user: process.env.GMAIL_USER,       // scantorenov@gmail.com
-      pass: process.env.GMAIL_APP_PASSWORD // Mot de passe d'application Google
-    }
-  });
-
+  const RESEND_API_KEY = process.env.RESEND_API_KEY;
   const siteUrl = process.env.URL || 'https://scantorenov.com';
+  const fromEmail = 'Scantorenov <onboarding@resend.dev>';
+  const alertTo = 'scantorenov@gmail.com';
 
   // ── 1. Alerte interne → scantorenov@gmail.com ──
   const alertHtml = `
@@ -39,31 +30,28 @@ exports.handler = async (event) => {
   // ── 2. Confirmation au demandeur ──
   const confirmHtml = `
     <div style="font-family:Inter,sans-serif;max-width:600px;margin:0 auto;padding:24px;">
-      <img src="${siteUrl}/Logo-scantorenov.png" alt="Scantorenov" style="width:60px;margin-bottom:16px;mix-blend-mode:multiply;" />
-      <h2 style="font-family:'Cormorant Garamond',Georgia,serif;color:#2D5F3E;font-weight:300;font-size:1.6rem;">
+      <img src="${siteUrl}/Logo-scantorenov.png" alt="Scantorenov" style="width:60px;margin-bottom:16px;" />
+      <h2 style="font-family:Georgia,serif;color:#2D5F3E;font-weight:300;font-size:1.6rem;">
         Merci ${nom}, nous avons bien reçu votre demande.
       </h2>
       <p style="color:#5A5A5A;line-height:1.6;margin:16px 0;">
         Notre équipe prendra connaissance de votre message et vous recontactera dans les plus brefs délais.
       </p>
       <div style="background:#F5F2ED;border-radius:8px;padding:20px;margin:24px 0;">
-        <p style="font-weight:600;color:#2A2A2A;margin-bottom:8px;">Récapitulatif de votre demande :</p>
+        <p style="font-weight:600;color:#2A2A2A;margin-bottom:8px;">Récapitulatif :</p>
         <p style="color:#5A5A5A;margin:4px 0;"><strong>Sujet :</strong> ${sujet || '—'}</p>
         <p style="color:#5A5A5A;margin:4px 0;"><strong>Message :</strong> ${message || '—'}</p>
       </div>
-
       <hr style="border:none;border-top:1px solid #e0ddd8;margin:24px 0;" />
-
-      <h3 style="font-family:'Cormorant Garamond',Georgia,serif;color:#1A5F6A;font-weight:400;font-size:1.2rem;margin-bottom:12px;">
+      <h3 style="color:#1A5F6A;font-weight:400;font-size:1.2rem;margin-bottom:12px;">
         🏠 Créez votre espace client
       </h3>
       <p style="color:#5A5A5A;line-height:1.6;margin-bottom:16px;">
-        En créant votre compte, vous accéderez à votre jumeau numérique 3D, à Marcel — votre assistant IA de rénovation — et à vos simulations visuelles.
+        Accédez à votre jumeau numérique 3D, à Marcel — votre assistant IA — et à vos simulations visuelles.
       </p>
-      <a href="${siteUrl}/connexion.html" style="display:inline-block;background:#2D5F3E;color:#FFFFFF;text-decoration:none;padding:12px 28px;border-radius:6px;font-weight:500;font-size:0.95rem;">
+      <a href="${siteUrl}/connexion.html" style="display:inline-block;background:#2D5F3E;color:#FFFFFF;text-decoration:none;padding:12px 28px;border-radius:6px;font-weight:500;">
         Créer mon compte
       </a>
-
       <p style="margin-top:32px;font-size:0.82rem;color:#8A8A8A;">
         Scantorenov — Précision d'intérieur<br/>
         <a href="${siteUrl}" style="color:#1A5F6A;">scantorenov.com</a>
@@ -71,22 +59,26 @@ exports.handler = async (event) => {
     </div>
   `;
 
+  async function sendEmail(to, subject, html) {
+    const res = await fetch('https://api.resend.com/emails', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${RESEND_API_KEY}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ from: fromEmail, to: [to], subject, html })
+    });
+    if (!res.ok) {
+      const err = await res.text();
+      throw new Error(`Resend ${res.status}: ${err}`);
+    }
+    return res.json();
+  }
+
   try {
-    // Envoi des deux mails en parallèle
     await Promise.all([
-      transporter.sendMail({
-        from: `"Scantorenov" <${process.env.GMAIL_USER}>`,
-        to: process.env.GMAIL_USER,
-        subject: `🏠 Nouveau contact : ${nom} — ${sujet || 'Demande'}`,
-        html: alertHtml
-      }),
-      transporter.sendMail({
-        from: `"Scantorenov" <${process.env.GMAIL_USER}>`,
-        to: email,
-        replyTo: process.env.GMAIL_USER,
-        subject: `Scantorenov — Votre demande a bien été reçue`,
-        html: confirmHtml
-      })
+      sendEmail(alertTo, `🏠 Nouveau contact : ${nom} — ${sujet || 'Demande'}`, alertHtml),
+      sendEmail(email, `Scantorenov — Votre demande a bien été reçue`, confirmHtml)
     ]);
 
     console.log(`✅ Emails envoyés — alerte + confirmation pour ${email}`);
