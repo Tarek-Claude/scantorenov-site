@@ -208,6 +208,8 @@
       cursor: pointer; transition: background 0.2s;
     }
     .marcel-send:hover { background: var(--bl); }
+    .msg.thinking { opacity: 0.55; font-style: italic; }
+    .marcel-input:disabled { opacity: 0.4; cursor: wait; }
 
     /* ── RESULTATS SIMULATIONS ── */
     .simulations-grid {
@@ -564,40 +566,62 @@ document.getElementById('logoutBtn').addEventListener('click', function() {
   window.location.href = 'connexion.html';
 });
 
-/* ── Marcel chat (placeholder local) ── */
+/* ── Marcel chat ── */
+var chatHistory = [];
+
 function sendMarcel() {
   var input = document.getElementById('marcelInput');
   var text = input.value.trim();
   if (!text) return;
 
   appendMsg('user', text);
+  chatHistory.push({ role: 'user', content: text });
   input.value = '';
+  input.disabled = true;
 
-  /* Appel &#224; la Netlify Function (quand la cl&#233; API sera configur&#233;e) */
+  /* Indicateur "Marcel r\u00e9fl\u00e9chit..." */
+  var thinkingId = appendMsg('marcel', 'Marcel r\u00e9fl\u00e9chit\u2026 \uD83D\uDC18', true);
+
   fetch('/.netlify/functions/chat', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ message: text })
+    body: JSON.stringify({ messages: chatHistory })
   })
   .then(function(r) {
     if (!r.ok) throw new Error('API indisponible');
     return r.json();
   })
   .then(function(data) {
-    appendMsg('marcel', data.reply || data.response || 'Je r\u00e9fl\u00e9chis\u2026');
+    removeMsg(thinkingId);
+    var reply = data.content || data.reply || data.response || 'Je r\u00e9fl\u00e9chis\u2026';
+    appendMsg('marcel', reply);
+    chatHistory.push({ role: 'assistant', content: reply });
+    input.disabled = false;
+    input.focus();
   })
   .catch(function() {
-    appendMsg('marcel', 'Je suis encore en cours de configuration. Revenez bient\u00f4t ! \uD83D\uDC18');
+    removeMsg(thinkingId);
+    appendMsg('marcel', 'Je ne suis pas joignable pour le moment. V\u00e9rifiez qu\u2019Ollama est lanc\u00e9. \uD83D\uDC18');
+    input.disabled = false;
+    input.focus();
   });
 }
 
-function appendMsg(role, text) {
+function appendMsg(role, text, isTemp) {
   var container = document.getElementById('marcelMessages');
   var div = document.createElement('div');
-  div.className = 'msg ' + role;
+  var id = 'msg-' + Date.now();
+  div.id = id;
+  div.className = 'msg ' + role + (isTemp ? ' thinking' : '');
   div.textContent = text;
   container.appendChild(div);
   container.scrollTop = container.scrollHeight;
+  return id;
+}
+
+function removeMsg(id) {
+  var el = document.getElementById(id);
+  if (el) el.remove();
 }
 </script>
 </body>
