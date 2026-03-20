@@ -1,18 +1,19 @@
-# Node.js and Netlify project
-
-# Node modules
+# Dépendances
 node_modules/
+package-lock.json
 
-# Environment variables
+# Variables d'environnement — NE JAMAIS COMMITTER
 .env
+.env.local
+.env.*.local
 
-# Netlify build cache
+# Netlify
 .netlify/
 
-# Visual Studio Code settings
+# Visual Studio Code
 .vscode/
 
-# Operating System files
+# OS
 .DS_Store
 Thumbs.db
 
