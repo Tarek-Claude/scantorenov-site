@@ -63,12 +63,74 @@ exports.handler = async function(event) {
     return { statusCode: 400, headers, body: JSON.stringify({ error: 'Corps de requête invalide' }) };
   }
 
-  const { messages } = body;
+  const { messages, bien } = body;
   if (!messages || !Array.isArray(messages) || messages.length === 0) {
     return { statusCode: 400, headers, body: JSON.stringify({ error: 'Messages manquants' }) };
   }
 
   const recentMessages = messages.slice(-20);
+
+  /* ── Construire le prompt enrichi avec les données du bien ── */
+  let contextPrompt = SYSTEM_PROMPT;
+
+  if (bien && bien.id) {
+    contextPrompt += `\n\n═══ DONNÉES DU BIEN DU CLIENT ═══\n`;
+    contextPrompt += `Titre : ${bien.titre || 'Non renseigné'}\n`;
+
+    if (bien.adresse) {
+      const a = bien.adresse;
+      contextPrompt += `Adresse : ${a.ville || '?'} (${a.code_postal || '?'}), ${a.departement || '?'}\n`;
+    }
+
+    if (bien.caracteristiques) {
+      const c = bien.caracteristiques;
+      contextPrompt += `Type : ${c.type || '?'}\n`;
+      if (c.surface_totale_m2) contextPrompt += `Surface totale : ${c.surface_totale_m2} m²\n`;
+      if (c.annee_construction) contextPrompt += `Année de construction : ${c.annee_construction}\n`;
+      if (c.nombre_niveaux) contextPrompt += `Nombre de niveaux : ${c.nombre_niveaux}\n`;
+      if (c.etat_general) contextPrompt += `État général : ${c.etat_general}\n`;
+      if (c.dpe_actuel) contextPrompt += `DPE actuel : ${c.dpe_actuel}\n`;
+      if (c.dpe_cible) contextPrompt += `DPE cible : ${c.dpe_cible}\n`;
+    }
+
+    if (bien.pieces && bien.pieces.length > 0) {
+      const piecesDecrites = bien.pieces.filter(p => p.nom && p.nom !== 'À renseigner après visite');
+      if (piecesDecrites.length > 0) {
+        contextPrompt += `\nPièces identifiées :\n`;
+        piecesDecrites.forEach(function(p) {
+          contextPrompt += `  - ${p.nom}`;
+          if (p.surface_m2) contextPrompt += ` (${p.surface_m2} m²)`;
+          if (p.etat) contextPrompt += ` — état : ${p.etat}`;
+          if (p.notes) contextPrompt += ` — ${p.notes}`;
+          contextPrompt += `\n`;
+        });
+      }
+    }
+
+    if (bien.observations_generales && bien.observations_generales.length > 0) {
+      contextPrompt += `\nObservations :\n`;
+      bien.observations_generales.forEach(function(obs) {
+        contextPrompt += `  • ${obs}\n`;
+      });
+    }
+
+    if (bien.contraintes_identifiees && bien.contraintes_identifiees.length > 0) {
+      contextPrompt += `\nContraintes identifiées :\n`;
+      bien.contraintes_identifiees.forEach(function(c) {
+        contextPrompt += `  ⚠ ${c}\n`;
+      });
+    }
+
+    if (bien.potentiel && bien.potentiel.length > 0) {
+      contextPrompt += `\nPotentiel :\n`;
+      bien.potentiel.forEach(function(p) {
+        contextPrompt += `  ✦ ${p}\n`;
+      });
+    }
+
+    contextPrompt += `\nLe client peut explorer le jumeau numérique 3D (Matterport) dans son espace. Utilise ces données pour contextualiser tes réponses. Si des données manquent, pose des questions au client ou invite-le à explorer la visite virtuelle.\n`;
+    contextPrompt += `═══════════════════════════════\n`;
+  }
 
   try {
     let replyText;
@@ -76,7 +138,7 @@ exports.handler = async function(event) {
     if (isLocal) {
       /* ── OLLAMA (développement local) ── */
       const ollamaMessages = [
-        { role: 'system', content: SYSTEM_PROMPT },
+        { role: 'system', content: contextPrompt },
         ...recentMessages.map(m => ({
           role: m.role === 'user' ? 'user' : 'assistant',
           content: m.content
@@ -116,7 +178,7 @@ exports.handler = async function(event) {
       const response = await client.messages.create({
         model: 'claude-sonnet-4-20250514',
         max_tokens: 1024,
-        system: SYSTEM_PROMPT,
+        system: contextPrompt,
         messages: recentMessages.map(m => ({
           role: m.role === 'user' ? 'user' : 'assistant',
           content: m.content

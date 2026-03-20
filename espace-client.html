@@ -558,6 +558,25 @@ document.getElementById('logoutBtn').addEventListener('click', function() {
   window.location.href = 'connexion.html';
 });
 
+/* ── Donn\u00e9es du bien (Matterport) ── */
+var MATTERPORT_MODEL_ID = 'DKQ6zroSLKj';
+var bienData = null;
+
+function chargerDonneesBien() {
+  fetch('/.netlify/functions/get-bien?id=' + MATTERPORT_MODEL_ID)
+    .then(function(r) { return r.json(); })
+    .then(function(data) {
+      bienData = data;
+      console.log('[Marcel] Donn\u00e9es du bien charg\u00e9es :', data.titre);
+    })
+    .catch(function(err) {
+      console.warn('[Marcel] Impossible de charger les donn\u00e9es du bien :', err);
+    });
+}
+
+/* Charger les donn\u00e9es d\u00e8s que possible */
+chargerDonneesBien();
+
 /* ── Marcel chat ── */
 var chatHistory = [];
 
@@ -577,7 +596,7 @@ function sendMarcel() {
   fetch('/.netlify/functions/chat', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ messages: chatHistory })
+    body: JSON.stringify({ messages: chatHistory, bien: bienData })
   })
   .then(function(r) {
     if (!r.ok) throw new Error('API indisponible');
