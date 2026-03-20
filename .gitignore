@@ -10,6 +10,13 @@ package-lock.json
 # Netlify
 .netlify/
 
+# Visual Studio Code
+.vscode/
+
 # OS
 .DS_Store
 Thumbs.db
+
+# Build artifacts
+/build/
+/dist/
