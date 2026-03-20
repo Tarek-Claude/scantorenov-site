@@ -61,14 +61,7 @@
     .form-panel { flex: 1; display: flex; align-items: center; justify-content: center; padding: 40px 60px; background: var(--bg); }
     .form-box { width: 100%; max-width: 420px; }
 
-    .form-tabs { display: flex; gap: 0; margin-bottom: 36px; border-bottom: 1px solid var(--border); }
-    .tab-btn {
-      flex: 1; padding: 12px; font-size: 0.78rem; font-weight: 600;
-      letter-spacing: 0.12em; text-transform: uppercase; background: none;
-      border: none; cursor: pointer; color: var(--muted);
-      border-bottom: 2px solid transparent; transition: all 0.25s; margin-bottom: -1px;
-    }
-    .tab-btn.active { color: var(--blue); border-bottom-color: var(--blue); }
+    /* Tabs supprimés — connexion uniquement */
 
     .form-title { font-family: 'Cormorant Garamond', serif; font-size: 2rem; font-weight: 300; margin-bottom: 8px; color: #fff; }
     .form-title em { font-style: italic; color: var(--blue); }
@@ -151,15 +144,10 @@
     <!-- FORM RIGHT -->
     <div class="form-panel">
       <div class="form-box">
-        <div class="form-tabs">
-          <button class="tab-btn active" id="tabLogin" onclick="showTab('login')">Connexion</button>
-          <button class="tab-btn" id="tabRegister" onclick="showTab('register')">Cr&#233;er un compte</button>
-        </div>
-
-        <!-- LOGIN FORM -->
+        <!-- LOGIN FORM (seul onglet — la cr&#233;ation de compte se fait sur demande via le formulaire de contact) -->
         <div id="loginForm">
-          <h1 class="form-title">Bon retour,<br><em id="userName">&#8230;</em>.</h1>
-          <p class="form-intro">Connectez-vous &#224; votre espace client pour acc&#233;der &#224; vos visites virtuelles et vos documents.</p>
+          <h1 class="form-title">Espace Client</h1>
+          <p class="form-intro">Connectez-vous afin d&#8217;acc&#233;der aux fonctionnalit&#233;s de votre espace client.</p>
           <div class="error-msg" id="loginError"></div>
           <form onsubmit="handleLogin(event)">
             <div class="f-group">
@@ -173,36 +161,7 @@
             <button type="submit" class="btn-submit" id="loginBtn">Acc&#233;der &#224; mon espace &#8594;</button>
           </form>
           <p class="form-note">Mot de passe oubli&#233; ? <a href="#" onclick="resetPass()" style="color:var(--blue);text-decoration:none;">R&#233;initialiser</a></p>
-        </div>
-
-        <!-- REGISTER FORM -->
-        <div id="registerForm" style="display:none;">
-          <h1 class="form-title">Cr&#233;er votre<br><em>espace client</em>.</h1>
-          <p class="form-intro">Inscrivez-vous pour acc&#233;der &#224; votre espace personnel Scantorenov.</p>
-          <div class="error-msg" id="regError"></div>
-          <div class="success-msg" id="regSuccess"></div>
-          <form onsubmit="handleRegister(event)">
-            <div class="f-row">
-              <div class="f-group">
-                <label class="f-label">Pr&#233;nom</label>
-                <input type="text" class="f-input" id="regFirst" placeholder="Pr&#233;nom" required />
-              </div>
-              <div class="f-group">
-                <label class="f-label">Nom</label>
-                <input type="text" class="f-input" id="regLast" placeholder="Nom" required />
-              </div>
-            </div>
-            <div class="f-group">
-              <label class="f-label">Adresse e-mail</label>
-              <input type="email" class="f-input" id="regEmail" placeholder="votre@email.com" required />
-            </div>
-            <div class="f-group">
-              <label class="f-label">Mot de passe</label>
-              <input type="password" class="f-input" id="regPass" placeholder="8 caract&#232;res minimum" minlength="8" required />
-            </div>
-            <button type="submit" class="btn-submit" id="regBtn">Cr&#233;er mon espace &#8594;</button>
-          </form>
-          <p class="form-note">En cr&#233;ant un compte, vous acceptez nos <a href="index.html#contact" style="color:var(--blue);text-decoration:none;">conditions g&#233;n&#233;rales</a>.</p>
+          <p class="form-note" style="margin-top:24px; line-height:1.7;">Pas encore de compte ?<br><a href="index.html#contact" style="color:var(--blue);text-decoration:none;">Contactez-nous</a> pour d&#233;marrer votre projet de r&#233;novation.</p>
         </div>
 
         <a href="index.html" class="back-link">&#8592; Retour au site</a>
@@ -229,14 +188,6 @@ function drawBg(){
 initBg(); drawBg();
 window.addEventListener('resize', initBg);
 
-/* ── Tab switching ── */
-function showTab(t) {
-  document.getElementById('loginForm').style.display = t==='login' ? '' : 'none';
-  document.getElementById('registerForm').style.display = t==='register' ? '' : 'none';
-  document.getElementById('tabLogin').classList.toggle('active', t==='login');
-  document.getElementById('tabRegister').classList.toggle('active', t==='register');
-}
-
 /* ── Netlify Identity (direct API) ── */
 var API = '/.netlify/identity';
 
@@ -246,18 +197,7 @@ var _hasToken = _hash.indexOf('confirmation_token') > -1
              || _hash.indexOf('recovery_token') > -1
              || _hash.indexOf('invite_token') > -1;
 
-/* Show dynamic user name from localStorage */
-try {
-  var _stored = JSON.parse(localStorage.getItem('gotrue.user'));
-  if (_stored && _stored.user_metadata && _stored.user_metadata.full_name) {
-    var _firstName = _stored.user_metadata.full_name.split(' ')[0];
-    document.getElementById('userName').textContent = _firstName;
-  } else {
-    document.getElementById('userName').textContent = 'Client';
-  }
-} catch(e) {
-  document.getElementById('userName').textContent = 'Client';
-}
+/* Titre statique — plus de nom dynamique */
 
 /* Auto-redirect if already logged in — but NOT when processing a token */
 if (!_hasToken) {
@@ -270,46 +210,6 @@ if (!_hasToken) {
 netlifyIdentity.on('login', function(user) {
   window.location.href = 'espace-client.html';
 });
-
-/* ── Register handler (direct API call) ── */
-function handleRegister(e) {
-  e.preventDefault();
-  var btn = document.getElementById('regBtn');
-  var errEl = document.getElementById('regError');
-  var sucEl = document.getElementById('regSuccess');
-  errEl.style.display = 'none';
-  sucEl.style.display = 'none';
-  btn.textContent = 'Cr\u00e9ation...'; btn.disabled = true;
-
-  var first = document.getElementById('regFirst').value.trim();
-  var last  = document.getElementById('regLast').value.trim();
-  var email = document.getElementById('regEmail').value.trim();
-  var pass  = document.getElementById('regPass').value;
-
-  fetch(API + '/signup', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      email: email,
-      password: pass,
-      data: { full_name: first + ' ' + last }
-    })
-  })
-  .then(function(r) {
-    if (!r.ok) return r.json().then(function(d) { throw new Error(d.msg || d.error_description || 'Erreur lors de la cr\u00e9ation.'); });
-    return r.json();
-  })
-  .then(function() {
-    sucEl.textContent = 'Compte cr\u00e9\u00e9 ! V\u00e9rifiez votre email pour confirmer votre inscription.';
-    sucEl.style.display = 'block';
-    btn.textContent = 'Cr\u00e9er mon espace \u2192'; btn.disabled = false;
-  })
-  .catch(function(err) {
-    errEl.textContent = err.message;
-    errEl.style.display = 'block';
-    btn.textContent = 'Cr\u00e9er mon espace \u2192'; btn.disabled = false;
-  });
-}
 
 /* ── Login handler (direct API call) ── */
 function handleLogin(e) {

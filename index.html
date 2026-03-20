@@ -132,7 +132,7 @@ window.location.replace('/connexion'+h);
 <h2>Votre premi&#232;re &#233;tape vers la r&#233;novation</h2>
 <p class="section-intro">Un forfait unique et transparent pour d&#233;couvrir votre bien en 3D et poser les bases de votre projet.</p>
 <div class="forfait-box">
-<div class="forfait-price">150&#8364; <span>TTC</span></div>
+<div class="forfait-price">250&#8364; <span>TTC</span></div>
 <div class="forfait-includes">
 <div class="forfait-item"><span class="fi-check">&#10003;</span>Scan 3D Matterport complet de votre bien</div>
 <div class="forfait-item"><span class="fi-check">&#10003;</span>Visite virtuelle interactive accessible 24h/24</div>
@@ -140,7 +140,7 @@ window.location.replace('/connexion'+h);
 <div class="forfait-item"><span class="fi-check">&#10003;</span>Consultation du jumeau num&#233;rique depuis n&#8217;importe quel appareil</div>
 <div class="forfait-item"><span class="fi-check">&#10003;</span>Outil de simulation IA pour imaginer vos travaux</div>
 </div>
-<div class="forfait-note">&#9733; Si vous nous confiez la Ma&#238;trise d&#8217;&#338;uvre, le forfait de 150&#8364; vous est int&#233;gralement rembours&#233;.</div>
+<div class="forfait-note">&#9733; Si vous nous confiez la Ma&#238;trise d&#8217;&#338;uvre, le forfait de 250&#8364; vous est int&#233;gralement rembours&#233;.</div>
 </div>
 </section>
 
@@ -204,14 +204,29 @@ window.location.replace('/connexion'+h);
 <div class="contact-detail"><span class="cd-icon">&#x2709;</span> scantorenov@gmail.com</div>
 <div class="contact-detail"><span class="cd-icon">&#x1F310;</span> scantorenov.com</div>
 </div>
-<form class="contact-form" name="contact" method="POST" data-netlify="true">
+<form class="contact-form" name="contact" method="POST" data-netlify="true" onsubmit="return validateContactForm(this)">
 <input type="text" name="nom" placeholder="Nom" required />
 <input type="email" name="email" placeholder="Email" required />
 <input type="text" name="telephone" placeholder="T&#233;l&#233;phone" />
 <input type="text" name="sujet" placeholder="Sujet" />
-<textarea name="message" placeholder="D&#233;crivez votre projet..." required></textarea>
+<textarea name="message" placeholder="D&#233;crivez votre projet de r&#233;novation (10 caract&#232;res minimum)..." required minlength="10"></textarea>
+<p id="contactFormError" style="color:#ff9090;font-size:0.82rem;display:none;margin:-4px 0 0 0;"></p>
 <button type="submit">Envoyer</button>
 </form>
+<script>
+function validateContactForm(form) {
+  var msg = form.message.value.trim();
+  var errEl = document.getElementById('contactFormError');
+  if (msg.length < 10) {
+    errEl.textContent = 'Merci de d\u00e9crire votre projet en au moins 10 caract\u00e8res.';
+    errEl.style.display = 'block';
+    form.message.focus();
+    return false;
+  }
+  errEl.style.display = 'none';
+  return true;
+}
+</script>
 </div>
 </section>
 

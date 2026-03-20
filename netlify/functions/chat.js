@@ -1,50 +1,140 @@
 /**
  * Scantorenov — Fonction serverless Netlify
- * Proxy sécurisé vers l'API Claude (Anthropic)
+ * Marcel : assistant IA de rénovation
  *
- * Configuration requise dans Netlify :
- *   Dashboard → Site → Environment variables → Ajouter :
- *   ANTHROPIC_API_KEY = sk-ant-api03-xxxx (votre clé API Claude)
+ * Cascade intelligente :
+ *   1. Anthropic Claude (priorité — meilleure qualité)
+ *   2. Together.ai / Llama 3.1 (fallback fiable)
+ *   3. Ollama (fallback local dev)
  */
 
-const Anthropic = require('@anthropic-ai/sdk');
+const MARCEL_SYSTEM_PROMPT = `Tu es Marcel, l'assistant IA de Scantorenov.
 
-const SYSTEM_PROMPT = `Tu es l'assistant IA de Scantorenov, une entreprise spécialisée en scan 3D Matterport et maîtrise d'oeuvre d'exécution pour des projets de rénovation haut de gamme.
+## Ta personnalité
+Tu es bienveillant, patient et précis — porté par la sagesse tranquille de l'éléphant 🐘.
+Tu parles un français élégant et accessible, jamais condescendant.
+Tu vouvoies le client sauf s'il te tutoie en premier.
+Tu es humble : tu proposes, tu ne décides jamais à la place du client.
 
-Ton rôle est d'aider les clients de Scantorenov à :
-- Imaginer et concevoir leur projet de rénovation
-- Comprendre les possibilités techniques (abattage de cloisons, extensions, changements de destination...)
-- Estimer des fourchettes budgétaires indicatives
-- Identifier les aides financières disponibles (MaPrimeRénov', CEE, éco-PTZ, ANAH, TVA réduite...)
-- Préparer leurs questions pour les échanges avec le maître d'oeuvre
+## Ton rôle
+Tu aides les clients à façonner leur avant-projet de rénovation :
+- Écouter leurs envies, leurs contraintes, leur budget
+- Imaginer des aménagements (abattage de cloisons, redistribution, extensions…)
+- Identifier les aides financières (MaPrimeRénov', CEE, éco-PTZ, ANAH, TVA réduite 5.5%…)
+- Structurer l'avant-projet étape par étape
+- Conseiller sur les matériaux, les styles, l'efficacité énergétique
 
-Ton style est professionnel, élégant et accessible. Tu parles au client directement en tutoyant ou vouvoyant selon son style. Tu es précis, concret et bienveillant. Tu mentionnes toujours que tes estimations budgétaires sont indicatives et qu'un devis officiel sera établi par le maître d'oeuvre.
+## Données du bien (si disponibles)
+{{PROPERTY_DATA}}
 
-Tu ne prends pas d'engagements contractuels à la place de Scantorenov. Pour toute question sur les tarifs de prestations, tu invites le client à consulter son devis ou à contacter directement contact@scantorenov.com.
+## Règles strictes
+- Tu ne prends JAMAIS d'engagement contractuel
+- Tu ne fournis JAMAIS d'estimation de prix ou de chiffrage pour des travaux de rénovation. Si le client demande combien coûteront les travaux, tu réponds que seul un devis établi par un maître d'œuvre qualifié peut donner un chiffrage fiable, et tu l'invites à transmettre son avant-projet pour obtenir un vrai devis.
+- Pour les tarifs de prestation Scantorenov → contact@scantorenov.com
+- Tu réponds TOUJOURS en français
+- Tu restes concis (3-5 paragraphes max sauf demande explicite)
+- Quand le client semble prêt, tu l'encourages à transmettre son avant-projet pour passer à l'étape suivante avec un chef de projet humain`;
 
-Réponds toujours en français.`;
+const headers = {
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Headers': 'Content-Type',
+  'Access-Control-Allow-Methods': 'POST, OPTIONS',
+  'Content-Type': 'application/json'
+};
 
-exports.handler = async function(event, context) {
-  const headers = {
-    'Access-Control-Allow-Origin': '*',
-    'Access-Control-Allow-Headers': 'Content-Type',
-    'Access-Control-Allow-Methods': 'POST, OPTIONS',
-    'Content-Type': 'application/json'
-  };
+/**
+ * Appelle Ollama (local) — gratuit, illimité
+ */
+async function callOllama(messages, systemPrompt) {
+  const ollamaUrl = process.env.OLLAMA_URL || 'http://localhost:11434';
 
+  const response = await fetch(`${ollamaUrl}/api/chat`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      model: process.env.OLLAMA_MODEL || 'mistral',
+      messages: [
+        { role: 'system', content: systemPrompt },
+        ...messages.map(m => ({
+          role: m.role === 'user' ? 'user' : 'assistant',
+          content: m.content
+        }))
+      ],
+      stream: false
+    })
+  });
+
+  if (!response.ok) {
+    const err = await response.text();
+    throw new Error(`Ollama error: ${err}`);
+  }
+
+  const data = await response.json();
+  return data.message?.content || "Je n'ai pas pu générer une réponse.";
+}
+
+/**
+ * Appelle Anthropic Claude (priorité n°1)
+ */
+async function callAnthropic(messages, systemPrompt) {
+  const Anthropic = require('@anthropic-ai/sdk');
+  const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
+
+  const response = await client.messages.create({
+    model: 'claude-sonnet-4-20250514',
+    max_tokens: 1024,
+    system: systemPrompt,
+    messages: messages.slice(-20).map(m => ({
+      role: m.role === 'user' ? 'user' : 'assistant',
+      content: m.content
+    }))
+  });
+
+  return response.content[0]?.text || "Je n'ai pas pu générer une réponse.";
+}
+
+/**
+ * Appelle Together.ai / Llama 3.1 (fallback n°2)
+ */
+async function callTogether(messages, systemPrompt) {
+  const apiKey = process.env.TOGETHER_API_KEY;
+  if (!apiKey) throw new Error('TOGETHER_API_KEY non configurée');
+
+  const response = await fetch('https://api.together.xyz/v1/chat/completions', {
+    method: 'POST',
+    headers: {
+      'Authorization': `Bearer ${apiKey}`,
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({
+      model: 'meta-llama/Llama-3.3-70B-Instruct-Turbo',
+      max_tokens: 1024,
+      messages: [
+        { role: 'system', content: systemPrompt },
+        ...messages.slice(-20).map(m => ({
+          role: m.role === 'user' ? 'user' : 'assistant',
+          content: m.content
+        }))
+      ]
+    })
+  });
+
+  if (!response.ok) {
+    const err = await response.text();
+    throw new Error(`Together.ai error ${response.status}: ${err}`);
+  }
+
+  const data = await response.json();
+  return data.choices[0]?.message?.content || "Je n'ai pas pu générer une réponse.";
+}
+
+exports.handler = async function(event) {
   if (event.httpMethod === 'OPTIONS') {
     return { statusCode: 200, headers, body: '' };
   }
 
   if (event.httpMethod !== 'POST') {
     return { statusCode: 405, headers, body: JSON.stringify({ error: 'Method not allowed' }) };
-  }
-
-  if (!process.env.ANTHROPIC_API_KEY) {
-    return {
-      statusCode: 500, headers,
-      body: JSON.stringify({ error: 'Clé API non configurée.' })
-    };
   }
 
   let body;
@@ -54,38 +144,71 @@ exports.handler = async function(event, context) {
     return { statusCode: 400, headers, body: JSON.stringify({ error: 'Corps de requête invalide' }) };
   }
 
-  const { messages } = body;
+  const { messages, propertyData } = body;
   if (!messages || !Array.isArray(messages) || messages.length === 0) {
     return { statusCode: 400, headers, body: JSON.stringify({ error: 'Messages manquants' }) };
   }
 
-  const recentMessages = messages.slice(-20);
+  // Injecter les données du bien dans le prompt système
+  let systemPrompt = MARCEL_SYSTEM_PROMPT;
+  if (propertyData) {
+    systemPrompt = systemPrompt.replace('{{PROPERTY_DATA}}', JSON.stringify(propertyData, null, 2));
+  } else {
+    systemPrompt = systemPrompt.replace('{{PROPERTY_DATA}}', 'Aucune donnée de bien disponible pour le moment.');
+  }
 
-  try {
-    const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
+  // ══════════════════════════════════════════════════════════
+  //  CASCADE INTELLIGENTE : Claude → Together → Ollama
+  //  Chaque provider est essayé. Si l'un échoue, on passe
+  //  au suivant automatiquement.
+  // ══════════════════════════════════════════════════════════
 
-    const response = await client.messages.create({
-      model: 'claude-opus-4-6',
-      max_tokens: 1024,
-      system: SYSTEM_PROMPT,
-      messages: recentMessages.map(m => ({
-        role: m.role === 'user' ? 'user' : 'assistant',
-        content: m.content
-      }))
-    });
+  const providers = [];
+  let usedProvider = 'unknown';
 
-    const replyText = response.content[0]?.text || "Je n'ai pas pu générer une réponse.";
+  // 1. Anthropic Claude (priorité — meilleure qualité français)
+  if (process.env.ANTHROPIC_API_KEY && process.env.ANTHROPIC_API_KEY !== 'sk-ant-REMPLACER_PAR_VOTRE_CLÉ') {
+    providers.push({ name: 'claude', fn: callAnthropic });
+  }
 
+  // 2. Together.ai / Llama 3.1 (fallback cloud fiable)
+  if (process.env.TOGETHER_API_KEY) {
+    providers.push({ name: 'together', fn: callTogether });
+  }
+
+  // 3. Ollama (fallback local dev)
+  providers.push({ name: 'ollama', fn: callOllama });
+
+  let replyText;
+  let lastError;
+
+  for (const provider of providers) {
+    try {
+      console.log(`Marcel: essai via ${provider.name}...`);
+      replyText = await provider.fn(messages, systemPrompt);
+      usedProvider = provider.name;
+      console.log(`Marcel: réponse via ${provider.name} ✓`);
+      break;
+    } catch (err) {
+      console.warn(`Marcel: ${provider.name} a échoué — ${err.message}`);
+      lastError = err;
+    }
+  }
+
+  if (replyText) {
     return {
       statusCode: 200, headers,
-      body: JSON.stringify({ content: replyText })
-    };
-
-  } catch (err) {
-    console.error('Erreur API Anthropic:', err.message);
-    return {
-      statusCode: 500, headers,
-      body: JSON.stringify({ error: "Erreur lors de la communication avec l'IA. Réessayez dans un instant." })
+      body: JSON.stringify({ content: replyText, provider: usedProvider })
     };
   }
+
+  // Tous les providers ont échoué
+  console.error('Marcel: tous les providers ont échoué. Dernière erreur:', lastError?.message);
+  return {
+    statusCode: 500, headers,
+    body: JSON.stringify({
+      error: "Erreur lors de la communication avec l'IA. Réessayez dans un instant.",
+      details: process.env.NODE_ENV === 'development' ? lastError?.message : undefined
+    })
+  };
 };
