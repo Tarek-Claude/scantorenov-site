@@ -4,7 +4,22 @@ const resend = new Resend(process.env.RESEND_API_KEY);
 
 // URL de création de compte client
 const SITE_URL = process.env.DEPLOY_URL || 'https://scantorenov.com';
-const getSignupUrl = (email) => `${SITE_URL}/connexion.html#inscription&email=${encodeURIComponent(email)}`;
+const getSignupUrl = (data) => {
+  const params = [
+    'email=' + encodeURIComponent(data.email),
+    'full_name=' + encodeURIComponent(`${data.genre} ${data.prenom} ${data.nom}`.trim()),
+    'telephone=' + encodeURIComponent(data.telephone),
+    'adresse=' + encodeURIComponent(data.adresse),
+    'type_bien=' + encodeURIComponent(data.typeBien),
+    'demande=' + encodeURIComponent(data.message || ''),
+    'qualite=' + encodeURIComponent(data.qualite),
+    'budget=' + encodeURIComponent(data.budget),
+    'surface=' + encodeURIComponent(data.surface),
+    'echeance=' + encodeURIComponent(data.echeance),
+    'precision=' + encodeURIComponent(data.precision)
+  ];
+  return `${SITE_URL}/connexion.html#inscription&${params.join('&')}`;
+};
 
 exports.handler = async (event) => {
   if (event.httpMethod !== 'POST') {
@@ -24,6 +39,7 @@ exports.handler = async (event) => {
       qualite: params.get('qualite') || '',
       typeBien: params.get('typeBien') || '',
       precision: params.get('precision') || '',
+      surface: params.get('surface') || '',
       echeance: params.get('echeance') || '',
       budget: params.get('budget') || '',
       message: params.get('message') || ''
@@ -45,6 +61,7 @@ exports.handler = async (event) => {
           <tr><td style="padding:6px 12px;font-weight:bold;">Adresse</td><td style="padding:6px 12px;">${data.adresse}</td></tr>
           <tr><td style="padding:6px 12px;font-weight:bold;">Qualité</td><td style="padding:6px 12px;">${data.qualite}</td></tr>
           <tr><td style="padding:6px 12px;font-weight:bold;">Type de bien</td><td style="padding:6px 12px;">${data.typeBien} — ${data.precision}</td></tr>
+          <tr><td style="padding:6px 12px;font-weight:bold;">Surface estimée</td><td style="padding:6px 12px;">${data.surface}</td></tr>
           <tr><td style="padding:6px 12px;font-weight:bold;">Échéance</td><td style="padding:6px 12px;">${data.echeance}</td></tr>
           <tr><td style="padding:6px 12px;font-weight:bold;">Budget</td><td style="padding:6px 12px;">${data.budget}</td></tr>
           <tr><td style="padding:6px 12px;font-weight:bold;">Message</td><td style="padding:6px 12px;">${data.message}</td></tr>
@@ -53,7 +70,7 @@ exports.handler = async (event) => {
     });
 
     // 2) Mail de confirmation → Demandeur + invitation à créer le compte
-    const signupUrl = getSignupUrl(data.email);
+    const signupUrl = getSignupUrl(data);
     await resend.emails.send({
       from: 'Scantorenov <contact@scantorenov.com>',
       to: [data.email],

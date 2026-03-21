@@ -321,8 +321,10 @@ section .section-intro {
 
 .services-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  grid-template-columns: repeat(3, 1fr);
   gap: 24px;
+  max-width: 1000px;
+  margin: 0 auto;
 }
 
 .service-card {
@@ -581,6 +583,11 @@ footer a {
   .forfait-box { padding: 32px 24px; }
   .hero-logo { width: 120px; height: 120px; }
   .forfait-price { font-size: 2.2rem; }
+  .services-grid { grid-template-columns: repeat(2, 1fr); }
+}
+
+@media (max-width: 480px) {
+  .services-grid { grid-template-columns: 1fr; }
 }
 </style>
 </head>
@@ -761,9 +768,19 @@ window.location.replace('/connexion'+h);
   <option value="" disabled selected>Pr&#233;cision (s&#233;lectionnez d&#8217;abord le type)</option>
 </select>
 
-<!-- Échéance -->
-<label for="echeanceInput" style="display:block;font-size:0.75rem;color:var(--muted);margin-bottom:4px;font-weight:500;">&#201;ch&#233;ance de livraison des travaux vis&#233;e</label>
-<input type="month" id="echeanceInput" name="echeance" required title="Format : MM/AAAA" />
+<!-- Surface estimée -->
+<select name="surface" required>
+  <option value="" disabled selected>Estimation surfaces au sol &#224; r&#233;nover</option>
+  <option value="< 10 m²">&lt; 10 m&#178;</option>
+  <option value="10 — 40 m²">10 &#8212; 40 m&#178;</option>
+  <option value="40 — 80 m²">40 &#8212; 80 m&#178;</option>
+  <option value="80 — 120 m²">80 &#8212; 120 m&#178;</option>
+  <option value="120 — 180 m²">120 &#8212; 180 m&#178;</option>
+  <option value="180 — 250 m²">180 &#8212; 250 m&#178;</option>
+  <option value="250 — 500 m²">250 &#8212; 500 m&#178;</option>
+  <option value="500 — 1000 m²">500 &#8212; 1 000 m&#178;</option>
+  <option value="> 1000 m²">&gt; 1 000 m&#178;</option>
+</select>
 
 <!-- Budget -->
 <select name="budget" required>
@@ -774,6 +791,30 @@ window.location.replace('/connexion'+h);
   <option value="< 200 000 €">&lt; 200 000 &#8364;</option>
   <option value="> 200 000 €">&gt; 200 000 &#8364;</option>
 </select>
+
+<!-- Échéance -->
+<label for="echeanceMonth" style="display:block;font-size:0.75rem;color:var(--muted);margin-bottom:4px;font-weight:500;">&#201;ch&#233;ance de livraison des travaux vis&#233;e</label>
+<div class="form-row">
+  <select id="echeanceMonth" required>
+    <option value="" disabled selected>Mois</option>
+    <option value="01">Janvier</option>
+    <option value="02">F&#233;vrier</option>
+    <option value="03">Mars</option>
+    <option value="04">Avril</option>
+    <option value="05">Mai</option>
+    <option value="06">Juin</option>
+    <option value="07">Juillet</option>
+    <option value="08">Ao&#251;t</option>
+    <option value="09">Septembre</option>
+    <option value="10">Octobre</option>
+    <option value="11">Novembre</option>
+    <option value="12">D&#233;cembre</option>
+  </select>
+  <select id="echeanceYear" required>
+    <option value="" disabled selected>Ann&#233;e</option>
+  </select>
+</div>
+<input type="hidden" name="echeance" id="echeanceHidden" />
 
 <!-- Description -->
 <textarea name="message" placeholder="Dites-nous tout ce &#224; quoi vous pensez. Par la suite, notre intelligence artificielle d&#233;veloppera chaque point avec vous." required minlength="10"></textarea>
@@ -816,6 +857,27 @@ document.getElementById('typeBien').addEventListener('change', function() {
   });
   sel.disabled = false;
 });
+
+/* --- Échéance : remplir les années et synchroniser le hidden --- */
+(function() {
+  var yearSel = document.getElementById('echeanceYear');
+  var monthSel = document.getElementById('echeanceMonth');
+  var hidden = document.getElementById('echeanceHidden');
+  var currentYear = new Date().getFullYear();
+  for (var y = currentYear; y <= currentYear + 5; y++) {
+    var opt = document.createElement('option');
+    opt.value = y;
+    opt.textContent = y;
+    yearSel.appendChild(opt);
+  }
+  function syncEcheance() {
+    var m = monthSel.value;
+    var a = yearSel.value;
+    if (m && a) hidden.value = a + '-' + m;
+  }
+  monthSel.addEventListener('change', syncEcheance);
+  yearSel.addEventListener('change', syncEcheance);
+})();
 
 /* --- Autocomplétion adresse via API BAN (gouv.fr) --- */
 (function() {

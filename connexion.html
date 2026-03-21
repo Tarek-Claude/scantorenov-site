@@ -220,12 +220,16 @@ var _hasToken = _hash.indexOf('confirmation_token') > -1
 /* Check for inscription signup flow */
 var _isInscription = _hash.indexOf('inscription') > -1;
 var _emailParam = '';
+var _signupMeta = {};
 if (_isInscription) {
   var parts = _hash.split('&');
   for (var i = 0; i < parts.length; i++) {
-    if (parts[i].indexOf('email=') === 0) {
-      _emailParam = decodeURIComponent(parts[i].substring(6));
-      break;
+    var eqIdx = parts[i].indexOf('=');
+    if (eqIdx > -1) {
+      var key = parts[i].substring(0, eqIdx);
+      var val = decodeURIComponent(parts[i].substring(eqIdx + 1));
+      if (key === 'email') _emailParam = val;
+      else if (key !== 'inscription') _signupMeta[key] = val;
     }
   }
 }
@@ -333,10 +337,17 @@ function handleSignup(e) {
     return;
   }
 
+  // Passer les données du formulaire de contact comme user_metadata
+  // GoTrue les transmet au hook identity-signup qui les copie dans app_metadata.project
+  var signupData = { email: email, password: pass };
+  if (Object.keys(_signupMeta).length > 0) {
+    signupData.data = _signupMeta;
+  }
+
   fetch(API + '/signup', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ email: email, password: pass })
+    body: JSON.stringify(signupData)
   })
   .then(function(r) {
     if (!r.ok) return r.json().then(function(d) { throw new Error(d.error_description || d.msg || 'Erreur lors de la cr\u00e9ation du compte.'); });

@@ -19,10 +19,12 @@
     }
     :root {
       --bg: #F5F2ED; --mid: #EDE8E0; --card: #FFFFFF;
+      --green: #2D5F3E; --green-hover: #3A7A50;
       --blue: #2D5F3E; --bl: #3A7A50; --dim: #1A5F6A;
       --glow: rgba(45,95,62,0.15); --muted: #8A8A8A;
       --border: rgba(42,42,42,0.1);
       --text: #2A2A2A; --text-soft: #5A5A5A;
+      --shadow: 0 2px 20px rgba(0,0,0,0.06);
     }
 
     /* ── AUTH GUARD ── */
@@ -234,6 +236,155 @@
       .welcome-team { flex-direction: column; align-items: center; text-align: center; padding: 28px 24px; }
       .welcome-team-roles { justify-content: center; }
       .welcome-quote { padding: 24px 16px; }
+    }
+
+    /* ── PHASE PROGRESS BAR ── */
+    .phase-progress {
+      display: flex; align-items: center; justify-content: center;
+      gap: 0; margin: 0 auto 48px; max-width: 700px;
+    }
+    .phase-step {
+      display: flex; flex-direction: column; align-items: center;
+      position: relative; flex: 1; text-align: center;
+    }
+    .phase-step::before {
+      content: ''; position: absolute; top: 16px; left: -50%; right: 50%;
+      height: 2px; background: var(--border); z-index: 0;
+    }
+    .phase-step:first-child::before { display: none; }
+    .phase-step.completed::before { background: var(--blue); }
+    .phase-step.active::before { background: var(--blue); }
+    .phase-dot {
+      width: 34px; height: 34px; border-radius: 50%;
+      border: 2px solid var(--border); background: var(--card);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 0.72rem; font-weight: 700; color: var(--muted);
+      position: relative; z-index: 1; transition: all 0.3s;
+    }
+    .phase-step.completed .phase-dot {
+      background: var(--blue); border-color: var(--blue); color: #fff;
+    }
+    .phase-step.active .phase-dot {
+      border-color: var(--blue); color: var(--blue);
+      box-shadow: 0 0 0 4px rgba(45,95,62,0.15);
+    }
+    .phase-label {
+      font-size: 0.62rem; color: var(--muted); margin-top: 8px;
+      letter-spacing: 0.02em; line-height: 1.3; max-width: 90px;
+    }
+    .phase-step.active .phase-label { color: var(--blue); font-weight: 600; }
+    .phase-step.completed .phase-label { color: var(--text-soft); }
+
+    /* ── CLIENT INFO CARD (Phase 3) ── */
+    .client-info-card {
+      background: var(--card); border: 1px solid var(--border);
+      border-radius: 12px; padding: 36px 40px; margin-bottom: 32px;
+      box-shadow: 0 2px 16px rgba(0,0,0,0.04);
+    }
+    .client-info-header {
+      display: flex; align-items: center; gap: 12px;
+      margin-bottom: 24px; padding-bottom: 16px;
+      border-bottom: 1px solid var(--border);
+    }
+    .client-info-header h3 {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 1rem; font-weight: 600; color: var(--text);
+    }
+    .client-info-header .ci-icon { font-size: 1.4rem; }
+    .client-info-grid {
+      display: grid; grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+    .ci-field {
+      padding: 14px 18px; background: rgba(0,0,0,0.02);
+      border: 1px solid var(--border); border-radius: 8px;
+    }
+    .ci-field-label {
+      font-size: 0.66rem; font-weight: 700; letter-spacing: 0.15em;
+      text-transform: uppercase; color: var(--muted); margin-bottom: 6px;
+    }
+    .ci-field-value {
+      font-size: 0.92rem; color: var(--text); line-height: 1.5;
+    }
+    .ci-field.full-width { grid-column: 1 / -1; }
+
+    /* ── PROJECT DESCRIPTION CARD ── */
+    .project-desc-card {
+      background: var(--card); border: 1px solid var(--border);
+      border-left: 4px solid var(--blue); border-radius: 0 12px 12px 0;
+      padding: 32px 36px; margin-bottom: 32px;
+      box-shadow: 0 2px 16px rgba(0,0,0,0.04);
+    }
+    .project-desc-card h3 {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 1rem; font-weight: 600; color: var(--text);
+      margin-bottom: 16px;
+      display: flex; align-items: center; gap: 10px;
+    }
+    .project-desc-text {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.15rem; font-style: italic; font-weight: 300;
+      color: var(--text-soft); line-height: 1.8;
+      padding: 20px 24px; background: rgba(45,95,62,0.03);
+      border-radius: 8px;
+    }
+
+    /* ── CALLBACK SECTION ── */
+    .callback-section {
+      text-align: center; padding: 40px 32px;
+      background: var(--card); border: 1px solid var(--border);
+      border-radius: 12px; margin-bottom: 48px;
+      box-shadow: 0 2px 16px rgba(0,0,0,0.04);
+    }
+    .callback-section h3 {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.4rem; font-weight: 300; color: var(--text);
+      margin-bottom: 12px;
+    }
+    .callback-section p {
+      color: var(--text-soft); font-size: 0.88rem; margin-bottom: 24px;
+      max-width: 500px; margin-left: auto; margin-right: auto; line-height: 1.7;
+    }
+    .callback-btn {
+      display: inline-flex; align-items: center; gap: 10px;
+      padding: 16px 36px; background: var(--blue); color: #FFFFFF;
+      border: none; border-radius: 6px; font-size: 0.82rem; font-weight: 700;
+      letter-spacing: 0.1em; text-transform: uppercase;
+      cursor: pointer; transition: all 0.3s;
+    }
+    .callback-btn:hover { background: var(--bl); box-shadow: 0 8px 32px rgba(45,95,62,0.3); }
+    .callback-btn:disabled {
+      background: #2ecc71; cursor: default; box-shadow: none;
+    }
+    .callback-icon { font-size: 1.2rem; }
+
+    /* ── SCAN DATE CONFIRMATION (Phase 4) ── */
+    .scan-date-card {
+      background: var(--card); border: 1px solid var(--border);
+      border-radius: 12px; padding: 36px 40px; margin-bottom: 32px;
+      text-align: center; box-shadow: 0 2px 16px rgba(0,0,0,0.04);
+    }
+    .scan-date-card h3 {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.4rem; font-weight: 300; margin-bottom: 12px;
+    }
+    .scan-date-value {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 1.8rem; font-weight: 700; color: var(--blue);
+      margin: 20px 0;
+    }
+    .scan-date-actions {
+      display: flex; gap: 14px; justify-content: center; margin-top: 24px;
+    }
+
+    /* ── PHASE SECTION VISIBILITY ── */
+    .phase-section { display: none; }
+    .phase-section.phase-visible { display: block; }
+
+    @media (max-width: 768px) {
+      .client-info-grid { grid-template-columns: 1fr; }
+      .phase-label { font-size: 0.55rem; max-width: 60px; }
+      .phase-dot { width: 28px; height: 28px; font-size: 0.65rem; }
     }
 
     /* ── ACTIVATION NOTICE ── */
@@ -659,8 +810,9 @@
       color: var(--blue); background: rgba(45,95,62,0.06);
     }
     .synthese-steps {
-      display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      display: grid; grid-template-columns: repeat(3, 1fr);
       gap: 16px; margin-bottom: 32px;
+      max-width: 900px; margin-left: auto; margin-right: auto;
     }
     .synthese-step {
       padding: 20px; background: rgba(0,0,0,0.02);
@@ -694,6 +846,242 @@
       cursor: pointer; transition: all 0.25s;
     }
     .btn-outline:hover { border-color: var(--blue); color: var(--blue); }
+
+    /* ── PHASE 6 : PROPOSITION COMMERCIALE ── */
+    .proposal-card {
+      background: var(--card); border-radius: 16px; padding: 40px 36px;
+      box-shadow: var(--shadow); text-align: center; max-width: 700px;
+      margin: 0 auto;
+    }
+    .proposal-card h3 {
+      font-family: 'Cormorant Garamond', serif; font-weight: 300;
+      font-size: 1.5rem; color: var(--green); margin-bottom: 12px;
+    }
+    .proposal-card p { color: var(--text-soft); font-size: 0.9rem; line-height: 1.7; margin-bottom: 24px; }
+    .proposal-status {
+      display: inline-flex; align-items: center; gap: 8px;
+      padding: 8px 20px; border-radius: 20px; font-size: 0.78rem;
+      font-weight: 600; letter-spacing: 0.06em; margin-bottom: 28px;
+    }
+    .proposal-status.pending {
+      background: rgba(232,168,74,0.1); color: #e8a84a;
+      border: 1px solid rgba(232,168,74,0.3);
+    }
+    .proposal-status.available {
+      background: rgba(45,95,62,0.08); color: var(--green);
+      border: 1px solid rgba(45,95,62,0.2);
+    }
+    .proposal-download {
+      display: inline-flex; align-items: center; gap: 10px;
+      padding: 14px 36px; background: var(--green); color: #fff;
+      border: none; border-radius: 8px; font-size: 0.88rem;
+      font-weight: 600; letter-spacing: 0.06em; cursor: pointer;
+      text-decoration: none; transition: all 0.25s;
+    }
+    .proposal-download:hover { background: var(--green-hover); transform: translateY(-1px); }
+    .proposal-recap {
+      margin-top: 32px; padding-top: 24px; border-top: 1px solid var(--border);
+      text-align: left;
+    }
+    .proposal-recap h4 {
+      font-size: 0.82rem; font-weight: 600; letter-spacing: 0.1em;
+      text-transform: uppercase; color: var(--muted); margin-bottom: 16px;
+    }
+    .proposal-recap-grid {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 12px;
+    }
+    .proposal-recap-item {
+      padding: 12px 16px; background: rgba(45,95,62,0.03);
+      border-radius: 8px; font-size: 0.85rem;
+    }
+    .proposal-recap-item .pr-label {
+      font-size: 0.72rem; font-weight: 600; letter-spacing: 0.08em;
+      text-transform: uppercase; color: var(--muted); margin-bottom: 4px;
+    }
+    .proposal-recap-item .pr-value { color: var(--text); font-weight: 500; }
+
+    .marcel-disabled-notice {
+      background: rgba(232,168,74,0.06); border: 1px solid rgba(232,168,74,0.2);
+      border-radius: 12px; padding: 20px 28px; text-align: center;
+      max-width: 600px; margin: 0 auto;
+    }
+    .marcel-disabled-notice p {
+      color: var(--text-soft); font-size: 0.88rem; line-height: 1.6; margin: 0;
+    }
+    .marcel-disabled-notice .mdn-icon {
+      font-size: 1.4rem; display: block; margin-bottom: 8px;
+    }
+
+    /* ── PHASE 7 : OFFRE MOE ── */
+    .moe-card {
+      background: var(--card); border-radius: 16px; padding: 40px 36px;
+      box-shadow: var(--shadow); max-width: 750px; margin: 0 auto;
+    }
+    .moe-card h3 {
+      font-family: 'Cormorant Garamond', serif; font-weight: 300;
+      font-size: 1.5rem; color: var(--green); margin-bottom: 8px;
+      text-align: center;
+    }
+    .moe-card .moe-subtitle {
+      text-align: center; color: var(--text-soft); font-size: 0.88rem;
+      margin-bottom: 28px;
+    }
+    .moe-details {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 16px;
+      margin-bottom: 28px;
+    }
+    .moe-detail-item {
+      padding: 16px 20px; background: rgba(45,95,62,0.04);
+      border-radius: 10px; border-left: 3px solid var(--green);
+    }
+    .moe-detail-item .md-label {
+      font-size: 0.72rem; font-weight: 600; letter-spacing: 0.08em;
+      text-transform: uppercase; color: var(--muted); margin-bottom: 6px;
+    }
+    .moe-detail-item .md-value {
+      font-size: 1.05rem; font-weight: 600; color: var(--text);
+    }
+    .moe-actions {
+      display: flex; gap: 16px; justify-content: center;
+      margin-top: 32px; padding-top: 24px; border-top: 1px solid var(--border);
+    }
+    .moe-accept {
+      padding: 14px 40px; background: var(--green); color: #fff;
+      border: none; border-radius: 8px; font-size: 0.88rem;
+      font-weight: 600; letter-spacing: 0.06em; cursor: pointer;
+      transition: all 0.25s;
+    }
+    .moe-accept:hover { background: var(--green-hover); transform: translateY(-1px); }
+    .moe-questions {
+      padding: 14px 32px; background: transparent;
+      border: 1px solid var(--border); color: var(--text-soft);
+      border-radius: 8px; font-size: 0.88rem; font-weight: 500;
+      cursor: pointer; transition: all 0.25s;
+    }
+    .moe-questions:hover { border-color: var(--green); color: var(--green); }
+
+    /* ── PHASE 8 : SUIVI DE CHANTIER ── */
+    .chantier-timeline {
+      max-width: 700px; margin: 0 auto; position: relative;
+      padding-left: 32px;
+    }
+    .chantier-timeline::before {
+      content: ''; position: absolute; left: 11px; top: 0; bottom: 0;
+      width: 2px; background: var(--border);
+    }
+    .ct-milestone {
+      position: relative; padding: 0 0 32px 24px;
+    }
+    .ct-milestone:last-child { padding-bottom: 0; }
+    .ct-dot {
+      position: absolute; left: -26px; top: 4px;
+      width: 14px; height: 14px; border-radius: 50%;
+      background: var(--border); border: 2px solid #fff;
+      box-shadow: 0 0 0 2px var(--border);
+    }
+    .ct-milestone.done .ct-dot { background: var(--green); box-shadow: 0 0 0 2px var(--green); }
+    .ct-milestone.active .ct-dot {
+      background: #fff; border: 3px solid var(--green);
+      box-shadow: 0 0 0 2px var(--green), 0 0 8px rgba(45,95,62,0.3);
+    }
+    .ct-date {
+      font-size: 0.72rem; font-weight: 600; letter-spacing: 0.08em;
+      text-transform: uppercase; color: var(--muted); margin-bottom: 4px;
+    }
+    .ct-title {
+      font-size: 0.95rem; font-weight: 600; color: var(--text); margin-bottom: 4px;
+    }
+    .ct-desc { font-size: 0.85rem; color: var(--text-soft); line-height: 1.6; }
+    .ct-milestone.done .ct-title { color: var(--green); }
+    .ct-milestone.done .ct-title::after {
+      content: ' \2713'; font-weight: 700;
+    }
+
+    .chantier-photos {
+      max-width: 700px; margin: 32px auto 0;
+    }
+    .chantier-photos h4 {
+      font-size: 0.82rem; font-weight: 600; letter-spacing: 0.1em;
+      text-transform: uppercase; color: var(--muted); margin-bottom: 16px;
+    }
+    .cp-grid {
+      display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px;
+    }
+    .cp-item {
+      border-radius: 10px; overflow: hidden; position: relative;
+      aspect-ratio: 4/3; background: var(--mid); cursor: pointer;
+    }
+    .cp-item img {
+      width: 100%; height: 100%; object-fit: cover;
+      transition: transform 0.3s;
+    }
+    .cp-item:hover img { transform: scale(1.05); }
+    .cp-item .cp-caption {
+      position: absolute; bottom: 0; left: 0; right: 0;
+      padding: 8px 12px; background: linear-gradient(transparent, rgba(0,0,0,0.6));
+      font-size: 0.75rem; color: #fff; font-weight: 500;
+    }
+
+    .chantier-docs {
+      max-width: 700px; margin: 32px auto 0;
+    }
+    .chantier-docs h4 {
+      font-size: 0.82rem; font-weight: 600; letter-spacing: 0.1em;
+      text-transform: uppercase; color: var(--muted); margin-bottom: 16px;
+    }
+    .cd-list { list-style: none; padding: 0; margin: 0; }
+    .cd-item {
+      display: flex; align-items: center; gap: 12px;
+      padding: 12px 16px; border-radius: 8px;
+      background: rgba(45,95,62,0.03); margin-bottom: 8px;
+      transition: background 0.2s;
+    }
+    .cd-item:hover { background: rgba(45,95,62,0.07); }
+    .cd-icon { font-size: 1.2rem; }
+    .cd-name { flex: 1; font-size: 0.88rem; font-weight: 500; color: var(--text); }
+    .cd-date { font-size: 0.75rem; color: var(--muted); }
+    .cd-link {
+      font-size: 0.78rem; font-weight: 600; color: var(--green);
+      text-decoration: none; letter-spacing: 0.04em;
+    }
+    .cd-link:hover { text-decoration: underline; }
+
+    .marcel-chantier-notice {
+      background: rgba(45,95,62,0.05); border: 1px solid rgba(45,95,62,0.15);
+      border-radius: 12px; padding: 20px 28px; text-align: center;
+      max-width: 600px; margin: 32px auto 0;
+    }
+    .marcel-chantier-notice p {
+      color: var(--text-soft); font-size: 0.88rem; line-height: 1.6; margin: 0;
+    }
+
+    /* ── PHASE 9 : ARCHIVE ── */
+    .archive-card {
+      background: var(--card); border-radius: 16px; padding: 48px 40px;
+      box-shadow: var(--shadow); text-align: center; max-width: 700px;
+      margin: 0 auto;
+    }
+    .archive-card .archive-icon { font-size: 3rem; margin-bottom: 16px; }
+    .archive-card h3 {
+      font-family: 'Cormorant Garamond', serif; font-weight: 300;
+      font-size: 1.6rem; color: var(--green); margin-bottom: 12px;
+    }
+    .archive-card p {
+      color: var(--text-soft); font-size: 0.9rem; line-height: 1.7;
+      margin-bottom: 8px;
+    }
+    .archive-links {
+      display: flex; gap: 16px; justify-content: center;
+      margin-top: 28px; flex-wrap: wrap;
+    }
+    .archive-link {
+      display: inline-flex; align-items: center; gap: 8px;
+      padding: 12px 24px; border: 1px solid var(--border);
+      border-radius: 8px; font-size: 0.85rem; font-weight: 500;
+      color: var(--text); text-decoration: none;
+      transition: all 0.25s;
+    }
+    .archive-link:hover { border-color: var(--green); color: var(--green); }
 
     /* ── FOOTER ── */
     .dash-footer {
@@ -871,13 +1259,203 @@
       <div class="welcome-baseline">Votre espace de r&#233;novation personnalis&#233;</div>
     </div>
 
+    <!-- BARRE DE PROGRESSION DES PHASES -->
+    <div class="phase-progress" id="phaseProgress">
+      <div class="phase-step" data-step="3">
+        <div class="phase-dot">1</div>
+        <div class="phase-label">Prise de contact</div>
+      </div>
+      <div class="phase-step" data-step="4">
+        <div class="phase-dot">2</div>
+        <div class="phase-label">Visite scan 3D</div>
+      </div>
+      <div class="phase-step" data-step="5">
+        <div class="phase-dot">3</div>
+        <div class="phase-label">Avant-projet</div>
+      </div>
+      <div class="phase-step" data-step="6">
+        <div class="phase-dot">4</div>
+        <div class="phase-label">Proposition</div>
+      </div>
+      <div class="phase-step" data-step="7">
+        <div class="phase-dot">5</div>
+        <div class="phase-label">Projet MOE</div>
+      </div>
+      <div class="phase-step" data-step="8">
+        <div class="phase-dot">6</div>
+        <div class="phase-label">Chantier</div>
+      </div>
+    </div>
+
+    <!-- ═══════════  PHASE 3 : INFOS PERSONNELLES + PROJET  ═══════════ -->
+    <div class="phase-section" id="phaseInfoClient" data-min-phase="3">
+
+      <!-- Carte informations personnelles -->
+      <div class="client-info-card">
+        <div class="client-info-header">
+          <span class="ci-icon">&#x1F4CB;</span>
+          <h3>Vos informations</h3>
+        </div>
+        <div class="client-info-grid" id="clientInfoGrid">
+          <!-- Rempli dynamiquement par renderPhase() -->
+        </div>
+      </div>
+
+      <!-- Description du projet -->
+      <div class="project-desc-card" id="projectDescCard" style="display:none">
+        <h3><span>&#x1F4DD;</span> Votre projet</h3>
+        <div class="project-desc-text" id="projectDescText"></div>
+      </div>
+
+      <!-- Bouton demander a etre rappele (Phase 3 uniquement) -->
+      <div class="callback-section" id="callbackSection" style="display:none">
+        <h3>Prochaine &#233;tape</h3>
+        <p>Un chef de projet d&#233;di&#233; va prendre connaissance de votre demande et vous rappeler pour &#233;changer sur votre projet.</p>
+        <button class="callback-btn" id="callbackBtn" onclick="requestCallback()">
+          <span class="callback-icon">&#x1F4DE;</span>
+          Demander &#224; &#234;tre rappel&#233;
+        </button>
+      </div>
+    </div>
+
+    <!-- ═══════════  PHASE 4 : CONFIRMATION DATE SCAN  ═══════════ -->
+    <div class="phase-section" id="phaseScanDate" data-min-phase="4" data-max-phase="4">
+
+      <!-- Reformulation du projet apres entretien -->
+      <div class="project-desc-card" id="reformulationCard" style="display:none">
+        <h3><span>&#x1F4AC;</span> Votre projet, tel que nous l&#8217;avons compris</h3>
+        <div class="project-desc-text" id="reformulationText"></div>
+      </div>
+
+      <!-- Confirmation de la date de visite -->
+      <div class="scan-date-card" id="scanDateCard" style="display:none">
+        <h3>Visite pour la r&#233;alisation du scan 3D</h3>
+        <p style="color:var(--text-soft);font-size:0.88rem;">Date propos&#233;e lors de notre &#233;change t&#233;l&#233;phonique</p>
+        <div class="scan-date-value" id="scanDateValue"></div>
+        <div class="scan-date-actions">
+          <button class="btn-outline" onclick="requestDateChange()">Modifier la date</button>
+          <button class="btn-primary" id="confirmScanBtn" onclick="confirmScanDate()">Confirmer cette date</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══════════  PHASE 6 : PROPOSITION COMMERCIALE  ═══════════ -->
+    <div class="section-block phase-section" id="phaseProposal" data-min-phase="6" data-max-phase="6">
+      <div class="section-label">Proposition</div>
+      <h2 class="section-title">Votre proposition commerciale</h2>
+      <p class="section-desc">Suite &#224; l&#8217;&#233;tude de votre avant-projet, notre &#233;quipe a pr&#233;par&#233; une proposition d&#233;taill&#233;e pour votre r&#233;novation.</p>
+
+      <div class="proposal-card">
+        <h3>Proposition de r&#233;novation</h3>
+        <div id="proposalStatus" class="proposal-status pending">
+          &#x23F3; En cours de pr&#233;paration
+        </div>
+        <p id="proposalDesc">Notre &#233;quipe finalise votre proposition. Vous recevrez une notification d&#232;s qu&#8217;elle sera disponible.</p>
+        <div id="proposalActions" style="display:none;">
+          <a id="proposalLink" href="#" target="_blank" class="proposal-download">
+            &#x1F4C4; Consulter la proposition
+          </a>
+        </div>
+        <div class="proposal-recap" id="proposalRecap">
+          <h4>R&#233;capitulatif du projet</h4>
+          <div class="proposal-recap-grid" id="proposalRecapGrid"></div>
+        </div>
+      </div>
+
+      <!-- Marcel désactivé en phase 6 -->
+      <div class="marcel-disabled-notice" style="margin-top:32px;">
+        <p>
+          <span class="mdn-icon">&#x1F418;</span>
+          Marcel est en pause le temps de l&#8217;&#233;tude de votre dossier par notre &#233;quipe.
+          Il sera de retour lors de la phase chantier pour vous accompagner au quotidien.
+        </p>
+      </div>
+    </div>
+
+    <!-- ═══════════  PHASE 7 : OFFRE MOE (Maîtrise d'Œuvre)  ═══════════ -->
+    <div class="section-block phase-section" id="phaseMOE" data-min-phase="7" data-max-phase="7">
+      <div class="section-label">Ma&#238;trise d&#8217;&#339;uvre</div>
+      <h2 class="section-title">Offre de ma&#238;trise d&#8217;&#339;uvre</h2>
+      <p class="section-desc">Votre proposition a &#233;t&#233; valid&#233;e. Voici l&#8217;offre de ma&#238;trise d&#8217;&#339;uvre pour la r&#233;alisation de vos travaux.</p>
+
+      <div class="moe-card">
+        <h3>Contrat de ma&#238;trise d&#8217;&#339;uvre</h3>
+        <p class="moe-subtitle">Bureau d&#8217;&#233;tudes R&#233;no&#8217;Island &#8212; Scantorenov</p>
+
+        <div class="moe-details" id="moeDetails">
+          <!-- Rempli dynamiquement par renderPhase7() -->
+        </div>
+
+        <div id="moeDocLink" style="text-align:center; display:none;">
+          <a id="moeDocUrl" href="#" target="_blank" class="proposal-download">
+            &#x1F4CB; T&#233;l&#233;charger le contrat MOE
+          </a>
+        </div>
+
+        <div class="moe-actions" id="moeActions">
+          <button class="moe-questions" onclick="requestMOEInfo()">J&#8217;ai des questions</button>
+          <button class="moe-accept" id="moeAcceptBtn" onclick="acceptMOE()">Accepter l&#8217;offre &#x2192;</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══════════  PHASE 8 : SUIVI DE CHANTIER  ═══════════ -->
+    <div class="section-block phase-section" id="phaseChantier" data-min-phase="8" data-max-phase="8">
+      <div class="section-label">Chantier</div>
+      <h2 class="section-title">Suivi de votre chantier</h2>
+      <p class="section-desc">Suivez l&#8217;avancement de vos travaux en temps r&#233;el. Chaque &#233;tape est document&#233;e et valid&#233;e.</p>
+
+      <!-- Timeline des jalons -->
+      <div class="chantier-timeline" id="chantierTimeline">
+        <!-- Rempli dynamiquement par renderPhase8() -->
+      </div>
+
+      <!-- Photos de chantier -->
+      <div class="chantier-photos" id="chantierPhotos" style="display:none">
+        <h4>&#x1F4F7; Photos du chantier</h4>
+        <div class="cp-grid" id="chantierPhotosGrid"></div>
+      </div>
+
+      <!-- Documents -->
+      <div class="chantier-docs" id="chantierDocs" style="display:none">
+        <h4>&#x1F4C1; Documents</h4>
+        <ul class="cd-list" id="chantierDocsList"></ul>
+      </div>
+
+      <!-- Marcel revient pour le chantier -->
+      <div class="marcel-chantier-notice">
+        <p>
+          <span style="font-size:1.4rem;display:block;margin-bottom:8px;">&#x1F418;</span>
+          Marcel est de retour ! Pendant toute la dur&#233;e du chantier, il reste &#224; votre disposition
+          pour r&#233;pondre &#224; vos questions, suivre l&#8217;avancement et vous tenir inform&#233;.
+        </p>
+      </div>
+    </div>
+
+    <!-- ═══════════  PHASE 9 : ARCHIVE  ═══════════ -->
+    <div class="section-block phase-section" id="phaseArchive" data-min-phase="9">
+      <div class="section-label">Projet termin&#233;</div>
+      <h2 class="section-title">Votre projet est termin&#233;</h2>
+      <p class="section-desc">F&#233;licitations ! Votre r&#233;novation est achev&#233;e. Retrouvez ici l&#8217;ensemble de votre dossier.</p>
+
+      <div class="archive-card">
+        <div class="archive-icon">&#x1F3E0;</div>
+        <h3>Projet achev&#233; avec succ&#232;s</h3>
+        <p>Votre espace reste accessible pour consulter votre jumeau num&#233;rique, vos documents et l&#8217;historique de votre projet.</p>
+        <p style="font-size:0.82rem;color:var(--muted);">Vous souhaitez un nouveau projet ? Contactez-nous pour b&#233;n&#233;ficier de votre tarif privil&#233;gi&#233;.</p>
+        <div class="archive-links" id="archiveLinks">
+          <!-- Rempli dynamiquement par renderPhase9() -->
+        </div>
+      </div>
+    </div>
+
     <!-- CITATION -->
     <div class="welcome-quote">
       <p>Fini les allers-retours, les sentiments d&#8217;incompr&#233;hension et les pertes de temps. Ici, tout est simple, intuitif, transparent et pr&#233;cis. Vous avancez &#224; votre rythme&nbsp;: rapidement, ou pas &#224; pas.</p>
     </div>
 
-    <!-- 3 PILIERS -->
-    <div class="welcome-pillars">
+    <!-- 3 PILIERS (visible a partir de la phase 5) -->
+    <div class="welcome-pillars phase-section" data-min-phase="5">
       <div class="welcome-pillar">
         <div class="welcome-pillar-icon">&#x1F3E0;</div>
         <h3>Jumeau num&#233;rique</h3>
@@ -895,8 +1473,8 @@
       </div>
     </div>
 
-    <!-- MARCEL -->
-    <div class="welcome-marcel">
+    <!-- MARCEL (visible a partir de la phase 5) -->
+    <div class="welcome-marcel phase-section" data-min-phase="5">
       <div class="welcome-marcel-avatar">&#x1F418;</div>
       <div class="welcome-marcel-content">
         <h3>Marcel, votre assistant de r&#233;novation</h3>
@@ -905,8 +1483,8 @@
       </div>
     </div>
 
-    <!-- EQUIPE HUMAINE -->
-    <div class="welcome-team">
+    <!-- EQUIPE HUMAINE (visible a partir de la phase 5) -->
+    <div class="welcome-team phase-section" data-min-phase="5">
       <div class="welcome-team-avatar">&#x1F91D;</div>
       <div class="welcome-team-content">
         <h3>Le relais humain, au c&#339;ur de chaque projet</h3>
@@ -922,7 +1500,7 @@
         </div>
       </div>
     </div>
-    <div class="team-cta">Maintenant, c&#8217;est parti &#8212; &#224; vous de projeter, <em id="welcomeNameEnd">Client</em>&nbsp;!</div>
+    <div class="team-cta phase-section" data-min-phase="5">Maintenant, c&#8217;est parti &#8212; &#224; vous de projeter, <em id="welcomeNameEnd">Client</em>&nbsp;!</div>
 
     <!-- SIGNATURE -->
     <div class="welcome-signature">
@@ -933,8 +1511,8 @@
       </div>
     </div>
 
-    <!-- ACTIVATION / PAIEMENT -->
-    <div class="activation-notice" id="activationNotice">
+    <!-- ACTIVATION / PAIEMENT (visible phase 5 uniquement, avant paiement) -->
+    <div class="activation-notice phase-section" id="activationNotice" data-min-phase="5">
       <div class="activation-notice-header">
         <span class="activation-notice-icon">&#x1F513;</span>
         <div class="activation-notice-title">Activez votre espace pour d&#233;bloquer l&#8217;ensemble des fonctionnalit&#233;s</div>
@@ -950,8 +1528,8 @@
     </div>
   </section>
 
-  <!-- ═══════════  2. VISITE VIRTUELLE MATTERPORT  ═══════════ -->
-  <div class="section-block">
+  <!-- ═══════════  2. VISITE VIRTUELLE MATTERPORT (Phase 5+)  ═══════════ -->
+  <div class="section-block phase-section" data-min-phase="5">
     <div class="section-label">Jumeau num&#233;rique</div>
     <h2 class="section-title">Votre visite virtuelle 3D</h2>
     <p class="section-desc">Explorez le jumeau num&#233;rique de votre bien. Naviguez librement dans chaque pi&#232;ce, prenez des mesures et projetez vos id&#233;es.</p>
@@ -971,8 +1549,8 @@
     </div>
   </div>
 
-  <!-- ═══════════  2b. DONNÉES DU BIEN  ═══════════ -->
-  <div class="section-block">
+  <!-- ═══════════  2b. DONNÉES DU BIEN (Phase 5+)  ═══════════ -->
+  <div class="section-block phase-section" data-min-phase="5">
     <div class="section-label">Caract&#233;ristiques</div>
     <h2 class="section-title">Donn&#233;es de votre bien</h2>
     <p class="section-desc">Informations extraites automatiquement depuis le scan 3D de votre bien.</p>
@@ -999,8 +1577,8 @@
     </div>
   </div>
 
-  <!-- ═══════════  3. MARCEL — ASSISTANT IA  ═══════════ -->
-  <div class="section-block">
+  <!-- ═══════════  3. MARCEL — ASSISTANT IA (Phase 5, desactive Phase 6+)  ═══════════ -->
+  <div class="section-block phase-section" data-min-phase="5" data-max-phase="5">
     <div class="section-label">Assistant IA</div>
     <h2 class="section-title">Discutez avec Marcel</h2>
     <p class="section-desc">Confiez vos id&#233;es, vos envies et vos doutes. Marcel vous aide &#224; fa&#231;onner un avant-projet fid&#232;le &#224; votre vision.</p>
@@ -1028,8 +1606,8 @@
     </div>
   </div>
 
-  <!-- ═══════════  4. RESULTATS SIMULATIONS  ═══════════ -->
-  <div class="section-block" id="simulationsSection" style="display:none">
+  <!-- ═══════════  4. RESULTATS SIMULATIONS (Phase 5)  ═══════════ -->
+  <div class="section-block phase-section" id="simulationsSection" data-min-phase="5" data-max-phase="5" style="display:none">
     <div class="section-label">Simulations</div>
     <h2 class="section-title">Vos r&#233;sultats de simulation</h2>
 
@@ -1073,8 +1651,8 @@
     </div>
   </div>
 
-  <!-- ═══════════  5. SYNTHESE AVANT-PROJET  ═══════════ -->
-  <div class="section-block">
+  <!-- ═══════════  5. SYNTHESE AVANT-PROJET (Phase 5)  ═══════════ -->
+  <div class="section-block phase-section" data-min-phase="5" data-max-phase="5">
     <div class="section-label">Avant-projet</div>
     <h2 class="section-title">Synth&#232;se et transmission</h2>
     <p class="section-desc">Lorsque votre avant-projet est pr&#234;t, transmettez-le &#224; notre &#233;quipe. Un chef de projet d&#233;di&#233; prendra le relais.</p>
@@ -1135,6 +1713,8 @@
 /* ── Auth ── */
 var netlifyIdentity = window.netlifyIdentity;
 var currentUser = null;
+var currentPhase = 3;
+var clientProject = {};
 
 function showDashboard(user) {
   currentUser = user;
@@ -1144,13 +1724,38 @@ function showDashboard(user) {
   document.getElementById('dashFooter').style.display = '';
 
   var meta = user.user_metadata || {};
-  var fullName = meta.full_name || user.email;
+  var appMeta = user.app_metadata || {};
+  var fullName = appMeta.project && appMeta.project.nom
+    ? appMeta.project.nom
+    : (meta.full_name || user.email);
   var firstName = fullName.split(' ')[0];
 
   document.getElementById('dashUserName').textContent = fullName;
   document.getElementById('welcomeName').textContent = firstName;
   var endNameEl = document.getElementById('welcomeNameEnd');
   if (endNameEl) endNameEl.textContent = firstName;
+
+  // Charger la phase et les donnees projet
+  currentPhase = appMeta.phase || 3;
+  clientProject = appMeta.project || {};
+
+  // Compatibilite avec les anciennes donnees codees en dur
+  if (!clientProject.nom && CLIENT_PROJETS[user.email]) {
+    var legacy = CLIENT_PROJETS[user.email];
+    clientProject = {
+      nom: legacy.nom,
+      adresse: legacy.adresse,
+      type_bien: legacy.type_bien,
+      demande: legacy.demande
+    };
+    // Si anciennes donnees existent, on est au moins en phase 5
+    if (currentPhase < 5 && CLIENT_MATTERPORT[user.email]) {
+      currentPhase = 5;
+    }
+  }
+
+  // Rendre la phase
+  renderPhase(currentPhase, clientProject, appMeta);
 }
 
 function showLogin() {
@@ -1239,6 +1844,406 @@ document.getElementById('logoutBtn').addEventListener('click', function() {
   window.location.href = 'connexion.html';
 });
 
+/* ══════════════════════════════════════════════════════════════
+   SYSTEME DE PHASES — Moteur de rendu progressif
+   ══════════════════════════════════════════════════════════════ */
+
+function renderPhase(phase, project, appMeta) {
+  appMeta = appMeta || {};
+
+  // 1. Mettre a jour la barre de progression
+  var steps = document.querySelectorAll('.phase-step');
+  var phaseMap = { 3: 0, 4: 1, 5: 2, 6: 3, 7: 4, 8: 5 };
+  var activeIndex = phaseMap[phase] !== undefined ? phaseMap[phase] : 0;
+  var allCompleted = phase >= 9; // Phase 9+ = toutes les etapes terminees
+
+  steps.forEach(function(step, i) {
+    step.classList.remove('active', 'completed');
+    if (allCompleted || i < activeIndex) step.classList.add('completed');
+    else if (i === activeIndex) step.classList.add('active');
+  });
+
+  // 2. Afficher/masquer les sections selon la phase
+  var sections = document.querySelectorAll('.phase-section');
+  sections.forEach(function(section) {
+    var minPhase = parseInt(section.getAttribute('data-min-phase') || '0');
+    var maxPhase = parseInt(section.getAttribute('data-max-phase') || '99');
+    if (phase >= minPhase && phase <= maxPhase) {
+      section.classList.add('phase-visible');
+    } else {
+      section.classList.remove('phase-visible');
+    }
+  });
+
+  // 3. Rendre les sections specifiques a la phase
+  if (phase >= 3) renderPhase3(project);
+  if (phase === 4) renderPhase4(appMeta);
+  if (phase === 5) {
+    initMatterportSection();
+    initMarcelWelcome();
+  }
+  if (phase >= 6) initMatterportSection(); // Visite 3D reste visible sans Marcel
+  if (phase === 6) renderPhase6(appMeta);
+  if (phase === 7) renderPhase7(appMeta);
+  if (phase === 8) {
+    renderPhase8(appMeta);
+    initMarcelWelcome(); // Marcel revient en phase chantier
+  }
+  if (phase >= 9) renderPhase9(appMeta);
+
+  // Masquer la citation pour les phases < 5
+  var quoteEl = document.querySelector('.welcome-quote');
+  if (quoteEl) quoteEl.style.display = phase >= 5 ? '' : 'none';
+
+  // Masquer la signature pour les phases < 5
+  var sigEl = document.querySelector('.welcome-signature');
+  if (sigEl) sigEl.style.display = phase >= 5 ? '' : 'none';
+}
+
+/* ── Phase 3 : Informations personnelles + description projet ── */
+function renderPhase3(project) {
+  var grid = document.getElementById('clientInfoGrid');
+  if (!grid) return;
+
+  var user = currentUser;
+  var meta = user ? (user.user_metadata || {}) : {};
+  var email = user ? user.email : '';
+
+  var nom = project.nom || meta.full_name || '';
+  var telephone = project.telephone || meta.telephone || '';
+  var adresse = project.adresse || '';
+  var typeBien = project.type_bien || '';
+  var qualite = project.qualite || '';
+  var budget = project.budget || '';
+  var echeance = project.echeance || '';
+
+  var fields = [];
+  if (nom) fields.push({ label: 'Nom', value: nom });
+  if (email) fields.push({ label: 'Email', value: email });
+  if (telephone) fields.push({ label: 'T\u00e9l\u00e9phone', value: telephone });
+  if (adresse) fields.push({ label: 'Adresse du bien', value: adresse, full: true });
+  if (qualite) fields.push({ label: 'Qualit\u00e9', value: qualite });
+  if (typeBien) fields.push({ label: 'Type de bien', value: typeBien });
+  if (budget) fields.push({ label: 'Budget pr\u00e9visionnel', value: budget });
+  if (echeance) fields.push({ label: '\u00c9ch\u00e9ance', value: echeance });
+
+  grid.innerHTML = '';
+  fields.forEach(function(f) {
+    var div = document.createElement('div');
+    div.className = 'ci-field' + (f.full ? ' full-width' : '');
+    div.innerHTML = '<div class="ci-field-label">' + f.label + '</div>'
+      + '<div class="ci-field-value">' + f.value + '</div>';
+    grid.appendChild(div);
+  });
+
+  // Description du projet
+  var descCard = document.getElementById('projectDescCard');
+  var descText = document.getElementById('projectDescText');
+  if (descCard && descText && project.demande) {
+    descText.textContent = project.demande;
+    descCard.style.display = '';
+  }
+
+  // Bouton callback (phase 3 uniquement)
+  var callbackEl = document.getElementById('callbackSection');
+  if (callbackEl) {
+    callbackEl.style.display = currentPhase === 3 ? '' : 'none';
+  }
+}
+
+/* ── Phase 4 : Confirmation date scan ── */
+function renderPhase4(appMeta) {
+  // Reformulation
+  var reformCard = document.getElementById('reformulationCard');
+  var reformText = document.getElementById('reformulationText');
+  if (reformCard && reformText && appMeta.reformulation) {
+    reformText.textContent = appMeta.reformulation;
+    reformCard.style.display = '';
+  }
+
+  // Date de scan
+  var dateCard = document.getElementById('scanDateCard');
+  var dateValue = document.getElementById('scanDateValue');
+  if (dateCard && dateValue && appMeta.scan_date) {
+    var d = new Date(appMeta.scan_date);
+    var options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+    dateValue.textContent = d.toLocaleDateString('fr-FR', options);
+    dateCard.style.display = '';
+
+    // Si deja confirme
+    if (appMeta.scan_confirmed) {
+      var btn = document.getElementById('confirmScanBtn');
+      if (btn) {
+        btn.textContent = '\u2713 Date confirm\u00e9e';
+        btn.disabled = true;
+        btn.style.background = '#2ecc71';
+      }
+    }
+  }
+}
+
+/* ── Phase 6 : Proposition commerciale ── */
+function renderPhase6(appMeta) {
+  var statusEl = document.getElementById('proposalStatus');
+  var descEl = document.getElementById('proposalDesc');
+  var actionsEl = document.getElementById('proposalActions');
+  var linkEl = document.getElementById('proposalLink');
+  var recapGrid = document.getElementById('proposalRecapGrid');
+
+  // Afficher le lien de la proposition si disponible
+  if (appMeta.proposal_url) {
+    statusEl.className = 'proposal-status available';
+    statusEl.innerHTML = '\u2705 Proposition disponible';
+    descEl.textContent = 'Votre proposition de r\u00e9novation est pr\u00eate. Consultez-la en d\u00e9tail ci-dessous.';
+    actionsEl.style.display = '';
+    linkEl.href = appMeta.proposal_url;
+  }
+
+  // Remplir le r\u00e9capitulatif
+  if (recapGrid) {
+    var items = [];
+    if (clientProject.type_bien) items.push({ label: 'Type de bien', value: clientProject.type_bien });
+    if (clientProject.adresse) items.push({ label: 'Adresse', value: clientProject.adresse });
+    if (clientProject.budget) items.push({ label: 'Budget indiqu\u00e9', value: clientProject.budget });
+    if (clientProject.echeance) items.push({ label: '\u00c9ch\u00e9ance', value: clientProject.echeance });
+
+    recapGrid.innerHTML = '';
+    items.forEach(function(item) {
+      var div = document.createElement('div');
+      div.className = 'proposal-recap-item';
+      div.innerHTML = '<div class="pr-label">' + item.label + '</div>'
+        + '<div class="pr-value">' + item.value + '</div>';
+      recapGrid.appendChild(div);
+    });
+  }
+}
+
+/* ── Phase 7 : Offre MOE ── */
+function renderPhase7(appMeta) {
+  var detailsEl = document.getElementById('moeDetails');
+  var docLinkEl = document.getElementById('moeDocLink');
+  var docUrlEl = document.getElementById('moeDocUrl');
+  var acceptBtn = document.getElementById('moeAcceptBtn');
+
+  // Remplir les d\u00e9tails MOE
+  var moe = appMeta.moe || {};
+  var items = [
+    { label: 'Type de mission', value: moe.mission_type || 'Ma\u00eetrise d\u2019\u0153uvre compl\u00e8te' },
+    { label: 'Dur\u00e9e estim\u00e9e', value: moe.duree || '\u00c0 d\u00e9finir' },
+    { label: 'Honoraires', value: moe.honoraires || '\u00c0 d\u00e9finir' },
+    { label: 'D\u00e9marrage pr\u00e9vu', value: moe.demarrage || '\u00c0 d\u00e9finir' }
+  ];
+
+  if (detailsEl) {
+    detailsEl.innerHTML = '';
+    items.forEach(function(item) {
+      var div = document.createElement('div');
+      div.className = 'moe-detail-item';
+      div.innerHTML = '<div class="md-label">' + item.label + '</div>'
+        + '<div class="md-value">' + item.value + '</div>';
+      detailsEl.appendChild(div);
+    });
+  }
+
+  // Lien vers le document MOE
+  if (moe.doc_url && docLinkEl && docUrlEl) {
+    docLinkEl.style.display = '';
+    docUrlEl.href = moe.doc_url;
+  }
+
+  // Si d\u00e9j\u00e0 accept\u00e9
+  if (appMeta.moe_accepted) {
+    acceptBtn.textContent = '\u2713 Offre accept\u00e9e';
+    acceptBtn.disabled = true;
+    acceptBtn.style.background = '#2ecc71';
+  }
+}
+
+/* ── Actions Phase 7 ── */
+function acceptMOE() {
+  if (!currentUser) return;
+  var ok = confirm(
+    '\u00cates-vous s\u00fbr de vouloir accepter l\u2019offre de ma\u00eetrise d\u2019\u0153uvre ?\n\n'
+    + 'Un contrat vous sera envoy\u00e9 par email pour signature \u00e9lectronique.'
+  );
+  if (!ok) return;
+
+  var btn = document.getElementById('moeAcceptBtn');
+  btn.disabled = true;
+  btn.textContent = 'Validation en cours\u2026';
+
+  // Notification admin
+  fetch('/.netlify/functions/contact', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+    body: 'nom=' + encodeURIComponent(clientProject.nom || '')
+      + '&email=' + encodeURIComponent(currentUser.email)
+      + '&message=' + encodeURIComponent('[ACCEPTATION MOE] Le client a accept\u00e9 l\u2019offre de ma\u00eetrise d\u2019\u0153uvre.')
+  }).catch(function() {});
+
+  btn.textContent = '\u2713 Offre accept\u00e9e';
+  btn.style.background = '#2ecc71';
+}
+
+function requestMOEInfo() {
+  if (!currentUser) return;
+  var question = prompt('Quelle est votre question concernant l\u2019offre de ma\u00eetrise d\u2019\u0153uvre ?');
+  if (!question) return;
+
+  fetch('/.netlify/functions/contact', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+    body: 'nom=' + encodeURIComponent(clientProject.nom || '')
+      + '&email=' + encodeURIComponent(currentUser.email)
+      + '&message=' + encodeURIComponent('[QUESTION MOE] ' + question)
+  }).then(function() {
+    alert('Votre question a bien \u00e9t\u00e9 transmise. Nous vous r\u00e9pondrons dans les plus brefs d\u00e9lais.');
+  }).catch(function() {
+    alert('Erreur lors de l\u2019envoi. Veuillez r\u00e9essayer.');
+  });
+}
+
+/* ── Phase 8 : Suivi de chantier ── */
+function renderPhase8(appMeta) {
+  var timelineEl = document.getElementById('chantierTimeline');
+  var photosEl = document.getElementById('chantierPhotos');
+  var photosGrid = document.getElementById('chantierPhotosGrid');
+  var docsEl = document.getElementById('chantierDocs');
+  var docsList = document.getElementById('chantierDocsList');
+
+  // Jalons du chantier
+  var chantier = appMeta.chantier || {};
+  var milestones = chantier.milestones || [
+    { title: 'D\u00e9marrage du chantier', desc: 'Installation de chantier, protections et d\u00e9molitions.', status: 'pending' },
+    { title: 'Gros \u0153uvre', desc: 'Ma\u00e7onnerie, ouvertures, modifications structurelles.', status: 'pending' },
+    { title: 'Second \u0153uvre', desc: 'Plomberie, \u00e9lectricit\u00e9, isolation, cloisons.', status: 'pending' },
+    { title: 'Finitions', desc: 'Rev\u00eatements sols et murs, peintures, menuiseries int\u00e9rieures.', status: 'pending' },
+    { title: 'R\u00e9ception des travaux', desc: 'Inspection finale, lev\u00e9e de r\u00e9serves, remise des cl\u00e9s.', status: 'pending' }
+  ];
+
+  if (timelineEl) {
+    timelineEl.innerHTML = '';
+    milestones.forEach(function(m) {
+      var cls = 'ct-milestone';
+      if (m.status === 'done') cls += ' done';
+      else if (m.status === 'active') cls += ' active';
+
+      var div = document.createElement('div');
+      div.className = cls;
+      div.innerHTML = '<div class="ct-dot"></div>'
+        + (m.date ? '<div class="ct-date">' + m.date + '</div>' : '')
+        + '<div class="ct-title">' + m.title + '</div>'
+        + '<div class="ct-desc">' + m.desc + '</div>';
+      timelineEl.appendChild(div);
+    });
+  }
+
+  // Photos de chantier
+  var photos = chantier.photos || [];
+  if (photos.length > 0 && photosEl && photosGrid) {
+    photosEl.style.display = '';
+    photosGrid.innerHTML = '';
+    photos.forEach(function(p) {
+      var div = document.createElement('div');
+      div.className = 'cp-item';
+      div.innerHTML = '<img src="' + p.url + '" alt="' + (p.caption || '') + '" loading="lazy" onclick="window.open(this.src,\'_blank\')" />'
+        + (p.caption ? '<div class="cp-caption">' + p.caption + '</div>' : '');
+      photosGrid.appendChild(div);
+    });
+  }
+
+  // Documents
+  var docs = chantier.documents || [];
+  if (docs.length > 0 && docsEl && docsList) {
+    docsEl.style.display = '';
+    docsList.innerHTML = '';
+    docs.forEach(function(d) {
+      var li = document.createElement('li');
+      li.className = 'cd-item';
+      li.innerHTML = '<span class="cd-icon">\uD83D\uDCC4</span>'
+        + '<span class="cd-name">' + d.name + '</span>'
+        + (d.date ? '<span class="cd-date">' + d.date + '</span>' : '')
+        + '<a href="' + d.url + '" target="_blank" class="cd-link">Ouvrir</a>';
+      docsList.appendChild(li);
+    });
+  }
+}
+
+/* ── Phase 9 : Archive ── */
+function renderPhase9(appMeta) {
+  var linksEl = document.getElementById('archiveLinks');
+  if (!linksEl) return;
+
+  var links = [];
+
+  // Lien vers la proposition
+  if (appMeta.proposal_url) {
+    links.push({ icon: '\uD83D\uDCC4', label: 'Proposition', url: appMeta.proposal_url });
+  }
+
+  // Lien vers le contrat MOE
+  if (appMeta.moe && appMeta.moe.doc_url) {
+    links.push({ icon: '\uD83D\uDCCB', label: 'Contrat MOE', url: appMeta.moe.doc_url });
+  }
+
+  // Lien contact pour nouveau projet
+  links.push({ icon: '\u2709\uFE0F', label: 'Nouveau projet', url: 'index.html#contact' });
+
+  linksEl.innerHTML = '';
+  links.forEach(function(l) {
+    var a = document.createElement('a');
+    a.className = 'archive-link';
+    a.href = l.url;
+    a.target = '_blank';
+    a.innerHTML = '<span>' + l.icon + '</span> ' + l.label;
+    linksEl.appendChild(a);
+  });
+}
+
+/* ── Actions Phase 3 ── */
+function requestCallback() {
+  var btn = document.getElementById('callbackBtn');
+  if (!btn || !currentUser) return;
+
+  btn.disabled = true;
+  btn.innerHTML = '<span class="callback-icon">\u2713</span> Demande envoy\u00e9e';
+
+  // Envoyer une notification a l'admin
+  var project = clientProject;
+  fetch('/.netlify/functions/contact', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+    body: 'genre=&prenom=' + encodeURIComponent((project.nom || '').split(' ')[0])
+      + '&nom=' + encodeURIComponent((project.nom || '').split(' ').slice(1).join(' '))
+      + '&email=' + encodeURIComponent(currentUser.email)
+      + '&telephone=' + encodeURIComponent(project.telephone || '')
+      + '&adresse=' + encodeURIComponent(project.adresse || '')
+      + '&qualite=' + encodeURIComponent(project.qualite || '')
+      + '&typeBien=' + encodeURIComponent(project.type_bien || '')
+      + '&precision=&echeance=&budget=' + encodeURIComponent(project.budget || '')
+      + '&message=' + encodeURIComponent('DEMANDE DE RAPPEL - Le client souhaite \u00eatre rappel\u00e9 par un chef de projet.')
+  }).catch(function() {});
+
+  alert('Votre demande de rappel a bien \u00e9t\u00e9 envoy\u00e9e.\nUn chef de projet vous contactera tr\u00e8s prochainement.');
+}
+
+/* ── Actions Phase 4 ── */
+function confirmScanDate() {
+  var btn = document.getElementById('confirmScanBtn');
+  if (!btn) return;
+  btn.disabled = true;
+  btn.textContent = '\u2713 Date confirm\u00e9e';
+  btn.style.background = '#2ecc71';
+  alert('Merci ! La date de visite est confirm\u00e9e.\nNous vous enverrons un rappel la veille.');
+}
+
+function requestDateChange() {
+  var newDate = prompt('Proposez une nouvelle date (format : JJ/MM/AAAA) :');
+  if (newDate) {
+    alert('Votre demande de modification a \u00e9t\u00e9 transmise.\nNous vous recontacterons pour valider.');
+  }
+}
+
 /* ── Marcel chat — historique conversationnel ── */
 var marcelHistory = [];
 var clientMatterportData = null; // Données Matterport injectées dans le contexte Marcel
@@ -1264,8 +2269,7 @@ function initMarcelWelcome() {
   var firstName = (user.user_metadata && user.user_metadata.full_name)
     ? user.user_metadata.full_name.split(' ')[0]
     : '';
-  var clientData = CLIENT_PROJETS[email] || null;
-  var projet = clientData ? clientData.demande : null;
+  var projet = clientProject.demande || null;
   var welcomeEl = document.getElementById('marcelWelcomeMsg');
 
   // Pas de description de projet → message générique
@@ -1279,7 +2283,8 @@ function initMarcelWelcome() {
   welcomeEl.innerHTML = '<span class="pd-loading-spinner" style="margin-right:8px;vertical-align:middle;"></span> Marcel pr\u00e9pare votre accueil personnalis\u00e9\u2026 \uD83D\uDC18';
 
   // Préparer les données Matterport pour injection dans le contexte Marcel
-  var matterportInfo = clientData.matterport_data || null;
+  var appMeta = (user.app_metadata || {});
+  var matterportInfo = appMeta.matterport_data || clientProject.matterport_data || null;
   clientMatterportData = matterportInfo; // Stocker globalement pour tous les échanges
   var matterportContext = '';
   if (matterportInfo) {
@@ -1808,13 +2813,8 @@ function initMatterportSection() {
   }
 }
 
-// Lancer après que showDashboard ait été appelé
-var _origShowDashboard = showDashboard;
-showDashboard = function(user) {
-  _origShowDashboard(user);
-  initMatterportSection();
-  initMarcelWelcome();
-};
+// Note : initMatterportSection() et initMarcelWelcome() sont maintenant
+// appelés par renderPhase() dans showDashboard() — plus besoin de surcharge.
 
 /* ══════════════════════════════════════════════════════════════
    GÉNÉRATION DU RAPPORT AVANT-PROJET (PDF)
@@ -1861,12 +2861,11 @@ function generateRapport() {
   if (!user) return;
 
   var email = user.email;
-  var clientData = CLIENT_PROJETS[email] || {};
   var meta = user.user_metadata || {};
-  var fullName = clientData.nom || meta.full_name || email;
-  var adresse = clientData.adresse || 'Non renseign\u00e9e';
-  var typeBien = clientData.type_bien || 'Non renseign\u00e9';
-  var demande = clientData.demande || 'Aucune description disponible.';
+  var fullName = clientProject.nom || meta.full_name || email;
+  var adresse = clientProject.adresse || 'Non renseign\u00e9e';
+  var typeBien = clientProject.type_bien || 'Non renseign\u00e9';
+  var demande = clientProject.demande || 'Aucune description disponible.';
 
   // Données du bien
   var propData = window.__propertyData || null;
@@ -1986,14 +2985,13 @@ function submitAvantProjet() {
   var btn = document.getElementById('btnTransmettre');
   var badge = document.querySelector('.synthese-badge');
   var email = user.email;
-  var clientData = CLIENT_PROJETS[email] || {};
   var meta = user.user_metadata || {};
 
-  // Collecter toutes les données
-  var fullName = clientData.nom || meta.full_name || email;
-  var adresse = clientData.adresse || 'Non renseignée';
-  var typeBien = clientData.type_bien || 'Non renseigné';
-  var demande = clientData.demande || 'Aucune description.';
+  // Collecter toutes les données depuis clientProject (app_metadata.project)
+  var fullName = clientProject.nom || meta.full_name || email;
+  var adresse = clientProject.adresse || 'Non renseignée';
+  var typeBien = clientProject.type_bien || 'Non renseigné';
+  var demande = clientProject.demande || 'Aucune description.';
   var visuals = getGeneratedVisuals();
   var programme = extractProgramme();
 

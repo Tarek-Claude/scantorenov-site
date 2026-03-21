@@ -1,16 +1,11 @@
 /**
- * Scantorenov — Notification d'inscription
+ * Scantorenov — Hook d'inscription Identity
  *
- * Netlify appelle automatiquement cette fonction quand un utilisateur
- * s'inscrit via Identity. Le nom "identity-signup" est une convention Netlify.
- *
- * Ce hook peut :
- *   1. Notifier l'admin (scantorenov@gmail.com) par email
- *   2. Valider/refuser l'inscription
- *   3. Ajouter des rôles au compte
- *
- * Retourner { statusCode: 200 } = inscription acceptée
- * Retourner { statusCode: 403 } = inscription refusée
+ * Appele automatiquement par Netlify quand un utilisateur s'inscrit.
+ * Initialise :
+ *   - roles: ['client']
+ *   - phase: 3 (premiere visite de l'espace)
+ *   - project: donnees du formulaire de contact (si transmises via user_metadata)
  */
 
 exports.handler = async function(event) {
@@ -28,29 +23,32 @@ exports.handler = async function(event) {
 
   const email = user.email || 'inconnu';
   const meta = user.user_metadata || {};
-  const fullName = meta.full_name || 'Non renseigné';
+  const fullName = meta.full_name || 'Non renseigne';
   const createdAt = user.created_at || new Date().toISOString();
 
-  console.log(`[INSCRIPTION] Nouveau compte créé :
+  console.log(`[INSCRIPTION] Nouveau compte cree :
     Nom    : ${fullName}
     Email  : ${email}
     Date   : ${createdAt}
   `);
 
-  // ── Notification email vers l'admin ──
-  // Utilise le service gratuit de notification par email via fetch
-  // Option 1 : Netlify Forms (gratuit, intégré)
-  // Option 2 : Email API externe (Resend, SendGrid, etc.)
+  // Construire les donnees projet a partir des metadonnees de signup
+  // Ces donnees sont passees par connexion.html depuis les parametres URL
+  const project = {};
+  if (meta.full_name) project.nom = meta.full_name;
+  if (meta.telephone) project.telephone = meta.telephone;
+  if (meta.adresse) project.adresse = meta.adresse;
+  if (meta.type_bien) project.type_bien = meta.type_bien;
+  if (meta.demande) project.demande = meta.demande;
+  if (meta.qualite) project.qualite = meta.qualite;
+  if (meta.budget) project.budget = meta.budget;
+  if (meta.echeance) project.echeance = meta.echeance;
+  if (meta.precision) project.precision = meta.precision;
+  if (meta.surface) project.surface = meta.surface;
 
-  // Pour l'instant : notification via Netlify Forms (submission API)
-  // L'admin recevra un email via les notifications de formulaire Netlify
+  // Notification admin (non bloquant)
   try {
-    const ADMIN_EMAIL = process.env.ADMIN_NOTIFICATION_EMAIL || 'scantorenov@gmail.com';
-
-    // Envoyer une notification via un fetch interne
-    // qui crée une soumission de formulaire Netlify
     const siteUrl = process.env.URL || 'https://scantorenov.com';
-
     await fetch(`${siteUrl}/.netlify/functions/notify-admin`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -61,21 +59,20 @@ exports.handler = async function(event) {
         date: createdAt
       })
     }).catch(function() {
-      // Si notify-admin n'existe pas encore, on log seulement
-      console.log('[NOTIFICATION] Fonction notify-admin non disponible — log seulement.');
+      console.log('[NOTIFICATION] Fonction notify-admin non disponible.');
     });
-
   } catch (err) {
     console.error('[NOTIFICATION] Erreur:', err.message);
-    // On ne bloque pas l'inscription même si la notification échoue
   }
 
-  // Accepter l'inscription et assigner le rôle "client"
+  // Accepter l'inscription — phase 3 = premiere visite espace client
   return {
     statusCode: 200,
     body: JSON.stringify({
       app_metadata: {
-        roles: ['client']
+        roles: ['client'],
+        phase: 3,
+        project: Object.keys(project).length > 0 ? project : undefined
       }
     })
   };
