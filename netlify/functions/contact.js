@@ -3,8 +3,8 @@ const { Resend } = require('resend');
 const resend = new Resend(process.env.RESEND_API_KEY);
 
 // URL de création de compte client
-const SITE_URL = 'https://scantorenov.com';
-const SIGNUP_URL = `${SITE_URL}/connexion.html#inscription`;
+const SITE_URL = process.env.DEPLOY_URL || 'https://scantorenov.com';
+const getSignupUrl = (email) => `${SITE_URL}/connexion.html#inscription&email=${encodeURIComponent(email)}`;
 
 exports.handler = async (event) => {
   if (event.httpMethod !== 'POST') {
@@ -53,36 +53,60 @@ exports.handler = async (event) => {
     });
 
     // 2) Mail de confirmation → Demandeur + invitation à créer le compte
+    const signupUrl = getSignupUrl(data.email);
     await resend.emails.send({
       from: 'Scantorenov <contact@scantorenov.com>',
       to: [data.email],
-      subject: `${data.genre} ${data.nom}, votre demande a bien été reçue`,
+      subject: `Bienvenue ${data.prenom}, créez votre espace de rénovation`,
       html: `
-        <div style="font-family:'Inter',Arial,sans-serif;max-width:600px;margin:0 auto;color:#2A2A2A;">
+        <div style="font-family:'Inter',Arial,sans-serif;max-width:650px;margin:0 auto;color:#2A2A2A;line-height:1.7;">
           <div style="text-align:center;padding:32px 0 24px;">
             <img src="${SITE_URL}/logo-scantorenov.webp" alt="Scantorenov" style="width:60px;height:auto;" />
           </div>
-          <h2 style="color:#2D5F3E;font-family:'Cormorant Garamond',Georgia,serif;font-weight:300;font-size:1.6rem;text-align:center;">
-            Merci ${data.prenom}, votre demande est entre nos mains.
+
+          <h2 style="color:#2D5F3E;font-family:'Cormorant Garamond',Georgia,serif;font-weight:300;font-size:1.5rem;text-align:center;margin:0 0 28px 0;">
+            Bonjour ${data.prenom},
           </h2>
-          <p style="font-size:0.92rem;line-height:1.7;color:#5A5A5A;text-align:center;padding:0 24px;">
-            Nous avons bien reçu votre demande concernant votre projet de rénovation
-            (${data.typeBien} — ${data.precision}). Notre équipe reviendra vers vous très prochainement.
+
+          <p style="font-size:0.95rem;color:#5A5A5A;margin:0 0 18px 0;padding:0 24px;">
+            C'est avec joie que nous accueillons votre demande de renseignement. Un projet de rénovation est toujours un moment important et nous vous remercions de l'intérêt que vous portez aux solutions proposées par Scantorenov.
           </p>
-          <div style="text-align:center;margin:32px 0;">
-            <a href="${SIGNUP_URL}"
-               style="display:inline-block;padding:14px 32px;background:#2D5F3E;color:#FFFFFF;text-decoration:none;border-radius:6px;font-size:0.85rem;font-weight:600;letter-spacing:0.05em;">
+
+          <p style="font-size:0.95rem;color:#5A5A5A;margin:0 0 18px 0;padding:0 24px;">
+            Ce mail est la première étape de notre processus d'accompagnement.
+          </p>
+
+          <p style="font-size:0.95rem;color:#5A5A5A;margin:0 0 24px 0;padding:0 24px;">
+            Vous trouverez, ci-dessous, un lien sur lequel nous vous invitons à cliquer afin de procéder à la création de votre espace personnalisé de rénovation.
+          </p>
+
+          <div style="text-align:center;margin:36px 0;">
+            <a href="${signupUrl}"
+               style="display:inline-block;padding:14px 40px;background:#2D5F3E;color:#FFFFFF;text-decoration:none;border-radius:6px;font-size:0.9rem;font-weight:600;letter-spacing:0.05em;box-shadow:0 2px 8px rgba(45,95,62,0.2);">
               Créer mon espace client
             </a>
           </div>
-          <p style="font-size:0.82rem;color:#8A8A8A;text-align:center;line-height:1.6;padding:0 24px;">
-            En créant votre espace, vous accéderez à votre jumeau numérique,
-            à Marcel — notre assistant IA — et à vos simulations visuelles.
+
+          <p style="font-size:0.95rem;color:#5A5A5A;margin:32px 0 18px 0;padding:0 24px;">
+            Une fois votre compte créé, vous serez recontacté sous 48h, afin de convenir d'un rendez-vous pour la réalisation du scan 3D Matterport et répondre à toutes vos questions.
           </p>
-          <hr style="border:none;border-top:1px solid #eee;margin:32px 0;" />
-          <p style="font-size:0.75rem;color:#8A8A8A;text-align:center;">
+
+          <hr style="border:none;border-top:1px solid #E8E8E8;margin:40px 0;" />
+
+          <p style="font-size:0.9rem;color:#5A5A5A;margin:24px 0 8px 0;padding:0 24px;">
+            Bien à vous,
+          </p>
+
+          <div style="padding:0 24px;margin:16px 0 32px 0;">
+            <p style="font-size:0.95rem;font-weight:600;color:#2D5F3E;margin:0 0 4px 0;">Tarek BECHAR</p>
+            <p style="font-size:0.85rem;color:#8A8A8A;margin:0;">Président fondateur de Scantorenov<br/>et du bureau d'études Réno'Island</p>
+          </div>
+
+          <hr style="border:none;border-top:1px solid #E8E8E8;margin:32px 0;" />
+
+          <p style="font-size:0.75rem;color:#8A8A8A;text-align:center;margin:0;padding:0 24px;">
             Scantorenov — Précision d'intérieur<br/>
-            contact@scantorenov.com
+            <a href="mailto:contact@scantorenov.com" style="color:#2D5F3E;text-decoration:none;">contact@scantorenov.com</a>
           </p>
         </div>
       `

@@ -140,8 +140,8 @@
     <!-- FORM RIGHT -->
     <div class="form-panel">
       <div class="form-box">
-        <!-- LOGIN FORM (seul onglet — la cr&#233;ation de compte se fait sur demande via le formulaire de contact) -->
-        <div id="loginForm">
+        <!-- LOGIN FORM -->
+        <div id="loginForm" style="display:none;">
           <h1 class="form-title">Espace Client</h1>
           <p class="form-intro">Connectez-vous afin d&#8217;acc&#233;der aux fonctionnalit&#233;s de votre espace client.</p>
           <div class="error-msg" id="loginError"></div>
@@ -158,6 +158,30 @@
           </form>
           <p class="form-note">Mot de passe oubli&#233; ? <a href="#" onclick="resetPass()" style="color:var(--green);text-decoration:none;">R&#233;initialiser</a></p>
           <p class="form-note" style="margin-top:24px; line-height:1.7;">Pas encore de compte ?<br><a href="index.html#contact" style="color:var(--green);text-decoration:none;">Contactez-nous</a> pour d&#233;marrer votre projet de r&#233;novation.</p>
+        </div>
+
+        <!-- SIGNUP FORM -->
+        <div id="signupForm" style="display:none;">
+          <h1 class="form-title">Cr&#233;er mon Espace</h1>
+          <p class="form-intro">Bienvenue dans votre espace Scantorenov. Cr&#233;ez votre compte pour commencer.</p>
+          <div class="error-msg" id="signupError"></div>
+          <div class="success-msg" id="signupSuccess">Compte cr&#233;&#233; avec succ&#232;s ! Un email de confirmation a &#233;t&#233; envoy&#233;.</div>
+          <form onsubmit="handleSignup(event)">
+            <div class="f-group">
+              <label class="f-label">Adresse e-mail</label>
+              <input type="email" class="f-input" id="signupEmail" placeholder="votre@email.com" required />
+            </div>
+            <div class="f-group">
+              <label class="f-label">Mot de passe</label>
+              <input type="password" class="f-input" id="signupPass" placeholder="&#8226;&#8226;&#8226;&#8226;&#8226;&#8226;&#8226;&#8226;" required />
+            </div>
+            <div class="f-group">
+              <label class="f-label">Confirmer le mot de passe</label>
+              <input type="password" class="f-input" id="signupPassConfirm" placeholder="&#8226;&#8226;&#8226;&#8226;&#8226;&#8226;&#8226;&#8226;" required />
+            </div>
+            <button type="submit" class="btn-submit" id="signupBtn">Cr&#233;er mon compte &#8594;</button>
+          </form>
+          <p class="form-note" style="margin-top:24px; line-height:1.7;">D&#233;j&#224; inscrit ?<br><a href="javascript:showLogin()" style="color:var(--green);text-decoration:none;">Se connecter</a></p>
         </div>
 
         <a href="index.html" class="back-link">&#8592; Retour au site</a>
@@ -193,10 +217,35 @@ var _hasToken = _hash.indexOf('confirmation_token') > -1
              || _hash.indexOf('recovery_token') > -1
              || _hash.indexOf('invite_token') > -1;
 
+/* Check for inscription signup flow */
+var _isInscription = _hash.indexOf('inscription') > -1;
+var _emailParam = '';
+if (_isInscription) {
+  var parts = _hash.split('&');
+  for (var i = 0; i < parts.length; i++) {
+    if (parts[i].indexOf('email=') === 0) {
+      _emailParam = decodeURIComponent(parts[i].substring(6));
+      break;
+    }
+  }
+}
+
+/* Show appropriate form on load */
+window.addEventListener('DOMContentLoaded', function() {
+  if (_isInscription) {
+    document.getElementById('signupForm').style.display = 'block';
+    if (_emailParam) {
+      document.getElementById('signupEmail').value = _emailParam;
+    }
+  } else {
+    document.getElementById('loginForm').style.display = 'block';
+  }
+});
+
 /* Titre statique — plus de nom dynamique */
 
 /* Auto-redirect if already logged in — but NOT when processing a token */
-if (!_hasToken) {
+if (!_hasToken && !_isInscription) {
   netlifyIdentity.on('init', function(user) {
     if (user) window.location.href = 'espace-client.html';
   });
@@ -261,6 +310,55 @@ function resetPass() {
   })
   .then(function() { alert('Email de r\u00e9initialisation envoy\u00e9 !'); })
   .catch(function() { alert('Erreur. V\u00e9rifiez votre adresse email.'); });
+}
+
+/* ── Signup handler ── */
+function handleSignup(e) {
+  e.preventDefault();
+  var btn = document.getElementById('signupBtn');
+  var errEl = document.getElementById('signupError');
+  var successEl = document.getElementById('signupSuccess');
+  errEl.style.display = 'none';
+  successEl.style.display = 'none';
+  btn.textContent = 'Cr\u00e9ation...'; btn.disabled = true;
+
+  var email = document.getElementById('signupEmail').value.trim();
+  var pass = document.getElementById('signupPass').value;
+  var passConfirm = document.getElementById('signupPassConfirm').value;
+
+  if (pass !== passConfirm) {
+    errEl.textContent = 'Les mots de passe ne correspondent pas.';
+    errEl.style.display = 'block';
+    btn.textContent = 'Cr\u00e9er mon compte \u2192'; btn.disabled = false;
+    return;
+  }
+
+  fetch(API + '/signup', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ email: email, password: pass })
+  })
+  .then(function(r) {
+    if (!r.ok) return r.json().then(function(d) { throw new Error(d.error_description || d.msg || 'Erreur lors de la cr\u00e9ation du compte.'); });
+    return r.json();
+  })
+  .then(function() {
+    successEl.style.display = 'block';
+    setTimeout(function() {
+      window.location.href = 'espace-client.html';
+    }, 2000);
+  })
+  .catch(function(err) {
+    errEl.textContent = err.message;
+    errEl.style.display = 'block';
+    btn.textContent = 'Cr\u00e9er mon compte \u2192'; btn.disabled = false;
+  });
+}
+
+/* ── Switch to login form ── */
+function showLogin() {
+  document.getElementById('signupForm').style.display = 'none';
+  document.getElementById('loginForm').style.display = 'block';
 }
 </script>
 </body>

@@ -457,6 +457,13 @@ section .section-intro {
   width: 100%;
 }
 
+.contact-form input::placeholder,
+.contact-form select::placeholder,
+.contact-form textarea::placeholder {
+  color: var(--muted);
+  opacity: 0.6;
+}
+
 .contact-form input:focus,
 .contact-form select:focus,
 .contact-form textarea:focus {
@@ -755,7 +762,8 @@ window.location.replace('/connexion'+h);
 </select>
 
 <!-- Échéance -->
-<input type="month" name="echeance" placeholder="&#201;ch&#233;ance de livraison vis&#233;e" required />
+<label for="echeanceInput" style="display:block;font-size:0.75rem;color:var(--muted);margin-bottom:4px;font-weight:500;">&#201;ch&#233;ance de livraison des travaux vis&#233;e</label>
+<input type="month" id="echeanceInput" name="echeance" required title="Format : MM/AAAA" />
 
 <!-- Budget -->
 <select name="budget" required>
