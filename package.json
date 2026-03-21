@@ -4,6 +4,7 @@
   "description": "Scantorenov — Scan 3D & Maîtrise d'Œuvre",
   "dependencies": {
     "@anthropic-ai/sdk": "^0.30.0",
+    "@supabase/supabase-js": "^2.49.0",
     "resend": "^3.2.0"
   },
   "engines": {

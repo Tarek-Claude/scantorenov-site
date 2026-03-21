@@ -34,3 +34,4 @@
 
 [context.production.environment]
   NODE_VERSION = "18"
+  SUPABASE_URL = "https://qvovfabwzyfhmkaluzss.supabase.co"

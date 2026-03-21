@@ -7,6 +7,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&family=Inter:wght@300;400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet" />
   <script src="https://identity.netlify.com/v1/netlify-identity-widget.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     html { scroll-behavior: smooth; }
@@ -1710,6 +1711,11 @@
      SCRIPTS
      ════════════════════════════════════════════════════════════════ -->
 <script>
+/* ── Supabase ── */
+var SUPABASE_URL = 'https://qvovfabwzyfhmkaluzss.supabase.co';
+var SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InF2b3ZmYWJ3enlmaG1rYWx1enNzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzMzNjQ0ODUsImV4cCI6MjA4ODk0MDQ4NX0._h-AjJwSGcaq1QGSpDEa4PAXNVBcyWjjEpAIboQaGU8';
+var supabaseClient = window.supabase ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON) : null;
+
 /* ── Auth ── */
 var netlifyIdentity = window.netlifyIdentity;
 var currentUser = null;
@@ -1725,6 +1731,48 @@ function showDashboard(user) {
 
   var meta = user.user_metadata || {};
   var appMeta = user.app_metadata || {};
+
+  // D'abord afficher avec les données locales/Identity
+  applyDashboardData(user, meta, appMeta);
+
+  // Puis tenter de charger depuis Supabase (plus à jour)
+  if (supabaseClient && user.email) {
+    supabaseClient
+      .from('clients')
+      .select('*')
+      .eq('email', user.email)
+      .single()
+      .then(function(result) {
+        if (result.data) {
+          var sb = result.data;
+          // Fusionner les données Supabase dans appMeta et clientProject
+          clientProject = {
+            nom: sb.nom || clientProject.nom,
+            adresse: sb.adresse || clientProject.adresse,
+            type_bien: sb.type_bien || clientProject.type_bien,
+            demande: sb.demande || clientProject.demande,
+            surface: sb.surface || clientProject.surface,
+            echeance: sb.echeance || clientProject.echeance,
+            budget: sb.budget || clientProject.budget,
+            telephone: sb.telephone || clientProject.telephone,
+            matterport_data: sb.matterport_data || clientProject.matterport_data
+          };
+          if (sb.phase && sb.phase > currentPhase) currentPhase = sb.phase;
+          if (sb.matterport_model_id) appMeta.matterport_id = sb.matterport_model_id;
+          if (sb.matterport_iframe) appMeta.matterport_iframe = sb.matterport_iframe;
+          if (sb.matterport_data) appMeta.matterport_data = sb.matterport_data;
+          if (sb.proposal_url) appMeta.proposal_url = sb.proposal_url;
+          if (sb.moe) appMeta.moe = sb.moe;
+          if (sb.moe_accepted) appMeta.moe_accepted = sb.moe_accepted;
+          if (sb.chantier) appMeta.chantier = sb.chantier;
+          // Recharger l'affichage avec les données Supabase
+          renderPhase(currentPhase, clientProject, appMeta);
+        }
+      });
+  }
+}
+
+function applyDashboardData(user, meta, appMeta) {
   var fullName = appMeta.project && appMeta.project.nom
     ? appMeta.project.nom
     : (meta.full_name || user.email);
@@ -2781,7 +2829,8 @@ function initMatterportSection() {
   var user = currentUser;
   var meta = (user && user.app_metadata) || (user && user.user_metadata) || {};
 
-  // Priorité : 1) métadonnées du compte, 2) table CLIENT_MATTERPORT
+  // Priorité : 1) iframe complète Supabase, 2) model ID metadata, 3) table CLIENT_MATTERPORT
+  var iframeSrc = meta.matterport_iframe || null;
   var modelId = meta.matterport_id || (user && CLIENT_MATTERPORT[user.email]) || null;
 
   var frameEl = document.getElementById('matterportFrame');
@@ -2789,12 +2838,15 @@ function initMatterportSection() {
   var iframeEl = document.getElementById('matterportIframe');
   var dataSection = document.getElementById('propertyDataContainer');
 
-  if (modelId) {
+  if (iframeSrc || modelId) {
     // Visite disponible → afficher l'iframe
     var sdkKey = 'b9a411fbbe9cb8a0b9fcff249832cad8';
-    // Ne PAS inclure applicationKey dans l'URL iframe (cause un blocage par referrer mismatch en local)
-    // L'applicationKey est uniquement utilisée lors du SDK.connect() pour l'extraction de données
-    iframeEl.src = 'https://my.matterport.com/show/?m=' + modelId + '&play=1&qs=1';
+    if (iframeSrc) {
+      // URL iframe complète depuis Supabase (peut contenir des params spécifiques)
+      iframeEl.src = iframeSrc;
+    } else {
+      iframeEl.src = 'https://my.matterport.com/show/?m=' + modelId + '&play=1&qs=1';
+    }
     frameEl.style.display = '';
     pendingEl.style.display = 'none';
     if (dataSection) dataSection.style.display = '';
