@@ -443,6 +443,7 @@ section .section-intro {
 }
 
 .contact-form input,
+.contact-form select,
 .contact-form textarea {
   background: #FFFFFF;
   border: 1px solid var(--border);
@@ -453,11 +454,38 @@ section .section-intro {
   font-size: 0.88rem;
   outline: none;
   transition: border-color 0.2s;
+  width: 100%;
 }
 
 .contact-form input:focus,
+.contact-form select:focus,
 .contact-form textarea:focus {
   border-color: var(--green);
+}
+
+.contact-form select {
+  cursor: pointer;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%238A8A8A'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 16px center;
+  padding-right: 40px;
+}
+
+.contact-form .form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+}
+
+.contact-form .form-row-3 {
+  display: grid;
+  grid-template-columns: auto 1fr 1fr;
+  gap: 14px;
+}
+
+.contact-form .form-row-3 select:first-child {
+  min-width: 130px;
 }
 
 .contact-form textarea {
@@ -484,6 +512,40 @@ section .section-intro {
   background: var(--green-hover);
 }
 
+.address-autocomplete {
+  position: relative;
+}
+
+.address-suggestions {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  background: #fff;
+  border: 1px solid var(--border);
+  border-top: none;
+  border-radius: 0 0 8px 8px;
+  max-height: 200px;
+  overflow-y: auto;
+  z-index: 50;
+  display: none;
+}
+
+.address-suggestions div {
+  padding: 10px 16px;
+  font-size: 0.85rem;
+  cursor: pointer;
+  border-bottom: 1px solid var(--border);
+}
+
+.address-suggestions div:hover {
+  background: var(--bg);
+}
+
+.address-suggestions div:last-child {
+  border-bottom: none;
+}
+
 footer {
   border-top: 1px solid var(--border);
   padding: 40px 48px;
@@ -505,6 +567,9 @@ footer a {
   .nav-links { display: none; }
   section { padding: 60px 20px; }
   .contact-grid { grid-template-columns: 1fr; }
+  .contact-form .form-row,
+  .contact-form .form-row-3 { grid-template-columns: 1fr; }
+  .contact-form .form-row-3 select:first-child { min-width: unset; }
   .matterport-section { padding: 40px 16px; }
   .forfait-box { padding: 32px 24px; }
   .hero-logo { width: 120px; height: 120px; }
@@ -644,28 +709,193 @@ window.location.replace('/connexion'+h);
 <div class="contact-detail"><span class="cd-icon">&#x2709;</span> contact@scantorenov.com</div>
 <div class="contact-detail"><span class="cd-icon">&#x1F310;</span> scantorenov.com</div>
 </div>
-<form class="contact-form" name="contact" method="POST" data-netlify="true" onsubmit="return validateContactForm(this)">
-<input type="text" name="nom" placeholder="Nom" required />
-<input type="email" name="email" placeholder="Email" required />
-<input type="text" name="telephone" placeholder="T&#233;l&#233;phone" />
-<input type="text" name="sujet" placeholder="Sujet" />
-<textarea name="message" placeholder="D&#233;crivez votre projet de r&#233;novation (10 caract&#232;res minimum)..." required minlength="10"></textarea>
+<form class="contact-form" name="contact" method="POST" data-netlify="true" id="contactForm">
+
+<!-- Genre / Prénom / Nom -->
+<div class="form-row-3">
+  <select name="genre" required>
+    <option value="" disabled selected>Civilit&#233;</option>
+    <option value="Monsieur">Monsieur</option>
+    <option value="Madame">Madame</option>
+  </select>
+  <input type="text" name="prenom" placeholder="Pr&#233;nom" required />
+  <input type="text" name="nom" placeholder="NOM" required />
+</div>
+
+<!-- Email / Téléphone -->
+<div class="form-row">
+  <input type="email" name="email" placeholder="Email" required />
+  <input type="tel" name="telephone" placeholder="T&#233;l&#233;phone" required />
+</div>
+
+<!-- Adresse avec autocomplétion BAN -->
+<div class="address-autocomplete">
+  <input type="text" name="adresse" id="adresseInput" placeholder="Adresse du bien &#224; r&#233;nover" required autocomplete="off" />
+  <div class="address-suggestions" id="adresseSuggestions"></div>
+</div>
+
+<!-- Qualité -->
+<select name="qualite" required>
+  <option value="" disabled selected>Vous &#234;tes...</option>
+  <option value="Particulier">Particulier</option>
+  <option value="Professionnel">Professionnel</option>
+</select>
+
+<!-- Type de bien -->
+<select name="typeBien" id="typeBien" required>
+  <option value="" disabled selected>Type de bien</option>
+  <option value="Résidentiel">R&#233;sidentiel</option>
+  <option value="Tertiaire">Tertiaire</option>
+  <option value="Site industriel">Site industriel</option>
+</select>
+
+<!-- Précision (dynamique) -->
+<select name="precision" id="precisionBien" required disabled>
+  <option value="" disabled selected>Pr&#233;cision (s&#233;lectionnez d&#8217;abord le type)</option>
+</select>
+
+<!-- Échéance -->
+<input type="month" name="echeance" placeholder="&#201;ch&#233;ance de livraison vis&#233;e" required />
+
+<!-- Budget -->
+<select name="budget" required>
+  <option value="" disabled selected>Budget pr&#233;visionnel</option>
+  <option value="< 20 000 €">&lt; 20 000 &#8364;</option>
+  <option value="< 50 000 €">&lt; 50 000 &#8364;</option>
+  <option value="< 100 000 €">&lt; 100 000 &#8364;</option>
+  <option value="< 200 000 €">&lt; 200 000 &#8364;</option>
+  <option value="> 200 000 €">&gt; 200 000 &#8364;</option>
+</select>
+
+<!-- Description -->
+<textarea name="message" placeholder="Dites-nous tout ce &#224; quoi vous pensez. Par la suite, notre intelligence artificielle d&#233;veloppera chaque point avec vous." required minlength="10"></textarea>
+
 <p id="contactFormError" style="color:#ff9090;font-size:0.82rem;display:none;margin:-4px 0 0 0;"></p>
-<button type="submit">Envoyer</button>
+<button type="submit">Envoyer ma demande</button>
 </form>
+
 <script>
-function validateContactForm(form) {
+/* --- Précision dynamique selon Type de bien --- */
+var precisionOptions = {
+  'Résidentiel': [
+    'Maison individuelle',
+    'Maison divisée',
+    'Appartement',
+    'Immeuble < 5 logements (mono/copropriété)',
+    'Immeuble > 10 logements (mono/copropriété)'
+  ],
+  'Tertiaire': [
+    'Boutique',
+    'Bureau',
+    'Locaux à usages mixtes'
+  ],
+  'Site industriel': [
+    'Atelier',
+    'Entrepôt',
+    'Usine'
+  ]
+};
+
+document.getElementById('typeBien').addEventListener('change', function() {
+  var sel = document.getElementById('precisionBien');
+  var opts = precisionOptions[this.value] || [];
+  sel.innerHTML = '<option value="" disabled selected>Pr\u00e9cisez...</option>';
+  opts.forEach(function(o) {
+    var opt = document.createElement('option');
+    opt.value = o;
+    opt.textContent = o;
+    sel.appendChild(opt);
+  });
+  sel.disabled = false;
+});
+
+/* --- Autocomplétion adresse via API BAN (gouv.fr) --- */
+(function() {
+  var input = document.getElementById('adresseInput');
+  var suggestions = document.getElementById('adresseSuggestions');
+  var debounceTimer;
+
+  input.addEventListener('input', function() {
+    clearTimeout(debounceTimer);
+    var q = this.value.trim();
+    if (q.length < 4) { suggestions.style.display = 'none'; return; }
+    debounceTimer = setTimeout(function() {
+      fetch('https://api-adresse.data.gouv.fr/search/?q=' + encodeURIComponent(q) + '&limit=5')
+        .then(function(r) { return r.json(); })
+        .then(function(data) {
+          suggestions.innerHTML = '';
+          if (data.features && data.features.length) {
+            data.features.forEach(function(f) {
+              var div = document.createElement('div');
+              div.textContent = f.properties.label;
+              div.addEventListener('click', function() {
+                input.value = f.properties.label;
+                suggestions.style.display = 'none';
+              });
+              suggestions.appendChild(div);
+            });
+            suggestions.style.display = 'block';
+          } else {
+            suggestions.style.display = 'none';
+          }
+        });
+    }, 300);
+  });
+
+  document.addEventListener('click', function(e) {
+    if (!suggestions.contains(e.target) && e.target !== input) {
+      suggestions.style.display = 'none';
+    }
+  });
+})();
+
+/* --- Soumission formulaire : Netlify Forms + fonction email --- */
+document.getElementById('contactForm').addEventListener('submit', function(e) {
+  e.preventDefault();
+  var form = this;
   var msg = form.message.value.trim();
   var errEl = document.getElementById('contactFormError');
+  var btn = form.querySelector('button[type="submit"]');
+
   if (msg.length < 10) {
     errEl.textContent = 'Merci de d\u00e9crire votre projet en au moins 10 caract\u00e8res.';
     errEl.style.display = 'block';
     form.message.focus();
-    return false;
+    return;
   }
   errEl.style.display = 'none';
-  return true;
-}
+  btn.disabled = true;
+  btn.textContent = 'Envoi en cours...';
+
+  var formData = new FormData(form);
+  var body = new URLSearchParams(formData).toString();
+
+  // 1) Soumettre à Netlify Forms
+  fetch('/', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+    body: body + '&form-name=contact'
+  }).then(function() {
+    // 2) Déclencher la fonction email (en parallèle, non bloquant)
+    fetch('/.netlify/functions/contact', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: body
+    }).catch(function() {});
+
+    // 3) Message de succès
+    form.innerHTML = '<div style="text-align:center;padding:40px 0;">' +
+      '<div style="font-size:2.5rem;margin-bottom:16px;">✓</div>' +
+      '<h3 style="font-family:Cormorant Garamond,serif;font-size:1.5rem;font-weight:300;color:var(--green);margin-bottom:12px;">Demande envoy\u00e9e avec succ\u00e8s</h3>' +
+      '<p style="color:var(--text-soft);font-size:0.9rem;">Un email de confirmation vous a \u00e9t\u00e9 adress\u00e9.<br/>Nous vous recontacterons tr\u00e8s prochainement.</p>' +
+      '</div>';
+  }).catch(function() {
+    errEl.textContent = 'Une erreur est survenue. Veuillez r\u00e9essayer.';
+    errEl.style.display = 'block';
+    btn.disabled = false;
+    btn.textContent = 'Envoyer ma demande';
+  });
+});
 </script>
 </div>
 </section>
