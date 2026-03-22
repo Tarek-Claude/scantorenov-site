@@ -2,16 +2,15 @@
  * Scantorenov — Fonction serverless Netlify
  * Marcel : assistant IA de rénovation
  *
- * Cascade intelligente :
+ * Providers :
  *   1. Anthropic Claude (priorité — meilleure qualité)
- *   2. Together.ai / Llama 3.1 (fallback fiable)
- *   3. Ollama (fallback local dev)
+ *   2. Together.ai / Llama 3.3 (fallback fiable)
  *
  * Prompt personnalisé :
  *   Si un marcel_system_prompt existe dans Supabase pour ce client (généré
- *   à la soumission du formulaire contact), il est utilisé À LA PLACE du
- *   prompt par défaut. Il contient les 3 missions : rôle, scénario client,
- *   directives de cohérence budget/surface/travaux.
+ *   à la soumission du formulaire contact via marcel-prompt.js), il est
+ *   utilisé à la place du prompt par défaut. Il contient les 3 missions :
+ *   rôle, scénario client, directives de cohérence budget/surface/travaux.
  */
 
 const { createClient } = require('@supabase/supabase-js');
@@ -66,38 +65,7 @@ const headers = {
 };
 
 /**
- * Appelle Ollama (local) — gratuit, illimité
- */
-async function callOllama(messages, systemPrompt) {
-  const ollamaUrl = process.env.OLLAMA_URL || 'http://localhost:11434';
-
-  const response = await fetch(`${ollamaUrl}/api/chat`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      model: process.env.OLLAMA_MODEL || 'mistral',
-      messages: [
-        { role: 'system', content: systemPrompt },
-        ...messages.map(m => ({
-          role: m.role === 'user' ? 'user' : 'assistant',
-          content: m.content
-        }))
-      ],
-      stream: false
-    })
-  });
-
-  if (!response.ok) {
-    const err = await response.text();
-    throw new Error(`Ollama error: ${err}`);
-  }
-
-  const data = await response.json();
-  return data.message?.content || "Je n'ai pas pu générer une réponse.";
-}
-
-/**
- * Appelle Anthropic Claude (priorité n°1)
+ * Appelle Anthropic Claude (provider principal)
  */
 async function callAnthropic(messages, systemPrompt) {
   const Anthropic = require('@anthropic-ai/sdk');
@@ -117,7 +85,7 @@ async function callAnthropic(messages, systemPrompt) {
 }
 
 /**
- * Appelle Together.ai / Llama 3.1 (fallback n°2)
+ * Appelle Together.ai / Llama 3.3 (fallback)
  */
 async function callTogether(messages, systemPrompt) {
   const apiKey = process.env.TOGETHER_API_KEY;
@@ -155,8 +123,6 @@ async function callTogether(messages, systemPrompt) {
  * Récupère le prompt Marcel personnalisé depuis Supabase pour un client.
  * Ce prompt est généré par marcel-prompt.js à la soumission du formulaire.
  * Il contient : rôle + scénario client + directives de cohérence.
- * @param {string} email - Email du client
- * @returns {string|null} Le prompt personnalisé ou null
  */
 async function getClientMarcelPrompt(email) {
   if (!email) return null;
@@ -203,21 +169,16 @@ exports.handler = async function(event) {
 
   // ══════════════════════════════════════════════════════════
   //  PROMPT SYSTÈME : Personnalisé (Supabase) ou par défaut
-  //  Si un marcel_system_prompt existe pour ce client, il est
-  //  utilisé car il contient les 3 missions (rôle, scénario,
-  //  directives de cohérence) forgées depuis le formulaire.
   // ══════════════════════════════════════════════════════════
   let systemPrompt;
   let promptSource = 'default';
 
   const clientPrompt = await getClientMarcelPrompt(email);
   if (clientPrompt) {
-    // Prompt personnalisé trouvé — l'utiliser comme base
     systemPrompt = clientPrompt;
     promptSource = 'supabase';
     console.log(`Marcel: prompt personnalisé chargé pour ${email}`);
 
-    // Enrichir avec les données du scan 3D si disponibles
     if (propertyData) {
       systemPrompt += `\n\n═══════════════════════════════════════════════════════
 DONNÉES DU SCAN 3D MATTERPORT
@@ -225,7 +186,6 @@ DONNÉES DU SCAN 3D MATTERPORT
 ${JSON.stringify(propertyData, null, 2)}`;
     }
   } else {
-    // Pas de prompt personnalisé — utiliser le prompt par défaut
     systemPrompt = MARCEL_SYSTEM_PROMPT;
     if (propertyData) {
       systemPrompt = systemPrompt.replace('{{PROPERTY_DATA}}', JSON.stringify(propertyData, null, 2));
@@ -235,26 +195,25 @@ ${JSON.stringify(propertyData, null, 2)}`;
   }
 
   // ══════════════════════════════════════════════════════════
-  //  CASCADE INTELLIGENTE : Claude → Together → Ollama
-  //  Chaque provider est essayé. Si l'un échoue, on passe
-  //  au suivant automatiquement.
+  //  CASCADE : Claude → Together.ai
   // ══════════════════════════════════════════════════════════
-
   const providers = [];
   let usedProvider = 'unknown';
 
-  // 1. Anthropic Claude (priorité — meilleure qualité français)
-  if (process.env.ANTHROPIC_API_KEY && process.env.ANTHROPIC_API_KEY !== 'sk-ant-REMPLACER_PAR_VOTRE_CLÉ') {
+  if (process.env.ANTHROPIC_API_KEY) {
     providers.push({ name: 'claude', fn: callAnthropic });
   }
 
-  // 2. Together.ai / Llama 3.1 (fallback cloud fiable)
   if (process.env.TOGETHER_API_KEY) {
     providers.push({ name: 'together', fn: callTogether });
   }
 
-  // 3. Ollama (fallback local dev)
-  providers.push({ name: 'ollama', fn: callOllama });
+  if (providers.length === 0) {
+    return {
+      statusCode: 500, headers,
+      body: JSON.stringify({ error: 'Aucun provider IA configuré (ANTHROPIC_API_KEY ou TOGETHER_API_KEY requis).' })
+    };
+  }
 
   let replyText;
   let lastError;
@@ -279,13 +238,11 @@ ${JSON.stringify(propertyData, null, 2)}`;
     };
   }
 
-  // Tous les providers ont échoué
   console.error('Marcel: tous les providers ont échoué. Dernière erreur:', lastError?.message);
   return {
     statusCode: 500, headers,
     body: JSON.stringify({
-      error: "Erreur lors de la communication avec l'IA. Réessayez dans un instant.",
-      details: process.env.NODE_ENV === 'development' ? lastError?.message : undefined
+      error: "Erreur lors de la communication avec l'IA. Réessayez dans un instant."
     })
   };
 };

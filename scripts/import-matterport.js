@@ -14,7 +14,7 @@
  *   --admin-secret <key>  Cle admin (ou variable ADMIN_SECRET)
  *
  * Exemples :
- *   node scripts/import-matterport.js "C:\...\M-A_Dimensions.csv" tr.kaptation@gmail.com --model-id DKQ6zroSLKj --dry-run
+ *   node scripts/import-matterport.js "chemin/vers/Dimensions.csv" client@email.com --model-id MODEL_ID --dry-run
  *   node scripts/import-matterport.js data.csv client@email.com --model-id ABC123 --admin-secret monSecret
  */
 

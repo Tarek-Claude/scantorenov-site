@@ -1567,12 +1567,12 @@
       display: flex; align-items: center; justify-content: space-between;
       border-bottom: 3px solid #2D5F3E; padding-bottom: 16px; margin-bottom: 32px;
     }
-    .rp-logo { font-family: 'Space Grotesk', sans-serif; font-size: 1.3rem; font-weight: 700; color: #060C18; }
+    .rp-logo { font-family: 'Space Grotesk', sans-serif; font-size: 1.3rem; font-weight: 700; color: #2A2A2A; }
     .rp-logo span { color: #2D5F3E; }
     .rp-date { font-size: 0.75rem; color: #888; }
     .rp-title {
       font-family: 'Cormorant Garamond', serif; font-size: 1.8rem;
-      font-weight: 300; color: #060C18; margin-bottom: 6px;
+      font-weight: 300; color: #2A2A2A; margin-bottom: 6px;
     }
     .rp-subtitle { font-size: 0.82rem; color: #666; margin-bottom: 32px; }
     .rp-section-title {
@@ -2444,21 +2444,6 @@ function applyDashboardData(user, meta, appMeta) {
   // Charger la phase et les donnees projet
   currentPhase = appMeta.phase || 3;
   clientProject = appMeta.project || {};
-
-  // Compatibilite avec les anciennes donnees codees en dur
-  if (!clientProject.nom && CLIENT_PROJETS[user.email]) {
-    var legacy = CLIENT_PROJETS[user.email];
-    clientProject = {
-      nom: legacy.nom,
-      adresse: legacy.adresse,
-      type_bien: legacy.type_bien,
-      demande: legacy.demande
-    };
-    // Si anciennes donnees existent, on est au moins en phase 5
-    if (currentPhase < 5 && CLIENT_MATTERPORT[user.email]) {
-      currentPhase = 5;
-    }
-  }
 
   // Rendre la phase
   renderPhase(currentPhase, clientProject, appMeta);
@@ -4001,126 +3986,18 @@ function initMatterportSDK() {
 }
 
 function useFallbackData() {
-  // Donn\u00e9es r\u00e9elles du scan — \u00e0 compl\u00e9ter au fur et \u00e0 mesure
-  window.__propertyData = {
-    model: { sid: 'DKQ6zroSLKj', name: '\u00C9tat des lieux \u2014 R\u00E9novation suite abandon de chantier' },
-    type: 'Pavillon',
-    annee: '60-70',
-    etat: 'Abandon de chantier',
-    etatDetail: 'R\u00E9novation compl\u00E8te \u00E0 pr\u00E9voir',
-    floors: [
-      { id: 0, index: 0, name: 'Rez-de-chauss\u00E9e' },
-      { id: 1, index: 1, name: '\u00C9tage' }
-    ],
-    rooms: [
-      { name: 'Entr\u00E9e', area: 6.2, floorIndex: 0 },
-      { name: 'S\u00E9jour / Salon', area: 28.5, floorIndex: 0 },
-      { name: 'Cuisine', area: 12.8, floorIndex: 0 },
-      { name: 'WC', area: 1.8, floorIndex: 0 },
-      { name: 'Couloir', area: 5.4, floorIndex: 1 },
-      { name: 'Chambre 1', area: 14.2, floorIndex: 1 },
-      { name: 'Chambre 2', area: 11.6, floorIndex: 1 },
-      { name: 'Chambre 3', area: 10.8, floorIndex: 1 },
-      { name: 'Salle de bains', area: 6.1, floorIndex: 1 },
-      { name: 'WC \u00E9tage', area: 1.5, floorIndex: 1 }
-    ]
-  };
-  renderPropertyData(window.__propertyData);
+  // Pas de données SDK Matterport disponibles — affichage vide
+  window.__propertyData = null;
+  console.log('Matterport SDK non disponible — données du bien chargées depuis Supabase.');
 }
-
-// ══════════════════════════════════════════════════════════════════
-//  TABLE DES PROJETS CLIENTS
-//  Recopiez ici la description saisie par le client dans le
-//  formulaire de contact lors de sa demande d'ouverture de compte.
-//  Marcel s'en servira pour construire un message d'accueil
-//  personnalisé dès la première connexion du client.
-// ══════════════════════════════════════════════════════════════════
-var CLIENT_PROJETS = {
-  'tr.kaptation@gmail.com': {
-    nom: 'TR KAPTATION',
-    adresse: '12 rue des Lilas, 93100 Montreuil',
-    type_bien: 'Pavillon ann\u00e9es 60-70 \u2014 216,7 m\u00b2 sur 2 niveaux ind\u00e9pendants',
-    demande: 'R\u00e9novation compl\u00e8te d\'un pavillon ann\u00e9es 60-70 de 216,7 m\u00b2 sur 2 niveaux ind\u00e9pendants (2 logements), suite \u00e0 abandon de chantier. Souhait d\'ouvrir la cuisine sur le s\u00e9jour, r\u00e9nover les salles de bains, isoler et moderniser les menuiseries.',
-    matterport_data: {
-      surface_totale: '216,7 m\u00b2',
-      titre_scan: '\u00c9tat des lieux de r\u00e9novation suite abandon de chantier',
-      niveaux: [
-        {
-          nom: '\u00c9tage 1 (Rez-de-chauss\u00e9e sur\u00e9lev\u00e9)',
-          surface: '116,1 m\u00b2',
-          pieces: [
-            { nom: 'Salon', surface: '34,0 m\u00b2', dimensions: '4,61 m x 7,59 m' },
-            { nom: 'Chambre 1', surface: '17,1 m\u00b2', dimensions: '4,61 m x 3,71 m' },
-            { nom: 'Chambre 2', surface: '13,7 m\u00b2', dimensions: '3,84 m x 3,59 m' },
-            { nom: 'Cuisine', surface: '12,0 m\u00b2', dimensions: '3,96 m x 3,03 m' },
-            { nom: 'Couloir principal', surface: '11,1 m\u00b2', dimensions: '1,77 m x 6,34 m' },
-            { nom: 'Salle de bain', surface: '6,0 m\u00b2', dimensions: '3,80 m x 1,99 m' },
-            { nom: 'Couloir entr\u00e9e', surface: '5,3 m\u00b2', dimensions: '3,80 m x 1,38 m' },
-            { nom: 'WC / Autre', surface: '1,2 m\u00b2', dimensions: '1,56 m x 0,78 m' },
-            { nom: 'Placard', surface: '1,1 m\u00b2', dimensions: '0,64 m x 1,76 m' }
-          ]
-        },
-        {
-          nom: '\u00c9tage 2',
-          surface: '100,6 m\u00b2',
-          pieces: [
-            { nom: 'Salle de jeux', surface: '19,1 m\u00b2', dimensions: '4,72 m x 4,17 m' },
-            { nom: 'Salle Bonus', surface: '15,7 m\u00b2', dimensions: '3,66 m x 4,20 m' },
-            { nom: 'Cuisine / Salle \u00e0 manger', surface: '13,0 m\u00b2' },
-            { nom: 'Chambre 3', surface: '12,4 m\u00b2' },
-            { nom: 'Chambre 4', surface: '11,7 m\u00b2', dimensions: '3,63 m x 3,21 m' },
-            { nom: 'Couloir', surface: '5,8 m\u00b2' },
-            { nom: 'Salle de bain', surface: '4,0 m\u00b2', dimensions: '3,62 m x 1,11 m' },
-            { nom: 'Escalier', surface: '2,7 m\u00b2', dimensions: '2,88 m x 0,95 m' },
-            { nom: 'WC / Autre', surface: '1,8 m\u00b2', dimensions: '2,27 m x 0,78 m' }
-          ]
-        }
-      ],
-      annexes: [
-        { nom: 'Garage', dimensions: '5,59 m x 2,90 m', emplacement: 'Ext\u00e9rieur RDC' }
-      ]
-    }
-  },
-  'guillaumeolmo@gmail.com': {
-    nom: 'Guillaume OLMO',
-    adresse: '25 boulevard Voltaire, 75011 Paris',
-    type_bien: 'Appartement \u2014 65 m\u00b2',
-    demande: 'R\u00e9novation d\'un appartement de 65m\u00b2 \u00e0 Paris. Modernisation compl\u00e8te avec ouverture cuisine/s\u00e9jour et r\u00e9fection salle de bains.'
-  }
-  // ══════════════════════════════════════════════════════════
-  //  Ajouter ici les prochains clients :
-  //  'email@client.com': {
-  //    nom: 'Pr\u00e9nom NOM',
-  //    adresse: 'Adresse du bien \u00e0 r\u00e9nover',
-  //    type_bien: 'Type et surface du bien',
-  //    demande: 'Description du projet',
-  //    matterport_data: {                    // ← Optionnel, si scan réalisé
-  //      surface_totale: 'XX m²',
-  //      niveaux: [ { nom: 'RDC', surface: 'XX m²', pieces: [...] } ]
-  //    }
-  //  },
-  // ══════════════════════════════════════════════════════════
-};
-
-// ══════════════════════════════════════════════════════════════════
-//  TABLE DES VISITES VIRTUELLES PAR CLIENT
-//  Pour ajouter une visite : ajouter l'email et le modelId Matterport
-//  Le modelId se trouve dans l'URL Matterport : my.matterport.com/show/?m=XXXXXX
-// ══════════════════════════════════════════════════════════════════
-var CLIENT_MATTERPORT = {
-  'tr.kaptation@gmail.com': 'DKQ6zroSLKj',
-  'guillaumeolmo@gmail.com': 'DKQ6zroSLKj'
-  // Ajouter ici les prochains clients :
-  // 'email@client.com': 'MODEL_ID_MATTERPORT',
-};
 
 function initMatterportSection() {
   var user = currentUser;
   var meta = (user && user.app_metadata) || (user && user.user_metadata) || {};
 
-  // Priorité : 1) iframe complète Supabase, 2) model ID metadata, 3) table CLIENT_MATTERPORT
+  // Priorité : 1) iframe complète Supabase, 2) model ID metadata
   var iframeSrc = meta.matterport_iframe || null;
-  var modelId = meta.matterport_id || (user && CLIENT_MATTERPORT[user.email]) || null;
+  var modelId = meta.matterport_id || null;
 
   var frameEl = document.getElementById('matterportFrame');
   var pendingEl = document.getElementById('matterportPending');
