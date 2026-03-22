@@ -530,17 +530,21 @@ section .section-intro {
   font-size: 0.72rem; font-weight: 700;
   letter-spacing: 0.12em; text-transform: uppercase;
   color: var(--green); margin-bottom: 10px;
+  text-align: center;
 }
 .form-group-question {
   font-size: 0.88rem; color: var(--text); font-weight: 500;
   margin-bottom: 12px; line-height: 1.5;
+  text-align: center;
 }
 .form-group-hint {
   font-size: 0.72rem; color: var(--muted); font-style: italic;
   margin-bottom: 10px;
+  text-align: center;
 }
 .form-tags {
   display: flex; flex-wrap: wrap; gap: 9px;
+  justify-content: center;
 }
 .form-tag {
   display: inline-flex; align-items: center; gap: 6px;
@@ -548,7 +552,14 @@ section .section-intro {
   border: 1.5px solid var(--border); border-radius: 24px;
   font-size: 0.82rem; font-weight: 500; color: var(--text-soft);
   cursor: pointer; transition: all 0.25s; user-select: none;
-  white-space: nowrap;
+  white-space: nowrap; flex: 0 1 auto;
+}
+/* Tags de même largeur quand peu nombreux (2-3 par ligne) */
+.form-tags[data-tag-group="typeProjet"] .form-tag,
+.form-tags[data-tag-group="incluant"] .form-tag,
+.form-tags[data-tag-group="nbPieces"] .form-tag {
+  flex: 1 1 0; justify-content: center; text-align: center;
+  min-width: 120px;
 }
 .form-tag:hover {
   border-color: var(--green); color: var(--text);
@@ -579,6 +590,48 @@ section .section-intro {
 .form-divider {
   height: 1px; background: var(--border);
   margin: 20px 0 24px;
+}
+/* Tags surface & budget : grille régulière */
+.form-tags[data-tag-group="surface"] {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 9px;
+}
+.form-tags[data-tag-group="surface"] .form-tag {
+  justify-content: center; text-align: center;
+}
+.form-tags[data-tag-group="budget"] {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 9px;
+}
+.form-tags[data-tag-group="budget"] .form-tag {
+  justify-content: center; text-align: center;
+}
+/* Espaces & travaux : grille 3 colonnes aussi */
+.form-tags[data-tag-group="espaces"] {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 9px;
+}
+.form-tags[data-tag-group="espaces"] .form-tag {
+  justify-content: center; text-align: center;
+}
+.form-tags[data-tag-group="travaux"] {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 9px;
+}
+.form-tags[data-tag-group="travaux"] .form-tag {
+  justify-content: center; text-align: center;
+}
+@media (max-width: 600px) {
+  .form-tags[data-tag-group="surface"],
+  .form-tags[data-tag-group="budget"],
+  .form-tags[data-tag-group="espaces"],
+  .form-tags[data-tag-group="travaux"] {
+    grid-template-columns: repeat(2, 1fr);
+  }
 }
 /* Textarea réduit pour le champ optionnel */
 .contact-form textarea.compact {
