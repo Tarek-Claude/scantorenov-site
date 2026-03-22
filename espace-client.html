@@ -759,6 +759,159 @@
     }
     .placeholder-hint { font-size: 0.78rem; max-width: 400px; line-height: 1.6; }
 
+    /* ── ESPACE DE TRAVAIL VISUEL ── */
+    .workspace-visual {
+      margin-top: 28px;
+    }
+    .workspace-visual h3.ws-title {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.15rem; font-weight: 400; color: var(--text);
+      margin-bottom: 6px;
+    }
+    .workspace-visual .ws-desc {
+      font-size: 0.78rem; color: var(--muted); margin-bottom: 16px; line-height: 1.5;
+    }
+
+    /* Zone galerie commune */
+    .ws-gallery {
+      margin-bottom: 24px; padding: 20px;
+      background: var(--card); border: 1px solid var(--border); border-radius: 10px;
+    }
+    .ws-gallery-header {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-bottom: 14px;
+    }
+    .ws-gallery-label {
+      display: flex; align-items: center; gap: 8px;
+      font-size: 0.74rem; font-weight: 700; text-transform: uppercase;
+      letter-spacing: 0.08em; color: var(--dim);
+    }
+    .ws-gallery-label .ws-icon { font-size: 1rem; }
+    .ws-gallery-badge {
+      font-size: 0.68rem; background: var(--mid); color: var(--text-soft);
+      padding: 3px 10px; border-radius: 12px; font-weight: 500;
+    }
+    .ws-gallery-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+      gap: 10px;
+    }
+    .ws-gallery-empty {
+      padding: 28px; text-align: center; color: var(--muted);
+      font-size: 0.82rem; font-style: italic;
+      border: 1px dashed var(--border); border-radius: 8px;
+    }
+
+    /* Thumbnail image */
+    .ws-thumb {
+      position: relative; aspect-ratio: 4/3; border-radius: 6px;
+      overflow: hidden; cursor: pointer; border: 2px solid transparent;
+      transition: border-color 0.2s, transform 0.15s;
+    }
+    .ws-thumb:hover { transform: scale(1.03); }
+    .ws-thumb img {
+      width: 100%; height: 100%; object-fit: cover;
+      display: block;
+    }
+    /* Sélection expert */
+    .ws-thumb.selectable.selected { border-color: var(--green); }
+    .ws-thumb .ws-check {
+      position: absolute; top: 6px; right: 6px;
+      width: 22px; height: 22px; border-radius: 50%;
+      background: rgba(255,255,255,0.85); border: 2px solid var(--border);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 0.7rem; color: transparent; transition: all 0.2s;
+    }
+    .ws-thumb.selected .ws-check {
+      background: var(--green); border-color: var(--green); color: #fff;
+    }
+    /* Suppression captures */
+    .ws-thumb .ws-delete {
+      position: absolute; top: 4px; right: 4px;
+      width: 22px; height: 22px; border-radius: 50%;
+      background: rgba(231,76,60,0.85); color: #fff;
+      border: none; cursor: pointer; font-size: 0.72rem;
+      display: flex; align-items: center; justify-content: center;
+      opacity: 0; transition: opacity 0.2s;
+    }
+    .ws-thumb:hover .ws-delete { opacity: 1; }
+    /* Épingle propositions Marcel */
+    .ws-thumb .ws-pin {
+      position: absolute; top: 4px; left: 4px;
+      width: 22px; height: 22px; border-radius: 50%;
+      background: rgba(255,255,255,0.85); border: 1px solid var(--border);
+      cursor: pointer; font-size: 0.65rem; color: var(--muted);
+      display: flex; align-items: center; justify-content: center;
+      transition: all 0.2s;
+    }
+    .ws-thumb .ws-pin.pinned {
+      background: #f39c12; border-color: #f39c12; color: #fff;
+    }
+
+    /* Bouton capturer */
+    .ws-capture-bar {
+      display: flex; align-items: center; gap: 12px;
+      margin-bottom: 12px;
+    }
+    .ws-capture-btn {
+      display: flex; align-items: center; gap: 8px;
+      padding: 10px 18px; background: var(--green); color: #fff;
+      border: none; border-radius: 6px; font-size: 0.78rem;
+      font-weight: 600; cursor: pointer; transition: background 0.2s;
+    }
+    .ws-capture-btn:hover { background: var(--green-hover); }
+    .ws-capture-btn:disabled {
+      background: var(--muted); cursor: not-allowed; opacity: 0.5;
+    }
+    .ws-capture-hint {
+      font-size: 0.72rem; color: var(--muted); font-style: italic;
+    }
+
+    /* Barre d'envoi à Marcel */
+    .ws-send-bar {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 14px 20px; margin-top: 8px;
+      background: linear-gradient(135deg, rgba(45,95,62,0.06), rgba(26,95,106,0.04));
+      border: 1px solid var(--border); border-radius: 8px;
+    }
+    .ws-send-count {
+      font-size: 0.78rem; color: var(--text-soft);
+    }
+    .ws-send-count strong { color: var(--green); }
+    .ws-send-btn {
+      display: flex; align-items: center; gap: 8px;
+      padding: 10px 20px; background: var(--green); color: #fff;
+      border: none; border-radius: 6px; font-size: 0.78rem;
+      font-weight: 600; cursor: pointer; transition: background 0.2s;
+    }
+    .ws-send-btn:hover { background: var(--green-hover); }
+    .ws-send-btn:disabled {
+      background: var(--muted); cursor: not-allowed; opacity: 0.5;
+    }
+
+    /* Lightbox zoom */
+    .ws-lightbox {
+      position: fixed; inset: 0; z-index: 9999;
+      background: rgba(0,0,0,0.85); display: none;
+      align-items: center; justify-content: center; cursor: pointer;
+    }
+    .ws-lightbox.open { display: flex; }
+    .ws-lightbox img {
+      max-width: 90%; max-height: 90%; border-radius: 8px;
+      box-shadow: 0 8px 40px rgba(0,0,0,0.5);
+    }
+    .ws-lightbox-close {
+      position: absolute; top: 20px; right: 24px;
+      background: none; border: none; color: #fff; font-size: 2rem;
+      cursor: pointer; opacity: 0.7;
+    }
+    .ws-lightbox-close:hover { opacity: 1; }
+
+    @media (max-width: 600px) {
+      .ws-gallery-grid { grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); }
+      .ws-send-bar { flex-direction: column; gap: 10px; }
+    }
+
     /* ── DONNÉES DU BIEN ── */
     .property-data-container {
       background: var(--card); border: 1px solid var(--border);
@@ -1970,6 +2123,81 @@
     </div>
   </div>
 
+  <!-- ═══════════  2a. ESPACE DE TRAVAIL VISUEL (Phase 5)  ═══════════ -->
+  <div class="section-block phase-section" data-min-phase="5" data-max-phase="5">
+    <div class="workspace-visual" id="workspaceVisual">
+
+      <!-- ── 1. SÉLECTION DE L'EXPERT (lecture seule) ── -->
+      <div class="ws-gallery" id="wsExpertGallery">
+        <div class="ws-gallery-header">
+          <div class="ws-gallery-label">
+            <span class="ws-icon">&#128193;</span> S&#233;lection de l&#8217;expert
+          </div>
+          <span class="ws-gallery-badge" id="wsExpertBadge">0 photo(s)</span>
+        </div>
+        <div class="ws-gallery-grid" id="wsExpertGrid">
+          <div class="ws-gallery-empty" id="wsExpertEmpty">
+            Les photos s&#233;lectionn&#233;es par votre chef de projet appara&#238;tront ici.
+          </div>
+        </div>
+      </div>
+
+      <!-- ── 2. BOUTON CAPTURE + 3. MES CAPTURES ── -->
+      <div class="ws-gallery" id="wsCapturesGallery">
+        <div class="ws-gallery-header">
+          <div class="ws-gallery-label">
+            <span class="ws-icon">&#128248;</span> Mes captures
+          </div>
+          <span class="ws-gallery-badge" id="wsCapturesBadge">0 capture(s)</span>
+        </div>
+        <div class="ws-capture-bar">
+          <!-- TODO: Brancher sur le Matterport Showcase SDK (mpSdk.Renderer.takeScreenShot) -->
+          <button class="ws-capture-btn" id="wsCaptureBtn" onclick="takeCapture()">
+            &#128247; Prendre une capture
+          </button>
+          <span class="ws-capture-hint">Capture la vue actuelle de la visite 3D</span>
+        </div>
+        <div class="ws-gallery-grid" id="wsCapturesGrid">
+          <div class="ws-gallery-empty" id="wsCapturesEmpty">
+            Aucune capture pour le moment. Utilisez le bouton ci-dessus pour capturer une vue.
+          </div>
+        </div>
+      </div>
+
+      <!-- ── 4. PROPOSITIONS DE MARCEL (Together AI) ── -->
+      <div class="ws-gallery" id="wsProposalsGallery">
+        <div class="ws-gallery-header">
+          <div class="ws-gallery-label">
+            <span class="ws-icon">&#127912;</span> Propositions de Marcel
+          </div>
+          <span class="ws-gallery-badge" id="wsProposalsBadge">0 visuel(s)</span>
+        </div>
+        <div class="ws-gallery-grid" id="wsProposalsGrid">
+          <div class="ws-gallery-empty" id="wsProposalsEmpty">
+            Les visuels de r&#233;novation g&#233;n&#233;r&#233;s par Marcel appara&#238;tront ici.
+          </div>
+        </div>
+      </div>
+
+      <!-- ── BARRE D'ENVOI À MARCEL ── -->
+      <div class="ws-send-bar" id="wsSendBar">
+        <div class="ws-send-count">
+          <strong id="wsSelectedCount">0</strong> photo(s) s&#233;lectionn&#233;e(s)
+        </div>
+        <button class="ws-send-btn" id="wsSendBtn" onclick="sendPhotosToMarcel()" disabled>
+          &#x1F418; Envoyer &#224; Marcel &#8594;
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Lightbox pour zoom -->
+  <div class="ws-lightbox" id="wsLightbox" onclick="closeLightbox()">
+    <button class="ws-lightbox-close">&times;</button>
+    <img id="wsLightboxImg" src="" alt="Zoom" />
+  </div>
+
   <!-- ═══════════  2b. DONNÉES DU BIEN (Phase 5+)  ═══════════ -->
   <div class="section-block phase-section" data-min-phase="5">
     <div class="section-label">Caract&#233;ristiques</div>
@@ -2349,6 +2577,7 @@ function renderPhase(phase, project, appMeta) {
   if (phase === 5) {
     initMatterportSection();
     initMarcelWelcome();
+    initWorkspaceVisual();
   }
   if (phase >= 6) initMatterportSection(); // Visite 3D reste visible sans Marcel
   if (phase === 6) renderPhase6(appMeta);
@@ -2698,6 +2927,332 @@ function mockQuizAnswer(answer, btnEl) {
     }, 2000);
   }
 }
+
+/* ══════════════════════════════════════════════
+   ESPACE DE TRAVAIL VISUEL — Galeries photos
+   ══════════════════════════════════════════════ */
+
+// État global des galeries
+var wsExpertPhotos = [];      // URLs des photos expert (depuis Supabase)
+var wsCapturePhotos = [];     // DataURLs des captures utilisateur (localStorage)
+var wsProposalPhotos = [];    // URLs des propositions Marcel (depuis chat/API)
+var wsSelectedPhotos = [];    // Photos sélectionnées pour envoi à Marcel
+
+// ── Clé localStorage pour les captures utilisateur ──
+function getCapturesKey() {
+  var email = '';
+  try { email = currentUser.email || ''; } catch(e) {}
+  return 'scantorenov_captures_' + email;
+}
+
+// ── Chargement des captures depuis localStorage ──
+function loadUserCaptures() {
+  try {
+    var raw = localStorage.getItem(getCapturesKey());
+    return raw ? JSON.parse(raw) : [];
+  } catch(e) { return []; }
+}
+
+function saveUserCaptures(captures) {
+  try {
+    localStorage.setItem(getCapturesKey(), JSON.stringify(captures));
+  } catch(e) { console.warn('Impossible de sauvegarder les captures:', e); }
+}
+
+/* ── Initialisation de l'espace visuel ── */
+function initWorkspaceVisual() {
+  // 1. Charger les photos expert depuis Supabase
+  loadExpertPhotos();
+  // 2. Charger les captures utilisateur depuis localStorage
+  wsCapturePhotos = loadUserCaptures();
+  renderCapturesGallery();
+  // 3. Propositions Marcel — seront alimentées par le chat
+  renderProposalsGallery();
+  // 4. Mise à jour du compteur
+  updateSendBar();
+}
+
+/* ══ 1. GALERIE EXPERT (lecture seule, sélectionnable) ══ */
+
+function loadExpertPhotos() {
+  // TODO: Charger depuis Supabase Storage (dossier du client)
+  // Pour l'instant, on cherche les photos uploadées via le script PC
+  var email = '';
+  try { email = currentUser.email || ''; } catch(e) {}
+  if (!email) return;
+
+  var safeEmail = email.replace('@', '_at_');
+  var supabaseUrl = 'https://qvovfabwzyfhmkaluzss.supabase.co';
+  var anonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InF2b3ZmYWJ3enlmaG1rYWx1enNzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzMzNjQ0ODUsImV4cCI6MjA4ODk0MDQ4NX0._h-AjJwSGcaq1QGSpDEa4PAXNVBcyWjjEpAIboQaGU8';
+
+  // Lister les fichiers dans le bucket "plans" pour ce client
+  fetch(supabaseUrl + '/storage/v1/object/list/plans/' + safeEmail, {
+    headers: { 'apikey': anonKey, 'Authorization': 'Bearer ' + anonKey }
+  })
+  .then(function(r) { return r.json(); })
+  .then(function(files) {
+    if (!Array.isArray(files)) return;
+    wsExpertPhotos = [];
+    files.forEach(function(f) {
+      if (f.name && /\.(png|jpg|jpeg|webp)$/i.test(f.name)) {
+        wsExpertPhotos.push({
+          url: supabaseUrl + '/storage/v1/object/public/plans/' + safeEmail + '/' + f.name,
+          name: f.name
+        });
+      }
+    });
+    renderExpertGallery();
+  })
+  .catch(function(e) { console.warn('Erreur chargement photos expert:', e); });
+}
+
+function renderExpertGallery() {
+  var grid = document.getElementById('wsExpertGrid');
+  var badge = document.getElementById('wsExpertBadge');
+  var empty = document.getElementById('wsExpertEmpty');
+  if (!grid) return;
+
+  if (wsExpertPhotos.length === 0) {
+    if (empty) empty.style.display = '';
+    if (badge) badge.textContent = '0 photo(s)';
+    return;
+  }
+  if (empty) empty.style.display = 'none';
+  if (badge) badge.textContent = wsExpertPhotos.length + ' photo(s)';
+
+  // Vider et reconstruire
+  grid.innerHTML = '';
+  wsExpertPhotos.forEach(function(photo, i) {
+    var div = document.createElement('div');
+    div.className = 'ws-thumb selectable';
+    div.setAttribute('data-ws-type', 'expert');
+    div.setAttribute('data-ws-index', i);
+    div.innerHTML = '<img src="' + photo.url + '" alt="' + photo.name + '" loading="lazy" onclick="openLightbox(\'' + photo.url + '\')" />' +
+                    '<div class="ws-check" onclick="event.stopPropagation();toggleExpertSelect(' + i + ', this.parentNode)">✓</div>';
+    grid.appendChild(div);
+  });
+}
+
+function toggleExpertSelect(index, thumbEl) {
+  var url = wsExpertPhotos[index].url;
+  var pos = wsSelectedPhotos.indexOf(url);
+  if (pos > -1) {
+    wsSelectedPhotos.splice(pos, 1);
+    thumbEl.classList.remove('selected');
+  } else {
+    wsSelectedPhotos.push(url);
+    thumbEl.classList.add('selected');
+  }
+  updateSendBar();
+}
+
+/* ══ 2. CAPTURE D'ÉCRAN MATTERPORT ══ */
+
+function takeCapture() {
+  // TODO: Utiliser le Matterport Showcase SDK :
+  //   mpSdk.Renderer.takeScreenShot({ width: 1920, height: 1080 })
+  //     .then(function(screenShotUri) { addCapture(screenShotUri); })
+  //
+  // En attendant, on génère une capture simulée à partir de l'iframe
+  // (ne fonctionne pas en cross-origin, c'est un placeholder)
+
+  var btn = document.getElementById('wsCaptureBtn');
+  if (btn) { btn.disabled = true; btn.innerHTML = '⏳ Capture en cours...'; }
+
+  // Simulation : créer une image placeholder avec un canvas
+  setTimeout(function() {
+    var canvas = document.createElement('canvas');
+    canvas.width = 640;
+    canvas.height = 360;
+    var ctx = canvas.getContext('2d');
+
+    // Fond dégradé
+    var grad = ctx.createLinearGradient(0, 0, 640, 360);
+    grad.addColorStop(0, '#2D5F3E');
+    grad.addColorStop(1, '#1A5F6A');
+    ctx.fillStyle = grad;
+    ctx.fillRect(0, 0, 640, 360);
+
+    // Texte
+    ctx.fillStyle = 'rgba(255,255,255,0.8)';
+    ctx.font = '18px sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillText('📷 Capture simulée', 320, 170);
+    ctx.font = '12px sans-serif';
+    ctx.fillStyle = 'rgba(255,255,255,0.5)';
+    var now = new Date();
+    ctx.fillText(now.toLocaleString('fr-FR'), 320, 200);
+    ctx.fillText('TODO: Brancher Matterport SDK', 320, 225);
+
+    var dataUrl = canvas.toDataURL('image/png');
+    addCapture(dataUrl);
+
+    if (btn) { btn.disabled = false; btn.innerHTML = '📷 Prendre une capture'; }
+  }, 800);
+}
+
+function addCapture(dataUrl) {
+  wsCapturePhotos.push({
+    data: dataUrl,
+    date: new Date().toISOString()
+  });
+  saveUserCaptures(wsCapturePhotos);
+  renderCapturesGallery();
+}
+
+function renderCapturesGallery() {
+  var grid = document.getElementById('wsCapturesGrid');
+  var badge = document.getElementById('wsCapturesBadge');
+  var empty = document.getElementById('wsCapturesEmpty');
+  if (!grid) return;
+
+  if (wsCapturePhotos.length === 0) {
+    if (empty) empty.style.display = '';
+    if (badge) badge.textContent = '0 capture(s)';
+    grid.innerHTML = '';
+    if (empty) grid.appendChild(empty);
+    return;
+  }
+  if (empty) empty.style.display = 'none';
+  if (badge) badge.textContent = wsCapturePhotos.length + ' capture(s)';
+
+  grid.innerHTML = '';
+  wsCapturePhotos.forEach(function(cap, i) {
+    var div = document.createElement('div');
+    div.className = 'ws-thumb selectable';
+    div.setAttribute('data-ws-type', 'capture');
+    div.setAttribute('data-ws-index', i);
+    var imgSrc = cap.data || cap;
+    div.innerHTML = '<img src="' + imgSrc + '" alt="Capture ' + (i+1) + '" onclick="openLightbox(\'' + imgSrc + '\')" />' +
+                    '<div class="ws-check" onclick="event.stopPropagation();toggleCaptureSelect(' + i + ', this.parentNode)">✓</div>' +
+                    '<button class="ws-delete" onclick="event.stopPropagation();deleteCapture(' + i + ')" title="Supprimer">✕</button>';
+    grid.appendChild(div);
+  });
+}
+
+function toggleCaptureSelect(index, thumbEl) {
+  var key = 'capture_' + index;
+  var pos = wsSelectedPhotos.indexOf(key);
+  if (pos > -1) {
+    wsSelectedPhotos.splice(pos, 1);
+    thumbEl.classList.remove('selected');
+  } else {
+    wsSelectedPhotos.push(key);
+    thumbEl.classList.add('selected');
+  }
+  updateSendBar();
+}
+
+function deleteCapture(index) {
+  // Retirer de la sélection si besoin
+  var key = 'capture_' + index;
+  var pos = wsSelectedPhotos.indexOf(key);
+  if (pos > -1) wsSelectedPhotos.splice(pos, 1);
+
+  wsCapturePhotos.splice(index, 1);
+  saveUserCaptures(wsCapturePhotos);
+  renderCapturesGallery();
+  updateSendBar();
+}
+
+/* ══ 3. PROPOSITIONS DE MARCEL (Together AI) ══ */
+
+function addProposal(imageUrl, description) {
+  // Appelé depuis le chat Marcel quand Together AI génère un visuel
+  wsProposalPhotos.push({
+    url: imageUrl,
+    description: description || '',
+    date: new Date().toISOString(),
+    pinned: false
+  });
+  renderProposalsGallery();
+}
+
+function renderProposalsGallery() {
+  var grid = document.getElementById('wsProposalsGrid');
+  var badge = document.getElementById('wsProposalsBadge');
+  var empty = document.getElementById('wsProposalsEmpty');
+  if (!grid) return;
+
+  if (wsProposalPhotos.length === 0) {
+    if (empty) empty.style.display = '';
+    if (badge) badge.textContent = '0 visuel(s)';
+    return;
+  }
+  if (empty) empty.style.display = 'none';
+  if (badge) badge.textContent = wsProposalPhotos.length + ' visuel(s)';
+
+  grid.innerHTML = '';
+  wsProposalPhotos.forEach(function(prop, i) {
+    var div = document.createElement('div');
+    div.className = 'ws-thumb';
+    div.innerHTML = '<img src="' + prop.url + '" alt="Proposition ' + (i+1) + '" loading="lazy" onclick="openLightbox(\'' + prop.url + '\')" />' +
+                    '<button class="ws-pin ' + (prop.pinned ? 'pinned' : '') + '" onclick="event.stopPropagation();togglePin(' + i + ')" title="Épingler">📌</button>' +
+                    '<button class="ws-delete" onclick="event.stopPropagation();deleteProposal(' + i + ')" title="Retirer">✕</button>';
+    grid.appendChild(div);
+  });
+}
+
+function togglePin(index) {
+  wsProposalPhotos[index].pinned = !wsProposalPhotos[index].pinned;
+  renderProposalsGallery();
+}
+
+function deleteProposal(index) {
+  wsProposalPhotos.splice(index, 1);
+  renderProposalsGallery();
+}
+
+/* ══ BARRE D'ENVOI À MARCEL ══ */
+
+function updateSendBar() {
+  var count = wsSelectedPhotos.length;
+  var countEl = document.getElementById('wsSelectedCount');
+  var btn = document.getElementById('wsSendBtn');
+  if (countEl) countEl.textContent = count;
+  if (btn) btn.disabled = (count === 0);
+}
+
+function sendPhotosToMarcel() {
+  // TODO: Envoyer les photos sélectionnées dans le contexte du chat Marcel
+  // Pour l'instant, on simule l'envoi
+  if (wsSelectedPhotos.length === 0) return;
+
+  var count = wsSelectedPhotos.length;
+  alert('📤 ' + count + ' photo(s) envoyée(s) à Marcel !\n\nTODO: Intégrer au chat Marcel pour que les photos soient visibles dans la conversation.');
+
+  // Réinitialiser la sélection
+  wsSelectedPhotos = [];
+  document.querySelectorAll('.ws-thumb.selected').forEach(function(el) {
+    el.classList.remove('selected');
+  });
+  updateSendBar();
+}
+
+/* ══ LIGHTBOX ══ */
+
+function openLightbox(url) {
+  var lb = document.getElementById('wsLightbox');
+  var img = document.getElementById('wsLightboxImg');
+  if (lb && img) {
+    img.src = url;
+    lb.classList.add('open');
+    document.body.style.overflow = 'hidden';
+  }
+}
+
+function closeLightbox() {
+  var lb = document.getElementById('wsLightbox');
+  if (lb) {
+    lb.classList.remove('open');
+    document.body.style.overflow = '';
+  }
+}
+
+// Fermer lightbox avec Echap
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'Escape') closeLightbox();
+});
 
 /* ── Phase 4 : Confirmation date scan ── */
 function renderPhase4(appMeta) {
