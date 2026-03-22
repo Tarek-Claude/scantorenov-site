@@ -3,86 +3,1791 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Espace Client - Scantorenov</title>
-  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400&family=Inter:wght@300;400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <title>Mon Espace &#8212; Scantorenov</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&family=Inter:wght@300;400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet" />
   <script src="https://identity.netlify.com/v1/netlify-identity-widget.js"></script>
   <style>
-    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-    :root{--bg:#060C18;--card:#0D1A2E;--blue:#4AB8E8;--bl:#7FCEEF;--muted:#6E92AA;--border:rgba(74,184,232,0.13)}
-    body{font-family:'Inter',sans-serif;background:var(--bg);color:#E8F2FA;min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center}
-    .auth-guard{text-align:center;padding:40px}
-    .auth-guard h1{font-family:'Cormorant Garamond',serif;font-size:2rem;font-weight:300;margin-bottom:32px}
-    .auth-btn{padding:13px 32px;background:var(--blue);color:var(--bg);border:none;font-size:0.82rem;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;cursor:pointer;transition:background 0.2s;text-decoration:none;display:inline-block}
-    .auth-btn:hover{background:var(--bl)}
-    .back-link{display:block;margin-top:20px;color:var(--muted);font-size:0.8rem;text-decoration:none}
-    .back-link:hover{color:var(--blue)}
-    .dashboard{display:none;width:100%;max-width:900px;padding:40px 24px}
-    .dashboard.visible{display:block}
-    .dash-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:40px}
-    .dash-logo{font-family:'Space Grotesk',sans-serif;font-size:1rem;font-weight:600;color:#fff}
-    .dash-logo span{color:var(--blue)}
-    .dash-user{font-size:0.82rem;color:var(--muted)}
-    .dash-logout{color:var(--blue);background:none;border:1px solid var(--border);padding:7px 16px;font-size:0.75rem;cursor:pointer;margin-left:14px;transition:all 0.2s}
-    .dash-logout:hover{border-color:var(--blue)}
-    .dash-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:16px}
-    .dash-card{background:var(--card);border:1px solid var(--border);padding:28px 24px;transition:border-color 0.3s;min-height:140px}
-    .dash-card:hover{border-color:rgba(74,184,232,0.35)}
-    .dc-icon{font-size:1.6rem;margin-bottom:14px}
-    .dc-title{font-family:'Space Grotesk',sans-serif;font-size:0.92rem;font-weight:600}
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.7;
+      min-height: 100vh;
+    }
+    :root {
+      --bg: #060C18; --mid: #0A1422; --card: #0D1A2E;
+      --blue: #4AB8E8; --bl: #7FCEEF; --dim: #2A6B95;
+      --glow: rgba(74,184,232,0.15); --muted: #6E92AA;
+      --border: rgba(74,184,232,0.13);
+      --text: #E8F2FA; --text-soft: #B8CFE0;
+    }
+
+    /* ── AUTH GUARD ── */
+    .auth-guard {
+      display: flex; flex-direction: column; align-items: center;
+      justify-content: center; min-height: 100vh; text-align: center; padding: 40px;
+    }
+    .auth-guard h1 {
+      font-family: 'Cormorant Garamond', serif; font-size: 2.2rem;
+      font-weight: 300; margin-bottom: 12px;
+    }
+    .auth-guard p { color: var(--muted); margin-bottom: 32px; font-size: 0.9rem; }
+    .auth-btn {
+      padding: 14px 36px; background: var(--blue); color: var(--bg);
+      border: none; font-size: 0.82rem; font-weight: 700;
+      letter-spacing: 0.12em; text-transform: uppercase;
+      cursor: pointer; transition: all 0.3s; text-decoration: none;
+    }
+    .auth-btn:hover { background: var(--bl); box-shadow: 0 8px 32px rgba(74,184,232,0.3); }
+    .back-link {
+      display: inline-block; margin-top: 24px; color: var(--muted);
+      font-size: 0.78rem; text-decoration: none; letter-spacing: 0.06em;
+    }
+    .back-link:hover { color: var(--blue); }
+
+    /* ── TOP NAV BAR ── */
+    .dash-nav {
+      position: sticky; top: 0; z-index: 100;
+      height: 64px; display: flex; align-items: center;
+      justify-content: space-between; padding: 0 40px;
+      background: rgba(6,12,24,0.92); backdrop-filter: blur(14px);
+      border-bottom: 1px solid var(--border);
+    }
+    .dash-logo {
+      font-family: 'Space Grotesk', sans-serif; font-size: 1.05rem;
+      font-weight: 600; color: #fff; text-decoration: none;
+    }
+    .dash-logo span { color: var(--blue); }
+    .dash-nav-right { display: flex; align-items: center; gap: 16px; }
+    .dash-user-name { font-size: 0.82rem; color: var(--muted); }
+    .dash-logout {
+      color: var(--blue); background: none; border: 1px solid var(--border);
+      padding: 7px 18px; font-size: 0.72rem; font-weight: 600;
+      letter-spacing: 0.1em; text-transform: uppercase;
+      cursor: pointer; transition: all 0.25s;
+    }
+    .dash-logout:hover { border-color: var(--blue); background: rgba(74,184,232,0.06); }
+
+    /* ── MAIN CONTAINER ── */
+    .dash-main {
+      display: none; width: 100%; max-width: 1100px;
+      margin: 0 auto; padding: 0 32px 80px;
+    }
+    .dash-main.visible { display: block; }
+
+    /* ── SECTION: WELCOME ── */
+    .welcome-section {
+      padding: 56px 0 40px; border-bottom: 1px solid var(--border);
+      margin-bottom: 48px;
+    }
+    .welcome-greeting {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 2rem; font-weight: 300; margin-bottom: 32px;
+    }
+    .welcome-greeting em { color: var(--blue); font-style: italic; }
+    .welcome-text {
+      color: var(--text-soft); font-size: 0.9rem; line-height: 2;
+      max-width: 860px; text-align: justify;
+    }
+    .welcome-text p { margin-bottom: 14px; }
+    .welcome-signature {
+      margin-top: 28px; padding-top: 20px;
+      border-top: 1px solid var(--border);
+      font-size: 0.85rem; color: var(--text);
+    }
+    .welcome-signature .sig-name {
+      font-family: 'Space Grotesk', sans-serif;
+      font-weight: 600; font-size: 0.9rem;
+    }
+    .welcome-signature .sig-title {
+      color: var(--muted); font-size: 0.78rem; margin-top: 2px;
+    }
+
+    /* ── SECTION TITLES ── */
+    .section-block { margin-bottom: 56px; }
+    .section-label {
+      font-size: 0.62rem; font-weight: 700; letter-spacing: 0.3em;
+      text-transform: uppercase; color: var(--blue); margin-bottom: 10px;
+    }
+    .section-title {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.6rem; font-weight: 300; margin-bottom: 8px;
+    }
+    .section-desc {
+      color: var(--muted); font-size: 0.84rem; margin-bottom: 24px;
+      max-width: 600px; line-height: 1.7;
+    }
+
+    /* ── VISITE VIRTUELLE (MATTERPORT) ── */
+    .matterport-frame {
+      width: 100%; aspect-ratio: 16/9; position: relative;
+      background: var(--card); border: 1px solid var(--border);
+      overflow: hidden; box-shadow: 0 8px 40px rgba(0,0,0,0.35);
+    }
+    .matterport-frame iframe {
+      position: absolute; top: 0; left: 0;
+      width: 100%; height: 100%; border: none;
+    }
+    .placeholder-content {
+      position: absolute; inset: 0;
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      color: var(--muted); text-align: center; padding: 24px;
+    }
+    /* ── Placeholder visite virtuelle en attente ── */
+    .matterport-pending {
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      text-align: center; padding: 60px 32px;
+      background: linear-gradient(135deg, rgba(74,184,232,0.04) 0%, rgba(10,20,34,0.6) 100%);
+      border: 1px dashed rgba(74,184,232,0.25); min-height: 360px;
+    }
+    .matterport-pending .mp-icon {
+      font-size: 3.2rem; margin-bottom: 24px; opacity: 0.7;
+      animation: mp-pulse 2.5s ease-in-out infinite;
+    }
+    @keyframes mp-pulse { 0%,100%{ opacity:0.5; transform:scale(1); } 50%{ opacity:0.9; transform:scale(1.05); } }
+    .matterport-pending h3 {
+      font-family: 'Cormorant Garamond', serif; font-size: 1.4rem;
+      font-weight: 300; color: #fff; margin-bottom: 12px;
+    }
+    .matterport-pending p {
+      color: var(--muted); font-size: 0.88rem; line-height: 1.7; max-width: 440px;
+    }
+    .matterport-pending .mp-email-note {
+      margin-top: 20px; font-size: 0.78rem; color: var(--blue); opacity: 0.8;
+      display: flex; align-items: center; gap: 8px;
+    }
+    .placeholder-icon { font-size: 3rem; margin-bottom: 16px; opacity: 0.5; }
+    .placeholder-label {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 0.9rem; font-weight: 600; margin-bottom: 6px; color: var(--text-soft);
+    }
+    .placeholder-hint { font-size: 0.78rem; max-width: 400px; line-height: 1.6; }
+
+    /* ── DONNÉES DU BIEN ── */
+    .property-data-container {
+      background: var(--card); border: 1px solid var(--border);
+      padding: 32px 36px; position: relative;
+    }
+    .property-data-container::before {
+      content: ''; position: absolute; top: 0; left: 0; right: 0;
+      height: 2px; background: linear-gradient(90deg, var(--blue), transparent);
+    }
+    .pd-header {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-bottom: 24px; flex-wrap: wrap; gap: 12px;
+    }
+    .pd-header h3 {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 1rem; font-weight: 600;
+    }
+    .pd-source {
+      font-size: 0.68rem; font-weight: 600; letter-spacing: 0.1em;
+      text-transform: uppercase; padding: 4px 12px;
+      border: 1px solid rgba(74,184,232,0.2);
+      color: var(--muted); background: rgba(74,184,232,0.04);
+    }
+    .pd-grid {
+      display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+      gap: 16px; margin-bottom: 24px;
+    }
+    .pd-card {
+      padding: 20px; background: rgba(255,255,255,0.015);
+      border: 1px solid var(--border); transition: border-color 0.3s;
+    }
+    .pd-card:hover { border-color: rgba(74,184,232,0.3); }
+    .pd-card-icon {
+      font-size: 1.4rem; margin-bottom: 10px;
+    }
+    .pd-card-label {
+      font-size: 0.68rem; font-weight: 700; letter-spacing: 0.15em;
+      text-transform: uppercase; color: var(--muted); margin-bottom: 6px;
+    }
+    .pd-card-value {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 1.3rem; font-weight: 700; color: var(--blue);
+      margin-bottom: 4px;
+    }
+    .pd-card-detail {
+      font-size: 0.76rem; color: var(--text-soft); line-height: 1.5;
+    }
+    .pd-rooms-title {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 0.88rem; font-weight: 600; margin-bottom: 14px;
+      padding-bottom: 10px; border-bottom: 1px solid var(--border);
+    }
+    .pd-rooms-list {
+      display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 10px;
+    }
+    .pd-room {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 12px 16px; background: rgba(255,255,255,0.015);
+      border: 1px solid var(--border); font-size: 0.84rem;
+    }
+    .pd-room-name { color: var(--text-soft); }
+    .pd-room-area {
+      font-family: 'Space Grotesk', sans-serif;
+      font-weight: 600; color: var(--blue);
+    }
+    .pd-loading {
+      text-align: center; padding: 32px; color: var(--muted); font-size: 0.85rem;
+    }
+    .pd-loading-spinner {
+      display: inline-block; width: 20px; height: 20px;
+      border: 2px solid var(--border); border-top-color: var(--blue);
+      border-radius: 50%; animation: pd-spin 0.8s linear infinite;
+      margin-right: 10px; vertical-align: middle;
+    }
+    @keyframes pd-spin { to { transform: rotate(360deg); } }
+
+    /* ── MARCEL (CHAT) ── */
+    .marcel-container {
+      background: var(--card); border: 1px solid var(--border);
+      display: flex; flex-direction: column;
+      height: 520px; overflow: hidden;
+    }
+    .marcel-header {
+      display: flex; align-items: center; gap: 14px;
+      padding: 18px 24px;
+      border-bottom: 1px solid var(--border);
+      background: rgba(74,184,232,0.03);
+    }
+    .marcel-avatar {
+      width: 44px; height: 44px; border-radius: 50%;
+      background: linear-gradient(135deg, var(--blue), var(--dim));
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.4rem; flex-shrink: 0;
+    }
+    .marcel-info .marcel-name {
+      font-family: 'Space Grotesk', sans-serif;
+      font-weight: 600; font-size: 0.92rem;
+    }
+    .marcel-info .marcel-status {
+      font-size: 0.72rem; color: var(--muted);
+    }
+    .marcel-messages {
+      flex: 1; overflow-y: auto; padding: 24px;
+      display: flex; flex-direction: column; gap: 16px;
+    }
+    .msg {
+      max-width: 80%; padding: 14px 18px;
+      font-size: 0.88rem; line-height: 1.65;
+    }
+    .msg.marcel {
+      align-self: flex-start;
+      background: rgba(74,184,232,0.07);
+      border: 1px solid rgba(74,184,232,0.12);
+      border-radius: 2px 14px 14px 14px;
+      color: var(--text-soft);
+    }
+    .msg.user {
+      align-self: flex-end;
+      background: var(--blue);
+      color: var(--bg);
+      border-radius: 14px 2px 14px 14px;
+      font-weight: 500;
+    }
+    .marcel-input-bar {
+      display: flex; gap: 0;
+      border-top: 1px solid var(--border);
+    }
+    .marcel-input {
+      flex: 1; padding: 16px 20px; background: transparent;
+      border: none; color: var(--text); font-family: 'Inter', sans-serif;
+      font-size: 0.88rem; outline: none;
+    }
+    .marcel-input::placeholder { color: rgba(110,146,170,0.45); }
+    .marcel-send {
+      padding: 16px 24px; background: var(--blue); border: none;
+      color: var(--bg); font-size: 0.78rem; font-weight: 700;
+      letter-spacing: 0.1em; text-transform: uppercase;
+      cursor: pointer; transition: background 0.2s;
+    }
+    .marcel-send:hover { background: var(--bl); }
+
+    /* ── IMAGE DANS LE CHAT ── */
+    .msg-image {
+      max-width: 100%; border-radius: 8px; margin-top: 10px;
+      border: 1px solid var(--border); cursor: pointer;
+      transition: transform 0.3s;
+    }
+    .msg-image:hover { transform: scale(1.02); }
+    .msg-image-loading {
+      display: flex; align-items: center; gap: 10px;
+      padding: 16px; background: rgba(108,99,255,0.06);
+      border: 1px solid rgba(108,99,255,0.15); border-radius: 8px;
+      margin-top: 10px; color: var(--muted); font-size: 0.82rem;
+    }
+    .gen-spinner {
+      display: inline-block; width: 16px; height: 16px;
+      border: 2px solid var(--border); border-top-color: #A59BFF;
+      border-radius: 50%; animation: pd-spin 0.8s linear infinite;
+    }
+
+    /* ── GALERIE DYNAMIQUE (visuels générés) ── */
+    .generated-gallery {
+      display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 20px; margin-top: 20px;
+    }
+    .gen-card {
+      background: var(--card); border: 1px solid var(--border);
+      overflow: hidden; transition: border-color 0.3s, transform 0.3s;
+    }
+    .gen-card:hover { border-color: rgba(108,99,255,0.4); transform: translateY(-2px); }
+    .gen-card img {
+      width: 100%; aspect-ratio: 16/10; object-fit: cover;
+      border-bottom: 1px solid var(--border);
+    }
+    .gen-card-body { padding: 16px 20px; }
+    .gen-card-body h4 {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 0.86rem; font-weight: 600; margin-bottom: 4px;
+    }
+    .gen-card-body p { color: var(--muted); font-size: 0.76rem; line-height: 1.5; }
+    .gen-card-badge {
+      display: inline-block; font-size: 0.6rem; font-weight: 700;
+      letter-spacing: 0.1em; text-transform: uppercase; margin-top: 6px;
+      padding: 3px 8px; background: rgba(108,99,255,0.08);
+      border: 1px solid rgba(108,99,255,0.2); color: #A59BFF;
+    }
+
+    /* ── RÉSUMÉ AVANT-PROJET ── */
+    .ap-summary {
+      background: var(--card); border: 1px solid var(--border);
+      padding: 36px; margin-bottom: 28px; position: relative;
+    }
+    .ap-summary::before {
+      content: ''; position: absolute; top: 0; left: 0; right: 0;
+      height: 3px; background: linear-gradient(90deg, var(--blue), #6C63FF, var(--blue));
+    }
+    .ap-summary-header {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-bottom: 24px; flex-wrap: wrap; gap: 12px;
+    }
+    .ap-summary-header h3 {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 1.05rem; font-weight: 600;
+      display: flex; align-items: center; gap: 10px;
+    }
+    .ap-summary-header h3 .ap-icon { font-size: 1.2rem; }
+    .ap-badge-progress {
+      font-size: 0.66rem; font-weight: 700; letter-spacing: 0.12em;
+      text-transform: uppercase; padding: 5px 14px;
+      background: rgba(108,99,255,0.1); border: 1px solid rgba(108,99,255,0.25);
+      color: #A59BFF;
+    }
+    .ap-grid {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 20px;
+      margin-bottom: 24px;
+    }
+    .ap-item {
+      padding: 18px 20px; background: rgba(255,255,255,0.015);
+      border: 1px solid var(--border);
+    }
+    .ap-item-label {
+      font-size: 0.66rem; font-weight: 700; letter-spacing: 0.15em;
+      text-transform: uppercase; color: var(--muted); margin-bottom: 8px;
+    }
+    .ap-item-value {
+      font-size: 0.88rem; color: var(--text-soft); line-height: 1.65;
+    }
+    .ap-item-value strong { color: var(--text); }
+    .ap-item.full-width { grid-column: 1 / -1; }
+    .ap-travaux-list {
+      list-style: none; padding: 0; margin: 0;
+      display: grid; grid-template-columns: 1fr 1fr; gap: 8px;
+    }
+    .ap-travaux-list li {
+      font-size: 0.84rem; color: var(--text-soft); line-height: 1.5;
+      padding: 8px 12px; background: rgba(74,184,232,0.04);
+      border-left: 2px solid var(--blue);
+    }
+    .ap-budget-bar {
+      margin-top: 16px; height: 8px; background: rgba(255,255,255,0.05);
+      border-radius: 4px; overflow: hidden;
+    }
+    .ap-budget-fill {
+      height: 100%; border-radius: 4px;
+      background: linear-gradient(90deg, var(--blue), #6C63FF);
+    }
+
+    /* ── VISUELS SIMULATIONS ── */
+    .simulations-grid {
+      display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 20px;
+    }
+    .sim-card {
+      background: var(--card); border: 1px solid var(--border);
+      overflow: hidden; transition: border-color 0.3s, transform 0.3s;
+    }
+    .sim-card:hover { border-color: rgba(74,184,232,0.35); transform: translateY(-2px); }
+    .sim-card-visual {
+      aspect-ratio: 16/10; background: var(--mid);
+      display: flex; align-items: center; justify-content: center;
+      border-bottom: 1px solid var(--border); position: relative; overflow: hidden;
+    }
+    .sim-card-visual .placeholder-icon { font-size: 2.2rem; margin-bottom: 8px; }
+    .sim-card-visual .placeholder-label { font-size: 0.78rem; }
+    .sim-card-body { padding: 20px; }
+    .sim-card-body h4 {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 0.88rem; font-weight: 600; margin-bottom: 6px;
+    }
+    .sim-card-body p { color: var(--muted); font-size: 0.78rem; line-height: 1.6; }
+    .sim-card-tag {
+      display: inline-block; font-size: 0.62rem; font-weight: 700;
+      letter-spacing: 0.1em; text-transform: uppercase;
+      padding: 3px 10px; margin-top: 8px;
+      background: rgba(74,184,232,0.08); border: 1px solid rgba(74,184,232,0.2);
+      color: var(--blue);
+    }
+    .sim-empty {
+      grid-column: 1 / -1; text-align: center;
+      padding: 48px 24px; color: var(--muted);
+    }
+    .sim-empty-icon { font-size: 2.4rem; margin-bottom: 12px; opacity: 0.4; }
+    .sim-empty p { font-size: 0.85rem; }
+
+    /* ── VISUELS SVG ARCHITECTURAUX ── */
+    .archi-visual {
+      width: 100%; height: 100%; position: absolute; inset: 0;
+    }
+    .archi-visual svg { width: 100%; height: 100%; }
+
+    /* ── SUGGESTIONS MARCEL ── */
+    .suggestions-header {
+      display: flex; align-items: center; gap: 10px;
+      margin-bottom: 8px;
+    }
+    .suggestions-header .marcel-mini-avatar {
+      width: 28px; height: 28px; border-radius: 50%;
+      background: linear-gradient(135deg, var(--blue), var(--dim));
+      display: flex; align-items: center; justify-content: center;
+      font-size: 0.85rem; flex-shrink: 0;
+    }
+
+    /* ── SYNTHESE AVANT-PROJET ── */
+    .synthese-container {
+      background: var(--card); border: 1px solid var(--border); padding: 40px 36px;
+    }
+    .synthese-header {
+      display: flex; align-items: flex-start; justify-content: space-between;
+      margin-bottom: 28px; gap: 20px; flex-wrap: wrap;
+    }
+    .synthese-header h3 {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 1rem; font-weight: 600;
+    }
+    .synthese-badge {
+      font-size: 0.68rem; font-weight: 600; letter-spacing: 0.12em;
+      text-transform: uppercase; padding: 5px 14px;
+      border: 1px solid rgba(74,184,232,0.25);
+      color: var(--blue); background: rgba(74,184,232,0.06);
+    }
+    .synthese-steps {
+      display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 16px; margin-bottom: 32px;
+    }
+    .synthese-step {
+      padding: 20px; background: rgba(255,255,255,0.02);
+      border: 1px solid var(--border); text-align: center;
+    }
+    .step-num {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 1.6rem; font-weight: 700; color: var(--blue);
+      margin-bottom: 8px;
+    }
+    .step-label {
+      font-size: 0.76rem; color: var(--muted); line-height: 1.5;
+    }
+    .synthese-actions { display: flex; gap: 14px; flex-wrap: wrap; }
+    .btn-primary {
+      padding: 14px 32px; background: var(--blue); color: var(--bg);
+      border: none; font-size: 0.78rem; font-weight: 700;
+      letter-spacing: 0.12em; text-transform: uppercase;
+      cursor: pointer; transition: all 0.3s;
+    }
+    .btn-primary:hover { background: var(--bl); box-shadow: 0 8px 32px rgba(74,184,232,0.3); }
+    .btn-primary:disabled {
+      background: var(--dim); opacity: 0.4; cursor: not-allowed;
+      box-shadow: none;
+    }
+    .btn-outline {
+      padding: 14px 32px; background: transparent;
+      border: 1px solid var(--border); color: var(--muted);
+      font-size: 0.78rem; font-weight: 600;
+      letter-spacing: 0.12em; text-transform: uppercase;
+      cursor: pointer; transition: all 0.25s;
+    }
+    .btn-outline:hover { border-color: var(--blue); color: var(--blue); }
+
+    /* ── FOOTER ── */
+    .dash-footer {
+      border-top: 1px solid var(--border); padding: 32px 40px;
+      text-align: center; font-size: 0.72rem; color: var(--muted);
+    }
+
+    /* ── SCROLLBAR ── */
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: rgba(74,184,232,0.2); border-radius: 3px; }
+    ::-webkit-scrollbar-thumb:hover { background: rgba(74,184,232,0.4); }
+
+    /* ── RESPONSIVE ── */
+    @media (max-width: 768px) {
+      .dash-nav { padding: 0 20px; }
+      .dash-main { padding: 0 16px 60px; }
+      .welcome-greeting { font-size: 1.6rem; }
+      .welcome-text { font-size: 0.84rem; }
+      .marcel-container { height: 440px; }
+      .synthese-container { padding: 28px 20px; }
+      .synthese-steps { grid-template-columns: 1fr 1fr; }
+    }
+
+    /* ══════════════════════════════════════════════════════════════
+       RAPPORT AVANT-PROJET — overlay + impression PDF
+       ══════════════════════════════════════════════════════════════ */
+    .rapport-overlay {
+      display: none; position: fixed; inset: 0; z-index: 9999;
+      background: rgba(0,0,0,0.85); overflow-y: auto;
+      padding: 20px; justify-content: center;
+    }
+    .rapport-overlay.visible { display: flex; }
+    .rapport-container {
+      background: #fff; color: #1a1a1a; max-width: 800px; width: 100%;
+      margin: auto; font-family: 'Inter', sans-serif; font-size: 11px;
+      line-height: 1.6; position: relative;
+    }
+    .rapport-close {
+      position: fixed; top: 24px; right: 32px; z-index: 10000;
+      background: var(--blue); color: #fff; border: none; padding: 10px 20px;
+      font-size: 0.8rem; font-weight: 600; cursor: pointer; letter-spacing: 0.08em;
+    }
+    .rapport-page {
+      padding: 48px 52px; min-height: 1100px; position: relative;
+      border-bottom: 2px dashed #ddd;
+    }
+    .rapport-page:last-child { border-bottom: none; }
+    .rp-header {
+      display: flex; align-items: center; justify-content: space-between;
+      border-bottom: 3px solid #4AB8E8; padding-bottom: 16px; margin-bottom: 32px;
+    }
+    .rp-logo { font-family: 'Space Grotesk', sans-serif; font-size: 1.3rem; font-weight: 700; color: #060C18; }
+    .rp-logo span { color: #4AB8E8; }
+    .rp-date { font-size: 0.75rem; color: #888; }
+    .rp-title {
+      font-family: 'Cormorant Garamond', serif; font-size: 1.8rem;
+      font-weight: 300; color: #060C18; margin-bottom: 6px;
+    }
+    .rp-subtitle { font-size: 0.82rem; color: #666; margin-bottom: 32px; }
+    .rp-section-title {
+      font-family: 'Space Grotesk', sans-serif; font-size: 0.72rem;
+      font-weight: 700; letter-spacing: 0.2em; text-transform: uppercase;
+      color: #4AB8E8; margin: 28px 0 12px; padding-bottom: 6px;
+      border-bottom: 1px solid #e8e8e8;
+    }
+    .rp-info-grid {
+      display: grid; grid-template-columns: 140px 1fr;
+      gap: 6px 16px; margin-bottom: 20px; font-size: 0.85rem;
+    }
+    .rp-info-label { font-weight: 600; color: #444; }
+    .rp-info-value { color: #1a1a1a; }
+    .rp-demande {
+      background: #f5f8fc; border-left: 3px solid #4AB8E8;
+      padding: 14px 18px; margin: 12px 0 20px; font-size: 0.85rem;
+      color: #333; font-style: italic; line-height: 1.7;
+    }
+    .rp-stats {
+      display: flex; gap: 20px; margin: 16px 0 24px;
+    }
+    .rp-stat {
+      flex: 1; background: #f5f8fc; padding: 16px; text-align: center;
+      border: 1px solid #e0e8f0;
+    }
+    .rp-stat-value {
+      font-family: 'Space Grotesk', sans-serif; font-size: 1.6rem;
+      font-weight: 700; color: #4AB8E8;
+    }
+    .rp-stat-label { font-size: 0.72rem; color: #666; margin-top: 4px; }
+    .rp-programme {
+      font-size: 0.85rem; color: #333; line-height: 1.8;
+      margin: 12px 0;
+    }
+    .rp-programme p { margin-bottom: 8px; }
+    .rp-visuels-grid {
+      display: grid; grid-template-columns: repeat(2, 1fr);
+      gap: 16px; margin-top: 16px;
+    }
+    .rp-visuel-card { border: 1px solid #e0e8f0; overflow: hidden; }
+    .rp-visuel-card img {
+      width: 100%; height: 180px; object-fit: cover; display: block;
+    }
+    .rp-visuel-caption {
+      padding: 8px 12px; font-size: 0.75rem; color: #444;
+      background: #f9fafb;
+    }
+    .rp-footer {
+      position: absolute; bottom: 20px; left: 52px; right: 52px;
+      text-align: center; font-size: 0.68rem; color: #aaa;
+      border-top: 1px solid #eee; padding-top: 10px;
+    }
+    .rp-watermark {
+      font-size: 0.65rem; color: #bbb; margin-top: 24px; text-align: center;
+    }
+    .rp-btn-print {
+      position: fixed; top: 24px; right: 140px; z-index: 10000;
+      background: #060C18; color: #fff; border: none; padding: 10px 20px;
+      font-size: 0.8rem; font-weight: 600; cursor: pointer; letter-spacing: 0.08em;
+    }
+
+    /* ── IMPRESSION PDF ── */
+    @media print {
+      body * { visibility: hidden; }
+      .rapport-overlay, .rapport-overlay * { visibility: visible; }
+      .rapport-overlay {
+        display: block !important; position: static;
+        background: none; padding: 0; overflow: visible;
+      }
+      .rapport-container { max-width: none; box-shadow: none; }
+      .rapport-page {
+        page-break-after: always; border-bottom: none;
+        min-height: auto; padding: 36px 40px;
+      }
+      .rapport-page:last-child { page-break-after: avoid; }
+      .rapport-close, .rp-btn-print { display: none !important; }
+      .rp-visuels-grid { break-inside: avoid; }
+      .rp-visuel-card { break-inside: avoid; }
+      @page { margin: 12mm; size: A4; }
+    }
   </style>
 </head>
 <body>
 
+<!-- ════════════════════════════════════════════════════════════════
+     AUTH GUARD — affich&#233; si l'utilisateur n'est pas connect&#233;
+     ════════════════════════════════════════════════════════════════ -->
 <div class="auth-guard" id="authGuard">
   <h1>Espace Client</h1>
-  <button class="auth-btn" onclick="netlifyIdentity.open()">Se connecter</button>
-  <a href="index.html" class="back-link">Retour</a>
+  <p>Connectez-vous pour acc&#233;der &#224; votre espace personnel.</p>
+  <a href="connexion.html" class="auth-btn">Se connecter</a>
+  <a href="index.html" class="back-link">&#8592; Retour au site</a>
 </div>
 
-<div class="dashboard" id="dashboard">
-  <div class="dash-header">
-    <div class="dash-logo">SCANTO<span>RENOV</span></div>
-    <div>
-      <span class="dash-user" id="userName"></span>
-      <button class="dash-logout" onclick="netlifyIdentity.logout()">Deconnexion</button>
-    </div>
-  </div>
-  <div class="dash-grid">
-    <div class="dash-card">
-      <div class="dc-icon">&#x1F3E0;</div>
-      <div class="dc-title">Visite 3D</div>
-    </div>
-    <div class="dash-card">
-      <div class="dc-icon">&#x1F916;</div>
-      <div class="dc-title">Assistant IA</div>
-    </div>
-    <div class="dash-card">
-      <div class="dc-icon">&#x1F4CB;</div>
-      <div class="dc-title">Devis</div>
-    </div>
-    <div class="dash-card">
-      <div class="dc-icon">&#x1F4C5;</div>
-      <div class="dc-title">Planning</div>
-    </div>
-  </div>
-</div>
+<!-- ════════════════════════════════════════════════════════════════
+     DASHBOARD — affich&#233; apr&#232;s authentification
+     ════════════════════════════════════════════════════════════════ -->
 
+<!-- NAV -->
+<nav class="dash-nav" id="dashNav" style="display:none">
+  <a href="index.html" class="dash-logo">Scanto<span>renov</span></a>
+  <div class="dash-nav-right">
+    <span class="dash-user-name" id="dashUserName"></span>
+    <button class="dash-logout" id="logoutBtn">D&#233;connexion</button>
+  </div>
+</nav>
+
+<main class="dash-main" id="dashboard">
+
+  <!-- ═══════════  1. MESSAGE D'ACCUEIL  ═══════════ -->
+  <section class="welcome-section">
+    <h1 class="welcome-greeting">Bienvenue dans votre compte client Scantorenov, <em id="welcomeName">Client</em>.</h1>
+    <div class="welcome-text">
+      <p>Merci de nous avoir choisi pour vous accompagner dans votre projet de r&#233;novation.</p>
+      <p>Lors de notre visite du bien que vous envisagez de r&#233;nover, nous avons scann&#233; et collect&#233; l&#8217;ensemble des donn&#233;es n&#233;cessaires &#224; la g&#233;n&#233;ration d&#8217;un jumeau num&#233;rique complet.</p>
+      <p>Fini les allers&#8209;retours, les sentiments d&#8217;incompr&#233;hension et les pertes de temps. Ici, tout est simple, intuitif, transparent et pr&#233;cis. Vous avancez &#224; votre rythme&nbsp;: rapidement, ou pas &#224; pas.</p>
+      <p>En compl&#233;ment, afin de vous aider &#224; concr&#233;tiser vos pens&#233;es, nous vous invitons &#224; confier vos id&#233;es, vos envies, vos doutes &#224; <strong>Marcel</strong>.</p>
+      <p>Plus qu&#8217;un agent de discussion, Marcel a &#233;t&#233; con&#231;u dans le but de vous aider &#224; fa&#231;onner un avant&#8209;projet fid&#232;le &#224; votre vision. Il avance en douceur, port&#233; par la sagesse tranquille de l&#8217;&#233;l&#233;phant. Humble et attentif, il &#233;coute vos intentions, lit les lignes de votre espace, donne forme &#224; vos envies et vous conseille si vous le souhaitez.</p>
+      <p>Toujours fid&#232;le &#224; votre vision, il vous accompagne vers des solutions durables, en accord avec votre budget et vos d&#233;lais. Gr&#226;ce aux outils et proc&#233;d&#233;s les plus avanc&#233;s, Marcel r&#233;v&#232;le, &#233;claire et sublime votre imagination.</p>
+      <p>Une fois cette premi&#232;re &#233;tape franchie, nos &#233;quipes humaines prennent le relais&nbsp;: assistants administratifs, conseillers, architectes, ing&#233;nieurs, &#233;nerg&#233;ticiens, chefs d&#8217;&#233;quipes, ouvriers sp&#233;cialis&#233;s&#8230;</p>
+      <p>La technologie et les techniques disponibles ici sont autant des outils puissants mais toujours mis au service de d&#233;sirs humains. Chez Scantorenov, nous avons &#224; c&#339;ur de vous offrir une exp&#233;rience de r&#233;novation profond&#233;ment humaine, align&#233;e sur vos aspirations et les finalit&#233;s de votre projet.</p>
+      <p>Investisseur attentif &#224; son budget, jeune couple en qu&#234;te d&#8217;un foyer chaleureux, retrait&#233;s souhaitant pr&#233;server leur autonomie&#8230;<br>
+      Pour nous, chaque projet est une fen&#234;tre ouverte sur votre avenir.</p>
+      <p><strong>Maintenant, c&#8217;est parti, &#224; vous de projeter <em id="welcomeNameEnd">Client</em>&nbsp;!</strong></p>
+    </div>
+    <div class="welcome-signature">
+      <div class="sig-name">Tarek BECHAR</div>
+      <div class="sig-title">Pr&#233;sident fondateur de scantorenov.com et du bureau d&#8217;&#233;tudes R&#233;no&#8217;Island</div>
+    </div>
+  </section>
+
+  <!-- ═══════════  2. VISITE VIRTUELLE MATTERPORT  ═══════════ -->
+  <div class="section-block">
+    <div class="section-label">Jumeau num&#233;rique</div>
+    <h2 class="section-title">Votre visite virtuelle 3D</h2>
+    <p class="section-desc">Explorez le jumeau num&#233;rique de votre bien. Naviguez librement dans chaque pi&#232;ce, prenez des mesures et projetez vos id&#233;es.</p>
+    <!-- Iframe Matterport — affichée si le lien est disponible -->
+    <div class="matterport-frame" id="matterportFrame" style="display:none">
+      <iframe id="matterportIframe"
+              allowfullscreen
+              allow="autoplay; fullscreen; web-share; xr-spatial-tracking;">
+      </iframe>
+    </div>
+    <!-- Placeholder — affich&#233; si pas encore de visite virtuelle -->
+    <div class="matterport-pending" id="matterportPending">
+      <div class="mp-icon">&#x1F3E0;</div>
+      <h3>Votre visite virtuelle Matterport sera prochainement accessible et visible ici</h3>
+      <p>Notre &#233;quipe pr&#233;pare actuellement le jumeau num&#233;rique de votre bien. D&#232;s qu&#8217;il sera en ligne, vous pourrez naviguer librement dans chaque pi&#232;ce, prendre des mesures et commencer &#224; projeter vos id&#233;es de r&#233;novation.</p>
+      <div class="mp-email-note">&#x2709; Vous recevrez un e-mail d&#232;s sa mise en ligne</div>
+    </div>
+  </div>
+
+  <!-- ═══════════  2b. DONNÉES DU BIEN  ═══════════ -->
+  <div class="section-block">
+    <div class="section-label">Caract&#233;ristiques</div>
+    <h2 class="section-title">Donn&#233;es de votre bien</h2>
+    <p class="section-desc">Informations extraites automatiquement depuis le scan 3D de votre bien.</p>
+    <div class="property-data-container" id="propertyDataContainer">
+      <div class="pd-loading" id="pdLoading">
+        <span class="pd-loading-spinner"></span>
+        Extraction des donn&#233;es depuis le jumeau num&#233;rique&#8230;
+      </div>
+      <div id="pdContent" style="display:none">
+        <div class="pd-header">
+          <h3 id="pdBienName">Votre bien</h3>
+          <span class="pd-source">Source : Scan Matterport 3D</span>
+        </div>
+        <div class="pd-grid" id="pdGrid">
+          <!-- Rempli dynamiquement par JS -->
+        </div>
+        <div id="pdRoomsSection" style="display:none">
+          <div class="pd-rooms-title">D&#233;tail par pi&#232;ce</div>
+          <div class="pd-rooms-list" id="pdRoomsList">
+            <!-- Rempli dynamiquement par JS -->
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════  3. MARCEL — ASSISTANT IA  ═══════════ -->
+  <div class="section-block">
+    <div class="section-label">Assistant IA</div>
+    <h2 class="section-title">Discutez avec Marcel</h2>
+    <p class="section-desc">Confiez vos id&#233;es, vos envies et vos doutes. Marcel vous aide &#224; fa&#231;onner un avant-projet fid&#232;le &#224; votre vision.</p>
+    <div class="marcel-container" id="marcelChat">
+      <div class="marcel-header">
+        <div class="marcel-avatar">&#x1F418;</div>
+        <div class="marcel-info">
+          <div class="marcel-name">Marcel</div>
+          <div class="marcel-status">Votre assistant de r&#233;novation &#183; En ligne</div>
+        </div>
+      </div>
+      <div class="marcel-messages" id="marcelMessages">
+        <div class="msg marcel" id="marcelWelcomeMsg">
+          Bonjour ! Je suis Marcel, votre assistant de r&#233;novation. &#x1F418;<br><br>
+          Je pr&#233;pare votre accueil personnalis&#233;&#8230;
+        </div>
+      </div>
+      <div class="marcel-input-bar">
+        <input type="text" class="marcel-input" id="marcelInput"
+               placeholder="D&#233;crivez vos envies, posez une question&#8230;"
+               onkeydown="if(event.key==='Enter')sendMarcel()" />
+        <button class="marcel-send" onclick="generateVisual()" style="background:rgba(108,99,255,0.9);letter-spacing:0.06em;" title="G&#233;n&#233;rer un visuel IA &#224; partir de votre description">&#x1F3A8; Visuel</button>
+        <button class="marcel-send" onclick="sendMarcel()">Envoyer</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════  4. RESULTATS SIMULATIONS  ═══════════ -->
+  <div class="section-block" id="simulationsSection" style="display:none">
+    <div class="section-label">Simulations</div>
+    <h2 class="section-title">Vos r&#233;sultats de simulation</h2>
+
+    <!-- ── 4a. RÉSUMÉ AVANT-PROJET (rempli dynamiquement) ── -->
+    <div class="ap-summary" id="apSummary" style="display:none">
+      <div class="ap-summary-header">
+        <h3><span class="ap-icon">&#x1F4CB;</span> R&#233;sum&#233; de l&#8217;avant-projet</h3>
+        <span class="ap-badge-progress">&#x1F418; &#201;labor&#233; avec Marcel</span>
+      </div>
+      <div class="ap-grid" id="apGrid">
+        <!-- Rempli dynamiquement par les échanges avec Marcel -->
+      </div>
+    </div>
+
+    <!-- ── 4b. VISUELS AVANT-PROJET (remplis dynamiquement) ── -->
+    <div class="simulations-grid" id="simulationsGrid">
+      <!-- Rempli dynamiquement par JS lors de la génération de visuels -->
+    </div>
+
+    <!-- ── 4b-bis. GALERIE VISUELS GÉNÉRÉS PAR MARCEL ── -->
+    <div style="margin-top: 40px;" id="generatedSection" style="display:none">
+      <div class="section-label">Visuels IA</div>
+      <h2 class="section-title" style="font-size:1.3rem; margin-bottom:6px;">Visuels g&#233;n&#233;r&#233;s par Marcel</h2>
+      <p class="section-desc">Rendus produits par l&#8217;IA &#224; partir de vos &#233;changes avec Marcel. Cliquez sur un visuel pour l&#8217;agrandir.</p>
+      <div class="generated-gallery" id="generatedGallery">
+        <!-- Rempli dynamiquement par JS -->
+      </div>
+    </div>
+
+    <!-- ── 4c. SUGGESTIONS MARCEL (remplies dynamiquement) ── -->
+    <div style="margin-top: 40px; display:none;" id="suggestionsSection">
+      <div class="suggestions-header">
+        <div class="marcel-mini-avatar">&#x1F418;</div>
+        <div class="section-label" style="margin-bottom:0">Suggestions Marcel</div>
+      </div>
+      <h2 class="section-title" style="font-size:1.3rem; margin-bottom:6px;">Alternatives propos&#233;es par Marcel</h2>
+      <p class="section-desc">Marcel a imagin&#233; des variantes bas&#233;es sur votre avant-projet. Explorez-les pour affiner votre vision.</p>
+      <div class="simulations-grid" id="suggestionsGrid">
+        <!-- Rempli dynamiquement -->
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════  5. SYNTHESE AVANT-PROJET  ═══════════ -->
+  <div class="section-block">
+    <div class="section-label">Avant-projet</div>
+    <h2 class="section-title">Synth&#232;se et transmission</h2>
+    <p class="section-desc">Lorsque votre avant-projet est pr&#234;t, transmettez-le &#224; notre &#233;quipe. Un chef de projet d&#233;di&#233; prendra le relais.</p>
+    <div class="synthese-container">
+      <div class="synthese-header">
+        <h3>&#201;tapes suivantes apr&#232;s transmission</h3>
+        <span class="synthese-badge">&#x23F3; En attente de votre validation</span>
+      </div>
+      <div class="synthese-actions" style="margin-bottom: 28px;">
+        <button class="btn-outline" onclick="generateRapport()">
+          T&#233;l&#233;charger la synth&#232;se (PDF)
+        </button>
+        <button class="btn-primary" id="btnTransmettre" onclick="submitAvantProjet()">
+          Transmettre mon avant-projet &#8594;
+        </button>
+      </div>
+      <div class="synthese-steps">
+        <div class="synthese-step">
+          <div class="step-num">01</div>
+          <div class="step-label">Chef de projet<br>attribu&#233;</div>
+        </div>
+        <div class="synthese-step">
+          <div class="step-num">02</div>
+          <div class="step-label">Sp&#233;cifications<br>et budget</div>
+        </div>
+        <div class="synthese-step">
+          <div class="step-num">03</div>
+          <div class="step-label">Financement et<br>aides publiques</div>
+        </div>
+        <div class="synthese-step">
+          <div class="step-num">04</div>
+          <div class="step-label">Phasage et d&#233;lais<br>pr&#233;visionnels</div>
+        </div>
+        <div class="synthese-step">
+          <div class="step-num">05</div>
+          <div class="step-label">Recherche et consultation<br>d&#8217;entreprises</div>
+        </div>
+        <div class="synthese-step">
+          <div class="step-num">06</div>
+          <div class="step-label">Choix d&#8217;entreprise<br>et planification</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</main>
+
+<!-- FOOTER -->
+<footer class="dash-footer" id="dashFooter" style="display:none">
+  &#169; 2026 Scantorenov &#8212; Tous droits r&#233;serv&#233;s &#183;
+  <a href="index.html" style="color:var(--blue);text-decoration:none;">Retour au site</a>
+</footer>
+
+<!-- ════════════════════════════════════════════════════════════════
+     SCRIPTS
+     ════════════════════════════════════════════════════════════════ -->
 <script>
-  var netlifyIdentity = window.netlifyIdentity;
-  function showDashboard(user) {
-    document.getElementById('authGuard').style.display = 'none';
-    document.getElementById('dashboard').classList.add('visible');
-    document.getElementById('userName').textContent = user.user_metadata && user.user_metadata.full_name ? user.user_metadata.full_name : user.email;
+/* ── Auth ── */
+var netlifyIdentity = window.netlifyIdentity;
+var currentUser = null;
+
+function showDashboard(user) {
+  currentUser = user;
+  document.getElementById('authGuard').style.display = 'none';
+  document.getElementById('dashNav').style.display = '';
+  document.getElementById('dashboard').classList.add('visible');
+  document.getElementById('dashFooter').style.display = '';
+
+  var meta = user.user_metadata || {};
+  var fullName = meta.full_name || user.email;
+  var firstName = fullName.split(' ')[0];
+
+  document.getElementById('dashUserName').textContent = fullName;
+  document.getElementById('welcomeName').textContent = firstName;
+  var endNameEl = document.getElementById('welcomeNameEnd');
+  if (endNameEl) endNameEl.textContent = firstName;
+}
+
+function showLogin() {
+  currentUser = null;
+  document.getElementById('authGuard').style.display = '';
+  document.getElementById('dashNav').style.display = 'none';
+  document.getElementById('dashboard').classList.remove('visible');
+  document.getElementById('dashFooter').style.display = 'none';
+}
+
+if (netlifyIdentity) {
+  netlifyIdentity.on('init', function(user) { if (user) showDashboard(user); else checkLocalStorage(); });
+  netlifyIdentity.on('login', function(user) { showDashboard(user); });
+  netlifyIdentity.on('logout', function() { showLogin(); });
+} else {
+  checkLocalStorage();
+}
+
+/* Fallback : connexion.html stocke le token manuellement dans localStorage
+   Le widget Identity ne le reconnaît pas toujours → on vérifie nous-mêmes */
+function checkLocalStorage() {
+  try {
+    var stored = JSON.parse(localStorage.getItem('gotrue.user'));
+    if (stored && stored.token && stored.token.access_token) {
+      // Vérifier que le token n'est pas expiré
+      if (stored.token.expires_at && stored.token.expires_at > Date.now()) {
+        // Valider le token auprès de l'API Identity
+        fetch('/.netlify/identity/user', {
+          headers: { 'Authorization': 'Bearer ' + stored.token.access_token }
+        })
+        .then(function(r) {
+          if (r.ok) return r.json();
+          throw new Error('Token invalide');
+        })
+        .then(function(userData) {
+          showDashboard(userData);
+        })
+        .catch(function() {
+          localStorage.removeItem('gotrue.user');
+          showLogin();
+        });
+      } else {
+        // Token expiré → tenter un refresh
+        refreshToken(stored);
+      }
+    }
+  } catch(e) { /* pas de données stockées */ }
+}
+
+function refreshToken(stored) {
+  if (!stored.token || !stored.token.refresh_token) return;
+  fetch('/.netlify/identity/token', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+    body: 'grant_type=refresh_token&refresh_token=' + encodeURIComponent(stored.token.refresh_token)
+  })
+  .then(function(r) {
+    if (!r.ok) throw new Error('Refresh failed');
+    return r.json();
+  })
+  .then(function(tokenData) {
+    return fetch('/.netlify/identity/user', {
+      headers: { 'Authorization': 'Bearer ' + tokenData.access_token }
+    }).then(function(r) { return r.json(); })
+      .then(function(userData) {
+        userData.token = {
+          access_token: tokenData.access_token,
+          token_type: tokenData.token_type,
+          expires_in: tokenData.expires_in,
+          refresh_token: tokenData.refresh_token,
+          expires_at: Date.now() + tokenData.expires_in * 1000
+        };
+        localStorage.setItem('gotrue.user', JSON.stringify(userData));
+        showDashboard(userData);
+      });
+  })
+  .catch(function() {
+    localStorage.removeItem('gotrue.user');
+    showLogin();
+  });
+}
+
+document.getElementById('logoutBtn').addEventListener('click', function() {
+  if (netlifyIdentity) netlifyIdentity.logout();
+  localStorage.removeItem('gotrue.user');
+  window.location.href = 'connexion.html';
+});
+
+/* ── Marcel chat — historique conversationnel ── */
+var marcelHistory = [];
+var marcelTypingDiv = null;
+
+// Active le bouton "Transmettre" dès que le client a échangé avec Marcel
+function checkEnableTransmission() {
+  var userMessages = marcelHistory.filter(function(m) { return m.role === 'user'; });
+  if (userMessages.length >= 1) {
+    var btn = document.getElementById('btnTransmettre');
+    if (btn && btn.textContent.indexOf('✓') === -1) {
+      btn.disabled = false;
+    }
   }
-  function showLogin() {
-    document.getElementById('authGuard').style.display = '';
-    document.getElementById('dashboard').classList.remove('visible');
+}
+
+/* ── Marcel — message d'accueil personnalisé basé sur le projet client ── */
+function initMarcelWelcome() {
+  var user = currentUser;
+  if (!user) return;
+
+  var email = user.email;
+  var firstName = (user.user_metadata && user.user_metadata.full_name)
+    ? user.user_metadata.full_name.split(' ')[0]
+    : '';
+  var clientData = CLIENT_PROJETS[email] || null;
+  var projet = clientData ? clientData.demande : null;
+  var welcomeEl = document.getElementById('marcelWelcomeMsg');
+
+  // Pas de description de projet → message générique
+  if (!projet) {
+    welcomeEl.innerHTML = 'Bonjour' + (firstName ? ' ' + firstName : '') + ' ! Je suis Marcel, votre assistant de r\u00e9novation. \uD83D\uDC18<br><br>'
+      + 'Je suis l\u00e0 pour vous aider \u00e0 imaginer, structurer et affiner votre projet. Dites-moi\u00a0: qu\u2019avez-vous en t\u00eate pour votre espace\u00a0?';
+    return;
   }
-  if (netlifyIdentity) {
-    netlifyIdentity.on('init', function(user) { if (user) showDashboard(user); });
-    netlifyIdentity.on('login', function(user) { showDashboard(user); });
-    netlifyIdentity.on('logout', function() { showLogin(); });
+
+  // Description disponible → demander à Marcel de construire un accueil personnalisé
+  welcomeEl.innerHTML = '<span class="pd-loading-spinner" style="margin-right:8px;vertical-align:middle;"></span> Marcel pr\u00e9pare votre accueil personnalis\u00e9\u2026 \uD83D\uDC18';
+
+  var introPrompt = 'Le client s\'appelle ' + (firstName || 'Client') + '. '
+    + 'Voici la description de son projet de r\u00e9novation, telle qu\'il l\'a r\u00e9dig\u00e9e lors de sa demande : \n\n'
+    + '\"' + projet + '\"\n\n'
+    + 'R\u00e9dige un message d\'accueil chaleureux et personnalis\u00e9 (2-3 paragraphes max). '
+    + 'Montre que tu as bien compris son projet, reformule-le bri\u00e8vement avec tes mots. '
+    + 'Ne propose aucune piste de r\u00e9flexion, aucune suggestion, aucune liste d\'id\u00e9es. '
+    + 'Termine simplement en l\'invitant \u00e0 exprimer librement ce \u00e0 quoi il pense, ce qu\'il imagine, ce qu\'il souhaite.';
+
+  fetch('/.netlify/functions/chat', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      messages: [{ role: 'user', content: introPrompt }],
+      propertyData: window.__propertyData || null
+    })
+  })
+  .then(function(r) {
+    if (!r.ok) throw new Error('API indisponible');
+    return r.json();
+  })
+  .then(function(data) {
+    var reply = data.content || '';
+    welcomeEl.innerHTML = reply.replace(/\n/g, '<br>');
+    // Ajouter au contexte conversationnel pour que Marcel se souvienne de son intro
+    marcelHistory.push({ role: 'assistant', content: reply });
+  })
+  .catch(function(err) {
+    console.warn('Marcel intro error:', err);
+    // Fallback : message générique enrichi avec la description
+    welcomeEl.innerHTML = 'Bonjour' + (firstName ? ' ' + firstName : '') + ' ! Je suis Marcel, votre assistant de r\u00e9novation. \uD83D\uDC18<br><br>'
+      + 'J\u2019ai pris connaissance de votre projet\u00a0: <em>' + projet + '</em><br><br>'
+      + 'Je suis l\u00e0 pour vous aider \u00e0 structurer et affiner ce projet. Par quoi souhaitez-vous commencer\u00a0?';
+  });
+}
+
+function sendMarcel() {
+  var input = document.getElementById('marcelInput');
+  var text = input.value.trim();
+  if (!text) return;
+
+  appendMsg('user', text);
+  marcelHistory.push({ role: 'user', content: text });
+  checkEnableTransmission();
+  input.value = '';
+  input.disabled = true;
+
+  // Indicateur de frappe
+  showTyping();
+
+  fetch('/.netlify/functions/chat', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      messages: marcelHistory,
+      propertyData: window.__propertyData || null
+    })
+  })
+  .then(function(r) {
+    if (!r.ok) throw new Error('API indisponible');
+    return r.json();
+  })
+  .then(function(data) {
+    hideTyping();
+    var reply = data.content || 'Je r\u00e9fl\u00e9chis\u2026';
+    appendMsg('marcel', reply);
+    marcelHistory.push({ role: 'assistant', content: reply });
+    input.disabled = false;
+    input.focus();
+  })
+  .catch(function(err) {
+    hideTyping();
+    appendMsg('marcel', 'Je rencontre un probl\u00e8me technique. V\u00e9rifiez qu\u2019Ollama est bien lanc\u00e9 sur votre machine. \uD83D\uDC18');
+    console.error('Marcel error:', err);
+    input.disabled = false;
+    input.focus();
+  });
+}
+
+function showTyping() {
+  var container = document.getElementById('marcelMessages');
+  marcelTypingDiv = document.createElement('div');
+  marcelTypingDiv.className = 'msg marcel';
+  marcelTypingDiv.innerHTML = '<em style="opacity:0.6">Marcel r\u00e9fl\u00e9chit\u2026 \uD83D\uDC18</em>';
+  container.appendChild(marcelTypingDiv);
+  container.scrollTop = container.scrollHeight;
+}
+
+function hideTyping() {
+  if (marcelTypingDiv) { marcelTypingDiv.remove(); marcelTypingDiv = null; }
+}
+
+function appendMsg(role, text) {
+  var container = document.getElementById('marcelMessages');
+  var div = document.createElement('div');
+  div.className = 'msg ' + role;
+  div.innerHTML = text.replace(/\n/g, '<br>');
+  container.appendChild(div);
+  container.scrollTop = container.scrollHeight;
+}
+
+/* ── G\u00e9n\u00e9ration de visuels IA (Pollinations.ai) ── */
+var generatedCount = 0;
+
+function generateVisual() {
+  var input = document.getElementById('marcelInput');
+  var text = input.value.trim();
+  if (!text) {
+    // Si pas de texte, utiliser le dernier message de Marcel comme contexte
+    var lastMarcel = marcelHistory.filter(function(m) { return m.role === 'assistant'; });
+    if (lastMarcel.length > 0) {
+      text = 'G\u00e9n\u00e8re un visuel de : ' + lastMarcel[lastMarcel.length - 1].content.substring(0, 200);
+    } else {
+      appendMsg('marcel', 'D\u00e9crivez d\u2019abord ce que vous souhaitez visualiser, puis cliquez sur \uD83C\uDFA8 Visuel. \uD83D\uDC18');
+      return;
+    }
   }
+
+  input.value = '';
+  appendMsg('user', '\uD83C\uDFA8 Demande de visuel : ' + text);
+
+  // Afficher le chargement dans le chat
+  var container = document.getElementById('marcelMessages');
+  var loadingDiv = document.createElement('div');
+  loadingDiv.className = 'msg marcel';
+  loadingDiv.innerHTML = '<div class="msg-image-loading"><span class="gen-spinner"></span>Marcel g\u00e9n\u00e8re votre visuel\u2026 \uD83D\uDC18</div>';
+  container.appendChild(loadingDiv);
+  container.scrollTop = container.scrollHeight;
+
+  // Construire le prompt enrichi pour l'architecture (en anglais pour de meilleurs r\u00e9sultats)
+  var fullPrompt = 'professional architectural interior design visualization, photorealistic, modern renovation, high quality render, natural lighting, French home, contemporary warm minimalist, ' + text;
+
+  // Appel via la Netlify Function (proxy s\u00e9curis\u00e9)
+  fetch('/.netlify/functions/generate-image', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ prompt: fullPrompt })
+  })
+  .then(function(r) { return r.json(); })
+  .then(function(data) {
+    if (data.error) throw new Error(data.error);
+    loadingDiv.remove();
+    showGeneratedImage(container, data.imageUrl, text);
+  })
+  .catch(function() {
+    // Fallback : image de d\u00e9mo (picsum) en attendant que Pollinations soit r\u00e9tabli
+    var seed = Math.floor(Math.random() * 1000);
+    var fallbackUrl = 'https://picsum.photos/seed/' + seed + '/1024/768';
+
+    loadingDiv.innerHTML = '<div class="msg-image-loading"><span class="gen-spinner"></span>Marcel pr\u00e9pare un visuel de d\u00e9mo\u2026 \uD83D\uDC18</div>';
+
+    var img = new Image();
+    img.onload = function() {
+      loadingDiv.remove();
+      showGeneratedImage(container, fallbackUrl, text + ' [d\u00e9mo]');
+    };
+    img.onerror = function() {
+      loadingDiv.remove();
+      appendMsg('marcel', 'Le service de g\u00e9n\u00e9ration de visuels est temporairement indisponible. R\u00e9essayez dans quelques minutes. \uD83D\uDC18');
+    };
+    img.src = fallbackUrl;
+  });
+}
+
+function showGeneratedImage(container, imageUrl, description) {
+  var imgMsg = document.createElement('div');
+  imgMsg.className = 'msg marcel';
+  imgMsg.innerHTML = 'Voici le visuel que j\u2019ai imagin\u00e9 pour vous \uD83D\uDC18<br>'
+    + '<img src="' + imageUrl + '" class="msg-image" alt="Visuel g\u00e9n\u00e9r\u00e9 par Marcel" '
+    + 'onclick="window.open(this.src, \'_blank\')" loading="lazy" />';
+  container.appendChild(imgMsg);
+  container.scrollTop = container.scrollHeight;
+  addToGallery(imageUrl, description);
+}
+
+function addToGallery(imageUrl, description) {
+  generatedCount++;
+  var gallery = document.getElementById('generatedGallery');
+  var section = document.getElementById('generatedSection');
+
+  // Afficher les sections simulations + galerie si c'est le premier visuel
+  if (section) section.style.display = '';
+  var simSection = document.getElementById('simulationsSection');
+  if (simSection) simSection.style.display = '';
+
+  var card = document.createElement('div');
+  card.className = 'gen-card';
+
+  var shortDesc = description.length > 60 ? description.substring(0, 60) + '\u2026' : description;
+  var now = new Date();
+  var time = now.getHours() + 'h' + (now.getMinutes() < 10 ? '0' : '') + now.getMinutes();
+
+  card.innerHTML = '<img src="' + imageUrl + '" alt="Visuel #' + generatedCount + '" '
+    + 'onclick="window.open(this.src, \'_blank\')" style="cursor:pointer" />'
+    + '<div class="gen-card-body">'
+    + '<h4>Visuel #' + generatedCount + ' \u2014 ' + time + '</h4>'
+    + '<p>' + shortDesc + '</p>'
+    + '<span class="gen-card-badge">\uD83C\uDFA8 G\u00e9n\u00e9r\u00e9 par Marcel IA</span>'
+    + '</div>';
+
+  gallery.insertBefore(card, gallery.firstChild);
+}
+
+/* ── Matterport SDK — extraction des donn\u00e9es du bien ── */
+window.__propertyData = null;
+
+function renderPropertyData(data) {
+  var loading = document.getElementById('pdLoading');
+  var content = document.getElementById('pdContent');
+  var grid = document.getElementById('pdGrid');
+  var roomsList = document.getElementById('pdRoomsList');
+  var roomsSection = document.getElementById('pdRoomsSection');
+  var bienName = document.getElementById('pdBienName');
+
+  if (!loading || !content) return;
+
+  // Nom du bien
+  if (data.model && data.model.name) {
+    bienName.textContent = data.model.name;
+  }
+
+  // Cartes r\u00e9capitulatives
+  var cards = [];
+  var totalArea = 0;
+  var roomCount = data.rooms ? data.rooms.length : 0;
+  var floorCount = data.floors ? data.floors.length : 0;
+
+  if (data.rooms) {
+    data.rooms.forEach(function(r) {
+      if (r.area) totalArea += r.area;
+    });
+  }
+
+  cards.push({
+    icon: '\uD83D\uDCCF',
+    label: 'Surface totale',
+    value: totalArea > 0 ? (Math.round(totalArea * 10) / 10) + ' m\u00B2' : '\u2014',
+    detail: 'Mesur\u00E9e par scan 3D'
+  });
+
+  cards.push({
+    icon: '\uD83D\uDEAA',
+    label: 'Pi\u00E8ces',
+    value: roomCount > 0 ? roomCount : '\u2014',
+    detail: roomCount > 0 ? 'D\u00E9tect\u00E9es automatiquement' : 'En attente du SDK'
+  });
+
+  cards.push({
+    icon: '\uD83C\uDFE2',
+    label: 'Niveaux',
+    value: floorCount > 0 ? floorCount : '\u2014',
+    detail: floorCount > 0 ? data.floors.map(function(f){return f.name}).join(', ') : 'En attente du SDK'
+  });
+
+  cards.push({
+    icon: '\uD83D\uDCCD',
+    label: 'R\u00E9f\u00E9rence scan',
+    value: data.model ? data.model.sid : 'DKQ6zroSLKj',
+    detail: 'Identifiant Matterport'
+  });
+
+  if (data.type) {
+    cards.push({
+      icon: '\uD83C\uDFE0',
+      label: 'Type de bien',
+      value: data.type,
+      detail: data.annee ? 'Ann\u00E9es ' + data.annee : ''
+    });
+  }
+
+  if (data.etat) {
+    cards.push({
+      icon: '\uD83D\uDD27',
+      label: '\u00C9tat g\u00E9n\u00E9ral',
+      value: data.etat,
+      detail: data.etatDetail || ''
+    });
+  }
+
+  grid.innerHTML = '';
+  cards.forEach(function(c) {
+    var div = document.createElement('div');
+    div.className = 'pd-card';
+    div.innerHTML = '<div class="pd-card-icon">' + c.icon + '</div>'
+      + '<div class="pd-card-label">' + c.label + '</div>'
+      + '<div class="pd-card-value">' + c.value + '</div>'
+      + '<div class="pd-card-detail">' + c.detail + '</div>';
+    grid.appendChild(div);
+  });
+
+  // D\u00E9tail par pi\u00E8ce
+  if (data.rooms && data.rooms.length > 0) {
+    roomsList.innerHTML = '';
+    data.rooms.forEach(function(r) {
+      var div = document.createElement('div');
+      div.className = 'pd-room';
+      div.innerHTML = '<span class="pd-room-name">' + (r.name || 'Pi\u00E8ce') + '</span>'
+        + '<span class="pd-room-area">' + (r.area ? (Math.round(r.area * 10) / 10) + ' m\u00B2' : '\u2014') + '</span>';
+      roomsList.appendChild(div);
+    });
+    roomsSection.style.display = '';
+  }
+
+  loading.style.display = 'none';
+  content.style.display = '';
+}
+
+function initMatterportSDK() {
+  var iframe = document.getElementById('matterportIframe');
+  if (!iframe || !window.MP_SDK) {
+    useFallbackData();
+    return;
+  }
+
+  var sdkKey = 'b9a411fbbe9cb8a0b9fcff249832cad8';
+
+  window.MP_SDK.connect(iframe, sdkKey, '3.10')
+    .then(function(sdk) {
+      console.log('Matterport SDK connect\u00e9');
+      return Promise.all([
+        sdk.Model.getData(),
+        sdk.Floor.getData(),
+        sdk.Room && sdk.Room.getData ? sdk.Room.getData() : Promise.resolve(null)
+      ]).then(function(results) {
+        var modelData = results[0];
+        var floors = results[1];
+        var rooms = results[2];
+
+        window.__propertyData = {
+          model: {
+            sid: modelData.sid || 'DKQ6zroSLKj',
+            name: modelData.name || 'Bien du client'
+          },
+          floors: floors ? floors.map(function(f, i) {
+            return { id: f.id, index: i, name: f.name || ('Niveau ' + i) };
+          }) : [],
+          rooms: rooms ? rooms.map(function(r) {
+            return {
+              id: r.id,
+              name: r.name || 'Pi\u00e8ce',
+              floorIndex: r.floorIndex,
+              area: r.area ? Math.round(r.area * 100) / 100 : null
+            };
+          }) : []
+        };
+
+        console.log('Donn\u00e9es du bien extraites:', window.__propertyData);
+        renderPropertyData(window.__propertyData);
+      });
+    })
+    .catch(function(err) {
+      console.warn('SDK Matterport non disponible:', err.message);
+      useFallbackData();
+    });
+}
+
+function useFallbackData() {
+  // Donn\u00e9es r\u00e9elles du scan — \u00e0 compl\u00e9ter au fur et \u00e0 mesure
+  window.__propertyData = {
+    model: { sid: 'DKQ6zroSLKj', name: '\u00C9tat des lieux \u2014 R\u00E9novation suite abandon de chantier' },
+    type: 'Pavillon',
+    annee: '60-70',
+    etat: 'Abandon de chantier',
+    etatDetail: 'R\u00E9novation compl\u00E8te \u00E0 pr\u00E9voir',
+    floors: [
+      { id: 0, index: 0, name: 'Rez-de-chauss\u00E9e' },
+      { id: 1, index: 1, name: '\u00C9tage' }
+    ],
+    rooms: [
+      { name: 'Entr\u00E9e', area: 6.2, floorIndex: 0 },
+      { name: 'S\u00E9jour / Salon', area: 28.5, floorIndex: 0 },
+      { name: 'Cuisine', area: 12.8, floorIndex: 0 },
+      { name: 'WC', area: 1.8, floorIndex: 0 },
+      { name: 'Couloir', area: 5.4, floorIndex: 1 },
+      { name: 'Chambre 1', area: 14.2, floorIndex: 1 },
+      { name: 'Chambre 2', area: 11.6, floorIndex: 1 },
+      { name: 'Chambre 3', area: 10.8, floorIndex: 1 },
+      { name: 'Salle de bains', area: 6.1, floorIndex: 1 },
+      { name: 'WC \u00E9tage', area: 1.5, floorIndex: 1 }
+    ]
+  };
+  renderPropertyData(window.__propertyData);
+}
+
+// ══════════════════════════════════════════════════════════════════
+//  TABLE DES PROJETS CLIENTS
+//  Recopiez ici la description saisie par le client dans le
+//  formulaire de contact lors de sa demande d'ouverture de compte.
+//  Marcel s'en servira pour construire un message d'accueil
+//  personnalisé dès la première connexion du client.
+// ══════════════════════════════════════════════════════════════════
+var CLIENT_PROJETS = {
+  'tr.kaptation@gmail.com': {
+    nom: 'TR KAPTATION',
+    adresse: '12 rue des Lilas, 93100 Montreuil',
+    type_bien: 'Pavillon ann\u00e9es 60-70 \u2014 98.9 m\u00b2 sur 2 niveaux',
+    demande: 'R\u00e9novation compl\u00e8te d\'un pavillon ann\u00e9es 60-70 de 98.9 m\u00b2 sur 2 niveaux, suite \u00e0 abandon de chantier. Souhait d\'ouvrir la cuisine sur le s\u00e9jour, r\u00e9nover la salle de bains, isoler et moderniser les menuiseries.'
+  },
+  'guillaumeolmo@gmail.com': {
+    nom: 'Guillaume OLMO',
+    adresse: '25 boulevard Voltaire, 75011 Paris',
+    type_bien: 'Appartement \u2014 65 m\u00b2',
+    demande: 'R\u00e9novation d\'un appartement de 65m\u00b2 \u00e0 Paris. Modernisation compl\u00e8te avec ouverture cuisine/s\u00e9jour et r\u00e9fection salle de bains.'
+  }
+  // ══════════════════════════════════════════════════════════
+  //  Ajouter ici les prochains clients :
+  //  'email@client.com': {
+  //    nom: 'Pr\u00e9nom NOM',
+  //    adresse: 'Adresse du bien \u00e0 r\u00e9nover',
+  //    type_bien: 'Type et surface du bien',
+  //    demande: 'Description copi\u00e9e depuis le formulaire de contact'
+  //  },
+  // ══════════════════════════════════════════════════════════
+};
+
+// ══════════════════════════════════════════════════════════════════
+//  TABLE DES VISITES VIRTUELLES PAR CLIENT
+//  Pour ajouter une visite : ajouter l'email et le modelId Matterport
+//  Le modelId se trouve dans l'URL Matterport : my.matterport.com/show/?m=XXXXXX
+// ══════════════════════════════════════════════════════════════════
+var CLIENT_MATTERPORT = {
+  'tr.kaptation@gmail.com': 'DKQ6zroSLKj',
+  'guillaumeolmo@gmail.com': 'DKQ6zroSLKj'
+  // Ajouter ici les prochains clients :
+  // 'email@client.com': 'MODEL_ID_MATTERPORT',
+};
+
+function initMatterportSection() {
+  var user = currentUser;
+  var meta = (user && user.app_metadata) || (user && user.user_metadata) || {};
+
+  // Priorité : 1) métadonnées du compte, 2) table CLIENT_MATTERPORT
+  var modelId = meta.matterport_id || (user && CLIENT_MATTERPORT[user.email]) || null;
+
+  var frameEl = document.getElementById('matterportFrame');
+  var pendingEl = document.getElementById('matterportPending');
+  var iframeEl = document.getElementById('matterportIframe');
+  var dataSection = document.getElementById('propertyDataContainer');
+
+  if (modelId) {
+    // Visite disponible → afficher l'iframe
+    var sdkKey = 'b9a411fbbe9cb8a0b9fcff249832cad8';
+    // Ne PAS inclure applicationKey dans l'URL iframe (cause un blocage par referrer mismatch en local)
+    // L'applicationKey est uniquement utilisée lors du SDK.connect() pour l'extraction de données
+    iframeEl.src = 'https://my.matterport.com/show/?m=' + modelId + '&play=1&qs=1';
+    frameEl.style.display = '';
+    pendingEl.style.display = 'none';
+    if (dataSection) dataSection.style.display = '';
+
+    // Charger le SDK pour extraire les données
+    var script = document.createElement('script');
+    script.src = 'https://static.matterport.com/showcase-sdk/latest.js';
+    script.onload = function() { setTimeout(initMatterportSDK, 2000); };
+    script.onerror = function() { useFallbackData(); };
+    document.head.appendChild(script);
+  } else {
+    // Pas encore de visite → placeholder
+    frameEl.style.display = 'none';
+    pendingEl.style.display = '';
+    if (dataSection) dataSection.style.display = 'none';
+  }
+}
+
+// Lancer après que showDashboard ait été appelé
+var _origShowDashboard = showDashboard;
+showDashboard = function(user) {
+  _origShowDashboard(user);
+  initMatterportSection();
+  initMarcelWelcome();
+};
+
+/* ══════════════════════════════════════════════════════════════
+   GÉNÉRATION DU RAPPORT AVANT-PROJET (PDF)
+   ══════════════════════════════════════════════════════════════ */
+
+// Collecter les visuels sélectionnés par le client (depuis la galerie)
+function getGeneratedVisuals() {
+  var imgs = document.querySelectorAll('#generatedGallery .gen-card img');
+  var visuals = [];
+  for (var i = 0; i < imgs.length; i++) {
+    var card = imgs[i].closest('.gen-card');
+    var caption = card ? card.querySelector('h4') : null;
+    visuals.push({
+      src: imgs[i].src,
+      caption: caption ? caption.textContent : 'Visuel #' + (i + 1)
+    });
+  }
+  return visuals;
+}
+
+// Extraire le programme de travaux depuis l'historique Marcel
+function extractProgramme() {
+  if (!marcelHistory || marcelHistory.length === 0) return null;
+  // Chercher dans les messages de Marcel les éléments liés aux travaux
+  var travaux = [];
+  for (var i = 0; i < marcelHistory.length; i++) {
+    var msg = marcelHistory[i];
+    if (msg.role === 'assistant' && msg.content) {
+      // Chercher les lignes qui parlent de travaux
+      var lines = msg.content.split('\n');
+      for (var j = 0; j < lines.length; j++) {
+        var l = lines[j].trim();
+        if (l.match(/^[-\u2022\u2013*]\s/) && l.length > 15) {
+          travaux.push(l.replace(/^[-\u2022\u2013*]\s*/, ''));
+        }
+      }
+    }
+  }
+  return travaux.length > 0 ? travaux : null;
+}
+
+function generateRapport() {
+  var user = currentUser;
+  if (!user) return;
+
+  var email = user.email;
+  var clientData = CLIENT_PROJETS[email] || {};
+  var meta = user.user_metadata || {};
+  var fullName = clientData.nom || meta.full_name || email;
+  var adresse = clientData.adresse || 'Non renseign\u00e9e';
+  var typeBien = clientData.type_bien || 'Non renseign\u00e9';
+  var demande = clientData.demande || 'Aucune description disponible.';
+
+  // Données du bien
+  var propData = window.__propertyData || null;
+  var surface = propData && propData.summary ? propData.summary.totalArea : null;
+  var nbPieces = propData && propData.rooms ? propData.rooms.length : null;
+  var nbNiveaux = propData && propData.floors ? propData.floors.length : null;
+
+  // Visuels générés
+  var visuals = getGeneratedVisuals();
+  var nbSimulations = generatedCount || 0;
+
+  // Programme de travaux
+  var programme = extractProgramme();
+
+  // Date
+  var now = new Date();
+  var dateStr = now.toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' });
+
+  // ── Construire le HTML du rapport ──
+  var html = '';
+
+  // ═══ PAGE 1 : Identification + Synthèse ═══
+  html += '<div class="rapport-page">';
+  html += '<div class="rp-header">';
+  html += '<div class="rp-logo">Scanto<span>renov</span></div>';
+  html += '<div class="rp-date">Rapport g\u00e9n\u00e9r\u00e9 le ' + dateStr + '</div>';
+  html += '</div>';
+  html += '<div class="rp-title">Rapport d\u2019avant-projet</div>';
+  html += '<div class="rp-subtitle">Document de synth\u00e8se \u2014 Espace client Scantorenov</div>';
+
+  // Identification client
+  html += '<div class="rp-section-title">Identification du client</div>';
+  html += '<div class="rp-info-grid">';
+  html += '<div class="rp-info-label">Client</div><div class="rp-info-value">' + fullName + '</div>';
+  html += '<div class="rp-info-label">E-mail</div><div class="rp-info-value">' + email + '</div>';
+  html += '<div class="rp-info-label">Adresse du bien</div><div class="rp-info-value">' + adresse + '</div>';
+  html += '<div class="rp-info-label">Type de bien</div><div class="rp-info-value">' + typeBien + '</div>';
+  if (surface) html += '<div class="rp-info-label">Surface totale</div><div class="rp-info-value">' + surface + ' m\u00b2</div>';
+  if (nbPieces) html += '<div class="rp-info-label">Nombre de pi\u00e8ces</div><div class="rp-info-value">' + nbPieces + '</div>';
+  if (nbNiveaux) html += '<div class="rp-info-label">Niveaux</div><div class="rp-info-value">' + nbNiveaux + '</div>';
+  html += '</div>';
+
+  // Demande initiale
+  html += '<div class="rp-section-title">Demande initiale du client</div>';
+  html += '<div class="rp-demande">\u00ab\u00a0' + demande + '\u00a0\u00bb</div>';
+
+  // Statistiques
+  html += '<div class="rp-section-title">Synth\u00e8se de l\u2019avant-projet</div>';
+  html += '<div class="rp-stats">';
+  html += '<div class="rp-stat"><div class="rp-stat-value">' + nbSimulations + '</div><div class="rp-stat-label">Visuels g\u00e9n\u00e9r\u00e9s</div></div>';
+  html += '<div class="rp-stat"><div class="rp-stat-value">' + marcelHistory.length + '</div><div class="rp-stat-label">\u00c9changes avec Marcel</div></div>';
+  if (nbPieces) html += '<div class="rp-stat"><div class="rp-stat-value">' + nbPieces + '</div><div class="rp-stat-label">Pi\u00e8ces analys\u00e9es</div></div>';
+  html += '</div>';
+
+  // Programme de travaux
+  html += '<div class="rp-section-title">Programme de travaux envisag\u00e9</div>';
+  html += '<div class="rp-programme">';
+  if (programme && programme.length > 0) {
+    html += '<ul style="padding-left:18px;margin:0;">';
+    for (var t = 0; t < Math.min(programme.length, 10); t++) {
+      html += '<li>' + programme[t] + '</li>';
+    }
+    html += '</ul>';
+  } else {
+    html += '<p style="color:#888;font-style:italic;">Le programme de travaux sera d\u00e9taill\u00e9 au fil des \u00e9changes avec Marcel. Continuez \u00e0 discuter de votre projet pour enrichir cette section.</p>';
+  }
+  html += '</div>';
+
+  html += '<div class="rp-footer">Scantorenov \u00b7 scantorenov.com \u00b7 contact@scantorenov.com \u00b7 Document g\u00e9n\u00e9r\u00e9 automatiquement</div>';
+  html += '</div>';
+
+  // ═══ PAGE 2+ : Visuels sélectionnés ═══
+  if (visuals.length > 0) {
+    // 4 visuels par page max
+    for (var p = 0; p < visuals.length; p += 4) {
+      html += '<div class="rapport-page">';
+      html += '<div class="rp-header">';
+      html += '<div class="rp-logo">Scanto<span>renov</span></div>';
+      html += '<div class="rp-date">Visuels de l\u2019avant-projet \u2014 ' + fullName + '</div>';
+      html += '</div>';
+      html += '<div class="rp-section-title">Visuels g\u00e9n\u00e9r\u00e9s par Marcel (' + (p + 1) + '-' + Math.min(p + 4, visuals.length) + ' sur ' + visuals.length + ')</div>';
+      html += '<div class="rp-visuels-grid">';
+      for (var v = p; v < Math.min(p + 4, visuals.length); v++) {
+        html += '<div class="rp-visuel-card">';
+        html += '<img src="' + visuals[v].src + '" alt="' + visuals[v].caption + '" />';
+        html += '<div class="rp-visuel-caption">' + visuals[v].caption + '</div>';
+        html += '</div>';
+      }
+      html += '</div>';
+      html += '<div class="rp-watermark">Ce document est un outil d\u2019aide \u00e0 la r\u00e9flexion. Les visuels sont g\u00e9n\u00e9r\u00e9s par intelligence artificielle et ont une valeur illustrative. Seul le devis \u00e9tabli par le ma\u00eetre d\u2019\u0153uvre fait foi.</div>';
+      html += '<div class="rp-footer">Scantorenov \u00b7 scantorenov.com \u00b7 Page ' + (Math.floor(p / 4) + 2) + '</div>';
+      html += '</div>';
+    }
+  }
+
+  // Injecter dans l'overlay
+  document.getElementById('rapportContent').innerHTML = html;
+  document.getElementById('rapportOverlay').classList.add('visible');
+}
+
+/* ══════════════════════════════════════════════════════════════
+   TRANSMISSION DE L'AVANT-PROJET
+   ══════════════════════════════════════════════════════════════ */
+
+function submitAvantProjet() {
+  var user = currentUser;
+  if (!user) return;
+
+  // Confirmation
+  var ok = confirm(
+    'Êtes-vous sûr de vouloir transmettre votre avant-projet ?\n\n'
+    + 'Un récapitulatif vous sera envoyé par email et notre équipe '
+    + 'prendra en charge votre dossier dans les plus brefs délais.'
+  );
+  if (!ok) return;
+
+  var btn = document.getElementById('btnTransmettre');
+  var badge = document.querySelector('.synthese-badge');
+  var email = user.email;
+  var clientData = CLIENT_PROJETS[email] || {};
+  var meta = user.user_metadata || {};
+
+  // Collecter toutes les données
+  var fullName = clientData.nom || meta.full_name || email;
+  var adresse = clientData.adresse || 'Non renseignée';
+  var typeBien = clientData.type_bien || 'Non renseigné';
+  var demande = clientData.demande || 'Aucune description.';
+  var visuals = getGeneratedVisuals();
+  var programme = extractProgramme();
+
+  // État de chargement
+  btn.disabled = true;
+  btn.textContent = 'Transmission en cours…';
+  if (badge) {
+    badge.textContent = '⏳ Transmission en cours…';
+    badge.style.borderColor = 'rgba(232,168,74,0.4)';
+    badge.style.color = '#e8a84a';
+  }
+
+  // Préparer la conversation (limiter à 50 derniers messages)
+  var conversationToSend = marcelHistory.slice(-50).map(function(m) {
+    return { role: m.role, content: m.content };
+  });
+
+  var payload = {
+    clientName: fullName,
+    clientEmail: email,
+    adresse: adresse,
+    typeBien: typeBien,
+    demande: demande,
+    nbSimulations: generatedCount || 0,
+    nbEchanges: marcelHistory.length,
+    programme: programme || [],
+    visuels: visuals.map(function(v) { return { src: v.src, caption: v.caption }; }),
+    conversation: conversationToSend
+  };
+
+  fetch('/.netlify/functions/submit-avantprojet', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload)
+  })
+  .then(function(res) { return res.json().then(function(d) { return { ok: res.ok, data: d }; }); })
+  .then(function(result) {
+    if (result.ok && result.data.success) {
+      // Succès
+      btn.textContent = '✓ Avant-projet transmis';
+      btn.style.background = '#2ecc71';
+      btn.style.borderColor = '#2ecc71';
+      btn.disabled = true;
+
+      if (badge) {
+        badge.textContent = '✓ Transmis le ' + result.data.date;
+        badge.style.borderColor = 'rgba(46,204,113,0.4)';
+        badge.style.color = '#2ecc71';
+        badge.style.background = 'rgba(46,204,113,0.08)';
+      }
+
+      // Notification dans le chat Marcel
+      appendMsg('marcel',
+        '🎉 Votre avant-projet a bien été transmis à notre équipe ! '
+        + 'Un email de confirmation vous a été envoyé à **' + email + '**.\n\n'
+        + 'Un chef de projet dédié va maintenant être attribué à votre dossier. '
+        + 'Nous reviendrons vers vous très rapidement pour les prochaines étapes.'
+      );
+    } else {
+      throw new Error(result.data.error || 'Erreur lors de la transmission');
+    }
+  })
+  .catch(function(err) {
+    console.error('Erreur transmission:', err);
+    btn.disabled = false;
+    btn.textContent = 'Transmettre mon avant-projet →';
+
+    if (badge) {
+      badge.textContent = '⏳ En attente de votre validation';
+      badge.style.borderColor = '';
+      badge.style.color = '';
+      badge.style.background = '';
+    }
+
+    alert(
+      'Une erreur est survenue lors de la transmission.\n\n'
+      + 'Veuillez réessayer dans quelques instants. '
+      + 'Si le problème persiste, contactez-nous à contact@scantorenov.com'
+    );
+  });
+}
+
+function closeRapport() {
+  document.getElementById('rapportOverlay').classList.remove('visible');
+}
+
+function printRapport() {
+  window.print();
+}
 </script>
+
+<!-- ═══ OVERLAY RAPPORT AVANT-PROJET ═══ -->
+<div class="rapport-overlay" id="rapportOverlay">
+  <button class="rp-btn-print" onclick="printRapport()">&#x1F5A8; Imprimer / PDF</button>
+  <button class="rapport-close" onclick="closeRapport()">&#x2715; Fermer</button>
+  <div class="rapport-container" id="rapportContent">
+    <!-- Rempli dynamiquement par generateRapport() -->
+  </div>
+</div>
+
 </body>
 </html>
