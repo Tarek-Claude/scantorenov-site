@@ -359,98 +359,140 @@
     }
     .callback-icon { font-size: 1.2rem; }
 
-    /* ── PARCOURS DECOUVERTE (Phase 3) ── */
-    .discovery-section {
+    /* ── STEPPER ONBOARDING (Phase 3) ── */
+    .stepper-section {
       background: var(--card); border: 1px solid var(--border);
       border-radius: 12px; margin-bottom: 48px;
       box-shadow: 0 2px 16px rgba(0,0,0,0.04);
       overflow: hidden;
     }
-    .discovery-header {
-      padding: 32px 32px 16px;
-      border-bottom: 1px solid var(--border);
+    .stepper-header {
+      padding: 28px 32px 20px;
     }
-    .discovery-header h3 {
+    .stepper-header h3 {
       font-family: 'Cormorant Garamond', serif;
-      font-size: 1.4rem; font-weight: 300; color: var(--text);
-      margin-bottom: 6px;
+      font-size: 1.5rem; font-weight: 300; color: var(--text);
+      margin-bottom: 4px;
     }
-    .discovery-header p {
+    .stepper-header p {
       color: var(--text-soft); font-size: 0.82rem; line-height: 1.6;
-      max-width: 600px;
     }
-    .discovery-progress {
-      padding: 12px 32px;
-      background: var(--mid);
-      display: flex; align-items: center; gap: 12px;
-      font-size: 0.78rem; color: var(--text-soft);
+
+    /* ── Onglets ── */
+    .stepper-tabs {
+      display: flex; border-bottom: 2px solid var(--border);
+      padding: 0 24px;
     }
-    .discovery-progress-bar {
-      flex: 1; height: 6px; background: var(--border);
-      border-radius: 3px; overflow: hidden;
+    .stepper-tab {
+      flex: 1; display: flex; align-items: center; gap: 10px;
+      padding: 14px 12px; cursor: default;
+      border-bottom: 3px solid transparent;
+      margin-bottom: -2px; transition: all 0.3s;
+      opacity: 0.45;
     }
-    .discovery-progress-fill {
+    .stepper-tab.active {
+      border-bottom-color: var(--green); opacity: 1;
+    }
+    .stepper-tab.completed { opacity: 0.8; cursor: pointer; }
+    .stepper-tab.completed:hover { opacity: 1; }
+    .stepper-tab-num {
+      width: 26px; height: 26px; flex-shrink: 0;
+      border-radius: 50%; font-size: 0.72rem; font-weight: 700;
+      display: flex; align-items: center; justify-content: center;
+      border: 2px solid var(--border); color: var(--muted);
+      background: var(--card); transition: all 0.3s;
+    }
+    .stepper-tab.active .stepper-tab-num {
+      border-color: var(--green); color: var(--green); background: rgba(45,95,62,0.08);
+    }
+    .stepper-tab.completed .stepper-tab-num {
+      border-color: var(--green); background: var(--green); color: #fff;
+    }
+    .stepper-tab-label {
+      font-size: 0.76rem; font-weight: 500; color: var(--text-soft);
+      line-height: 1.3;
+    }
+    .stepper-tab.active .stepper-tab-label { color: var(--text); font-weight: 600; }
+
+    /* ── Barre de progression ── */
+    .stepper-progress {
+      height: 4px; background: var(--mid);
+    }
+    .stepper-progress-fill {
       height: 100%; width: 0%;
       background: linear-gradient(90deg, var(--green), var(--green-hover));
-      border-radius: 3px;
-      transition: width 0.6s ease;
+      transition: width 0.5s ease;
     }
-    .discovery-list {
-      padding: 24px 32px;
-      display: flex; flex-direction: column; gap: 0;
+
+    /* ── Panneaux de contenu ── */
+    .stepper-panels { position: relative; min-height: 280px; }
+    .stepper-panel {
+      display: none; padding: 32px; animation: stepFadeIn 0.35s ease;
     }
-    .discovery-item {
-      display: flex; align-items: center; gap: 16px;
-      padding: 18px 16px;
-      border-bottom: 1px solid var(--border);
-      cursor: default;
-      transition: background 0.2s;
+    .stepper-panel.active { display: block; }
+    @keyframes stepFadeIn {
+      from { opacity: 0; transform: translateY(8px); }
+      to { opacity: 1; transform: translateY(0); }
     }
-    .discovery-item:last-child { border-bottom: none; }
-    .discovery-item:hover { background: rgba(45,95,62,0.03); }
-    .discovery-check {
-      width: 28px; height: 28px; flex-shrink: 0;
-      border: 2px solid var(--border);
-      border-radius: 50%;
-      display: flex; align-items: center; justify-content: center;
-      font-size: 0.85rem; color: transparent;
-      transition: all 0.3s;
+    .stepper-panel h4 {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.25rem; font-weight: 400; color: var(--text);
+      margin-bottom: 16px;
     }
-    .discovery-item.completed .discovery-check {
-      background: var(--green); border-color: var(--green);
-      color: #fff;
+    .stepper-panel p, .stepper-panel li {
+      font-size: 0.85rem; color: var(--text-soft); line-height: 1.8;
     }
-    .discovery-item.locked .discovery-check {
-      background: var(--mid); border-color: var(--border);
+    .stepper-panel ul {
+      list-style: none; padding: 0; margin: 12px 0;
     }
-    .discovery-info { flex: 1; }
-    .discovery-title {
-      font-size: 0.88rem; font-weight: 500; color: var(--text);
-      margin-bottom: 2px;
+    .stepper-panel li {
+      padding: 6px 0 6px 24px; position: relative;
     }
-    .discovery-desc {
-      font-size: 0.78rem; color: var(--text-soft); line-height: 1.5;
+    .stepper-panel li::before {
+      content: ''; position: absolute; left: 6px; top: 14px;
+      width: 6px; height: 6px; border-radius: 50%;
+      background: var(--green); opacity: 0.5;
     }
-    .discovery-item.locked .discovery-title { color: var(--muted); }
-    .discovery-item.locked .discovery-desc { color: var(--muted); }
-    .discovery-badge {
-      font-size: 0.68rem; font-weight: 600; text-transform: uppercase;
-      letter-spacing: 0.08em; padding: 4px 10px;
-      border-radius: 12px; white-space: nowrap;
+    .stepper-panel .step-highlight {
+      background: var(--mid); border-radius: 8px;
+      padding: 16px 20px; margin: 16px 0;
+      border-left: 3px solid var(--green);
+      font-size: 0.84rem; color: var(--text); line-height: 1.7;
     }
-    .discovery-badge.done {
-      background: rgba(45,95,62,0.1); color: var(--green);
+
+    /* ── Boutons navigation stepper ── */
+    .stepper-footer {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 20px 32px 28px; border-top: 1px solid var(--border);
     }
-    .discovery-badge.current {
-      background: rgba(26,95,106,0.1); color: var(--dim);
+    .stepper-btn-back {
+      padding: 10px 20px; background: none; border: 1px solid var(--border);
+      border-radius: 6px; font-size: 0.78rem; font-weight: 500;
+      color: var(--text-soft); cursor: pointer; transition: all 0.2s;
     }
-    .discovery-badge.locked {
-      background: var(--mid); color: var(--muted);
+    .stepper-btn-back:hover { border-color: var(--text-soft); color: var(--text); }
+    .stepper-btn-back:disabled { opacity: 0; cursor: default; pointer-events: none; }
+    .stepper-btn-next {
+      padding: 12px 28px; background: var(--green); color: #fff;
+      border: none; border-radius: 6px; font-size: 0.82rem; font-weight: 600;
+      cursor: pointer; transition: all 0.3s;
+      display: flex; align-items: center; gap: 8px;
     }
-    .discovery-unlock-msg {
-      text-align: center; padding: 20px 32px 28px;
-      font-size: 0.82rem; color: var(--text-soft);
-      font-style: italic;
+    .stepper-btn-next:hover { background: var(--green-hover); box-shadow: 0 4px 20px rgba(45,95,62,0.25); }
+    .stepper-btn-next:disabled {
+      background: var(--muted); cursor: not-allowed; box-shadow: none; opacity: 0.6;
+    }
+    .stepper-status {
+      font-size: 0.75rem; color: var(--text-soft); font-style: italic;
+    }
+
+    /* ── Responsive ── */
+    @media (max-width: 700px) {
+      .stepper-tabs { padding: 0 8px; }
+      .stepper-tab { padding: 10px 6px; gap: 6px; }
+      .stepper-tab-label { font-size: 0.68rem; }
+      .stepper-panel { padding: 24px 20px; }
+      .stepper-footer { padding: 16px 20px 24px; }
     }
 
     /* ── SCAN DATE CONFIRMATION (Phase 4) ── */
@@ -1402,54 +1444,106 @@
         <div class="project-desc-text" id="projectDescText"></div>
       </div>
 
-      <!-- Parcours découverte (Phase 3 uniquement) -->
-      <div class="discovery-section" id="discoverySection" style="display:none">
-        <div class="discovery-header">
+      <!-- ── Stepper Onboarding (Phase 3 uniquement) ── -->
+      <div class="stepper-section" id="stepperSection" style="display:none">
+        <div class="stepper-header">
           <h3>Parcours d&#233;couverte</h3>
-          <p>Avant de prendre rendez-vous, familiarisez-vous avec nos outils et notre approche. Validez chaque &#233;tape pour d&#233;bloquer la prise de rendez-vous.</p>
+          <p>Avant de prendre rendez-vous, familiarisez-vous avec nos outils et notre m&#233;thode. Validez chaque &#233;tape pour d&#233;bloquer la suite.</p>
         </div>
-        <div class="discovery-progress">
-          <span id="discoveryCount">0 / 4</span>
-          <div class="discovery-progress-bar">
-            <div class="discovery-progress-fill" id="discoveryFill"></div>
+
+        <!-- Onglets -->
+        <div class="stepper-tabs" id="stepperTabs">
+          <div class="stepper-tab active" data-step="0" onclick="goToStep(0)">
+            <div class="stepper-tab-num">1</div>
+            <div class="stepper-tab-label">Qui sommes-nous</div>
           </div>
-        </div>
-        <div class="discovery-list" id="discoveryList">
-          <div class="discovery-item" data-discovery="bureau" onclick="openDiscovery('bureau')">
-            <div class="discovery-check">&#x2713;</div>
-            <div class="discovery-info">
-              <div class="discovery-title">Qui sommes-nous ?</div>
-              <div class="discovery-desc">D&#233;couvrez Reno&#8217;Island, le bureau d&#8217;&#233;tudes derri&#232;re Scantorenov, et notre approche de la r&#233;novation.</div>
-            </div>
-            <span class="discovery-badge current">&#192; d&#233;couvrir</span>
+          <div class="stepper-tab" data-step="1" onclick="goToStep(1)">
+            <div class="stepper-tab-num">2</div>
+            <div class="stepper-tab-label">Visite virtuelle 3D</div>
           </div>
-          <div class="discovery-item locked" data-discovery="matterport" onclick="openDiscovery('matterport')">
-            <div class="discovery-check">&#x2713;</div>
-            <div class="discovery-info">
-              <div class="discovery-title">La visite virtuelle 3D</div>
-              <div class="discovery-desc">Comment naviguer dans votre scan Matterport, prendre des mesures et exploiter pleinement votre jumeau num&#233;rique.</div>
-            </div>
-            <span class="discovery-badge locked">Verrouill&#233;</span>
+          <div class="stepper-tab" data-step="2" onclick="goToStep(2)">
+            <div class="stepper-tab-num">3</div>
+            <div class="stepper-tab-label">Marcel, votre assistant</div>
           </div>
-          <div class="discovery-item locked" data-discovery="marcel" onclick="openDiscovery('marcel')">
-            <div class="discovery-check">&#x2713;</div>
-            <div class="discovery-info">
-              <div class="discovery-title">Travailler avec Marcel</div>
-              <div class="discovery-desc">Conseils pour interagir efficacement avec notre assistant IA en phase avant-projet et en tirer le meilleur parti.</div>
-            </div>
-            <span class="discovery-badge locked">Verrouill&#233;</span>
-          </div>
-          <div class="discovery-item locked" data-discovery="visuels" onclick="openDiscovery('visuels')">
-            <div class="discovery-check">&#x2713;</div>
-            <div class="discovery-info">
-              <div class="discovery-title">G&#233;n&#233;rer des visuels</div>
-              <div class="discovery-desc">Comment cr&#233;er des visuels de r&#233;novation adapt&#233;s, et comprendre les limites actuelles de l&#8217;IA g&#233;n&#233;rative.</div>
-            </div>
-            <span class="discovery-badge locked">Verrouill&#233;</span>
+          <div class="stepper-tab" data-step="3" onclick="goToStep(3)">
+            <div class="stepper-tab-num">4</div>
+            <div class="stepper-tab-label">Visuels IA</div>
           </div>
         </div>
-        <div class="discovery-unlock-msg" id="discoveryUnlockMsg">
-          Compl&#233;tez les 4 &#233;tapes pour d&#233;bloquer la prise de rendez-vous
+
+        <!-- Barre de progression -->
+        <div class="stepper-progress">
+          <div class="stepper-progress-fill" id="stepperFill"></div>
+        </div>
+
+        <!-- Panneaux de contenu -->
+        <div class="stepper-panels">
+          <!-- ── &#201;tape 1 : Qui sommes-nous ── -->
+          <div class="stepper-panel active" data-panel="0">
+            <h4>Reno&#8217;Island &#8212; Le bureau d&#8217;&#233;tudes derri&#232;re Scantorenov</h4>
+            <p>Scantorenov est un service d&#233;velopp&#233; par <strong>Reno&#8217;Island</strong>, bureau d&#8217;&#233;tudes sp&#233;cialis&#233; en ma&#238;trise d&#8217;&#339;uvre de r&#233;novation.</p>
+            <div class="step-highlight">
+              Notre approche combine la capture 3D de votre bien (scan Matterport), l&#8217;intelligence artificielle et l&#8217;expertise humaine d&#8217;un chef de projet d&#233;di&#233; pour vous accompagner de A &#224; Z.
+            </div>
+            <ul>
+              <li>Un jumeau num&#233;rique pr&#233;cis de votre bien, accessible 24h/24</li>
+              <li>Un assistant IA (Marcel) pour explorer les possibilit&#233;s de r&#233;novation</li>
+              <li>Un chef de projet exp&#233;riment&#233; pour piloter la mise en &#339;uvre</li>
+              <li>Un suivi transparent de chaque &#233;tape, de l&#8217;&#233;tude &#224; la r&#233;ception des travaux</li>
+            </ul>
+          </div>
+
+          <!-- ── &#201;tape 2 : Visite virtuelle ── -->
+          <div class="stepper-panel" data-panel="1">
+            <h4>Votre visite virtuelle Matterport</h4>
+            <p>Apr&#232;s le scan de votre bien, vous disposerez d&#8217;un <strong>jumeau num&#233;rique interactif</strong>. Voici comment l&#8217;exploiter au mieux :</p>
+            <ul>
+              <li><strong>Naviguer librement</strong> &#8212; D&#233;placez-vous dans chaque pi&#232;ce comme si vous y &#233;tiez, zoomez sur les d&#233;tails</li>
+              <li><strong>Prendre des mesures</strong> &#8212; L&#8217;outil de mesure int&#233;gr&#233; vous permet de v&#233;rifier distances et surfaces &#224; tout moment</li>
+              <li><strong>Capturer des vues</strong> &#8212; Faites des captures d&#8217;&#233;cran des zones qui vous int&#233;ressent pour les partager avec Marcel</li>
+              <li><strong>Vue plan</strong> &#8212; Basculez en vue &#171; Dollhouse &#187; ou &#171; Floor Plan &#187; pour une vision d&#8217;ensemble</li>
+            </ul>
+            <div class="step-highlight">
+              Astuce : plus vous explorez votre visite virtuelle en amont, plus vos &#233;changes avec Marcel et votre chef de projet seront productifs.
+            </div>
+          </div>
+
+          <!-- ── &#201;tape 3 : Marcel ── -->
+          <div class="stepper-panel" data-panel="2">
+            <h4>Travailler avec Marcel, votre assistant IA</h4>
+            <p>Marcel est l&#8217;assistant intelligent int&#233;gr&#233; &#224; votre espace. Il conna&#238;t votre bien gr&#226;ce au scan 3D et vous aide en phase avant-projet.</p>
+            <ul>
+              <li><strong>Posez des questions pr&#233;cises</strong> &#8212; &#171; Peut-on ouvrir la cuisine sur le salon ? &#187; plut&#244;t que &#171; Que faire ? &#187;</li>
+              <li><strong>D&#233;crivez vos envies</strong> &#8212; Style, ambiance, contraintes, budget&#8230; plus vous &#234;tes pr&#233;cis, mieux Marcel vous guide</li>
+              <li><strong>Proc&#233;dez par &#233;tapes</strong> &#8212; Traitez une pi&#232;ce ou un sujet &#224; la fois pour des r&#233;ponses plus pertinentes</li>
+              <li><strong>Demandez des alternatives</strong> &#8212; Marcel peut proposer plusieurs sc&#233;narios pour un m&#234;me espace</li>
+            </ul>
+            <div class="step-highlight">
+              Marcel est un outil puissant, mais il reste un assistant. Ses suggestions sont des pistes de r&#233;flexion que votre chef de projet validera et affinera avec vous.
+            </div>
+          </div>
+
+          <!-- ── &#201;tape 4 : Visuels IA ── -->
+          <div class="stepper-panel" data-panel="3">
+            <h4>G&#233;n&#233;rer des visuels de r&#233;novation</h4>
+            <p>Vous pourrez g&#233;n&#233;rer des <strong>visuels d&#8217;ambiance</strong> pour visualiser le potentiel de votre r&#233;novation. Quelques points importants :</p>
+            <ul>
+              <li><strong>Ce sont des inspirations</strong> &#8212; Les visuels IA donnent une direction esth&#233;tique, pas un plan technique</li>
+              <li><strong>Soyez descriptif</strong> &#8212; &#171; Cuisine ouverte, style scandinave, bois clair et plan de travail en pierre &#187;</li>
+              <li><strong>It&#233;rez</strong> &#8212; Affinez progressivement : g&#233;n&#233;rez, ajustez la description, reg&#233;n&#233;rez</li>
+              <li><strong>Acceptez les limites</strong> &#8212; L&#8217;IA ne reproduit pas votre pi&#232;ce &#224; l&#8217;identique, elle s&#8217;en inspire</li>
+            </ul>
+            <div class="step-highlight">
+              L&#8217;IA g&#233;n&#233;rative est un outil formidable mais imparfait. Les visuels servent de base de discussion avec votre chef de projet, qui traduira vos envies en solutions techniques r&#233;alisables.
+            </div>
+          </div>
+        </div>
+
+        <!-- Pied du stepper -->
+        <div class="stepper-footer">
+          <button class="stepper-btn-back" id="stepperBack" onclick="stepperPrev()" disabled>&#8592; Pr&#233;c&#233;dent</button>
+          <span class="stepper-status" id="stepperStatus">&#201;tape 1 sur 4</span>
+          <button class="stepper-btn-next" id="stepperNext" onclick="stepperConfirm()">J&#8217;ai compris &#10003;</button>
         </div>
       </div>
 
@@ -2137,96 +2231,144 @@ function renderPhase3(project) {
     descCard.style.display = '';
   }
 
-  // Parcours découverte + bouton callback (phase 3 uniquement)
-  var discoveryEl = document.getElementById('discoverySection');
+  // Stepper onboarding + bouton callback (phase 3 uniquement)
+  var stepperEl = document.getElementById('stepperSection');
   var callbackEl = document.getElementById('callbackSection');
   if (currentPhase === 3) {
-    if (discoveryEl) discoveryEl.style.display = '';
-    renderDiscovery();
-    // Le callback sera affiché/masqué par renderDiscovery selon l'avancement
+    if (stepperEl) stepperEl.style.display = '';
+    initStepper();
   } else {
-    if (discoveryEl) discoveryEl.style.display = 'none';
+    if (stepperEl) stepperEl.style.display = 'none';
     if (callbackEl) callbackEl.style.display = currentPhase <= 3 ? '' : 'none';
   }
 }
 
-/* ── Parcours découverte ── */
-var DISCOVERY_STEPS = ['bureau', 'matterport', 'marcel', 'visuels'];
+/* ══════════════════════════════════════════════
+   STEPPER ONBOARDING
+   ══════════════════════════════════════════════ */
+var stepperCurrent = 0;
+var STEPPER_TOTAL = 4;
 
-function getDiscoveryState() {
+function getStepperState() {
   try {
-    var raw = localStorage.getItem('scantorenov_discovery');
-    return raw ? JSON.parse(raw) : {};
-  } catch(e) { return {}; }
+    var raw = localStorage.getItem('scantorenov_stepper');
+    return raw ? JSON.parse(raw) : { validated: [] };
+  } catch(e) { return { validated: [] }; }
 }
 
-function saveDiscoveryState(state) {
-  localStorage.setItem('scantorenov_discovery', JSON.stringify(state));
+function saveStepperState(state) {
+  localStorage.setItem('scantorenov_stepper', JSON.stringify(state));
 }
 
-function renderDiscovery() {
-  var state = getDiscoveryState();
-  var completed = 0;
-  var firstIncomplete = -1;
+function initStepper() {
+  var state = getStepperState();
+  // Reprendre là où l'utilisateur s'était arrêté
+  var firstUnvalidated = state.validated.length;
+  if (firstUnvalidated >= STEPPER_TOTAL) firstUnvalidated = STEPPER_TOTAL - 1;
+  stepperCurrent = firstUnvalidated;
+  renderStepper();
+}
 
-  DISCOVERY_STEPS.forEach(function(step, i) {
-    var item = document.querySelector('[data-discovery="' + step + '"]');
-    if (!item) return;
+function renderStepper() {
+  var state = getStepperState();
+  var validatedCount = state.validated.length;
 
-    var badge = item.querySelector('.discovery-badge');
-    var isCompleted = state[step] === true;
-
-    item.classList.remove('completed', 'locked');
-
-    if (isCompleted) {
-      item.classList.add('completed');
-      if (badge) { badge.className = 'discovery-badge done'; badge.textContent = 'Terminé'; }
-      completed++;
-    } else if (firstIncomplete === -1) {
-      firstIncomplete = i;
-      // Première étape non complétée : active
-      if (badge) { badge.className = 'discovery-badge current'; badge.textContent = 'À découvrir'; }
-    } else {
-      item.classList.add('locked');
-      if (badge) { badge.className = 'discovery-badge locked'; badge.textContent = 'Verrouillé'; }
+  // -- Onglets --
+  var tabs = document.querySelectorAll('.stepper-tab');
+  tabs.forEach(function(tab) {
+    var idx = parseInt(tab.getAttribute('data-step'));
+    tab.classList.remove('active', 'completed');
+    if (idx === stepperCurrent) tab.classList.add('active');
+    if (state.validated.indexOf(idx) > -1) tab.classList.add('completed');
+    // Numéro dans l'onglet
+    var numEl = tab.querySelector('.stepper-tab-num');
+    if (numEl) {
+      numEl.textContent = (state.validated.indexOf(idx) > -1) ? '✓' : (idx + 1);
     }
   });
 
-  // Barre de progression
-  var fill = document.getElementById('discoveryFill');
-  var count = document.getElementById('discoveryCount');
-  var total = DISCOVERY_STEPS.length;
-  if (fill) fill.style.width = (completed / total * 100) + '%';
-  if (count) count.textContent = completed + ' / ' + total;
+  // -- Panneaux --
+  var panels = document.querySelectorAll('.stepper-panel');
+  panels.forEach(function(panel) {
+    var idx = parseInt(panel.getAttribute('data-panel'));
+    panel.classList.toggle('active', idx === stepperCurrent);
+  });
 
-  // Message + bouton callback
-  var msg = document.getElementById('discoveryUnlockMsg');
+  // -- Barre de progression --
+  var fill = document.getElementById('stepperFill');
+  if (fill) fill.style.width = (validatedCount / STEPPER_TOTAL * 100) + '%';
+
+  // -- Status --
+  var statusEl = document.getElementById('stepperStatus');
+  if (statusEl) {
+    if (validatedCount >= STEPPER_TOTAL) {
+      statusEl.textContent = '✅ Parcours complété !';
+    } else {
+      statusEl.textContent = 'Étape ' + (stepperCurrent + 1) + ' sur ' + STEPPER_TOTAL;
+    }
+  }
+
+  // -- Bouton précédent --
+  var backBtn = document.getElementById('stepperBack');
+  if (backBtn) backBtn.disabled = (stepperCurrent === 0);
+
+  // -- Bouton suivant / J'ai compris --
+  var nextBtn = document.getElementById('stepperNext');
+  if (nextBtn) {
+    var alreadyValidated = state.validated.indexOf(stepperCurrent) > -1;
+    if (alreadyValidated && stepperCurrent < STEPPER_TOTAL - 1) {
+      // Étape déjà validée et pas la dernière → simple navigation
+      nextBtn.textContent = 'Suivant →';
+      nextBtn.disabled = false;
+    } else if (alreadyValidated && stepperCurrent === STEPPER_TOTAL - 1) {
+      // Dernière étape déjà validée → masquer le bouton
+      nextBtn.textContent = '✓ Terminé';
+      nextBtn.disabled = true;
+    } else {
+      // Pas encore validée
+      nextBtn.innerHTML = 'J&#8217;ai compris &#10003;';
+      nextBtn.disabled = false;
+    }
+  }
+
+  // -- Bouton callback --
   var callbackEl = document.getElementById('callbackSection');
-  if (completed >= total) {
-    if (msg) msg.textContent = '✅ Parcours complété ! Vous pouvez maintenant prendre rendez-vous.';
-    if (callbackEl) callbackEl.style.display = '';
-  } else {
-    if (msg) msg.textContent = 'Complétez les ' + total + ' étapes pour débloquer la prise de rendez-vous';
-    if (callbackEl) callbackEl.style.display = 'none';
+  if (callbackEl) {
+    callbackEl.style.display = (validatedCount >= STEPPER_TOTAL) ? '' : 'none';
   }
 }
 
-function openDiscovery(stepId) {
-  var state = getDiscoveryState();
+function goToStep(idx) {
+  var state = getStepperState();
+  // On peut naviguer vers une étape déjà validée ou la prochaine non validée
+  if (idx <= state.validated.length) {
+    stepperCurrent = idx;
+    renderStepper();
+  }
+}
 
-  // Vérifier que l'étape est accessible (pas verrouillée)
-  var stepIndex = DISCOVERY_STEPS.indexOf(stepId);
-  for (var i = 0; i < stepIndex; i++) {
-    if (!state[DISCOVERY_STEPS[i]]) return; // Étape précédente non complétée
+function stepperConfirm() {
+  var state = getStepperState();
+
+  // Si pas encore validée, valider
+  if (state.validated.indexOf(stepperCurrent) === -1) {
+    state.validated.push(stepperCurrent);
+    saveStepperState(state);
   }
 
-  // Si déjà complétée, ne rien faire
-  if (state[stepId]) return;
+  // Passer à l'étape suivante (si pas la dernière)
+  if (stepperCurrent < STEPPER_TOTAL - 1) {
+    stepperCurrent++;
+  }
 
-  // Marquer comme complétée (pour l'instant, validation directe — le contenu sera ajouté plus tard)
-  state[stepId] = true;
-  saveDiscoveryState(state);
-  renderDiscovery();
+  renderStepper();
+}
+
+function stepperPrev() {
+  if (stepperCurrent > 0) {
+    stepperCurrent--;
+    renderStepper();
+  }
 }
 
 /* ── Phase 4 : Confirmation date scan ── */
