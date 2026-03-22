@@ -193,7 +193,7 @@ nav {
 
 section {
   padding: 100px 48px;
-  max-width: 1100px;
+  max-width: 1200px;
   margin: 0 auto;
 }
 
@@ -415,13 +415,63 @@ section .section-intro {
 .contact-info {
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 0;
+  justify-content: center;
+  height: 100%;
 }
 
 .contact-info p {
   color: var(--text-soft);
   font-size: 0.92rem;
   line-height: 1.8;
+}
+
+.contact-phrase {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 0.9rem; font-weight: 400;
+  color: var(--text); line-height: 2.8;
+  margin: 0; padding: 0;
+  border-left: 2px solid transparent;
+  padding-left: 16px;
+  transition: border-color 0.3s;
+}
+.contact-phrase:nth-child(odd) {
+  border-left-color: rgba(45,95,62,0.2);
+}
+
+/* Colonne droite du contact-grid : espacement des champs */
+.contact-grid > div:last-child {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+/* Groupe téléphone avec indicatif */
+.phone-group {
+  display: flex;
+  gap: 0;
+  align-items: stretch;
+}
+.phone-group .phone-prefix {
+  min-width: 95px;
+  max-width: 95px;
+  border-radius: 8px 0 0 8px;
+  border-right: none;
+  padding: 13px 8px;
+  font-size: 0.85rem;
+  background-position: right 8px center;
+  padding-right: 24px;
+}
+.phone-group input[type="tel"] {
+  border-radius: 0 8px 8px 0;
+  flex: 1;
+}
+
+/* Zone pleine largeur pour les tags */
+.contact-fullwidth {
+  margin-top: 32px;
+  padding-top: 32px;
+  border-top: 1px solid var(--border);
 }
 
 .contact-detail {
@@ -503,22 +553,27 @@ section .section-intro {
 }
 
 .contact-form button {
-  padding: 14px 28px;
+  padding: 18px 52px;
   background: var(--green);
   color: #FFFFFF;
-  border: none;
-  border-radius: 6px;
-  font-size: 0.8rem;
+  border: 2px solid var(--green);
+  border-radius: 32px;
+  font-size: 0.82rem;
   font-weight: 700;
   letter-spacing: 0.1em;
   text-transform: uppercase;
   cursor: pointer;
-  transition: background 0.2s;
-  align-self: flex-start;
+  transition: all 0.3s ease;
+  display: block;
+  margin: 20px auto 0;
+  font-size: 0.9rem;
+  letter-spacing: 0.08em;
 }
 
 .contact-form button:hover {
-  background: var(--green-hover);
+  background: transparent;
+  color: var(--green);
+  border-color: var(--green);
 }
 
 /* ── TAG / CHIP SELECTOR ── */
@@ -633,9 +688,30 @@ section .section-intro {
     grid-template-columns: repeat(2, 1fr);
   }
 }
-/* Textarea réduit pour le champ optionnel */
+/* Échéance selects agrandis et côte à côte */
+.contact-fullwidth .form-group .form-row {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: nowrap;
+}
+.contact-fullwidth .form-group .form-row select {
+  padding: 14px 40px 14px 18px;
+  font-size: 0.95rem;
+  min-width: 160px;
+  text-align: center;
+  flex: 1;
+}
+/* Textarea pour le champ optionnel */
 .contact-form textarea.compact {
-  min-height: 60px;
+  min-height: 110px;
+  max-width: 700px;
+  margin: 0 auto;
+  display: block;
+  resize: vertical;
+}
+/* Erreur et bouton centrés en pleine largeur */
+.contact-fullwidth #contactFormError {
+  text-align: center;
 }
 /* Résumé structuré caché */
 .contact-form .structured-summary {
@@ -838,13 +914,20 @@ window.location.replace('/connexion'+h);
 <section id="contact">
 <div class="section-label">Contact</div>
 <h2>Votre r&#233;novation commence ici</h2>
+
+<!-- ── ZONE HAUTE : Identification (2 colonnes) ── -->
+<form class="contact-form" name="contact" method="POST" data-netlify="true" id="contactForm">
 <div class="contact-grid">
 <div class="contact-info">
-<p>Vous avez un projet de r&#233;novation&nbsp;? Vous souhaitez d&#233;couvrir notre approche par le scan 3D&nbsp;? N&#8217;h&#233;sitez pas &#224; nous contacter. Nous vous r&#233;pondrons dans les plus brefs d&#233;lais.</p>
-<div class="contact-detail"><span class="cd-icon">&#x2709;</span> contact@scantorenov.com</div>
+<p class="contact-phrase">Vous avez un projet de r&#233;novation&nbsp;?</p>
+<p class="contact-phrase">D&#233;couvrez notre approche par le scan 3D.</p>
+<p class="contact-phrase">Un jumeau num&#233;rique pr&#233;cis de votre bien.</p>
+<p class="contact-phrase">Un assistant IA pour explorer chaque possibilit&#233;.</p>
+<p class="contact-phrase">Un chef de projet d&#233;di&#233; &#224; vos c&#244;t&#233;s.</p>
+<div class="contact-detail" style="margin-top:24px;"><span class="cd-icon">&#x2709;</span> contact@scantorenov.com</div>
 <div class="contact-detail"><span class="cd-icon">&#x1F310;</span> scantorenov.com</div>
 </div>
-<form class="contact-form" name="contact" method="POST" data-netlify="true" id="contactForm">
+<div><!-- colonne droite formulaire -->
 
 <!-- Genre / Prénom / Nom -->
 <div class="form-row-3">
@@ -857,10 +940,31 @@ window.location.replace('/connexion'+h);
   <input type="text" name="nom" placeholder="NOM" required />
 </div>
 
-<!-- Email / Téléphone -->
+<!-- Email / Téléphone avec indicatif -->
 <div class="form-row">
   <input type="email" name="email" placeholder="Email" required />
-  <input type="tel" name="telephone" placeholder="T&#233;l&#233;phone" required />
+  <div class="phone-group">
+    <select name="indicatif" id="indicatif" class="phone-prefix">
+      <option value="+33" selected>&#127467;&#127479; +33</option>
+      <option value="+32">&#127463;&#127466; +32</option>
+      <option value="+41">&#127464;&#127469; +41</option>
+      <option value="+352">&#127473;&#127482; +352</option>
+      <option value="+377">&#127474;&#127464; +377</option>
+      <option value="+44">&#127468;&#127463; +44</option>
+      <option value="+49">&#127465;&#127466; +49</option>
+      <option value="+34">&#127466;&#127480; +34</option>
+      <option value="+39">&#127470;&#127481; +39</option>
+      <option value="+351">&#127477;&#127481; +351</option>
+      <option value="+1">&#127482;&#127480; +1</option>
+      <option value="+1">&#127464;&#127462; +1</option>
+      <option value="+212">&#127474;&#127462; +212</option>
+      <option value="+216">&#127481;&#127475; +216</option>
+      <option value="+213">&#127465;&#127487; +213</option>
+      <option value="+225">&#127464;&#127470; +225</option>
+      <option value="+221">&#127480;&#127475; +221</option>
+    </select>
+    <input type="tel" name="telephone" placeholder="T&#233;l&#233;phone" required />
+  </div>
 </div>
 
 <!-- Adresse avec autocomplétion BAN -->
@@ -888,6 +992,12 @@ window.location.replace('/connexion'+h);
 <select name="precision" id="precisionBien" required disabled>
   <option value="" disabled selected>Pr&#233;cision (s&#233;lectionnez d&#8217;abord le type)</option>
 </select>
+
+</div><!-- fin colonne droite formulaire -->
+</div><!-- fin contact-grid (2 colonnes) -->
+
+<!-- ── ZONE BASSE : Projet + Tags (pleine largeur) ── -->
+<div class="contact-fullwidth">
 
 <!-- ══════════ GROUPE 1 : LE PROJET ══════════ -->
 <div class="form-divider"></div>
@@ -927,6 +1037,7 @@ window.location.replace('/connexion'+h);
     <span class="form-tag" data-value="Salon / Salle &#224; manger"><span class="tag-icon">&#128715;</span><span class="tag-check">&#10003;</span> Salon / Salle &#224; manger</span>
     <span class="form-tag" data-value="Chambres / Bureau"><span class="tag-icon">&#128716;</span><span class="tag-check">&#10003;</span> Chambres / Bureau</span>
     <span class="form-tag" data-value="Terrasse / Fa&#231;ade"><span class="tag-icon">&#127795;</span><span class="tag-check">&#10003;</span> Terrasse / Fa&#231;ade</span>
+    <span class="form-tag" data-value="Am&#233;nagement Combles / Sous-sol"><span class="tag-icon">&#128208;</span><span class="tag-check">&#10003;</span> Am&#233;nagement Combles / Sous-sol</span>
   </div>
 </div>
 
@@ -942,7 +1053,7 @@ window.location.replace('/connexion'+h);
     <span class="form-tag" data-value="Menuiseries"><span class="tag-icon">&#129695;</span><span class="tag-check">&#10003;</span> Menuiseries</span>
     <span class="form-tag" data-value="Toiture"><span class="tag-icon">&#127968;</span><span class="tag-check">&#10003;</span> Toiture</span>
     <span class="form-tag" data-value="Cuvelage"><span class="tag-icon">&#128167;</span><span class="tag-check">&#10003;</span> Cuvelage</span>
-    <span class="form-tag" data-value="Am&#233;nagement de combles"><span class="tag-icon">&#128208;</span><span class="tag-check">&#10003;</span> Am&#233;nagement de combles</span>
+    <span class="form-tag" data-value="Panneaux solaires"><span class="tag-icon">&#9728;</span><span class="tag-check">&#10003;</span> Panneaux solaires</span>
   </div>
 </div>
 
@@ -970,14 +1081,16 @@ window.location.replace('/connexion'+h);
     <span class="form-tag" data-value="< 20 000 €"><span class="tag-check">&#10003;</span> - 20 000 &#8364;</span>
     <span class="form-tag" data-value="20 000 — 50 000 €"><span class="tag-check">&#10003;</span> 20 000 &#8212; 50 000 &#8364;</span>
     <span class="form-tag" data-value="50 000 — 100 000 €"><span class="tag-check">&#10003;</span> 50 000 &#8212; 100 000 &#8364;</span>
-    <span class="form-tag" data-value="100 000 — 200 000 €"><span class="tag-check">&#10003;</span> 100 000 &#8212; 200 000 &#8364;</span>
-    <span class="form-tag" data-value="> 200 000 €"><span class="tag-check">&#10003;</span> + 200 000 &#8364;</span>
+    <span class="form-tag" data-value="100 000 — 150 000 €"><span class="tag-check">&#10003;</span> 100 000 &#8212; 150 000 &#8364;</span>
+    <span class="form-tag" data-value="150 000 — 250 000 €"><span class="tag-check">&#10003;</span> 150 000 &#8212; 250 000 &#8364;</span>
+    <span class="form-tag" data-value="> 250 000 €"><span class="tag-check">&#10003;</span> + 250 000 &#8364;</span>
   </div>
 </div>
 
 <!-- Échéance -->
-<label for="echeanceMonth" style="display:block;font-size:0.75rem;color:var(--muted);margin-bottom:4px;font-weight:500;">&#201;ch&#233;ance de livraison des travaux vis&#233;e</label>
-<div class="form-row">
+<div class="form-group">
+<div class="form-group-question">&#201;ch&#233;ance de livraison des travaux vis&#233;e</div>
+<div class="form-row" style="justify-content:center;gap:12px;max-width:400px;margin:0 auto;">
   <select id="echeanceMonth" required>
     <option value="" disabled selected>Mois</option>
     <option value="01">Janvier</option>
@@ -997,11 +1110,13 @@ window.location.replace('/connexion'+h);
     <option value="" disabled selected>Ann&#233;e</option>
   </select>
 </div>
+</div><!-- fin form-group échéance -->
 <input type="hidden" name="echeance" id="echeanceHidden" />
 
 <!-- Champ libre optionnel -->
 <div class="form-divider"></div>
-<textarea name="message" class="compact" placeholder="Un d&#233;tail sp&#233;cifique &#224; pr&#233;ciser ? (Facultatif)"></textarea>
+<textarea name="message" class="compact" placeholder="Un d&#233;tail sp&#233;cifique &#224; pr&#233;ciser ? (Facultatif - 50 caract&#232;res maximum)" maxlength="50"></textarea>
+<small class="char-count" id="charCount" style="display:block;text-align:right;max-width:700px;margin:4px auto 0;color:var(--muted);font-size:0.75rem;">0 / 50</small>
 
 <!-- Champs cachés pour les données structurées -->
 <input type="hidden" name="typeProjet" id="tagTypeProjet" />
@@ -1014,6 +1129,7 @@ window.location.replace('/connexion'+h);
 
 <p id="contactFormError" style="color:#ff9090;font-size:0.82rem;display:none;margin:-4px 0 0 0;"></p>
 <button type="submit">Envoyer ma demande</button>
+</div><!-- fin contact-fullwidth -->
 </form>
 
 <script>
@@ -1107,6 +1223,19 @@ document.getElementById('typeBien').addEventListener('change', function() {
   }
   monthSel.addEventListener('change', syncEcheance);
   yearSel.addEventListener('change', syncEcheance);
+})();
+
+/* --- Compteur de caractères textarea --- */
+(function() {
+  var ta = document.querySelector('textarea[name="message"]');
+  var counter = document.getElementById('charCount');
+  if (ta && counter) {
+    ta.addEventListener('input', function() {
+      var len = ta.value.length;
+      counter.textContent = len + ' / 50';
+      counter.style.color = len >= 50 ? '#ff9090' : 'var(--muted)';
+    });
+  }
 })();
 
 /* --- Collecter toutes les données structurées au submit --- */
@@ -1204,6 +1333,28 @@ document.getElementById('contactForm').addEventListener('submit', function(e) {
   // Écrire le résumé dans le champ message pour compatibilité
   if (form.message) form.message.value = demande;
 
+  // Préparer les données structurées pour Marcel (JSON)
+  var marcelData = {
+    genre: form.genre ? form.genre.value : '',
+    prenom: form.prenom ? form.prenom.value : '',
+    nom: form.nom ? form.nom.value : '',
+    email: form.email ? form.email.value : '',
+    telephone: form.telephone ? form.telephone.value : '',
+    adresse: form.adresse ? form.adresse.value : '',
+    qualite: form.qualite ? form.qualite.value : '',
+    typeBien: form.typeBien ? form.typeBien.value : '',
+    precision: form.precision ? form.precision.value : '',
+    typeProjet: structured.typeProjet || '',
+    incluant: structured.incluant || [],
+    nbPieces: structured.nbPieces || '',
+    espaces: structured.espaces || [],
+    travaux: structured.travaux || [],
+    surface: structured.surface || '',
+    budget: structured.budget || '',
+    echeance: form.echeance ? form.echeance.value : '',
+    message: msgText
+  };
+
   var formData = new FormData(form);
   var body = new URLSearchParams(formData).toString();
 
@@ -1213,7 +1364,18 @@ document.getElementById('contactForm').addEventListener('submit', function(e) {
     headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
     body: body + '&form-name=contact'
   }).then(function() {
-    // 2) Déclencher la fonction email (en parallèle, non bloquant)
+    // 2) Générer et stocker le prompt Marcel dans Supabase
+    fetch('/.netlify/functions/marcel-prompt', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(marcelData)
+    }).then(function(r) { return r.json(); })
+      .then(function(res) {
+        console.log('Marcel prompt:', res.success ? 'généré (' + res.prompt_length + ' car.)' : 'erreur');
+      })
+      .catch(function(err) { console.warn('Marcel prompt non généré:', err); });
+
+    // 3) Déclencher la fonction email (en parallèle, non bloquant)
     fetch('/.netlify/functions/contact', {
       method: 'POST',
       headers: { 'Content-Type': 'application/x-www-form-urlencoded' },

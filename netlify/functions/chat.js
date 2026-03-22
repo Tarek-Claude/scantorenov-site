@@ -6,7 +6,15 @@
  *   1. Anthropic Claude (priorité — meilleure qualité)
  *   2. Together.ai / Llama 3.1 (fallback fiable)
  *   3. Ollama (fallback local dev)
+ *
+ * Prompt personnalisé :
+ *   Si un marcel_system_prompt existe dans Supabase pour ce client (généré
+ *   à la soumission du formulaire contact), il est utilisé À LA PLACE du
+ *   prompt par défaut. Il contient les 3 missions : rôle, scénario client,
+ *   directives de cohérence budget/surface/travaux.
  */
+
+const { createClient } = require('@supabase/supabase-js');
 
 const MARCEL_SYSTEM_PROMPT = `Tu es Marcel, l'assistant IA de Scantorenov.
 
@@ -143,6 +151,35 @@ async function callTogether(messages, systemPrompt) {
   return data.choices[0]?.message?.content || "Je n'ai pas pu générer une réponse.";
 }
 
+/**
+ * Récupère le prompt Marcel personnalisé depuis Supabase pour un client.
+ * Ce prompt est généré par marcel-prompt.js à la soumission du formulaire.
+ * Il contient : rôle + scénario client + directives de cohérence.
+ * @param {string} email - Email du client
+ * @returns {string|null} Le prompt personnalisé ou null
+ */
+async function getClientMarcelPrompt(email) {
+  if (!email) return null;
+  const url = process.env.SUPABASE_URL;
+  const key = process.env.SUPABASE_SERVICE_KEY;
+  if (!url || !key) return null;
+
+  try {
+    const supabase = createClient(url, key);
+    const { data, error } = await supabase
+      .from('clients')
+      .select('marcel_system_prompt')
+      .eq('email', email.toLowerCase().trim())
+      .single();
+
+    if (error || !data || !data.marcel_system_prompt) return null;
+    return data.marcel_system_prompt;
+  } catch (err) {
+    console.warn('Marcel: récupération prompt Supabase échouée:', err.message);
+    return null;
+  }
+}
+
 exports.handler = async function(event) {
   if (event.httpMethod === 'OPTIONS') {
     return { statusCode: 200, headers, body: '' };
@@ -159,17 +196,42 @@ exports.handler = async function(event) {
     return { statusCode: 400, headers, body: JSON.stringify({ error: 'Corps de requête invalide' }) };
   }
 
-  const { messages, propertyData } = body;
+  const { messages, propertyData, email } = body;
   if (!messages || !Array.isArray(messages) || messages.length === 0) {
     return { statusCode: 400, headers, body: JSON.stringify({ error: 'Messages manquants' }) };
   }
 
-  // Injecter les données du bien dans le prompt système
-  let systemPrompt = MARCEL_SYSTEM_PROMPT;
-  if (propertyData) {
-    systemPrompt = systemPrompt.replace('{{PROPERTY_DATA}}', JSON.stringify(propertyData, null, 2));
+  // ══════════════════════════════════════════════════════════
+  //  PROMPT SYSTÈME : Personnalisé (Supabase) ou par défaut
+  //  Si un marcel_system_prompt existe pour ce client, il est
+  //  utilisé car il contient les 3 missions (rôle, scénario,
+  //  directives de cohérence) forgées depuis le formulaire.
+  // ══════════════════════════════════════════════════════════
+  let systemPrompt;
+  let promptSource = 'default';
+
+  const clientPrompt = await getClientMarcelPrompt(email);
+  if (clientPrompt) {
+    // Prompt personnalisé trouvé — l'utiliser comme base
+    systemPrompt = clientPrompt;
+    promptSource = 'supabase';
+    console.log(`Marcel: prompt personnalisé chargé pour ${email}`);
+
+    // Enrichir avec les données du scan 3D si disponibles
+    if (propertyData) {
+      systemPrompt += `\n\n═══════════════════════════════════════════════════════
+DONNÉES DU SCAN 3D MATTERPORT
+═══════════════════════════════════════════════════════
+${JSON.stringify(propertyData, null, 2)}`;
+    }
   } else {
-    systemPrompt = systemPrompt.replace('{{PROPERTY_DATA}}', 'Aucune donnée de bien disponible pour le moment.');
+    // Pas de prompt personnalisé — utiliser le prompt par défaut
+    systemPrompt = MARCEL_SYSTEM_PROMPT;
+    if (propertyData) {
+      systemPrompt = systemPrompt.replace('{{PROPERTY_DATA}}', JSON.stringify(propertyData, null, 2));
+    } else {
+      systemPrompt = systemPrompt.replace('{{PROPERTY_DATA}}', 'Aucune donnée de bien disponible pour le moment.');
+    }
   }
 
   // ══════════════════════════════════════════════════════════
@@ -213,7 +275,7 @@ exports.handler = async function(event) {
   if (replyText) {
     return {
       statusCode: 200, headers,
-      body: JSON.stringify({ content: replyText, provider: usedProvider })
+      body: JSON.stringify({ content: replyText, provider: usedProvider, promptSource })
     };
   }
 
