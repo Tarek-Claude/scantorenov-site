@@ -521,6 +521,74 @@ section .section-intro {
   background: var(--green-hover);
 }
 
+/* ── TAG / CHIP SELECTOR ── */
+.form-group {
+  margin-bottom: 8px;
+}
+.form-group-label {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 0.72rem; font-weight: 700;
+  letter-spacing: 0.12em; text-transform: uppercase;
+  color: var(--green); margin-bottom: 10px;
+}
+.form-group-question {
+  font-size: 0.88rem; color: var(--text); font-weight: 500;
+  margin-bottom: 12px; line-height: 1.5;
+}
+.form-group-hint {
+  font-size: 0.72rem; color: var(--muted); font-style: italic;
+  margin-bottom: 10px;
+}
+.form-tags {
+  display: flex; flex-wrap: wrap; gap: 9px;
+}
+.form-tag {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 10px 18px; background: var(--card);
+  border: 1.5px solid var(--border); border-radius: 24px;
+  font-size: 0.82rem; font-weight: 500; color: var(--text-soft);
+  cursor: pointer; transition: all 0.25s; user-select: none;
+  white-space: nowrap;
+}
+.form-tag:hover {
+  border-color: var(--green); color: var(--text);
+  background: rgba(45,95,62,0.03);
+  transform: translateY(-1px);
+  box-shadow: 0 3px 12px rgba(45,95,62,0.08);
+}
+.form-tag.active {
+  border-color: var(--green); color: var(--green);
+  background: rgba(45,95,62,0.08); font-weight: 600;
+  box-shadow: 0 2px 10px rgba(45,95,62,0.12);
+}
+.form-tag .tag-icon {
+  font-size: 1rem; line-height: 1;
+}
+.form-tag .tag-check {
+  width: 16px; height: 16px; border-radius: 50%;
+  border: 1.5px solid var(--border); display: flex;
+  align-items: center; justify-content: center;
+  font-size: 0.6rem; color: transparent;
+  transition: all 0.2s; flex-shrink: 0;
+}
+.form-tag.active .tag-check {
+  background: var(--green); border-color: var(--green);
+  color: #fff;
+}
+/* Séparateur entre groupes */
+.form-divider {
+  height: 1px; background: var(--border);
+  margin: 20px 0 24px;
+}
+/* Textarea réduit pour le champ optionnel */
+.contact-form textarea.compact {
+  min-height: 60px;
+}
+/* Résumé structuré caché */
+.contact-form .structured-summary {
+  display: none;
+}
+
 .address-autocomplete {
   position: relative;
 }
@@ -755,129 +823,148 @@ window.location.replace('/connexion'+h);
   <option value="Professionnel">Professionnel</option>
 </select>
 
-<!-- Type de bien -->
-<select name="typeBien" id="typeBien" required>
-  <option value="" disabled selected>Type de bien</option>
-  <option value="Résidentiel">R&#233;sidentiel</option>
-  <option value="Tertiaire">Tertiaire</option>
-  <option value="Site industriel">Site industriel</option>
-</select>
-
-<!-- Précision (dynamique) -->
-<select name="precision" id="precisionBien" required disabled>
-  <option value="" disabled selected>Pr&#233;cision (s&#233;lectionnez d&#8217;abord le type)</option>
-</select>
-
-<!-- Surface estimée -->
-<select name="surface" required>
-  <option value="" disabled selected>Estimation surfaces au sol &#224; r&#233;nover</option>
-  <option value="< 10 m²">&lt; 10 m&#178;</option>
-  <option value="10 — 40 m²">10 &#8212; 40 m&#178;</option>
-  <option value="40 — 80 m²">40 &#8212; 80 m&#178;</option>
-  <option value="80 — 120 m²">80 &#8212; 120 m&#178;</option>
-  <option value="120 — 180 m²">120 &#8212; 180 m&#178;</option>
-  <option value="180 — 250 m²">180 &#8212; 250 m&#178;</option>
-  <option value="250 — 500 m²">250 &#8212; 500 m&#178;</option>
-  <option value="500 — 1000 m²">500 &#8212; 1 000 m&#178;</option>
-  <option value="> 1000 m²">&gt; 1 000 m&#178;</option>
-</select>
-
-<!-- Budget -->
-<select name="budget" required>
-  <option value="" disabled selected>Budget pr&#233;visionnel</option>
-  <option value="< 20 000 €">&lt; 20 000 &#8364;</option>
-  <option value="< 50 000 €">&lt; 50 000 &#8364;</option>
-  <option value="< 100 000 €">&lt; 100 000 &#8364;</option>
-  <option value="< 200 000 €">&lt; 200 000 &#8364;</option>
-  <option value="> 200 000 €">&gt; 200 000 &#8364;</option>
-</select>
-
-<!-- Échéance -->
-<label for="echeanceMonth" style="display:block;font-size:0.75rem;color:var(--muted);margin-bottom:4px;font-weight:500;">&#201;ch&#233;ance de livraison des travaux vis&#233;e</label>
-<div class="form-row">
-  <select id="echeanceMonth" required>
-    <option value="" disabled selected>Mois</option>
-    <option value="01">Janvier</option>
-    <option value="02">F&#233;vrier</option>
-    <option value="03">Mars</option>
-    <option value="04">Avril</option>
-    <option value="05">Mai</option>
-    <option value="06">Juin</option>
-    <option value="07">Juillet</option>
-    <option value="08">Ao&#251;t</option>
-    <option value="09">Septembre</option>
-    <option value="10">Octobre</option>
-    <option value="11">Novembre</option>
-    <option value="12">D&#233;cembre</option>
-  </select>
-  <select id="echeanceYear" required>
-    <option value="" disabled selected>Ann&#233;e</option>
-  </select>
+<!-- ══════════ GROUPE 1 : LE PROJET ══════════ -->
+<div class="form-divider"></div>
+<div class="form-group">
+  <div class="form-group-label">Votre projet</div>
+  <div class="form-group-question">Type de projet</div>
+  <div class="form-tags" data-tag-group="typeProjet" data-mode="single">
+    <span class="form-tag" data-value="R&#233;novation globale"><span class="tag-check">&#10003;</span> R&#233;novation globale</span>
+    <span class="form-tag" data-value="R&#233;novation partielle"><span class="tag-check">&#10003;</span> R&#233;novation partielle</span>
+    <span class="form-tag" data-value="Extension / Am&#233;nagement"><span class="tag-check">&#10003;</span> Extension / Am&#233;nagement</span>
+  </div>
 </div>
-<input type="hidden" name="echeance" id="echeanceHidden" />
 
-<!-- Description -->
-<textarea name="message" placeholder="Dites-nous tout ce &#224; quoi vous pensez. Par la suite, notre intelligence artificielle d&#233;veloppera chaque point avec vous." required minlength="10"></textarea>
+<div class="form-group">
+  <div class="form-group-question">Nombre de pi&#232;ces &#224; r&#233;nover</div>
+  <div class="form-tags" data-tag-group="nbPieces" data-mode="single">
+    <span class="form-tag" data-value="1 pi&#232;ce"><span class="tag-check">&#10003;</span> 1 pi&#232;ce</span>
+    <span class="form-tag" data-value="2 pi&#232;ces"><span class="tag-check">&#10003;</span> 2 pi&#232;ces</span>
+    <span class="form-tag" data-value="3 &#224; 4 pi&#232;ces"><span class="tag-check">&#10003;</span> 3 &#224; 4 pi&#232;ces</span>
+    <span class="form-tag" data-value="5 pi&#232;ces ou plus"><span class="tag-check">&#10003;</span> 5 pi&#232;ces ou plus</span>
+  </div>
+</div>
+
+<!-- ══════════ GROUPE 2 : LES DÉTAILS ══════════ -->
+<div class="form-divider"></div>
+<div class="form-group">
+  <div class="form-group-label">Les d&#233;tails</div>
+  <div class="form-group-question">Espaces concern&#233;s</div>
+  <div class="form-group-hint">S&#233;lection multiple possible</div>
+  <div class="form-tags" data-tag-group="espaces" data-mode="multi">
+    <span class="form-tag" data-value="Cuisine"><span class="tag-icon">&#127859;</span><span class="tag-check">&#10003;</span> Cuisine</span>
+    <span class="form-tag" data-value="Salle de bain / WC"><span class="tag-icon">&#128703;</span><span class="tag-check">&#10003;</span> Salle de bain / WC</span>
+    <span class="form-tag" data-value="Pi&#232;ces de vie"><span class="tag-icon">&#128715;</span><span class="tag-check">&#10003;</span> Pi&#232;ces de vie</span>
+    <span class="form-tag" data-value="Chambres / Bureau"><span class="tag-icon">&#128716;</span><span class="tag-check">&#10003;</span> Chambres / Bureau</span>
+    <span class="form-tag" data-value="Ext&#233;rieur"><span class="tag-icon">&#127795;</span><span class="tag-check">&#10003;</span> Ext&#233;rieur</span>
+  </div>
+</div>
+
+<div class="form-group">
+  <div class="form-group-question">Travaux envisag&#233;s</div>
+  <div class="form-group-hint">S&#233;lection multiple possible</div>
+  <div class="form-tags" data-tag-group="travaux" data-mode="multi">
+    <span class="form-tag" data-value="Redistribution (Cloisons)"><span class="tag-icon">&#129521;</span><span class="tag-check">&#10003;</span> Redistribution</span>
+    <span class="form-tag" data-value="Rev&#234;tements (Sols/Murs)"><span class="tag-icon">&#127912;</span><span class="tag-check">&#10003;</span> Rev&#234;tements</span>
+    <span class="form-tag" data-value="&#201;lectricit&#233;"><span class="tag-icon">&#9889;</span><span class="tag-check">&#10003;</span> &#201;lectricit&#233;</span>
+    <span class="form-tag" data-value="Plomberie"><span class="tag-icon">&#128167;</span><span class="tag-check">&#10003;</span> Plomberie</span>
+    <span class="form-tag" data-value="Isolation / Chauffage"><span class="tag-icon">&#128293;</span><span class="tag-check">&#10003;</span> Isolation / Chauffage</span>
+    <span class="form-tag" data-value="Menuiseries"><span class="tag-icon">&#129695;</span><span class="tag-check">&#10003;</span> Menuiseries</span>
+  </div>
+</div>
+
+<!-- ══════════ GROUPE 3 : LES MÉTRIQUES ══════════ -->
+<div class="form-divider"></div>
+<div class="form-group">
+  <div class="form-group-label">Les m&#233;triques</div>
+  <div class="form-group-question">Surface concern&#233;e</div>
+  <div class="form-tags" data-tag-group="surface" data-mode="single">
+    <span class="form-tag" data-value="Moins de 30 m²"><span class="tag-check">&#10003;</span> &lt; 30 m&#178;</span>
+    <span class="form-tag" data-value="30 &#224; 60 m²"><span class="tag-check">&#10003;</span> 30 &#8212; 60 m&#178;</span>
+    <span class="form-tag" data-value="60 &#224; 100 m²"><span class="tag-check">&#10003;</span> 60 &#8212; 100 m&#178;</span>
+    <span class="form-tag" data-value="Plus de 100 m²"><span class="tag-check">&#10003;</span> &gt; 100 m&#178;</span>
+  </div>
+</div>
+
+<div class="form-group">
+  <div class="form-group-question">Budget estim&#233;</div>
+  <div class="form-tags" data-tag-group="budget" data-mode="single">
+    <span class="form-tag" data-value="Moins de 10 000 €"><span class="tag-check">&#10003;</span> &lt; 10 000 &#8364;</span>
+    <span class="form-tag" data-value="10k€ &#224; 30k€"><span class="tag-check">&#10003;</span> 10k &#8212; 30k &#8364;</span>
+    <span class="form-tag" data-value="30k€ &#224; 60k€"><span class="tag-check">&#10003;</span> 30k &#8212; 60k &#8364;</span>
+    <span class="form-tag" data-value="Plus de 60 000 €"><span class="tag-check">&#10003;</span> &gt; 60 000 &#8364;</span>
+    <span class="form-tag" data-value="&#192; d&#233;finir"><span class="tag-check">&#10003;</span> Je ne sais pas</span>
+  </div>
+</div>
+
+<!-- Champ libre optionnel -->
+<div class="form-divider"></div>
+<textarea name="message" class="compact" placeholder="Un d&#233;tail sp&#233;cifique &#224; pr&#233;ciser ? (Facultatif)"></textarea>
+
+<!-- Champs cachés pour les données structurées -->
+<input type="hidden" name="typeProjet" id="tagTypeProjet" />
+<input type="hidden" name="nbPieces" id="tagNbPieces" />
+<input type="hidden" name="espaces" id="tagEspaces" />
+<input type="hidden" name="travaux" id="tagTravaux" />
+<input type="hidden" name="surface" id="tagSurface" />
+<input type="hidden" name="budget" id="tagBudget" />
 
 <p id="contactFormError" style="color:#ff9090;font-size:0.82rem;display:none;margin:-4px 0 0 0;"></p>
 <button type="submit">Envoyer ma demande</button>
 </form>
 
 <script>
-/* --- Précision dynamique selon Type de bien --- */
-var precisionOptions = {
-  'Résidentiel': [
-    'Maison individuelle',
-    'Maison divisée',
-    'Appartement',
-    'Immeuble < 5 logements (mono/copropriété)',
-    'Immeuble > 10 logements (mono/copropriété)'
-  ],
-  'Tertiaire': [
-    'Boutique',
-    'Bureau',
-    'Locaux à usages mixtes'
-  ],
-  'Site industriel': [
-    'Atelier',
-    'Entrepôt',
-    'Usine'
-  ]
-};
-
-document.getElementById('typeBien').addEventListener('change', function() {
-  var sel = document.getElementById('precisionBien');
-  var opts = precisionOptions[this.value] || [];
-  sel.innerHTML = '<option value="" disabled selected>Pr\u00e9cisez...</option>';
-  opts.forEach(function(o) {
-    var opt = document.createElement('option');
-    opt.value = o;
-    opt.textContent = o;
-    sel.appendChild(opt);
-  });
-  sel.disabled = false;
-});
-
-/* --- Échéance : remplir les années et synchroniser le hidden --- */
+/* ══════════════════════════════════════════════
+   TAG / CHIP SELECTOR — Logique interactive
+   ══════════════════════════════════════════════ */
 (function() {
-  var yearSel = document.getElementById('echeanceYear');
-  var monthSel = document.getElementById('echeanceMonth');
-  var hidden = document.getElementById('echeanceHidden');
-  var currentYear = new Date().getFullYear();
-  for (var y = currentYear; y <= currentYear + 5; y++) {
-    var opt = document.createElement('option');
-    opt.value = y;
-    opt.textContent = y;
-    yearSel.appendChild(opt);
+  var allGroups = document.querySelectorAll('.form-tags[data-tag-group]');
+
+  allGroups.forEach(function(group) {
+    var mode = group.getAttribute('data-mode'); // "single" ou "multi"
+    var groupName = group.getAttribute('data-tag-group');
+    var tags = group.querySelectorAll('.form-tag');
+
+    tags.forEach(function(tag) {
+      tag.addEventListener('click', function() {
+        if (mode === 'single') {
+          // Désélectionner tous les autres du même groupe
+          tags.forEach(function(t) { t.classList.remove('active'); });
+          tag.classList.add('active');
+        } else {
+          // Toggle multi-sélection
+          tag.classList.toggle('active');
+        }
+        // Synchroniser le champ caché
+        syncTagHidden(groupName, group, mode);
+      });
+    });
+  });
+
+  function syncTagHidden(name, group, mode) {
+    var hidden = document.getElementById('tag' + name.charAt(0).toUpperCase() + name.slice(1));
+    if (!hidden) return;
+    var activeTags = group.querySelectorAll('.form-tag.active');
+    var values = [];
+    activeTags.forEach(function(t) { values.push(t.getAttribute('data-value')); });
+    hidden.value = (mode === 'single') ? (values[0] || '') : values.join(', ');
   }
-  function syncEcheance() {
-    var m = monthSel.value;
-    var a = yearSel.value;
-    if (m && a) hidden.value = a + '-' + m;
-  }
-  monthSel.addEventListener('change', syncEcheance);
-  yearSel.addEventListener('change', syncEcheance);
 })();
+
+/* --- Collecter toutes les données structurées au submit --- */
+function collectStructuredData() {
+  var data = {};
+  var groups = document.querySelectorAll('.form-tags[data-tag-group]');
+  groups.forEach(function(group) {
+    var name = group.getAttribute('data-tag-group');
+    var mode = group.getAttribute('data-mode');
+    var activeTags = group.querySelectorAll('.form-tag.active');
+    var values = [];
+    activeTags.forEach(function(t) { values.push(t.getAttribute('data-value')); });
+    data[name] = (mode === 'single') ? (values[0] || null) : values;
+  });
+  return data;
+}
 
 /* --- Autocomplétion adresse via API BAN (gouv.fr) --- */
 (function() {
@@ -923,19 +1010,41 @@ document.getElementById('typeBien').addEventListener('change', function() {
 document.getElementById('contactForm').addEventListener('submit', function(e) {
   e.preventDefault();
   var form = this;
-  var msg = form.message.value.trim();
   var errEl = document.getElementById('contactFormError');
   var btn = form.querySelector('button[type="submit"]');
 
-  if (msg.length < 10) {
-    errEl.textContent = 'Merci de d\u00e9crire votre projet en au moins 10 caract\u00e8res.';
+  // Valider qu'au moins le type de projet est sélectionné
+  var structured = collectStructuredData();
+  if (!structured.typeProjet) {
+    errEl.textContent = 'Merci de s\u00e9lectionner au moins le type de projet.';
     errEl.style.display = 'block';
-    form.message.focus();
+    // Scroller vers le premier groupe de tags
+    var firstGroup = document.querySelector('.form-tags[data-tag-group="typeProjet"]');
+    if (firstGroup) firstGroup.scrollIntoView({ behavior: 'smooth', block: 'center' });
     return;
   }
+  if (!structured.surface) {
+    errEl.textContent = 'Merci d\u0027indiquer la surface concern\u00e9e.';
+    errEl.style.display = 'block';
+    return;
+  }
+
   errEl.style.display = 'none';
   btn.disabled = true;
   btn.textContent = 'Envoi en cours...';
+
+  // Construire le message structuré pour Marcel (JSON dans le champ message)
+  var msgText = form.message ? form.message.value.trim() : '';
+  var demande = 'Projet : ' + (structured.typeProjet || '-') +
+    ' | Pi\u00e8ces : ' + (structured.nbPieces || '-') +
+    ' | Espaces : ' + (structured.espaces && structured.espaces.length ? structured.espaces.join(', ') : '-') +
+    ' | Travaux : ' + (structured.travaux && structured.travaux.length ? structured.travaux.join(', ') : '-') +
+    ' | Surface : ' + (structured.surface || '-') +
+    ' | Budget : ' + (structured.budget || '-');
+  if (msgText) demande += ' | Note : ' + msgText;
+
+  // Écrire le résumé dans le champ message pour compatibilité
+  if (form.message) form.message.value = demande;
 
   var formData = new FormData(form);
   var body = new URLSearchParams(formData).toString();
