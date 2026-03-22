@@ -823,6 +823,19 @@ window.location.replace('/connexion'+h);
   <option value="Professionnel">Professionnel</option>
 </select>
 
+<!-- Type de bien -->
+<select name="typeBien" id="typeBien" required>
+  <option value="" disabled selected>Type de bien</option>
+  <option value="R&#233;sidentiel">R&#233;sidentiel</option>
+  <option value="Tertiaire">Tertiaire</option>
+  <option value="Site industriel">Site industriel</option>
+</select>
+
+<!-- Précision (dynamique selon type de bien) -->
+<select name="precision" id="precisionBien" required disabled>
+  <option value="" disabled selected>Pr&#233;cision (s&#233;lectionnez d&#8217;abord le type)</option>
+</select>
+
 <!-- ══════════ GROUPE 1 : LE PROJET ══════════ -->
 <div class="form-divider"></div>
 <div class="form-group">
@@ -902,6 +915,30 @@ window.location.replace('/connexion'+h);
   </div>
 </div>
 
+<!-- Échéance -->
+<label for="echeanceMonth" style="display:block;font-size:0.75rem;color:var(--muted);margin-bottom:4px;font-weight:500;">&#201;ch&#233;ance de livraison des travaux vis&#233;e</label>
+<div class="form-row">
+  <select id="echeanceMonth" required>
+    <option value="" disabled selected>Mois</option>
+    <option value="01">Janvier</option>
+    <option value="02">F&#233;vrier</option>
+    <option value="03">Mars</option>
+    <option value="04">Avril</option>
+    <option value="05">Mai</option>
+    <option value="06">Juin</option>
+    <option value="07">Juillet</option>
+    <option value="08">Ao&#251;t</option>
+    <option value="09">Septembre</option>
+    <option value="10">Octobre</option>
+    <option value="11">Novembre</option>
+    <option value="12">D&#233;cembre</option>
+  </select>
+  <select id="echeanceYear" required>
+    <option value="" disabled selected>Ann&#233;e</option>
+  </select>
+</div>
+<input type="hidden" name="echeance" id="echeanceHidden" />
+
 <!-- Champ libre optionnel -->
 <div class="form-divider"></div>
 <textarea name="message" class="compact" placeholder="Un d&#233;tail sp&#233;cifique &#224; pr&#233;ciser ? (Facultatif)"></textarea>
@@ -954,6 +991,61 @@ window.location.replace('/connexion'+h);
     activeTags.forEach(function(t) { values.push(t.getAttribute('data-value')); });
     hidden.value = (mode === 'single') ? (values[0] || '') : values.join(', ');
   }
+})();
+
+/* --- Précision dynamique selon Type de bien --- */
+var precisionOptions = {
+  'Résidentiel': [
+    'Maison individuelle',
+    'Maison divisée',
+    'Appartement',
+    'Immeuble < 5 logements (mono/copropriété)',
+    'Immeuble > 10 logements (mono/copropriété)'
+  ],
+  'Tertiaire': [
+    'Boutique',
+    'Bureau',
+    'Locaux à usages mixtes'
+  ],
+  'Site industriel': [
+    'Atelier',
+    'Entrepôt',
+    'Usine'
+  ]
+};
+
+document.getElementById('typeBien').addEventListener('change', function() {
+  var sel = document.getElementById('precisionBien');
+  var opts = precisionOptions[this.value] || [];
+  sel.innerHTML = '<option value="" disabled selected>Pr\u00e9cisez...</option>';
+  opts.forEach(function(o) {
+    var opt = document.createElement('option');
+    opt.value = o;
+    opt.textContent = o;
+    sel.appendChild(opt);
+  });
+  sel.disabled = false;
+});
+
+/* --- Échéance : remplir les années et synchroniser le hidden --- */
+(function() {
+  var yearSel = document.getElementById('echeanceYear');
+  var monthSel = document.getElementById('echeanceMonth');
+  var hidden = document.getElementById('echeanceHidden');
+  var currentYear = new Date().getFullYear();
+  for (var y = currentYear; y <= currentYear + 5; y++) {
+    var opt = document.createElement('option');
+    opt.value = y;
+    opt.textContent = y;
+    yearSel.appendChild(opt);
+  }
+  function syncEcheance() {
+    var m = monthSel.value;
+    var a = yearSel.value;
+    if (m && a) hidden.value = a + '-' + m;
+  }
+  monthSel.addEventListener('change', syncEcheance);
+  yearSel.addEventListener('change', syncEcheance);
 })();
 
 /* --- Collecter toutes les données structurées au submit --- */
