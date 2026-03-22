@@ -460,6 +460,140 @@
       font-size: 0.84rem; color: var(--text); line-height: 1.7;
     }
 
+    /* ── Zones d'action interactives ── */
+    .step-action {
+      margin-top: 24px; padding: 20px;
+      background: linear-gradient(135deg, rgba(45,95,62,0.04), rgba(26,95,106,0.04));
+      border: 1px dashed var(--border); border-radius: 10px;
+    }
+    .step-action-label {
+      font-size: 0.72rem; font-weight: 700; text-transform: uppercase;
+      letter-spacing: 0.1em; color: var(--dim); margin-bottom: 14px;
+      display: flex; align-items: center; gap: 8px;
+    }
+    .step-action-label::before {
+      content: ''; width: 8px; height: 8px; border-radius: 50%;
+      background: var(--muted); flex-shrink: 0; transition: background 0.3s;
+    }
+    .step-action-label.unlocked::before { background: #2ecc71; }
+
+    /* Mock vidéo player */
+    .mock-video {
+      background: #1a1a2e; border-radius: 8px; overflow: hidden;
+      position: relative;
+    }
+    .mock-video-screen {
+      height: 160px; display: flex; align-items: center; justify-content: center;
+      color: rgba(255,255,255,0.5); font-size: 0.82rem; position: relative;
+    }
+    .mock-video-screen .play-icon {
+      font-size: 2.5rem; cursor: pointer; transition: transform 0.2s;
+      position: absolute;
+    }
+    .mock-video-screen .play-icon:hover { transform: scale(1.15); }
+    .mock-video-screen .play-icon.hidden { display: none; }
+    .mock-video-screen .video-msg {
+      font-size: 0.78rem; opacity: 0.7;
+    }
+    .mock-video-bar {
+      height: 6px; background: rgba(255,255,255,0.1);
+    }
+    .mock-video-bar-fill {
+      height: 100%; width: 0%; background: #e74c3c;
+      transition: width 0.3s linear;
+    }
+    .mock-video-controls {
+      padding: 8px 14px; display: flex; align-items: center;
+      justify-content: space-between;
+      color: rgba(255,255,255,0.6); font-size: 0.72rem;
+    }
+    .mock-video-skip {
+      font-size: 0.68rem; color: rgba(255,255,255,0.35);
+      background: none; border: 1px solid rgba(255,255,255,0.15);
+      padding: 3px 10px; border-radius: 4px; cursor: pointer;
+    }
+    .mock-video-skip:hover { color: rgba(255,255,255,0.7); border-color: rgba(255,255,255,0.3); }
+
+    /* Hotspots interactifs */
+    .mock-hotspot-zone {
+      position: relative; background: var(--mid); border-radius: 8px;
+      height: 200px; overflow: hidden;
+      background-image: repeating-linear-gradient(45deg, transparent, transparent 20px, rgba(45,95,62,0.03) 20px, rgba(45,95,62,0.03) 40px);
+    }
+    .mock-hotspot {
+      position: absolute; width: 40px; height: 40px;
+      border-radius: 50%; border: 2px solid var(--green);
+      background: rgba(45,95,62,0.1); cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 0.75rem; font-weight: 700; color: var(--green);
+      transition: all 0.3s; animation: hotspotPulse 2s infinite;
+    }
+    .mock-hotspot:hover { transform: scale(1.15); background: rgba(45,95,62,0.2); }
+    .mock-hotspot.clicked {
+      background: var(--green); color: #fff; border-color: var(--green);
+      animation: none; transform: scale(1);
+    }
+    @keyframes hotspotPulse {
+      0%, 100% { box-shadow: 0 0 0 0 rgba(45,95,62,0.3); }
+      50% { box-shadow: 0 0 0 8px rgba(45,95,62,0); }
+    }
+    .mock-hotspot-counter {
+      text-align: center; margin-top: 10px;
+      font-size: 0.78rem; color: var(--text-soft);
+    }
+
+    /* Champ texte Marcel */
+    .mock-chat {
+      display: flex; flex-direction: column; gap: 10px;
+    }
+    .mock-chat-input {
+      width: 100%; padding: 14px 16px; border: 1px solid var(--border);
+      border-radius: 8px; font-size: 0.84rem; font-family: 'Inter', sans-serif;
+      resize: vertical; min-height: 70px; background: var(--card);
+      color: var(--text); transition: border-color 0.2s;
+    }
+    .mock-chat-input:focus { outline: none; border-color: var(--green); }
+    .mock-chat-input::placeholder { color: var(--muted); }
+    .mock-chat-counter {
+      font-size: 0.72rem; color: var(--muted); text-align: right;
+    }
+    .mock-chat-counter.ready { color: var(--green); font-weight: 600; }
+
+    /* Quiz */
+    .mock-quiz-question {
+      font-size: 0.9rem; font-weight: 500; color: var(--text);
+      margin-bottom: 14px; line-height: 1.5;
+    }
+    .mock-quiz-options { display: flex; gap: 12px; flex-wrap: wrap; }
+    .mock-quiz-btn {
+      flex: 1; min-width: 120px; padding: 14px 20px;
+      border: 2px solid var(--border); border-radius: 8px;
+      background: var(--card); cursor: pointer;
+      font-size: 0.84rem; font-weight: 500; color: var(--text);
+      transition: all 0.3s; text-align: center;
+    }
+    .mock-quiz-btn:hover { border-color: var(--green); background: rgba(45,95,62,0.04); }
+    .mock-quiz-btn.correct {
+      border-color: var(--green); background: rgba(45,95,62,0.1);
+      color: var(--green); font-weight: 600;
+    }
+    .mock-quiz-btn.wrong {
+      border-color: #e74c3c; background: rgba(231,76,60,0.06);
+      color: #c0392b;
+    }
+    .mock-quiz-btn.disabled { pointer-events: none; opacity: 0.7; }
+    .mock-quiz-feedback {
+      margin-top: 12px; font-size: 0.82rem; padding: 10px 14px;
+      border-radius: 6px; display: none;
+    }
+    .mock-quiz-feedback.show { display: block; }
+    .mock-quiz-feedback.correct {
+      background: rgba(45,95,62,0.08); color: var(--green);
+    }
+    .mock-quiz-feedback.wrong {
+      background: rgba(231,76,60,0.06); color: #c0392b;
+    }
+
     /* ── Boutons navigation stepper ── */
     .stepper-footer {
       display: flex; justify-content: space-between; align-items: center;
@@ -1478,7 +1612,8 @@
 
         <!-- Panneaux de contenu -->
         <div class="stepper-panels">
-          <!-- ── &#201;tape 1 : Qui sommes-nous ── -->
+
+          <!-- ══════════ &#201;tape 1 : Qui sommes-nous ══════════ -->
           <div class="stepper-panel active" data-panel="0">
             <h4>Reno&#8217;Island &#8212; Le bureau d&#8217;&#233;tudes derri&#232;re Scantorenov</h4>
             <p>Scantorenov est un service d&#233;velopp&#233; par <strong>Reno&#8217;Island</strong>, bureau d&#8217;&#233;tudes sp&#233;cialis&#233; en ma&#238;trise d&#8217;&#339;uvre de r&#233;novation.</p>
@@ -1491,52 +1626,98 @@
               <li>Un chef de projet exp&#233;riment&#233; pour piloter la mise en &#339;uvre</li>
               <li>Un suivi transparent de chaque &#233;tape, de l&#8217;&#233;tude &#224; la r&#233;ception des travaux</li>
             </ul>
+            <!-- TODO: Remplacer le faux lecteur vidéo par une vraie vidéo de présentation Reno'Island -->
+            <div class="step-action" id="action0">
+              <div class="step-action-label" id="actionLabel0">Regardez la vid&#233;o de pr&#233;sentation pour continuer</div>
+              <div class="mock-video" id="mockVideo">
+                <div class="mock-video-screen" id="mockVideoScreen">
+                  <span class="play-icon" id="videoPlayBtn" onclick="mockVideoStart()">&#9654;&#65039;</span>
+                  <span class="video-msg" id="videoMsg" style="display:none">Lecture en cours...</span>
+                </div>
+                <div class="mock-video-bar">
+                  <div class="mock-video-bar-fill" id="videoBarFill"></div>
+                </div>
+                <div class="mock-video-controls">
+                  <span id="videoTime">0:00 / 0:08</span>
+                  <button class="mock-video-skip" onclick="mockVideoSkip()" title="Dev : simuler la fin">&#9654;&#9654; Simuler fin</button>
+                </div>
+              </div>
+            </div>
           </div>
 
-          <!-- ── &#201;tape 2 : Visite virtuelle ── -->
+          <!-- ══════════ &#201;tape 2 : Visite virtuelle ══════════ -->
           <div class="stepper-panel" data-panel="1">
             <h4>Votre visite virtuelle Matterport</h4>
             <p>Apr&#232;s le scan de votre bien, vous disposerez d&#8217;un <strong>jumeau num&#233;rique interactif</strong>. Voici comment l&#8217;exploiter au mieux :</p>
             <ul>
-              <li><strong>Naviguer librement</strong> &#8212; D&#233;placez-vous dans chaque pi&#232;ce comme si vous y &#233;tiez, zoomez sur les d&#233;tails</li>
-              <li><strong>Prendre des mesures</strong> &#8212; L&#8217;outil de mesure int&#233;gr&#233; vous permet de v&#233;rifier distances et surfaces &#224; tout moment</li>
-              <li><strong>Capturer des vues</strong> &#8212; Faites des captures d&#8217;&#233;cran des zones qui vous int&#233;ressent pour les partager avec Marcel</li>
-              <li><strong>Vue plan</strong> &#8212; Basculez en vue &#171; Dollhouse &#187; ou &#171; Floor Plan &#187; pour une vision d&#8217;ensemble</li>
+              <li><strong>Naviguer librement</strong> &#8212; D&#233;placez-vous dans chaque pi&#232;ce comme si vous y &#233;tiez</li>
+              <li><strong>Prendre des mesures</strong> &#8212; V&#233;rifiez distances et surfaces &#224; tout moment</li>
+              <li><strong>Capturer des vues</strong> &#8212; Faites des captures d&#8217;&#233;cran pour Marcel</li>
+              <li><strong>Vue plan</strong> &#8212; Basculez en vue &#171; Dollhouse &#187; ou &#171; Floor Plan &#187;</li>
             </ul>
             <div class="step-highlight">
-              Astuce : plus vous explorez votre visite virtuelle en amont, plus vos &#233;changes avec Marcel et votre chef de projet seront productifs.
+              Plus vous explorez votre visite virtuelle en amont, plus vos &#233;changes seront productifs.
+            </div>
+            <!-- TODO: Remplacer les faux hotspots par un mini-parcours dans l'iframe Matterport -->
+            <div class="step-action" id="action1">
+              <div class="step-action-label" id="actionLabel1">Cliquez sur les 3 points d&#8217;int&#233;r&#234;t dans l&#8217;ordre pour continuer</div>
+              <div class="mock-hotspot-zone" id="hotspotZone">
+                <div class="mock-hotspot" style="top:30px;left:15%" data-hs="1" onclick="mockHotspotClick(this, 1)">1</div>
+                <div class="mock-hotspot" style="top:80px;left:55%" data-hs="2" onclick="mockHotspotClick(this, 2)">2</div>
+                <div class="mock-hotspot" style="top:130px;left:78%" data-hs="3" onclick="mockHotspotClick(this, 3)">3</div>
+              </div>
+              <div class="mock-hotspot-counter" id="hotspotCounter">0 / 3 points d&#233;couverts</div>
             </div>
           </div>
 
-          <!-- ── &#201;tape 3 : Marcel ── -->
+          <!-- ══════════ &#201;tape 3 : Marcel ══════════ -->
           <div class="stepper-panel" data-panel="2">
             <h4>Travailler avec Marcel, votre assistant IA</h4>
-            <p>Marcel est l&#8217;assistant intelligent int&#233;gr&#233; &#224; votre espace. Il conna&#238;t votre bien gr&#226;ce au scan 3D et vous aide en phase avant-projet.</p>
+            <p>Marcel est l&#8217;assistant intelligent int&#233;gr&#233; &#224; votre espace. Il conna&#238;t votre bien et vous aide en phase avant-projet.</p>
             <ul>
-              <li><strong>Posez des questions pr&#233;cises</strong> &#8212; &#171; Peut-on ouvrir la cuisine sur le salon ? &#187; plut&#244;t que &#171; Que faire ? &#187;</li>
-              <li><strong>D&#233;crivez vos envies</strong> &#8212; Style, ambiance, contraintes, budget&#8230; plus vous &#234;tes pr&#233;cis, mieux Marcel vous guide</li>
-              <li><strong>Proc&#233;dez par &#233;tapes</strong> &#8212; Traitez une pi&#232;ce ou un sujet &#224; la fois pour des r&#233;ponses plus pertinentes</li>
-              <li><strong>Demandez des alternatives</strong> &#8212; Marcel peut proposer plusieurs sc&#233;narios pour un m&#234;me espace</li>
+              <li><strong>Posez des questions pr&#233;cises</strong> &#8212; &#171; Peut-on ouvrir la cuisine sur le salon ? &#187;</li>
+              <li><strong>D&#233;crivez vos envies</strong> &#8212; Style, ambiance, contraintes, budget&#8230;</li>
+              <li><strong>Proc&#233;dez par &#233;tapes</strong> &#8212; Une pi&#232;ce ou un sujet &#224; la fois</li>
+              <li><strong>Demandez des alternatives</strong> &#8212; Plusieurs sc&#233;narios pour un m&#234;me espace</li>
             </ul>
             <div class="step-highlight">
-              Marcel est un outil puissant, mais il reste un assistant. Ses suggestions sont des pistes de r&#233;flexion que votre chef de projet validera et affinera avec vous.
+              Marcel est un outil puissant, mais il reste un assistant. Ses suggestions sont des pistes de r&#233;flexion que votre chef de projet validera.
+            </div>
+            <!-- TODO: Remplacer par un vrai échange test avec Marcel via l'API -->
+            <div class="step-action" id="action2">
+              <div class="step-action-label" id="actionLabel2">Essayez : &#233;crivez une question que vous poseriez &#224; Marcel (min. 20 caract&#232;res)</div>
+              <div class="mock-chat">
+                <textarea class="mock-chat-input" id="mockChatInput" placeholder="Ex : Peut-on agrandir la salle de bain en supprimant la cloison avec le couloir ?" oninput="mockChatCheck()"></textarea>
+                <div class="mock-chat-counter" id="mockChatCounter">0 / 20 caract&#232;res minimum</div>
+              </div>
             </div>
           </div>
 
-          <!-- ── &#201;tape 4 : Visuels IA ── -->
+          <!-- ══════════ &#201;tape 4 : Visuels IA ══════════ -->
           <div class="stepper-panel" data-panel="3">
             <h4>G&#233;n&#233;rer des visuels de r&#233;novation</h4>
-            <p>Vous pourrez g&#233;n&#233;rer des <strong>visuels d&#8217;ambiance</strong> pour visualiser le potentiel de votre r&#233;novation. Quelques points importants :</p>
+            <p>Vous pourrez g&#233;n&#233;rer des <strong>visuels d&#8217;ambiance</strong> pour visualiser le potentiel de votre r&#233;novation.</p>
             <ul>
-              <li><strong>Ce sont des inspirations</strong> &#8212; Les visuels IA donnent une direction esth&#233;tique, pas un plan technique</li>
-              <li><strong>Soyez descriptif</strong> &#8212; &#171; Cuisine ouverte, style scandinave, bois clair et plan de travail en pierre &#187;</li>
-              <li><strong>It&#233;rez</strong> &#8212; Affinez progressivement : g&#233;n&#233;rez, ajustez la description, reg&#233;n&#233;rez</li>
-              <li><strong>Acceptez les limites</strong> &#8212; L&#8217;IA ne reproduit pas votre pi&#232;ce &#224; l&#8217;identique, elle s&#8217;en inspire</li>
+              <li><strong>Ce sont des inspirations</strong> &#8212; Direction esth&#233;tique, pas un plan technique</li>
+              <li><strong>Soyez descriptif</strong> &#8212; &#171; Cuisine ouverte, style scandinave, bois clair &#187;</li>
+              <li><strong>It&#233;rez</strong> &#8212; G&#233;n&#233;rez, ajustez, reg&#233;n&#233;rez</li>
+              <li><strong>Acceptez les limites</strong> &#8212; L&#8217;IA s&#8217;inspire de votre pi&#232;ce, elle ne la reproduit pas</li>
             </ul>
             <div class="step-highlight">
-              L&#8217;IA g&#233;n&#233;rative est un outil formidable mais imparfait. Les visuels servent de base de discussion avec votre chef de projet, qui traduira vos envies en solutions techniques r&#233;alisables.
+              L&#8217;IA g&#233;n&#233;rative est un outil formidable mais imparfait. Les visuels servent de base de discussion avec votre chef de projet.
+            </div>
+            <!-- TODO: Remplacer par un quiz plus complet ou une interaction visuelle -->
+            <div class="step-action" id="action3">
+              <div class="step-action-label" id="actionLabel3">R&#233;pondez &#224; cette question pour continuer</div>
+              <div class="mock-quiz-question">L&#8217;IA g&#233;n&#233;rative peut-elle reproduire votre pi&#232;ce &#224; l&#8217;identique dans un visuel ?</div>
+              <div class="mock-quiz-options">
+                <button class="mock-quiz-btn" onclick="mockQuizAnswer('oui', this)">Oui, parfaitement</button>
+                <button class="mock-quiz-btn" onclick="mockQuizAnswer('non', this)">Non, elle s&#8217;en inspire</button>
+              </div>
+              <div class="mock-quiz-feedback" id="quizFeedback"></div>
             </div>
           </div>
+
         </div>
 
         <!-- Pied du stepper -->
@@ -2244,10 +2425,11 @@ function renderPhase3(project) {
 }
 
 /* ══════════════════════════════════════════════
-   STEPPER ONBOARDING
+   STEPPER ONBOARDING — avec validation active
    ══════════════════════════════════════════════ */
 var stepperCurrent = 0;
 var STEPPER_TOTAL = 4;
+var stepUnlocked = [false, false, false, false]; // état de déverrouillage par action
 
 function getStepperState() {
   try {
@@ -2266,6 +2448,8 @@ function initStepper() {
   var firstUnvalidated = state.validated.length;
   if (firstUnvalidated >= STEPPER_TOTAL) firstUnvalidated = STEPPER_TOTAL - 1;
   stepperCurrent = firstUnvalidated;
+  // Les étapes déjà validées sont considérées déverrouillées
+  state.validated.forEach(function(idx) { stepUnlocked[idx] = true; });
   renderStepper();
 }
 
@@ -2280,7 +2464,6 @@ function renderStepper() {
     tab.classList.remove('active', 'completed');
     if (idx === stepperCurrent) tab.classList.add('active');
     if (state.validated.indexOf(idx) > -1) tab.classList.add('completed');
-    // Numéro dans l'onglet
     var numEl = tab.querySelector('.stepper-tab-num');
     if (numEl) {
       numEl.textContent = (state.validated.indexOf(idx) > -1) ? '✓' : (idx + 1);
@@ -2317,17 +2500,28 @@ function renderStepper() {
   if (nextBtn) {
     var alreadyValidated = state.validated.indexOf(stepperCurrent) > -1;
     if (alreadyValidated && stepperCurrent < STEPPER_TOTAL - 1) {
-      // Étape déjà validée et pas la dernière → simple navigation
       nextBtn.textContent = 'Suivant →';
       nextBtn.disabled = false;
     } else if (alreadyValidated && stepperCurrent === STEPPER_TOTAL - 1) {
-      // Dernière étape déjà validée → masquer le bouton
       nextBtn.textContent = '✓ Terminé';
       nextBtn.disabled = true;
     } else {
-      // Pas encore validée
+      // ── BLOCAGE CONDITIONNEL ──
+      // Le bouton est DISABLED tant que l'action n'est pas accomplie
       nextBtn.innerHTML = 'J&#8217;ai compris &#10003;';
-      nextBtn.disabled = false;
+      nextBtn.disabled = !stepUnlocked[stepperCurrent];
+    }
+  }
+
+  // -- Labels d'action --
+  for (var i = 0; i < STEPPER_TOTAL; i++) {
+    var label = document.getElementById('actionLabel' + i);
+    if (label) {
+      if (stepUnlocked[i] || state.validated.indexOf(i) > -1) {
+        label.classList.add('unlocked');
+      } else {
+        label.classList.remove('unlocked');
+      }
     }
   }
 
@@ -2338,9 +2532,14 @@ function renderStepper() {
   }
 }
 
+/* ── Déverrouille une étape (appelé par les actions mock) ── */
+function unlockStep(idx) {
+  stepUnlocked[idx] = true;
+  renderStepper();
+}
+
 function goToStep(idx) {
   var state = getStepperState();
-  // On peut naviguer vers une étape déjà validée ou la prochaine non validée
   if (idx <= state.validated.length) {
     stepperCurrent = idx;
     renderStepper();
@@ -2348,19 +2547,18 @@ function goToStep(idx) {
 }
 
 function stepperConfirm() {
-  var state = getStepperState();
+  // Ne rien faire si l'étape n'est pas déverrouillée
+  if (!stepUnlocked[stepperCurrent]) return;
 
-  // Si pas encore validée, valider
+  var state = getStepperState();
   if (state.validated.indexOf(stepperCurrent) === -1) {
     state.validated.push(stepperCurrent);
     saveStepperState(state);
   }
 
-  // Passer à l'étape suivante (si pas la dernière)
   if (stepperCurrent < STEPPER_TOTAL - 1) {
     stepperCurrent++;
   }
-
   renderStepper();
 }
 
@@ -2368,6 +2566,136 @@ function stepperPrev() {
   if (stepperCurrent > 0) {
     stepperCurrent--;
     renderStepper();
+  }
+}
+
+/* ══════════════════════════════════════════════
+   ACTIONS MOCK — à remplacer par les vraies
+   ══════════════════════════════════════════════ */
+
+/* ── Étape 1 : Faux lecteur vidéo ── */
+// TODO: Remplacer par un vrai player vidéo (YouTube/Vimeo) avec événement onended
+var mockVideoTimer = null;
+var mockVideoProgress = 0;
+var MOCK_VIDEO_DURATION = 8; // secondes
+
+function mockVideoStart() {
+  var playBtn = document.getElementById('videoPlayBtn');
+  var msg = document.getElementById('videoMsg');
+  if (playBtn) playBtn.classList.add('hidden');
+  if (msg) msg.style.display = '';
+
+  mockVideoProgress = 0;
+  if (mockVideoTimer) clearInterval(mockVideoTimer);
+
+  mockVideoTimer = setInterval(function() {
+    mockVideoProgress += 0.25;
+    var pct = Math.min((mockVideoProgress / MOCK_VIDEO_DURATION) * 100, 100);
+    var bar = document.getElementById('videoBarFill');
+    var time = document.getElementById('videoTime');
+    if (bar) bar.style.width = pct + '%';
+    if (time) time.textContent = '0:0' + Math.floor(mockVideoProgress) + ' / 0:0' + MOCK_VIDEO_DURATION;
+
+    if (mockVideoProgress >= MOCK_VIDEO_DURATION) {
+      clearInterval(mockVideoTimer);
+      mockVideoComplete();
+    }
+  }, 250);
+}
+
+function mockVideoSkip() {
+  // Bouton dev pour accélérer le test
+  if (mockVideoTimer) clearInterval(mockVideoTimer);
+  var bar = document.getElementById('videoBarFill');
+  var time = document.getElementById('videoTime');
+  if (bar) bar.style.width = '100%';
+  if (time) time.textContent = '0:0' + MOCK_VIDEO_DURATION + ' / 0:0' + MOCK_VIDEO_DURATION;
+  var playBtn = document.getElementById('videoPlayBtn');
+  var msg = document.getElementById('videoMsg');
+  if (playBtn) playBtn.classList.add('hidden');
+  if (msg) msg.style.display = '';
+  mockVideoComplete();
+}
+
+function mockVideoComplete() {
+  var msg = document.getElementById('videoMsg');
+  if (msg) msg.textContent = '✓ Vidéo terminée';
+  unlockStep(0);
+}
+
+/* ── Étape 2 : Hotspots à cliquer ── */
+// TODO: Remplacer par un mini-parcours interactif dans l'iframe Matterport SDK
+var hotspotClicked = 0;
+var hotspotNext = 1;
+
+function mockHotspotClick(el, num) {
+  // L'utilisateur doit cliquer dans l'ordre 1, 2, 3
+  if (num !== hotspotNext) return;
+
+  el.classList.add('clicked');
+  hotspotClicked++;
+  hotspotNext++;
+
+  var counter = document.getElementById('hotspotCounter');
+  if (counter) counter.textContent = hotspotClicked + ' / 3 points découverts';
+
+  if (hotspotClicked >= 3) {
+    unlockStep(1);
+  }
+}
+
+/* ── Étape 3 : Message texte à écrire ── */
+// TODO: Remplacer par un vrai échange test avec Marcel via l'API Anthropic
+var MOCK_CHAT_MIN = 20;
+
+function mockChatCheck() {
+  var input = document.getElementById('mockChatInput');
+  var counter = document.getElementById('mockChatCounter');
+  if (!input || !counter) return;
+
+  var len = input.value.trim().length;
+  counter.textContent = len + ' / ' + MOCK_CHAT_MIN + ' caractères minimum';
+
+  if (len >= MOCK_CHAT_MIN) {
+    counter.classList.add('ready');
+    counter.textContent = '✓ ' + len + ' caractères — c\'est suffisant !';
+    unlockStep(2);
+  } else {
+    counter.classList.remove('ready');
+  }
+}
+
+/* ── Étape 4 : Quiz ── */
+// TODO: Remplacer par un quiz plus complet ou une interaction visuelle
+function mockQuizAnswer(answer, btnEl) {
+  var feedback = document.getElementById('quizFeedback');
+  var allBtns = document.querySelectorAll('#action3 .mock-quiz-btn');
+
+  // Désactiver tous les boutons
+  allBtns.forEach(function(b) { b.classList.add('disabled'); });
+
+  if (answer === 'non') {
+    // Bonne réponse
+    btnEl.classList.add('correct');
+    if (feedback) {
+      feedback.className = 'mock-quiz-feedback show correct';
+      feedback.textContent = '✓ Exactement ! L\'IA s\'inspire de votre espace mais ne le reproduit pas fidèlement. Les visuels sont des pistes d\'inspiration.';
+    }
+    unlockStep(3);
+  } else {
+    // Mauvaise réponse
+    btnEl.classList.add('wrong');
+    if (feedback) {
+      feedback.className = 'mock-quiz-feedback show wrong';
+      feedback.textContent = '✗ Pas tout à fait. L\'IA ne peut pas encore reproduire une pièce à l\'identique. Réessayez !';
+    }
+    // Réactiver après 2 secondes pour réessayer
+    setTimeout(function() {
+      allBtns.forEach(function(b) {
+        b.classList.remove('disabled', 'wrong', 'correct');
+      });
+      if (feedback) feedback.className = 'mock-quiz-feedback';
+    }, 2000);
   }
 }
 
