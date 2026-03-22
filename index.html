@@ -844,7 +844,11 @@ window.location.replace('/connexion'+h);
   <div class="form-tags" data-tag-group="typeProjet" data-mode="single">
     <span class="form-tag" data-value="R&#233;novation globale"><span class="tag-check">&#10003;</span> R&#233;novation globale</span>
     <span class="form-tag" data-value="R&#233;novation partielle"><span class="tag-check">&#10003;</span> R&#233;novation partielle</span>
-    <span class="form-tag" data-value="Extension / Am&#233;nagement"><span class="tag-check">&#10003;</span> Extension / Am&#233;nagement</span>
+  </div>
+  <div class="form-group-question" style="margin-top:14px;">Incluant</div>
+  <div class="form-tags" data-tag-group="incluant" data-mode="multi">
+    <span class="form-tag" data-value="Extension"><span class="tag-check">&#10003;</span> Extension</span>
+    <span class="form-tag" data-value="Ameublement"><span class="tag-check">&#10003;</span> Ameublement</span>
   </div>
 </div>
 
@@ -945,6 +949,7 @@ window.location.replace('/connexion'+h);
 
 <!-- Champs cachés pour les données structurées -->
 <input type="hidden" name="typeProjet" id="tagTypeProjet" />
+<input type="hidden" name="incluant" id="tagIncluant" />
 <input type="hidden" name="nbPieces" id="tagNbPieces" />
 <input type="hidden" name="espaces" id="tagEspaces" />
 <input type="hidden" name="travaux" id="tagTravaux" />
