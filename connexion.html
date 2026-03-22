@@ -165,7 +165,7 @@
           <h1 class="form-title">Cr&#233;er mon Espace</h1>
           <p class="form-intro">Bienvenue dans votre espace Scantorenov. Cr&#233;ez votre compte pour commencer.</p>
           <div class="error-msg" id="signupError"></div>
-          <div class="success-msg" id="signupSuccess">Compte cr&#233;&#233; avec succ&#232;s ! Un email de confirmation a &#233;t&#233; envoy&#233;.</div>
+          <div class="success-msg" id="signupSuccess">Compte cr&#233;&#233; avec succ&#232;s ! Vous allez &#234;tre redirig&#233; vers la page de connexion.</div>
           <form onsubmit="handleSignup(event)">
             <div class="f-group">
               <label class="f-label">Adresse e-mail</label>
@@ -355,9 +355,37 @@ function handleSignup(e) {
   })
   .then(function() {
     successEl.style.display = 'block';
-    setTimeout(function() {
-      window.location.href = 'espace-client.html';
-    }, 2000);
+    // Auto-login immédiat après inscription (pas de confirmation email)
+    fetch(API + '/token?grant_type=password', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email: email, password: pass })
+    })
+    .then(function(r) { return r.json(); })
+    .then(function(data) {
+      if (data.access_token) {
+        // Connexion réussie directement
+        netlifyIdentity.store && netlifyIdentity.store.saveUser(data);
+        setTimeout(function() {
+          window.location.href = 'espace-client.html';
+        }, 1500);
+      } else {
+        // Fallback : rediriger vers la page de connexion
+        successEl.textContent = 'Compte créé ! Connectez-vous avec vos identifiants.';
+        setTimeout(function() {
+          showLogin();
+          document.getElementById('loginEmail').value = email;
+        }, 2000);
+      }
+    })
+    .catch(function() {
+      // Fallback : rediriger vers la page de connexion
+      successEl.textContent = 'Compte créé ! Connectez-vous avec vos identifiants.';
+      setTimeout(function() {
+        showLogin();
+        document.getElementById('loginEmail').value = email;
+      }, 2000);
+    });
   })
   .catch(function(err) {
     errEl.textContent = err.message;

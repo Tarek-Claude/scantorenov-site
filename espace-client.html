@@ -359,6 +359,100 @@
     }
     .callback-icon { font-size: 1.2rem; }
 
+    /* ── PARCOURS DECOUVERTE (Phase 3) ── */
+    .discovery-section {
+      background: var(--card); border: 1px solid var(--border);
+      border-radius: 12px; margin-bottom: 48px;
+      box-shadow: 0 2px 16px rgba(0,0,0,0.04);
+      overflow: hidden;
+    }
+    .discovery-header {
+      padding: 32px 32px 16px;
+      border-bottom: 1px solid var(--border);
+    }
+    .discovery-header h3 {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.4rem; font-weight: 300; color: var(--text);
+      margin-bottom: 6px;
+    }
+    .discovery-header p {
+      color: var(--text-soft); font-size: 0.82rem; line-height: 1.6;
+      max-width: 600px;
+    }
+    .discovery-progress {
+      padding: 12px 32px;
+      background: var(--mid);
+      display: flex; align-items: center; gap: 12px;
+      font-size: 0.78rem; color: var(--text-soft);
+    }
+    .discovery-progress-bar {
+      flex: 1; height: 6px; background: var(--border);
+      border-radius: 3px; overflow: hidden;
+    }
+    .discovery-progress-fill {
+      height: 100%; width: 0%;
+      background: linear-gradient(90deg, var(--green), var(--green-hover));
+      border-radius: 3px;
+      transition: width 0.6s ease;
+    }
+    .discovery-list {
+      padding: 24px 32px;
+      display: flex; flex-direction: column; gap: 0;
+    }
+    .discovery-item {
+      display: flex; align-items: center; gap: 16px;
+      padding: 18px 16px;
+      border-bottom: 1px solid var(--border);
+      cursor: default;
+      transition: background 0.2s;
+    }
+    .discovery-item:last-child { border-bottom: none; }
+    .discovery-item:hover { background: rgba(45,95,62,0.03); }
+    .discovery-check {
+      width: 28px; height: 28px; flex-shrink: 0;
+      border: 2px solid var(--border);
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 0.85rem; color: transparent;
+      transition: all 0.3s;
+    }
+    .discovery-item.completed .discovery-check {
+      background: var(--green); border-color: var(--green);
+      color: #fff;
+    }
+    .discovery-item.locked .discovery-check {
+      background: var(--mid); border-color: var(--border);
+    }
+    .discovery-info { flex: 1; }
+    .discovery-title {
+      font-size: 0.88rem; font-weight: 500; color: var(--text);
+      margin-bottom: 2px;
+    }
+    .discovery-desc {
+      font-size: 0.78rem; color: var(--text-soft); line-height: 1.5;
+    }
+    .discovery-item.locked .discovery-title { color: var(--muted); }
+    .discovery-item.locked .discovery-desc { color: var(--muted); }
+    .discovery-badge {
+      font-size: 0.68rem; font-weight: 600; text-transform: uppercase;
+      letter-spacing: 0.08em; padding: 4px 10px;
+      border-radius: 12px; white-space: nowrap;
+    }
+    .discovery-badge.done {
+      background: rgba(45,95,62,0.1); color: var(--green);
+    }
+    .discovery-badge.current {
+      background: rgba(26,95,106,0.1); color: var(--dim);
+    }
+    .discovery-badge.locked {
+      background: var(--mid); color: var(--muted);
+    }
+    .discovery-unlock-msg {
+      text-align: center; padding: 20px 32px 28px;
+      font-size: 0.82rem; color: var(--text-soft);
+      font-style: italic;
+    }
+
     /* ── SCAN DATE CONFIRMATION (Phase 4) ── */
     .scan-date-card {
       background: var(--card); border: 1px solid var(--border);
@@ -1308,6 +1402,57 @@
         <div class="project-desc-text" id="projectDescText"></div>
       </div>
 
+      <!-- Parcours découverte (Phase 3 uniquement) -->
+      <div class="discovery-section" id="discoverySection" style="display:none">
+        <div class="discovery-header">
+          <h3>Parcours d&#233;couverte</h3>
+          <p>Avant de prendre rendez-vous, familiarisez-vous avec nos outils et notre approche. Validez chaque &#233;tape pour d&#233;bloquer la prise de rendez-vous.</p>
+        </div>
+        <div class="discovery-progress">
+          <span id="discoveryCount">0 / 4</span>
+          <div class="discovery-progress-bar">
+            <div class="discovery-progress-fill" id="discoveryFill"></div>
+          </div>
+        </div>
+        <div class="discovery-list" id="discoveryList">
+          <div class="discovery-item" data-discovery="bureau" onclick="openDiscovery('bureau')">
+            <div class="discovery-check">&#x2713;</div>
+            <div class="discovery-info">
+              <div class="discovery-title">Qui sommes-nous ?</div>
+              <div class="discovery-desc">D&#233;couvrez Reno&#8217;Island, le bureau d&#8217;&#233;tudes derri&#232;re Scantorenov, et notre approche de la r&#233;novation.</div>
+            </div>
+            <span class="discovery-badge current">&#192; d&#233;couvrir</span>
+          </div>
+          <div class="discovery-item locked" data-discovery="matterport" onclick="openDiscovery('matterport')">
+            <div class="discovery-check">&#x2713;</div>
+            <div class="discovery-info">
+              <div class="discovery-title">La visite virtuelle 3D</div>
+              <div class="discovery-desc">Comment naviguer dans votre scan Matterport, prendre des mesures et exploiter pleinement votre jumeau num&#233;rique.</div>
+            </div>
+            <span class="discovery-badge locked">Verrouill&#233;</span>
+          </div>
+          <div class="discovery-item locked" data-discovery="marcel" onclick="openDiscovery('marcel')">
+            <div class="discovery-check">&#x2713;</div>
+            <div class="discovery-info">
+              <div class="discovery-title">Travailler avec Marcel</div>
+              <div class="discovery-desc">Conseils pour interagir efficacement avec notre assistant IA en phase avant-projet et en tirer le meilleur parti.</div>
+            </div>
+            <span class="discovery-badge locked">Verrouill&#233;</span>
+          </div>
+          <div class="discovery-item locked" data-discovery="visuels" onclick="openDiscovery('visuels')">
+            <div class="discovery-check">&#x2713;</div>
+            <div class="discovery-info">
+              <div class="discovery-title">G&#233;n&#233;rer des visuels</div>
+              <div class="discovery-desc">Comment cr&#233;er des visuels de r&#233;novation adapt&#233;s, et comprendre les limites actuelles de l&#8217;IA g&#233;n&#233;rative.</div>
+            </div>
+            <span class="discovery-badge locked">Verrouill&#233;</span>
+          </div>
+        </div>
+        <div class="discovery-unlock-msg" id="discoveryUnlockMsg">
+          Compl&#233;tez les 4 &#233;tapes pour d&#233;bloquer la prise de rendez-vous
+        </div>
+      </div>
+
       <!-- Bouton demander a etre rappele (Phase 3 uniquement) -->
       <div class="callback-section" id="callbackSection" style="display:none">
         <h3>Prochaine &#233;tape</h3>
@@ -1992,11 +2137,96 @@ function renderPhase3(project) {
     descCard.style.display = '';
   }
 
-  // Bouton callback (phase 3 uniquement)
+  // Parcours découverte + bouton callback (phase 3 uniquement)
+  var discoveryEl = document.getElementById('discoverySection');
   var callbackEl = document.getElementById('callbackSection');
-  if (callbackEl) {
-    callbackEl.style.display = currentPhase === 3 ? '' : 'none';
+  if (currentPhase === 3) {
+    if (discoveryEl) discoveryEl.style.display = '';
+    renderDiscovery();
+    // Le callback sera affiché/masqué par renderDiscovery selon l'avancement
+  } else {
+    if (discoveryEl) discoveryEl.style.display = 'none';
+    if (callbackEl) callbackEl.style.display = currentPhase <= 3 ? '' : 'none';
   }
+}
+
+/* ── Parcours découverte ── */
+var DISCOVERY_STEPS = ['bureau', 'matterport', 'marcel', 'visuels'];
+
+function getDiscoveryState() {
+  try {
+    var raw = localStorage.getItem('scantorenov_discovery');
+    return raw ? JSON.parse(raw) : {};
+  } catch(e) { return {}; }
+}
+
+function saveDiscoveryState(state) {
+  localStorage.setItem('scantorenov_discovery', JSON.stringify(state));
+}
+
+function renderDiscovery() {
+  var state = getDiscoveryState();
+  var completed = 0;
+  var firstIncomplete = -1;
+
+  DISCOVERY_STEPS.forEach(function(step, i) {
+    var item = document.querySelector('[data-discovery="' + step + '"]');
+    if (!item) return;
+
+    var badge = item.querySelector('.discovery-badge');
+    var isCompleted = state[step] === true;
+
+    item.classList.remove('completed', 'locked');
+
+    if (isCompleted) {
+      item.classList.add('completed');
+      if (badge) { badge.className = 'discovery-badge done'; badge.textContent = 'Terminé'; }
+      completed++;
+    } else if (firstIncomplete === -1) {
+      firstIncomplete = i;
+      // Première étape non complétée : active
+      if (badge) { badge.className = 'discovery-badge current'; badge.textContent = 'À découvrir'; }
+    } else {
+      item.classList.add('locked');
+      if (badge) { badge.className = 'discovery-badge locked'; badge.textContent = 'Verrouillé'; }
+    }
+  });
+
+  // Barre de progression
+  var fill = document.getElementById('discoveryFill');
+  var count = document.getElementById('discoveryCount');
+  var total = DISCOVERY_STEPS.length;
+  if (fill) fill.style.width = (completed / total * 100) + '%';
+  if (count) count.textContent = completed + ' / ' + total;
+
+  // Message + bouton callback
+  var msg = document.getElementById('discoveryUnlockMsg');
+  var callbackEl = document.getElementById('callbackSection');
+  if (completed >= total) {
+    if (msg) msg.textContent = '✅ Parcours complété ! Vous pouvez maintenant prendre rendez-vous.';
+    if (callbackEl) callbackEl.style.display = '';
+  } else {
+    if (msg) msg.textContent = 'Complétez les ' + total + ' étapes pour débloquer la prise de rendez-vous';
+    if (callbackEl) callbackEl.style.display = 'none';
+  }
+}
+
+function openDiscovery(stepId) {
+  var state = getDiscoveryState();
+
+  // Vérifier que l'étape est accessible (pas verrouillée)
+  var stepIndex = DISCOVERY_STEPS.indexOf(stepId);
+  for (var i = 0; i < stepIndex; i++) {
+    if (!state[DISCOVERY_STEPS[i]]) return; // Étape précédente non complétée
+  }
+
+  // Si déjà complétée, ne rien faire
+  if (state[stepId]) return;
+
+  // Marquer comme complétée (pour l'instant, validation directe — le contenu sera ajouté plus tard)
+  state[stepId] = true;
+  saveDiscoveryState(state);
+  renderDiscovery();
 }
 
 /* ── Phase 4 : Confirmation date scan ── */
