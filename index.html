@@ -64,8 +64,7 @@ nav {
 .logo-img {
   height: 42px;
   width: auto;
-  mix-blend-mode: multiply;
-}
+  }
 
 .logo-text {
   font-family: 'Space Grotesk', sans-serif;
@@ -140,7 +139,7 @@ nav {
   height: auto;
   margin-bottom: 28px;
   position: relative;
-  }
+}
 
 .hero-baseline {
   font-family: 'Cormorant Garamond', serif;
@@ -322,8 +321,10 @@ section .section-intro {
 
 .services-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  grid-template-columns: repeat(3, 1fr);
   gap: 24px;
+  max-width: 1000px;
+  margin: 0 auto;
 }
 
 .service-card {
@@ -444,6 +445,7 @@ section .section-intro {
 }
 
 .contact-form input,
+.contact-form select,
 .contact-form textarea {
   background: #FFFFFF;
   border: 1px solid var(--border);
@@ -454,11 +456,45 @@ section .section-intro {
   font-size: 0.88rem;
   outline: none;
   transition: border-color 0.2s;
+  width: 100%;
+}
+
+.contact-form input::placeholder,
+.contact-form select::placeholder,
+.contact-form textarea::placeholder {
+  color: var(--muted);
+  opacity: 0.6;
 }
 
 .contact-form input:focus,
+.contact-form select:focus,
 .contact-form textarea:focus {
   border-color: var(--green);
+}
+
+.contact-form select {
+  cursor: pointer;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%238A8A8A'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 16px center;
+  padding-right: 40px;
+}
+
+.contact-form .form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+}
+
+.contact-form .form-row-3 {
+  display: grid;
+  grid-template-columns: auto 1fr 1fr;
+  gap: 14px;
+}
+
+.contact-form .form-row-3 select:first-child {
+  min-width: 130px;
 }
 
 .contact-form textarea {
@@ -485,6 +521,161 @@ section .section-intro {
   background: var(--green-hover);
 }
 
+/* ── TAG / CHIP SELECTOR ── */
+.form-group {
+  margin-bottom: 8px;
+}
+.form-group-label {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 0.72rem; font-weight: 700;
+  letter-spacing: 0.12em; text-transform: uppercase;
+  color: var(--green); margin-bottom: 10px;
+  text-align: center;
+}
+.form-group-question {
+  font-size: 0.88rem; color: var(--text); font-weight: 500;
+  margin-bottom: 12px; line-height: 1.5;
+  text-align: center;
+}
+.form-group-hint {
+  font-size: 0.72rem; color: var(--muted); font-style: italic;
+  margin-bottom: 10px;
+  text-align: center;
+}
+.form-tags {
+  display: flex; flex-wrap: wrap; gap: 9px;
+  justify-content: center;
+}
+.form-tag {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 10px 18px; background: var(--card);
+  border: 1.5px solid var(--border); border-radius: 24px;
+  font-size: 0.82rem; font-weight: 500; color: var(--text-soft);
+  cursor: pointer; transition: all 0.25s; user-select: none;
+  white-space: nowrap; flex: 0 1 auto;
+}
+/* Tags de même largeur quand peu nombreux (2-3 par ligne) */
+.form-tags[data-tag-group="typeProjet"] .form-tag,
+.form-tags[data-tag-group="incluant"] .form-tag,
+.form-tags[data-tag-group="nbPieces"] .form-tag {
+  flex: 1 1 0; justify-content: center; text-align: center;
+  min-width: 120px;
+}
+.form-tag:hover {
+  border-color: var(--green); color: var(--text);
+  background: rgba(45,95,62,0.03);
+  transform: translateY(-1px);
+  box-shadow: 0 3px 12px rgba(45,95,62,0.08);
+}
+.form-tag.active {
+  border-color: var(--green); color: var(--green);
+  background: rgba(45,95,62,0.08); font-weight: 600;
+  box-shadow: 0 2px 10px rgba(45,95,62,0.12);
+}
+.form-tag .tag-icon {
+  font-size: 1rem; line-height: 1;
+}
+.form-tag .tag-check {
+  width: 16px; height: 16px; border-radius: 50%;
+  border: 1.5px solid var(--border); display: flex;
+  align-items: center; justify-content: center;
+  font-size: 0.6rem; color: transparent;
+  transition: all 0.2s; flex-shrink: 0;
+}
+.form-tag.active .tag-check {
+  background: var(--green); border-color: var(--green);
+  color: #fff;
+}
+/* Séparateur entre groupes */
+.form-divider {
+  height: 1px; background: var(--border);
+  margin: 20px 0 24px;
+}
+/* Tags surface & budget : grille régulière */
+.form-tags[data-tag-group="surface"] {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 9px;
+}
+.form-tags[data-tag-group="surface"] .form-tag {
+  justify-content: center; text-align: center;
+}
+.form-tags[data-tag-group="budget"] {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 9px;
+}
+.form-tags[data-tag-group="budget"] .form-tag {
+  justify-content: center; text-align: center;
+}
+/* Espaces & travaux : grille 3 colonnes aussi */
+.form-tags[data-tag-group="espaces"] {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 9px;
+}
+.form-tags[data-tag-group="espaces"] .form-tag {
+  justify-content: center; text-align: center;
+}
+.form-tags[data-tag-group="travaux"] {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 9px;
+}
+.form-tags[data-tag-group="travaux"] .form-tag {
+  justify-content: center; text-align: center;
+}
+@media (max-width: 600px) {
+  .form-tags[data-tag-group="surface"],
+  .form-tags[data-tag-group="budget"],
+  .form-tags[data-tag-group="espaces"],
+  .form-tags[data-tag-group="travaux"] {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+/* Textarea réduit pour le champ optionnel */
+.contact-form textarea.compact {
+  min-height: 60px;
+}
+/* Résumé structuré caché */
+.contact-form .structured-summary {
+  display: none;
+}
+
+.address-autocomplete {
+  position: relative;
+}
+
+.address-suggestions {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  background: #fff;
+  border: 1px solid var(--border);
+  border-top: none;
+  border-radius: 0 0 8px 8px;
+  max-height: 200px;
+  overflow-y: auto;
+  z-index: 50;
+  display: none;
+}
+
+.address-suggestions div {
+  padding: 10px 16px;
+  font-size: 0.85rem;
+  cursor: pointer;
+  border-bottom: 1px solid var(--border);
+}
+
+.address-suggestions div:hover {
+  background: var(--bg);
+}
+
+.address-suggestions div:last-child {
+  border-bottom: none;
+}
+
 footer {
   border-top: 1px solid var(--border);
   padding: 40px 48px;
@@ -506,10 +697,18 @@ footer a {
   .nav-links { display: none; }
   section { padding: 60px 20px; }
   .contact-grid { grid-template-columns: 1fr; }
+  .contact-form .form-row,
+  .contact-form .form-row-3 { grid-template-columns: 1fr; }
+  .contact-form .form-row-3 select:first-child { min-width: unset; }
   .matterport-section { padding: 40px 16px; }
   .forfait-box { padding: 32px 24px; }
   .hero-logo { width: 120px; height: 120px; }
   .forfait-price { font-size: 2.2rem; }
+  .services-grid { grid-template-columns: repeat(2, 1fr); }
+}
+
+@media (max-width: 480px) {
+  .services-grid { grid-template-columns: 1fr; }
 }
 </style>
 </head>
@@ -523,7 +722,7 @@ window.location.replace('/connexion'+h);
 
 <nav>
 <a href="#" class="logo-link">
-<img src="logo-scantorenov.png" alt="Scantorenov" class="logo-img" />
+<img src="logo-scantorenov.webp" alt="Scantorenov" class="logo-img" />
 <div class="logo-text">Scanto<span>renov</span></div>
 </a>
 <ul class="nav-links">
@@ -536,7 +735,7 @@ window.location.replace('/connexion'+h);
 </nav>
 
 <div class="hero">
-<img src="logo-scantorenov.png" alt="Scantorenov" class="hero-logo" />
+<img src="logo-scantorenov.webp" alt="Scantorenov" class="hero-logo" />
 <div class="hero-baseline">La Vision Consciente</div>
 <h1>Une nouvelle fa&#231;on d&#8217;imaginer, piloter et vivre votre r&#233;novation</h1>
 <p class="hero-sub">Une exp&#233;rience haut de gamme, immersive et &#233;coresponsable pour transformer votre bien, du scan 3D &#224; la livraison de votre chantier.</p>
@@ -639,36 +838,493 @@ window.location.replace('/connexion'+h);
 <section id="contact">
 <div class="section-label">Contact</div>
 <h2>Votre r&#233;novation commence ici</h2>
+<form class="contact-form" name="contact" method="POST" data-netlify="true" id="contactForm">
 <div class="contact-grid">
-<div class="contact-info">
-<p>Vous avez un projet de r&#233;novation&nbsp;? Vous souhaitez d&#233;couvrir notre approche par le scan 3D&nbsp;? N&#8217;h&#233;sitez pas &#224; nous contacter. Nous vous r&#233;pondrons dans les plus brefs d&#233;lais.</p>
+<!-- Colonne gauche : texte accroche -->
+<div class="contact-info" style="display:flex;flex-direction:column;justify-content:center;">
+<p class="contact-phrase" style="font-family:'Cormorant Garamond',serif;font-size:1.05rem;line-height:2.2;color:var(--text-soft);">
+Vous avez un projet de r&#233;novation&nbsp;?<br/>
+D&#233;couvrez notre approche par le scan 3D.<br/>
+Remplissez ce formulaire,<br/>
+nous vous recontacterons rapidement.
+</p>
 <div class="contact-detail"><span class="cd-icon">&#x2709;</span> contact@scantorenov.com</div>
 <div class="contact-detail"><span class="cd-icon">&#x1F310;</span> scantorenov.com</div>
 </div>
-<form class="contact-form" name="contact" method="POST" data-netlify="true" onsubmit="return validateContactForm(this)">
-<input type="text" name="nom" placeholder="Nom" required />
-<input type="email" name="email" placeholder="Email" required />
-<input type="text" name="telephone" placeholder="T&#233;l&#233;phone" />
-<input type="text" name="sujet" placeholder="Sujet" />
-<textarea name="message" placeholder="D&#233;crivez votre projet de r&#233;novation (10 caract&#232;res minimum)..." required minlength="10"></textarea>
-<p id="contactFormError" style="color:#ff9090;font-size:0.82rem;display:none;margin:-4px 0 0 0;"></p>
-<button type="submit">Envoyer</button>
-</form>
-<script>
-function validateContactForm(form) {
-  var msg = form.message.value.trim();
-  var errEl = document.getElementById('contactFormError');
-  if (msg.length < 10) {
-    errEl.textContent = 'Merci de d\u00e9crire votre projet en au moins 10 caract\u00e8res.';
-    errEl.style.display = 'block';
-    form.message.focus();
-    return false;
-  }
-  errEl.style.display = 'none';
-  return true;
-}
-</script>
+<!-- Colonne droite : champs identification -->
+<div class="contact-fields">
+
+<!-- Genre / Prénom / Nom -->
+<div class="form-row-3">
+  <select name="genre" required>
+    <option value="" disabled selected>Civilit&#233;</option>
+    <option value="Monsieur">Monsieur</option>
+    <option value="Madame">Madame</option>
+  </select>
+  <input type="text" name="prenom" placeholder="Pr&#233;nom" required />
+  <input type="text" name="nom" placeholder="NOM" required />
 </div>
+
+<!-- Email / Téléphone -->
+<div class="form-row">
+  <input type="email" name="email" placeholder="Email" required />
+  <div style="display:flex;gap:6px;">
+    <select name="phone_prefix" style="width:100px;padding:12px 6px;font-size:0.85rem;flex-shrink:0;">
+      <option value="+33">&#127467;&#127479; +33</option>
+      <option value="+32">&#127463;&#127466; +32</option>
+      <option value="+41">&#127464;&#127469; +41</option>
+      <option value="+352">&#127473;&#127482; +352</option>
+      <option value="+377">&#127474;&#127464; +377</option>
+      <option value="+44">&#127468;&#127463; +44</option>
+      <option value="+49">&#127465;&#127466; +49</option>
+      <option value="+34">&#127466;&#127480; +34</option>
+      <option value="+39">&#127470;&#127481; +39</option>
+      <option value="+351">&#127477;&#127481; +351</option>
+      <option value="+1">&#127482;&#127480; +1</option>
+      <option value="+1CA">&#127464;&#127462; +1</option>
+      <option value="+212">&#127474;&#127462; +212</option>
+      <option value="+216">&#127481;&#127475; +216</option>
+      <option value="+213">&#127465;&#127487; +213</option>
+      <option value="+225">&#127464;&#127470; +225</option>
+      <option value="+221">&#127480;&#127475; +221</option>
+    </select>
+    <input type="tel" name="telephone" placeholder="T&#233;l&#233;phone" required style="flex:1;" />
+  </div>
+</div>
+
+<!-- Adresse avec autocomplétion BAN -->
+<div class="address-autocomplete">
+  <input type="text" name="adresse" id="adresseInput" placeholder="Adresse du bien &#224; r&#233;nover" required autocomplete="off" />
+  <div class="address-suggestions" id="adresseSuggestions"></div>
+</div>
+
+<!-- Qualité -->
+<select name="qualite" required>
+  <option value="" disabled selected>Vous &#234;tes...</option>
+  <option value="Particulier">Particulier</option>
+  <option value="Professionnel">Professionnel</option>
+</select>
+
+<!-- Type de bien -->
+<select name="typeBien" id="typeBien" required>
+  <option value="" disabled selected>Type de bien</option>
+  <option value="R&#233;sidentiel">R&#233;sidentiel</option>
+  <option value="Tertiaire">Tertiaire</option>
+  <option value="Site industriel">Site industriel</option>
+</select>
+
+<!-- Précision (dynamique selon type de bien) -->
+<select name="precision" id="precisionBien" required disabled>
+  <option value="" disabled selected>Pr&#233;cision (s&#233;lectionnez d&#8217;abord le type)</option>
+</select>
+</div><!-- fin contact-fields (colonne droite) -->
+</div><!-- fin contact-grid -->
+
+<!-- ══════════ ZONE PLEINE LARGEUR : TAGS ══════════ -->
+<div class="contact-fullwidth" style="margin-top:32px;padding-top:32px;border-top:1px solid var(--border);">
+
+<!-- ══════════ GROUPE 1 : LE PROJET ══════════ -->
+<div class="form-divider"></div>
+<div class="form-group">
+  <div class="form-group-label">Votre projet</div>
+  <div class="form-group-question">Type de projet</div>
+  <div class="form-tags" data-tag-group="typeProjet" data-mode="single">
+    <span class="form-tag" data-value="R&#233;novation globale"><span class="tag-check">&#10003;</span> R&#233;novation globale</span>
+    <span class="form-tag" data-value="R&#233;novation partielle"><span class="tag-check">&#10003;</span> R&#233;novation partielle</span>
+  </div>
+  <div class="form-group-question" style="margin-top:14px;">Incluant</div>
+  <div class="form-tags" data-tag-group="incluant" data-mode="multi">
+    <span class="form-tag" data-value="Extension"><span class="tag-check">&#10003;</span> Extension</span>
+    <span class="form-tag" data-value="Ameublement"><span class="tag-check">&#10003;</span> Ameublement</span>
+  </div>
+</div>
+
+<div class="form-group">
+  <div class="form-group-question">Nombre de pi&#232;ces &#224; r&#233;nover</div>
+  <div class="form-tags" data-tag-group="nbPieces" data-mode="single">
+    <span class="form-tag" data-value="1 pi&#232;ce"><span class="tag-check">&#10003;</span> 1 pi&#232;ce</span>
+    <span class="form-tag" data-value="2 pi&#232;ces"><span class="tag-check">&#10003;</span> 2 pi&#232;ces</span>
+    <span class="form-tag" data-value="3 &#224; 4 pi&#232;ces"><span class="tag-check">&#10003;</span> 3 &#224; 4 pi&#232;ces</span>
+    <span class="form-tag" data-value="5 pi&#232;ces ou plus"><span class="tag-check">&#10003;</span> 5 pi&#232;ces ou plus</span>
+  </div>
+</div>
+
+<!-- ══════════ GROUPE 2 : LES DÉTAILS ══════════ -->
+<div class="form-divider"></div>
+<div class="form-group">
+  <div class="form-group-label">Les d&#233;tails</div>
+  <div class="form-group-question">Espaces concern&#233;s</div>
+  <div class="form-group-hint">S&#233;lection multiple possible</div>
+  <div class="form-tags" data-tag-group="espaces" data-mode="multi">
+    <span class="form-tag" data-value="Cuisine"><span class="tag-icon">&#127859;</span><span class="tag-check">&#10003;</span> Cuisine</span>
+    <span class="form-tag" data-value="Salle de bain / WC"><span class="tag-icon">&#128703;</span><span class="tag-check">&#10003;</span> Salle de bain / WC</span>
+    <span class="form-tag" data-value="Salon / Salle &#224; manger"><span class="tag-icon">&#128715;</span><span class="tag-check">&#10003;</span> Salon / Salle &#224; manger</span>
+    <span class="form-tag" data-value="Chambres / Bureau"><span class="tag-icon">&#128716;</span><span class="tag-check">&#10003;</span> Chambres / Bureau</span>
+    <span class="form-tag" data-value="Terrasse / Fa&#231;ade"><span class="tag-icon">&#127795;</span><span class="tag-check">&#10003;</span> Terrasse / Fa&#231;ade</span>
+    <span class="form-tag" data-value="Am&#233;nagement Combles / Sous-sol"><span class="tag-icon">&#128208;</span><span class="tag-check">&#10003;</span> Combles / Sous-sol</span>
+  </div>
+</div>
+
+<div class="form-group">
+  <div class="form-group-question">Travaux envisag&#233;s</div>
+  <div class="form-group-hint">S&#233;lection multiple possible</div>
+  <div class="form-tags" data-tag-group="travaux" data-mode="multi">
+    <span class="form-tag" data-value="Redistribution (Cloisons)"><span class="tag-icon">&#129521;</span><span class="tag-check">&#10003;</span> Redistribution</span>
+    <span class="form-tag" data-value="Rev&#234;tements (Sols/Murs)"><span class="tag-icon">&#127912;</span><span class="tag-check">&#10003;</span> Rev&#234;tements</span>
+    <span class="form-tag" data-value="&#201;lectricit&#233;"><span class="tag-icon">&#9889;</span><span class="tag-check">&#10003;</span> &#201;lectricit&#233;</span>
+    <span class="form-tag" data-value="Plomberie"><span class="tag-icon">&#128167;</span><span class="tag-check">&#10003;</span> Plomberie</span>
+    <span class="form-tag" data-value="Isolation / Ventilation / Chauffage"><span class="tag-icon">&#128293;</span><span class="tag-check">&#10003;</span> Isolation / Ventilation / Chauffage</span>
+    <span class="form-tag" data-value="Menuiseries"><span class="tag-icon">&#129695;</span><span class="tag-check">&#10003;</span> Menuiseries</span>
+    <span class="form-tag" data-value="Toiture"><span class="tag-icon">&#127968;</span><span class="tag-check">&#10003;</span> Toiture</span>
+    <span class="form-tag" data-value="Cuvelage"><span class="tag-icon">&#128167;</span><span class="tag-check">&#10003;</span> Cuvelage</span>
+    <span class="form-tag" data-value="Panneaux solaires"><span class="tag-icon">&#9728;</span><span class="tag-check">&#10003;</span> Panneaux solaires</span>
+  </div>
+</div>
+
+<!-- ══════════ GROUPE 3 : LES MÉTRIQUES ══════════ -->
+<div class="form-divider"></div>
+<div class="form-group">
+  <div class="form-group-label">Les m&#233;triques</div>
+  <div class="form-group-question">Surface concern&#233;e</div>
+  <div class="form-tags" data-tag-group="surface" data-mode="single">
+    <span class="form-tag" data-value="< 10 m²"><span class="tag-check">&#10003;</span> &lt; 10 m&#178;</span>
+    <span class="form-tag" data-value="10 — 40 m²"><span class="tag-check">&#10003;</span> 10 &#8212; 40 m&#178;</span>
+    <span class="form-tag" data-value="40 — 80 m²"><span class="tag-check">&#10003;</span> 40 &#8212; 80 m&#178;</span>
+    <span class="form-tag" data-value="80 — 120 m²"><span class="tag-check">&#10003;</span> 80 &#8212; 120 m&#178;</span>
+    <span class="form-tag" data-value="120 — 180 m²"><span class="tag-check">&#10003;</span> 120 &#8212; 180 m&#178;</span>
+    <span class="form-tag" data-value="180 — 250 m²"><span class="tag-check">&#10003;</span> 180 &#8212; 250 m&#178;</span>
+    <span class="form-tag" data-value="250 — 500 m²"><span class="tag-check">&#10003;</span> 250 &#8212; 500 m&#178;</span>
+    <span class="form-tag" data-value="500 — 1000 m²"><span class="tag-check">&#10003;</span> 500 &#8212; 1 000 m&#178;</span>
+    <span class="form-tag" data-value="> 1000 m²"><span class="tag-check">&#10003;</span> &gt; 1 000 m&#178;</span>
+  </div>
+</div>
+
+<div class="form-group">
+  <div class="form-group-question">Budget estim&#233;</div>
+  <div class="form-tags" data-tag-group="budget" data-mode="single">
+    <span class="form-tag" data-value="< 20 000 €"><span class="tag-check">&#10003;</span> - 20 000 &#8364;</span>
+    <span class="form-tag" data-value="20 000 — 50 000 €"><span class="tag-check">&#10003;</span> 20 000 &#8212; 50 000 &#8364;</span>
+    <span class="form-tag" data-value="50 000 — 100 000 €"><span class="tag-check">&#10003;</span> 50 000 &#8212; 100 000 &#8364;</span>
+    <span class="form-tag" data-value="100 000 — 150 000 €"><span class="tag-check">&#10003;</span> 100 000 &#8212; 150 000 &#8364;</span>
+    <span class="form-tag" data-value="150 000 — 250 000 €"><span class="tag-check">&#10003;</span> 150 000 &#8212; 250 000 &#8364;</span>
+    <span class="form-tag" data-value="> 250 000 €"><span class="tag-check">&#10003;</span> + 250 000 &#8364;</span>
+  </div>
+</div>
+
+<!-- Échéance -->
+<div class="form-group" style="text-align:center;">
+  <div class="form-group-question">&#201;ch&#233;ance de livraison souhait&#233;e</div>
+  <div style="display:flex;gap:12px;justify-content:center;max-width:400px;margin:0 auto;">
+    <select id="echeanceMonth" required style="flex:1;padding:12px 16px;font-size:0.9rem;">
+      <option value="" disabled selected>Mois</option>
+      <option value="01">Janvier</option>
+      <option value="02">F&#233;vrier</option>
+      <option value="03">Mars</option>
+      <option value="04">Avril</option>
+      <option value="05">Mai</option>
+      <option value="06">Juin</option>
+      <option value="07">Juillet</option>
+      <option value="08">Ao&#251;t</option>
+      <option value="09">Septembre</option>
+      <option value="10">Octobre</option>
+      <option value="11">Novembre</option>
+      <option value="12">D&#233;cembre</option>
+    </select>
+    <select id="echeanceYear" required style="flex:1;padding:12px 16px;font-size:0.9rem;">
+      <option value="" disabled selected>Ann&#233;e</option>
+    </select>
+  </div>
+</div>
+<input type="hidden" name="echeance" id="echeanceHidden" />
+
+<!-- Champ libre optionnel -->
+<div class="form-divider"></div>
+<div style="position:relative;">
+  <textarea name="message" class="compact" maxlength="50" placeholder="Un d&#233;tail sp&#233;cifique &#224; pr&#233;ciser ? (Facultatif &#8212; 50 caract&#232;res maximum)" style="min-height:80px;width:100%;resize:vertical;"></textarea>
+  <div id="charCounter" style="position:absolute;bottom:8px;right:12px;font-size:0.7rem;color:var(--muted);">0 / 50</div>
+</div>
+
+<!-- Champs cachés pour les données structurées -->
+<input type="hidden" name="typeProjet" id="tagTypeProjet" />
+<input type="hidden" name="incluant" id="tagIncluant" />
+<input type="hidden" name="nbPieces" id="tagNbPieces" />
+<input type="hidden" name="espaces" id="tagEspaces" />
+<input type="hidden" name="travaux" id="tagTravaux" />
+<input type="hidden" name="surface" id="tagSurface" />
+<input type="hidden" name="budget" id="tagBudget" />
+
+<p id="contactFormError" style="color:#ff9090;font-size:0.82rem;display:none;margin:-4px 0 0 0;text-align:center;"></p>
+<div style="text-align:center;margin-top:12px;">
+  <button type="submit" style="padding:16px 48px;border-radius:50px;font-size:0.85rem;letter-spacing:0.08em;">Envoyer ma demande</button>
+</div>
+</div><!-- fin contact-fullwidth -->
+</form>
+
+<script>
+/* ══════════════════════════════════════════════
+   TAG / CHIP SELECTOR — Logique interactive
+   ══════════════════════════════════════════════ */
+(function() {
+  var allGroups = document.querySelectorAll('.form-tags[data-tag-group]');
+
+  allGroups.forEach(function(group) {
+    var mode = group.getAttribute('data-mode'); // "single" ou "multi"
+    var groupName = group.getAttribute('data-tag-group');
+    var tags = group.querySelectorAll('.form-tag');
+
+    tags.forEach(function(tag) {
+      tag.addEventListener('click', function() {
+        if (mode === 'single') {
+          // Désélectionner tous les autres du même groupe
+          tags.forEach(function(t) { t.classList.remove('active'); });
+          tag.classList.add('active');
+        } else {
+          // Toggle multi-sélection
+          tag.classList.toggle('active');
+        }
+        // Synchroniser le champ caché
+        syncTagHidden(groupName, group, mode);
+      });
+    });
+  });
+
+  function syncTagHidden(name, group, mode) {
+    var hidden = document.getElementById('tag' + name.charAt(0).toUpperCase() + name.slice(1));
+    if (!hidden) return;
+    var activeTags = group.querySelectorAll('.form-tag.active');
+    var values = [];
+    activeTags.forEach(function(t) { values.push(t.getAttribute('data-value')); });
+    hidden.value = (mode === 'single') ? (values[0] || '') : values.join(', ');
+  }
+})();
+
+/* --- Précision dynamique selon Type de bien --- */
+var precisionOptions = {
+  'Résidentiel': [
+    'Maison individuelle',
+    'Maison divisée',
+    'Appartement',
+    'Immeuble < 5 logements (mono/copropriété)',
+    'Immeuble > 10 logements (mono/copropriété)'
+  ],
+  'Tertiaire': [
+    'Boutique',
+    'Bureau',
+    'Locaux à usages mixtes'
+  ],
+  'Site industriel': [
+    'Atelier',
+    'Entrepôt',
+    'Usine'
+  ]
+};
+
+document.getElementById('typeBien').addEventListener('change', function() {
+  var sel = document.getElementById('precisionBien');
+  var opts = precisionOptions[this.value] || [];
+  sel.innerHTML = '<option value="" disabled selected>Pr\u00e9cisez...</option>';
+  opts.forEach(function(o) {
+    var opt = document.createElement('option');
+    opt.value = o;
+    opt.textContent = o;
+    sel.appendChild(opt);
+  });
+  sel.disabled = false;
+});
+
+/* --- Échéance : remplir les années et synchroniser le hidden --- */
+(function() {
+  var yearSel = document.getElementById('echeanceYear');
+  var monthSel = document.getElementById('echeanceMonth');
+  var hidden = document.getElementById('echeanceHidden');
+  var currentYear = new Date().getFullYear();
+  for (var y = currentYear; y <= currentYear + 5; y++) {
+    var opt = document.createElement('option');
+    opt.value = y;
+    opt.textContent = y;
+    yearSel.appendChild(opt);
+  }
+  function syncEcheance() {
+    var m = monthSel.value;
+    var a = yearSel.value;
+    if (m && a) hidden.value = a + '-' + m;
+  }
+  monthSel.addEventListener('change', syncEcheance);
+  yearSel.addEventListener('change', syncEcheance);
+})();
+
+/* --- Compteur de caractères textarea (limite stricte 50) --- */
+(function() {
+  var ta = document.querySelector('textarea[name="message"]');
+  var counter = document.getElementById('charCounter');
+  if (ta && counter) {
+    ta.addEventListener('input', function() {
+      if (this.value.length > 50) this.value = this.value.substring(0, 50);
+      var len = this.value.length;
+      counter.textContent = len + ' / 50';
+      counter.style.color = len >= 45 ? '#C4745A' : 'var(--muted)';
+    });
+  }
+})();
+
+/* --- Collecter toutes les données structurées au submit --- */
+function collectStructuredData() {
+  var data = {};
+  var groups = document.querySelectorAll('.form-tags[data-tag-group]');
+  groups.forEach(function(group) {
+    var name = group.getAttribute('data-tag-group');
+    var mode = group.getAttribute('data-mode');
+    var activeTags = group.querySelectorAll('.form-tag.active');
+    var values = [];
+    activeTags.forEach(function(t) { values.push(t.getAttribute('data-value')); });
+    data[name] = (mode === 'single') ? (values[0] || null) : values;
+  });
+  return data;
+}
+
+/* --- Autocomplétion adresse via API BAN (gouv.fr) --- */
+(function() {
+  var input = document.getElementById('adresseInput');
+  var suggestions = document.getElementById('adresseSuggestions');
+  var debounceTimer;
+
+  input.addEventListener('input', function() {
+    clearTimeout(debounceTimer);
+    var q = this.value.trim();
+    if (q.length < 4) { suggestions.style.display = 'none'; return; }
+    debounceTimer = setTimeout(function() {
+      fetch('https://api-adresse.data.gouv.fr/search/?q=' + encodeURIComponent(q) + '&limit=5')
+        .then(function(r) { return r.json(); })
+        .then(function(data) {
+          suggestions.innerHTML = '';
+          if (data.features && data.features.length) {
+            data.features.forEach(function(f) {
+              var div = document.createElement('div');
+              div.textContent = f.properties.label;
+              div.addEventListener('click', function() {
+                input.value = f.properties.label;
+                suggestions.style.display = 'none';
+              });
+              suggestions.appendChild(div);
+            });
+            suggestions.style.display = 'block';
+          } else {
+            suggestions.style.display = 'none';
+          }
+        });
+    }, 300);
+  });
+
+  document.addEventListener('click', function(e) {
+    if (!suggestions.contains(e.target) && e.target !== input) {
+      suggestions.style.display = 'none';
+    }
+  });
+})();
+
+/* --- Soumission formulaire : Netlify Forms + fonction email --- */
+document.getElementById('contactForm').addEventListener('submit', function(e) {
+  e.preventDefault();
+  var form = this;
+  var errEl = document.getElementById('contactFormError');
+  var btn = form.querySelector('button[type="submit"]');
+
+  // Valider qu'au moins le type de projet est sélectionné
+  var structured = collectStructuredData();
+  if (!structured.typeProjet) {
+    errEl.textContent = 'Merci de s\u00e9lectionner au moins le type de projet.';
+    errEl.style.display = 'block';
+    // Scroller vers le premier groupe de tags
+    var firstGroup = document.querySelector('.form-tags[data-tag-group="typeProjet"]');
+    if (firstGroup) firstGroup.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    return;
+  }
+  if (!structured.surface) {
+    errEl.textContent = 'Merci d\u0027indiquer la surface concern\u00e9e.';
+    errEl.style.display = 'block';
+    return;
+  }
+
+  errEl.style.display = 'none';
+  btn.disabled = true;
+  btn.textContent = 'Envoi en cours...';
+
+  // Construire le message structuré pour Marcel (JSON dans le champ message)
+  var msgText = form.message ? form.message.value.trim() : '';
+  var demande = 'Projet : ' + (structured.typeProjet || '-') +
+    ' | Pi\u00e8ces : ' + (structured.nbPieces || '-') +
+    ' | Espaces : ' + (structured.espaces && structured.espaces.length ? structured.espaces.join(', ') : '-') +
+    ' | Travaux : ' + (structured.travaux && structured.travaux.length ? structured.travaux.join(', ') : '-') +
+    ' | Surface : ' + (structured.surface || '-') +
+    ' | Budget : ' + (structured.budget || '-');
+  if (msgText) demande += ' | Note : ' + msgText;
+
+  // Écrire le résumé dans le champ message pour compatibilité
+  if (form.message) form.message.value = demande;
+
+  var formData = new FormData(form);
+  var body = new URLSearchParams(formData).toString();
+
+  // Préparer les données structurées pour Marcel (JSON)
+  var marcelData = {
+    genre: form.genre ? form.genre.value : '',
+    prenom: form.prenom ? form.prenom.value : '',
+    nom: form.nom ? form.nom.value : '',
+    email: form.email ? form.email.value : '',
+    telephone: form.telephone ? form.telephone.value : '',
+    adresse: form.adresse ? form.adresse.value : '',
+    qualite: form.qualite ? form.qualite.value : '',
+    typeBien: form.typeBien ? form.typeBien.value : '',
+    precision: form.precision ? form.precision.value : '',
+    typeProjet: structured.typeProjet || '',
+    incluant: structured.incluant || [],
+    nbPieces: structured.nbPieces || '',
+    espaces: structured.espaces || [],
+    travaux: structured.travaux || [],
+    surface: structured.surface || '',
+    budget: structured.budget || '',
+    echeance: form.echeance ? form.echeance.value : '',
+    message: msgText
+  };
+
+  // 1) Soumettre à Netlify Forms
+  fetch('/', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+    body: body + '&form-name=contact'
+  }).then(function() {
+    // 2) Générer et stocker le prompt Marcel dans Supabase
+    fetch('/.netlify/functions/marcel-prompt', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(marcelData)
+    }).then(function(r) { return r.json(); })
+      .then(function(res) {
+        console.log('Marcel prompt:', res.success ? 'généré (' + res.prompt_length + ' car.)' : 'erreur');
+      })
+      .catch(function(err) { console.warn('Marcel prompt non généré:', err); });
+
+    // 3) Déclencher la fonction email (en parallèle, non bloquant)
+    fetch('/.netlify/functions/contact', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: body
+    }).catch(function() {});
+
+    // 4) Message de succès
+    form.innerHTML = '<div style="text-align:center;padding:40px 0;">' +
+      '<div style="font-size:2.5rem;margin-bottom:16px;">✓</div>' +
+      '<h3 style="font-family:Cormorant Garamond,serif;font-size:1.5rem;font-weight:300;color:var(--green);margin-bottom:12px;">Demande envoy\u00e9e avec succ\u00e8s</h3>' +
+      '<p style="color:var(--text-soft);font-size:0.9rem;">Un email de confirmation vous a \u00e9t\u00e9 adress\u00e9.<br/>Nous vous recontacterons tr\u00e8s prochainement.</p>' +
+      '</div>';
+  }).catch(function() {
+    errEl.textContent = 'Une erreur est survenue. Veuillez r\u00e9essayer.';
+    errEl.style.display = 'block';
+    btn.disabled = false;
+    btn.textContent = 'Envoyer ma demande';
+  });
+});
+</script>
 </section>
 
 <footer>
