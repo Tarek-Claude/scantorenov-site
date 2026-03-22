@@ -8,6 +8,8 @@
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&family=Inter:wght@300;400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet" />
   <script src="https://identity.netlify.com/v1/netlify-identity-widget.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+  <!-- Matterport Showcase SDK — pour la capture d'écran intégrée -->
+  <script src="https://static.matterport.com/showcase-sdk/latest.js"></script>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     html { scroll-behavior: smooth; }
@@ -862,6 +864,14 @@
     .ws-capture-btn:hover { background: var(--green-hover); }
     .ws-capture-btn:disabled {
       background: var(--muted); cursor: not-allowed; opacity: 0.5;
+    }
+    .ws-capture-btn.capturing {
+      background: var(--dim); pointer-events: none;
+      animation: capturePulse 1s ease-in-out infinite;
+    }
+    @keyframes capturePulse {
+      0%, 100% { opacity: 0.7; }
+      50% { opacity: 1; }
     }
     .ws-capture-hint {
       font-size: 0.72rem; color: var(--muted); font-style: italic;
@@ -2151,11 +2161,11 @@
           <span class="ws-gallery-badge" id="wsCapturesBadge">0 capture(s)</span>
         </div>
         <div class="ws-capture-bar">
-          <!-- TODO: Brancher sur le Matterport Showcase SDK (mpSdk.Renderer.takeScreenShot) -->
-          <button class="ws-capture-btn" id="wsCaptureBtn" onclick="takeCapture()">
+          <!-- Capture réelle via Matterport Showcase SDK (mpSdk.Renderer.takeScreenShot) -->
+          <button class="ws-capture-btn" id="wsCaptureBtn" onclick="takeCapture()" disabled title="En attente de connexion au SDK...">
             &#128247; Prendre une capture
           </button>
-          <span class="ws-capture-hint">Capture la vue actuelle de la visite 3D</span>
+          <span class="ws-capture-hint" id="wsCaptureHint">En attente de la visite 3D...</span>
         </div>
         <div class="ws-gallery-grid" id="wsCapturesGrid">
           <div class="ws-gallery-empty" id="wsCapturesEmpty">
@@ -3049,46 +3059,52 @@ function toggleExpertSelect(index, thumbEl) {
 /* ══ 2. CAPTURE D'ÉCRAN MATTERPORT ══ */
 
 function takeCapture() {
-  // TODO: Utiliser le Matterport Showcase SDK :
-  //   mpSdk.Renderer.takeScreenShot({ width: 1920, height: 1080 })
-  //     .then(function(screenShotUri) { addCapture(screenShotUri); })
-  //
-  // En attendant, on génère une capture simulée à partir de l'iframe
-  // (ne fonctionne pas en cross-origin, c'est un placeholder)
-
   var btn = document.getElementById('wsCaptureBtn');
-  if (btn) { btn.disabled = true; btn.innerHTML = '⏳ Capture en cours...'; }
 
-  // Simulation : créer une image placeholder avec un canvas
-  setTimeout(function() {
-    var canvas = document.createElement('canvas');
-    canvas.width = 640;
-    canvas.height = 360;
-    var ctx = canvas.getContext('2d');
+  // ── État "en cours" sur le bouton ──
+  function setCaptureLoading(loading) {
+    if (!btn) return;
+    if (loading) {
+      btn.classList.add('capturing');
+      btn.disabled = true;
+      btn.innerHTML = '&#9203; Capture en cours...';
+    } else {
+      btn.classList.remove('capturing');
+      btn.disabled = false;
+      btn.innerHTML = '&#128247; Prendre une capture';
+    }
+  }
 
-    // Fond dégradé
-    var grad = ctx.createLinearGradient(0, 0, 640, 360);
-    grad.addColorStop(0, '#2D5F3E');
-    grad.addColorStop(1, '#1A5F6A');
-    ctx.fillStyle = grad;
-    ctx.fillRect(0, 0, 640, 360);
+  // ── Vérifier que le SDK est connecté ──
+  if (!mpSdkInstance) {
+    // SDK pas encore prêt — fallback avec un message clair
+    alert('Le SDK Matterport n\'est pas encore connecté.\nPatientez quelques secondes que la visite 3D se charge complètement, puis réessayez.');
+    return;
+  }
 
-    // Texte
-    ctx.fillStyle = 'rgba(255,255,255,0.8)';
-    ctx.font = '18px sans-serif';
-    ctx.textAlign = 'center';
-    ctx.fillText('📷 Capture simulée', 320, 170);
-    ctx.font = '12px sans-serif';
-    ctx.fillStyle = 'rgba(255,255,255,0.5)';
-    var now = new Date();
-    ctx.fillText(now.toLocaleString('fr-FR'), 320, 200);
-    ctx.fillText('TODO: Brancher Matterport SDK', 320, 225);
+  setCaptureLoading(true);
 
-    var dataUrl = canvas.toDataURL('image/png');
-    addCapture(dataUrl);
+  // ── Vraie capture via le Matterport Showcase SDK ──
+  mpSdkInstance.Renderer.takeScreenShot({ width: 1920, height: 1080 })
+    .then(function(screenShotUri) {
+      // screenShotUri = data URI (base64) de l'image capturée
+      addCapture(screenShotUri);
 
-    if (btn) { btn.disabled = false; btn.innerHTML = '📷 Prendre une capture'; }
-  }, 800);
+      // Feedback visuel : vert brièvement
+      if (btn) {
+        btn.innerHTML = '&#10004; Capturé !';
+        btn.style.background = '#2ecc71';
+        setTimeout(function() {
+          btn.style.background = '';
+          setCaptureLoading(false);
+        }, 1200);
+      }
+    })
+    .catch(function(err) {
+      console.error('Erreur capture Matterport:', err);
+      alert('Erreur lors de la capture : ' + (err.message || err) + '\nAssurez-vous que la visite 3D est bien chargée.');
+      setCaptureLoading(false);
+    });
 }
 
 function addCapture(dataUrl) {
@@ -3917,6 +3933,9 @@ function renderPropertyData(data) {
   content.style.display = '';
 }
 
+// Référence globale au SDK Matterport (utilisée par takeCapture)
+var mpSdkInstance = null;
+
 function initMatterportSDK() {
   var iframe = document.getElementById('matterportIframe');
   if (!iframe || !window.MP_SDK) {
@@ -3924,11 +3943,26 @@ function initMatterportSDK() {
     return;
   }
 
-  var sdkKey = 'b9a411fbbe9cb8a0b9fcff249832cad8';
+  var sdkKey = 'it5i55rr71n8tmetz6maupmsb';
 
   window.MP_SDK.connect(iframe, sdkKey, '3.10')
     .then(function(sdk) {
-      console.log('Matterport SDK connect\u00e9');
+      console.log('Matterport SDK connecté');
+      // Stocker l'instance pour les captures d'écran
+      mpSdkInstance = sdk;
+
+      // Activer le bouton de capture maintenant que le SDK est prêt
+      var captureBtn = document.getElementById('wsCaptureBtn');
+      var captureHint = document.getElementById('wsCaptureHint');
+      if (captureBtn) {
+        captureBtn.disabled = false;
+        captureBtn.title = 'Capture la vue actuelle de la visite 3D';
+      }
+      if (captureHint) {
+        captureHint.textContent = '✓ SDK connecté — Capture la vue actuelle de la visite 3D';
+        captureHint.style.color = 'var(--green)';
+      }
+
       return Promise.all([
         sdk.Model.getData(),
         sdk.Floor.getData(),
@@ -3949,14 +3983,14 @@ function initMatterportSDK() {
           rooms: rooms ? rooms.map(function(r) {
             return {
               id: r.id,
-              name: r.name || 'Pi\u00e8ce',
+              name: r.name || 'Pièce',
               floorIndex: r.floorIndex,
               area: r.area ? Math.round(r.area * 100) / 100 : null
             };
           }) : []
         };
 
-        console.log('Donn\u00e9es du bien extraites:', window.__propertyData);
+        console.log('Données du bien extraites:', window.__propertyData);
         renderPropertyData(window.__propertyData);
       });
     })
@@ -4094,24 +4128,32 @@ function initMatterportSection() {
   var dataSection = document.getElementById('propertyDataContainer');
 
   if (iframeSrc || modelId) {
-    // Visite disponible → afficher l'iframe
-    var sdkKey = 'b9a411fbbe9cb8a0b9fcff249832cad8';
+    // Visite disponible → afficher l'iframe avec la clé SDK
+    var sdkKey = 'it5i55rr71n8tmetz6maupmsb';
     if (iframeSrc) {
-      // URL iframe complète depuis Supabase (peut contenir des params spécifiques)
-      iframeEl.src = iframeSrc;
+      // URL iframe complète depuis Supabase — ajouter la clé SDK si absente
+      var src = iframeSrc;
+      if (src.indexOf('applicationKey') === -1) {
+        src += (src.indexOf('?') > -1 ? '&' : '?') + 'applicationKey=' + sdkKey;
+      }
+      iframeEl.src = src;
     } else {
-      iframeEl.src = 'https://my.matterport.com/show/?m=' + modelId + '&play=1&qs=1';
+      iframeEl.src = 'https://my.matterport.com/show/?m=' + modelId + '&play=1&qs=1&applicationKey=' + sdkKey;
     }
     frameEl.style.display = '';
     pendingEl.style.display = 'none';
     if (dataSection) dataSection.style.display = '';
 
-    // Charger le SDK pour extraire les données
-    var script = document.createElement('script');
-    script.src = 'https://static.matterport.com/showcase-sdk/latest.js';
-    script.onload = function() { setTimeout(initMatterportSDK, 2000); };
-    script.onerror = function() { useFallbackData(); };
-    document.head.appendChild(script);
+    // Le SDK est déjà chargé dans le <head>, connecter après un délai
+    if (window.MP_SDK) {
+      setTimeout(initMatterportSDK, 2000);
+    } else {
+      // Fallback si le SDK n'a pas chargé
+      setTimeout(function() {
+        if (window.MP_SDK) initMatterportSDK();
+        else useFallbackData();
+      }, 3000);
+    }
   } else {
     // Pas encore de visite → placeholder
     frameEl.style.display = 'none';
