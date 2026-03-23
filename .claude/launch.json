@@ -3,8 +3,8 @@
   "configurations": [
     {
       "name": "netlify-dev",
-      "runtimeExecutable": "cmd",
-      "runtimeArgs": ["/c", "netlify", "dev", "--port", "8888"],
+      "runtimeExecutable": "cmd.exe",
+      "runtimeArgs": ["/c", "netlify dev --port 8888"],
       "port": 8888
     }
   ]

@@ -1018,7 +1018,27 @@ function checkEnableTransmission() {
   }
 }
 
-/* ── Marcel — message d'accueil personnalisé basé sur le projet client ── */
+/* ── Données client depuis les métadonnées Netlify Identity ── */
+var clientDataFromSupabase = null;
+
+function loadClientData(email, callback) {
+  if (!currentUser) { callback(null); return; }
+  // Les données client sont stockées dans les user_metadata de Netlify Identity
+  // (renseignées lors de la création du compte via les données du formulaire)
+  var meta = currentUser.user_metadata || {};
+  clientDataFromSupabase = {
+    nom: meta.full_name || email,
+    adresse: meta.adresse || null,
+    type_bien: meta.type_bien || null,
+    demande: meta.demande || null,
+    type_projet: meta.type_projet || null,
+    surface: meta.surface || null,
+    budget: meta.budget || null
+  };
+  callback(clientDataFromSupabase);
+}
+
+/* ── Marcel — message d'accueil personnalisé ── */
 function initMarcelWelcome() {
   var user = currentUser;
   if (!user) return;
@@ -1027,24 +1047,19 @@ function initMarcelWelcome() {
   var firstName = (user.user_metadata && user.user_metadata.full_name)
     ? user.user_metadata.full_name.split(' ')[0]
     : '';
-  var clientData = CLIENT_PROJETS[email] || null;
-  var projet = clientData ? clientData.demande : null;
   var welcomeEl = document.getElementById('marcelWelcomeMsg');
 
-  // Pas de description de projet → message générique
-  if (!projet) {
-    welcomeEl.innerHTML = 'Bonjour' + (firstName ? ' ' + firstName : '') + ' ! Je suis Marcel, votre assistant de r\u00e9novation. \uD83D\uDC18<br><br>'
-      + 'Je suis l\u00e0 pour vous aider \u00e0 imaginer, structurer et affiner votre projet. Dites-moi\u00a0: qu\u2019avez-vous en t\u00eate pour votre espace\u00a0?';
-    return;
-  }
+  // Message générique immédiat (sera remplacé si Marcel génère un accueil personnalisé)
+  var genericMsg = 'Bonjour' + (firstName ? ' ' + firstName : '') + ' ! Je suis Marcel, votre assistant de r\u00e9novation. \uD83D\uDC18<br><br>'
+    + 'Je suis l\u00e0 pour vous aider \u00e0 imaginer, structurer et affiner votre projet. Dites-moi\u00a0: qu\u2019avez-vous en t\u00eate pour votre espace\u00a0?';
 
-  // Description disponible → demander à Marcel de construire un accueil personnalisé
+  // Demander à Marcel de construire un accueil personnalisé
+  // Le prompt Marcel dans Supabase contient déjà toutes les données du formulaire
   welcomeEl.innerHTML = '<span class="pd-loading-spinner" style="margin-right:8px;vertical-align:middle;"></span> Marcel pr\u00e9pare votre accueil personnalis\u00e9\u2026 \uD83D\uDC18';
 
   var introPrompt = 'Le client s\'appelle ' + (firstName || 'Client') + '. '
-    + 'Voici la description de son projet de r\u00e9novation, telle qu\'il l\'a r\u00e9dig\u00e9e lors de sa demande : \n\n'
-    + '\"' + projet + '\"\n\n'
-    + 'R\u00e9dige un message d\'accueil chaleureux et personnalis\u00e9 (2-3 paragraphes max). '
+    + 'C\'est sa premi\u00e8re connexion \u00e0 son espace client. '
+    + 'R\u00e9dige un message d\'accueil chaleureux et personnalis\u00e9 (2-3 paragraphes max) en te basant sur les donn\u00e9es de son projet que tu connais d\u00e9j\u00e0 via ton contexte syst\u00e8me. '
     + 'Montre que tu as bien compris son projet, reformule-le bri\u00e8vement avec tes mots. '
     + 'Ne propose aucune piste de r\u00e9flexion, aucune suggestion, aucune liste d\'id\u00e9es. '
     + 'Termine simplement en l\'invitant \u00e0 exprimer librement ce \u00e0 quoi il pense, ce qu\'il imagine, ce qu\'il souhaite.';
@@ -1054,6 +1069,7 @@ function initMarcelWelcome() {
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
       messages: [{ role: 'user', content: introPrompt }],
+      email: email,
       propertyData: window.__propertyData || null
     })
   })
@@ -1064,15 +1080,11 @@ function initMarcelWelcome() {
   .then(function(data) {
     var reply = data.content || '';
     welcomeEl.innerHTML = reply.replace(/\n/g, '<br>');
-    // Ajouter au contexte conversationnel pour que Marcel se souvienne de son intro
     marcelHistory.push({ role: 'assistant', content: reply });
   })
   .catch(function(err) {
     console.warn('Marcel intro error:', err);
-    // Fallback : message générique enrichi avec la description
-    welcomeEl.innerHTML = 'Bonjour' + (firstName ? ' ' + firstName : '') + ' ! Je suis Marcel, votre assistant de r\u00e9novation. \uD83D\uDC18<br><br>'
-      + 'J\u2019ai pris connaissance de votre projet\u00a0: <em>' + projet + '</em><br><br>'
-      + 'Je suis l\u00e0 pour vous aider \u00e0 structurer et affiner ce projet. Par quoi souhaitez-vous commencer\u00a0?';
+    welcomeEl.innerHTML = genericMsg;
   });
 }
 
@@ -1095,6 +1107,7 @@ function sendMarcel() {
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
       messages: marcelHistory,
+      email: currentUser ? currentUser.email : null,
       propertyData: window.__propertyData || null
     })
   })
@@ -1112,7 +1125,7 @@ function sendMarcel() {
   })
   .catch(function(err) {
     hideTyping();
-    appendMsg('marcel', 'Je rencontre un probl\u00e8me technique. V\u00e9rifiez qu\u2019Ollama est bien lanc\u00e9 sur votre machine. \uD83D\uDC18');
+    appendMsg('marcel', 'Je rencontre un probl\u00e8me technique momentan\u00e9. Veuillez r\u00e9essayer dans un instant. \uD83D\uDC18');
     console.error('Marcel error:', err);
     input.disabled = false;
     input.focus();
@@ -1297,7 +1310,7 @@ function renderPropertyData(data) {
   cards.push({
     icon: '\uD83D\uDCCD',
     label: 'R\u00E9f\u00E9rence scan',
-    value: data.model ? data.model.sid : 'DKQ6zroSLKj',
+    value: data.model ? data.model.sid : '\u2014',
     detail: 'Identifiant Matterport'
   });
 
@@ -1370,7 +1383,7 @@ function initMatterportSDK() {
 
         window.__propertyData = {
           model: {
-            sid: modelData.sid || 'DKQ6zroSLKj',
+            sid: modelData.sid || '',
             name: modelData.name || 'Bien du client'
           },
           floors: floors ? floors.map(function(f, i) {
@@ -1397,82 +1410,20 @@ function initMatterportSDK() {
 }
 
 function useFallbackData() {
-  // Donn\u00e9es r\u00e9elles du scan — \u00e0 compl\u00e9ter au fur et \u00e0 mesure
-  window.__propertyData = {
-    model: { sid: 'DKQ6zroSLKj', name: '\u00C9tat des lieux \u2014 R\u00E9novation suite abandon de chantier' },
-    type: 'Pavillon',
-    annee: '60-70',
-    etat: 'Abandon de chantier',
-    etatDetail: 'R\u00E9novation compl\u00E8te \u00E0 pr\u00E9voir',
-    floors: [
-      { id: 0, index: 0, name: 'Rez-de-chauss\u00E9e' },
-      { id: 1, index: 1, name: '\u00C9tage' }
-    ],
-    rooms: [
-      { name: 'Entr\u00E9e', area: 6.2, floorIndex: 0 },
-      { name: 'S\u00E9jour / Salon', area: 28.5, floorIndex: 0 },
-      { name: 'Cuisine', area: 12.8, floorIndex: 0 },
-      { name: 'WC', area: 1.8, floorIndex: 0 },
-      { name: 'Couloir', area: 5.4, floorIndex: 1 },
-      { name: 'Chambre 1', area: 14.2, floorIndex: 1 },
-      { name: 'Chambre 2', area: 11.6, floorIndex: 1 },
-      { name: 'Chambre 3', area: 10.8, floorIndex: 1 },
-      { name: 'Salle de bains', area: 6.1, floorIndex: 1 },
-      { name: 'WC \u00E9tage', area: 1.5, floorIndex: 1 }
-    ]
-  };
-  renderPropertyData(window.__propertyData);
+  // Pas de données SDK Matterport — les données du bien seront chargées depuis Supabase
+  window.__propertyData = null;
+  console.log('Matterport SDK non disponible — données du bien chargées depuis Supabase.');
 }
 
-// ══════════════════════════════════════════════════════════════════
-//  TABLE DES PROJETS CLIENTS
-//  Recopiez ici la description saisie par le client dans le
-//  formulaire de contact lors de sa demande d'ouverture de compte.
-//  Marcel s'en servira pour construire un message d'accueil
-//  personnalisé dès la première connexion du client.
-// ══════════════════════════════════════════════════════════════════
-var CLIENT_PROJETS = {
-  'tr.kaptation@gmail.com': {
-    nom: 'TR KAPTATION',
-    adresse: '12 rue des Lilas, 93100 Montreuil',
-    type_bien: 'Pavillon ann\u00e9es 60-70 \u2014 98.9 m\u00b2 sur 2 niveaux',
-    demande: 'R\u00e9novation compl\u00e8te d\'un pavillon ann\u00e9es 60-70 de 98.9 m\u00b2 sur 2 niveaux, suite \u00e0 abandon de chantier. Souhait d\'ouvrir la cuisine sur le s\u00e9jour, r\u00e9nover la salle de bains, isoler et moderniser les menuiseries.'
-  },
-  'guillaumeolmo@gmail.com': {
-    nom: 'Guillaume OLMO',
-    adresse: '25 boulevard Voltaire, 75011 Paris',
-    type_bien: 'Appartement \u2014 65 m\u00b2',
-    demande: 'R\u00e9novation d\'un appartement de 65m\u00b2 \u00e0 Paris. Modernisation compl\u00e8te avec ouverture cuisine/s\u00e9jour et r\u00e9fection salle de bains.'
-  }
-  // ══════════════════════════════════════════════════════════
-  //  Ajouter ici les prochains clients :
-  //  'email@client.com': {
-  //    nom: 'Pr\u00e9nom NOM',
-  //    adresse: 'Adresse du bien \u00e0 r\u00e9nover',
-  //    type_bien: 'Type et surface du bien',
-  //    demande: 'Description copi\u00e9e depuis le formulaire de contact'
-  //  },
-  // ══════════════════════════════════════════════════════════
-};
-
-// ══════════════════════════════════════════════════════════════════
-//  TABLE DES VISITES VIRTUELLES PAR CLIENT
-//  Pour ajouter une visite : ajouter l'email et le modelId Matterport
-//  Le modelId se trouve dans l'URL Matterport : my.matterport.com/show/?m=XXXXXX
-// ══════════════════════════════════════════════════════════════════
-var CLIENT_MATTERPORT = {
-  'tr.kaptation@gmail.com': 'DKQ6zroSLKj',
-  'guillaumeolmo@gmail.com': 'DKQ6zroSLKj'
-  // Ajouter ici les prochains clients :
-  // 'email@client.com': 'MODEL_ID_MATTERPORT',
-};
+// Les données clients sont désormais chargées depuis Supabase
+// (plus de tables CLIENT_PROJETS / CLIENT_MATTERPORT hardcodées)
 
 function initMatterportSection() {
   var user = currentUser;
   var meta = (user && user.app_metadata) || (user && user.user_metadata) || {};
 
-  // Priorité : 1) métadonnées du compte, 2) table CLIENT_MATTERPORT
-  var modelId = meta.matterport_id || (user && CLIENT_MATTERPORT[user.email]) || null;
+  // Le modelId vient des métadonnées du compte (configuré dans Netlify Identity)
+  var modelId = meta.matterport_id || null;
 
   var frameEl = document.getElementById('matterportFrame');
   var pendingEl = document.getElementById('matterportPending');
@@ -1507,8 +1458,11 @@ function initMatterportSection() {
 var _origShowDashboard = showDashboard;
 showDashboard = function(user) {
   _origShowDashboard(user);
-  initMatterportSection();
-  initMarcelWelcome();
+  // Charger les données client depuis Supabase, puis initialiser Marcel et Matterport
+  loadClientData(user.email, function() {
+    initMatterportSection();
+    initMarcelWelcome();
+  });
 };
 
 /* ══════════════════════════════════════════════════════════════
@@ -1556,12 +1510,12 @@ function generateRapport() {
   if (!user) return;
 
   var email = user.email;
-  var clientData = CLIENT_PROJETS[email] || {};
+  var cd = clientDataFromSupabase || {};
   var meta = user.user_metadata || {};
-  var fullName = clientData.nom || meta.full_name || email;
-  var adresse = clientData.adresse || 'Non renseign\u00e9e';
-  var typeBien = clientData.type_bien || 'Non renseign\u00e9';
-  var demande = clientData.demande || 'Aucune description disponible.';
+  var fullName = cd.nom || meta.full_name || email;
+  var adresse = cd.adresse || 'Non renseign\u00e9e';
+  var typeBien = cd.type_bien || 'Non renseign\u00e9';
+  var demande = cd.demande || 'Aucune description disponible.';
 
   // Données du bien
   var propData = window.__propertyData || null;
@@ -1681,14 +1635,14 @@ function submitAvantProjet() {
   var btn = document.getElementById('btnTransmettre');
   var badge = document.querySelector('.synthese-badge');
   var email = user.email;
-  var clientData = CLIENT_PROJETS[email] || {};
+  var cd = clientDataFromSupabase || {};
   var meta = user.user_metadata || {};
 
   // Collecter toutes les données
-  var fullName = clientData.nom || meta.full_name || email;
-  var adresse = clientData.adresse || 'Non renseignée';
-  var typeBien = clientData.type_bien || 'Non renseigné';
-  var demande = clientData.demande || 'Aucune description.';
+  var fullName = cd.nom || meta.full_name || email;
+  var adresse = cd.adresse || 'Non renseign\u00e9e';
+  var typeBien = cd.type_bien || 'Non renseign\u00e9';
+  var demande = cd.demande || 'Aucune description.';
   var visuals = getGeneratedVisuals();
   var programme = extractProgramme();
 
