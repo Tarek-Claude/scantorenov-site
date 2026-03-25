@@ -193,7 +193,7 @@ nav {
 
 section {
   padding: 100px 48px;
-  max-width: 1200px;
+  max-width: 1100px;
   margin: 0 auto;
 }
 
@@ -415,63 +415,13 @@ section .section-intro {
 .contact-info {
   display: flex;
   flex-direction: column;
-  gap: 0;
-  justify-content: center;
-  height: 100%;
+  gap: 16px;
 }
 
 .contact-info p {
   color: var(--text-soft);
   font-size: 0.92rem;
   line-height: 1.8;
-}
-
-.contact-phrase {
-  font-family: 'Cormorant Garamond', serif;
-  font-size: 0.9rem; font-weight: 400;
-  color: var(--text); line-height: 2.8;
-  margin: 0; padding: 0;
-  border-left: 2px solid transparent;
-  padding-left: 16px;
-  transition: border-color 0.3s;
-}
-.contact-phrase:nth-child(odd) {
-  border-left-color: rgba(45,95,62,0.2);
-}
-
-/* Colonne droite du contact-grid : espacement des champs */
-.contact-grid > div:last-child {
-  display: flex;
-  flex-direction: column;
-  gap: 14px;
-}
-
-/* Groupe téléphone avec indicatif */
-.phone-group {
-  display: flex;
-  gap: 0;
-  align-items: stretch;
-}
-.phone-group .phone-prefix {
-  min-width: 95px;
-  max-width: 95px;
-  border-radius: 8px 0 0 8px;
-  border-right: none;
-  padding: 13px 8px;
-  font-size: 0.85rem;
-  background-position: right 8px center;
-  padding-right: 24px;
-}
-.phone-group input[type="tel"] {
-  border-radius: 0 8px 8px 0;
-  flex: 1;
-}
-
-/* Zone pleine largeur pour les tags */
-.contact-fullwidth {
-  margin-top: 32px;
-  padding-top: 32px;
-  border-top: 1px solid var(--border);
 }
 
 .contact-detail {
@@ -553,27 +503,22 @@ section .section-intro {
 }
 
 .contact-form button {
-  padding: 18px 52px;
+  padding: 14px 28px;
   background: var(--green);
   color: #FFFFFF;
-  border: 2px solid var(--green);
-  border-radius: 32px;
-  font-size: 0.82rem;
+  border: none;
+  border-radius: 6px;
+  font-size: 0.8rem;
   font-weight: 700;
   letter-spacing: 0.1em;
   text-transform: uppercase;
   cursor: pointer;
-  transition: all 0.3s ease;
-  display: block;
-  margin: 20px auto 0;
-  font-size: 0.9rem;
-  letter-spacing: 0.08em;
+  transition: background 0.2s;
+  align-self: flex-start;
 }
 
 .contact-form button:hover {
-  background: transparent;
-  color: var(--green);
-  border-color: var(--green);
+  background: var(--green-hover);
 }
 
 /* ── TAG / CHIP SELECTOR ── */
@@ -688,30 +633,9 @@ section .section-intro {
     grid-template-columns: repeat(2, 1fr);
   }
 }
-/* Échéance selects agrandis et côte à côte */
-.contact-fullwidth .form-group .form-row {
-  display: flex;
-  flex-direction: row;
-  flex-wrap: nowrap;
-}
-.contact-fullwidth .form-group .form-row select {
-  padding: 14px 40px 14px 18px;
-  font-size: 0.95rem;
-  min-width: 160px;
-  text-align: center;
-  flex: 1;
-}
-/* Textarea pour le champ optionnel */
+/* Textarea réduit pour le champ optionnel */
 .contact-form textarea.compact {
-  min-height: 110px;
-  max-width: 700px;
-  margin: 0 auto;
-  display: block;
-  resize: vertical;
-}
-/* Erreur et bouton centrés en pleine largeur */
-.contact-fullwidth #contactFormError {
-  text-align: center;
+  min-height: 60px;
 }
 /* Résumé structuré caché */
 .contact-form .structured-summary {
@@ -914,20 +838,21 @@ window.location.replace('/connexion'+h);
 <section id="contact">
 <div class="section-label">Contact</div>
 <h2>Votre r&#233;novation commence ici</h2>
-
-<!-- ── ZONE HAUTE : Identification (2 colonnes) ── -->
 <form class="contact-form" name="contact" method="POST" data-netlify="true" id="contactForm">
 <div class="contact-grid">
-<div class="contact-info">
-<p class="contact-phrase">Vous avez un projet de r&#233;novation&nbsp;?</p>
-<p class="contact-phrase">D&#233;couvrez notre approche par le scan 3D.</p>
-<p class="contact-phrase">Un jumeau num&#233;rique pr&#233;cis de votre bien.</p>
-<p class="contact-phrase">Un assistant IA pour explorer chaque possibilit&#233;.</p>
-<p class="contact-phrase">Un chef de projet d&#233;di&#233; &#224; vos c&#244;t&#233;s.</p>
-<div class="contact-detail" style="margin-top:24px;"><span class="cd-icon">&#x2709;</span> contact@scantorenov.com</div>
+<!-- Colonne gauche : texte accroche -->
+<div class="contact-info" style="display:flex;flex-direction:column;justify-content:center;">
+<p class="contact-phrase" style="font-family:'Cormorant Garamond',serif;font-size:1.05rem;line-height:2.2;color:var(--text-soft);">
+Vous avez un projet de r&#233;novation&nbsp;?<br/>
+D&#233;couvrez notre approche par le scan 3D.<br/>
+Remplissez ce formulaire,<br/>
+nous vous recontacterons rapidement.
+</p>
+<div class="contact-detail"><span class="cd-icon">&#x2709;</span> contact@scantorenov.com</div>
 <div class="contact-detail"><span class="cd-icon">&#x1F310;</span> scantorenov.com</div>
 </div>
-<div><!-- colonne droite formulaire -->
+<!-- Colonne droite : champs identification -->
+<div class="contact-fields">
 
 <!-- Genre / Prénom / Nom -->
 <div class="form-row-3">
@@ -940,12 +865,12 @@ window.location.replace('/connexion'+h);
   <input type="text" name="nom" placeholder="NOM" required />
 </div>
 
-<!-- Email / Téléphone avec indicatif -->
+<!-- Email / Téléphone -->
 <div class="form-row">
   <input type="email" name="email" placeholder="Email" required />
-  <div class="phone-group">
-    <select name="indicatif" id="indicatif" class="phone-prefix">
-      <option value="+33" selected>&#127467;&#127479; +33</option>
+  <div style="display:flex;gap:6px;">
+    <select name="phone_prefix" style="width:100px;padding:12px 6px;font-size:0.85rem;flex-shrink:0;">
+      <option value="+33">&#127467;&#127479; +33</option>
       <option value="+32">&#127463;&#127466; +32</option>
       <option value="+41">&#127464;&#127469; +41</option>
       <option value="+352">&#127473;&#127482; +352</option>
@@ -956,14 +881,14 @@ window.location.replace('/connexion'+h);
       <option value="+39">&#127470;&#127481; +39</option>
       <option value="+351">&#127477;&#127481; +351</option>
       <option value="+1">&#127482;&#127480; +1</option>
-      <option value="+1">&#127464;&#127462; +1</option>
+      <option value="+1CA">&#127464;&#127462; +1</option>
       <option value="+212">&#127474;&#127462; +212</option>
       <option value="+216">&#127481;&#127475; +216</option>
       <option value="+213">&#127465;&#127487; +213</option>
       <option value="+225">&#127464;&#127470; +225</option>
       <option value="+221">&#127480;&#127475; +221</option>
     </select>
-    <input type="tel" name="telephone" placeholder="T&#233;l&#233;phone" required />
+    <input type="tel" name="telephone" placeholder="T&#233;l&#233;phone" required style="flex:1;" />
   </div>
 </div>
 
@@ -992,12 +917,11 @@ window.location.replace('/connexion'+h);
 <select name="precision" id="precisionBien" required disabled>
   <option value="" disabled selected>Pr&#233;cision (s&#233;lectionnez d&#8217;abord le type)</option>
 </select>
+</div><!-- fin contact-fields (colonne droite) -->
+</div><!-- fin contact-grid -->
 
-</div><!-- fin colonne droite formulaire -->
-</div><!-- fin contact-grid (2 colonnes) -->
-
-<!-- ── ZONE BASSE : Projet + Tags (pleine largeur) ── -->
-<div class="contact-fullwidth">
+<!-- ══════════ ZONE PLEINE LARGEUR : TAGS ══════════ -->
+<div class="contact-fullwidth" style="margin-top:32px;padding-top:32px;border-top:1px solid var(--border);">
 
 <!-- ══════════ GROUPE 1 : LE PROJET ══════════ -->
 <div class="form-divider"></div>
@@ -1037,7 +961,7 @@ window.location.replace('/connexion'+h);
     <span class="form-tag" data-value="Salon / Salle &#224; manger"><span class="tag-icon">&#128715;</span><span class="tag-check">&#10003;</span> Salon / Salle &#224; manger</span>
     <span class="form-tag" data-value="Chambres / Bureau"><span class="tag-icon">&#128716;</span><span class="tag-check">&#10003;</span> Chambres / Bureau</span>
     <span class="form-tag" data-value="Terrasse / Fa&#231;ade"><span class="tag-icon">&#127795;</span><span class="tag-check">&#10003;</span> Terrasse / Fa&#231;ade</span>
-    <span class="form-tag" data-value="Am&#233;nagement Combles / Sous-sol"><span class="tag-icon">&#128208;</span><span class="tag-check">&#10003;</span> Am&#233;nagement Combles / Sous-sol</span>
+    <span class="form-tag" data-value="Am&#233;nagement Combles / Sous-sol"><span class="tag-icon">&#128208;</span><span class="tag-check">&#10003;</span> Combles / Sous-sol</span>
   </div>
 </div>
 
@@ -1088,35 +1012,37 @@ window.location.replace('/connexion'+h);
 </div>
 
 <!-- Échéance -->
-<div class="form-group">
-<div class="form-group-question">&#201;ch&#233;ance de livraison des travaux vis&#233;e</div>
-<div class="form-row" style="justify-content:center;gap:12px;max-width:400px;margin:0 auto;">
-  <select id="echeanceMonth" required>
-    <option value="" disabled selected>Mois</option>
-    <option value="01">Janvier</option>
-    <option value="02">F&#233;vrier</option>
-    <option value="03">Mars</option>
-    <option value="04">Avril</option>
-    <option value="05">Mai</option>
-    <option value="06">Juin</option>
-    <option value="07">Juillet</option>
-    <option value="08">Ao&#251;t</option>
-    <option value="09">Septembre</option>
-    <option value="10">Octobre</option>
-    <option value="11">Novembre</option>
-    <option value="12">D&#233;cembre</option>
-  </select>
-  <select id="echeanceYear" required>
-    <option value="" disabled selected>Ann&#233;e</option>
-  </select>
+<div class="form-group" style="text-align:center;">
+  <div class="form-group-question">&#201;ch&#233;ance de livraison souhait&#233;e</div>
+  <div style="display:flex;gap:12px;justify-content:center;max-width:400px;margin:0 auto;">
+    <select id="echeanceMonth" required style="flex:1;padding:12px 16px;font-size:0.9rem;">
+      <option value="" disabled selected>Mois</option>
+      <option value="01">Janvier</option>
+      <option value="02">F&#233;vrier</option>
+      <option value="03">Mars</option>
+      <option value="04">Avril</option>
+      <option value="05">Mai</option>
+      <option value="06">Juin</option>
+      <option value="07">Juillet</option>
+      <option value="08">Ao&#251;t</option>
+      <option value="09">Septembre</option>
+      <option value="10">Octobre</option>
+      <option value="11">Novembre</option>
+      <option value="12">D&#233;cembre</option>
+    </select>
+    <select id="echeanceYear" required style="flex:1;padding:12px 16px;font-size:0.9rem;">
+      <option value="" disabled selected>Ann&#233;e</option>
+    </select>
+  </div>
 </div>
-</div><!-- fin form-group échéance -->
 <input type="hidden" name="echeance" id="echeanceHidden" />
 
 <!-- Champ libre optionnel -->
 <div class="form-divider"></div>
-<textarea name="message" class="compact" placeholder="Un d&#233;tail sp&#233;cifique &#224; pr&#233;ciser ? (Facultatif - 50 caract&#232;res maximum)" maxlength="50"></textarea>
-<small class="char-count" id="charCount" style="display:block;text-align:right;max-width:700px;margin:4px auto 0;color:var(--muted);font-size:0.75rem;">0 / 50</small>
+<div style="position:relative;">
+  <textarea name="message" class="compact" maxlength="50" placeholder="Un d&#233;tail sp&#233;cifique &#224; pr&#233;ciser ? (Facultatif &#8212; 50 caract&#232;res maximum)" style="min-height:80px;width:100%;resize:vertical;"></textarea>
+  <div id="charCounter" style="position:absolute;bottom:8px;right:12px;font-size:0.7rem;color:var(--muted);">0 / 50</div>
+</div>
 
 <!-- Champs cachés pour les données structurées -->
 <input type="hidden" name="typeProjet" id="tagTypeProjet" />
@@ -1126,11 +1052,11 @@ window.location.replace('/connexion'+h);
 <input type="hidden" name="travaux" id="tagTravaux" />
 <input type="hidden" name="surface" id="tagSurface" />
 <input type="hidden" name="budget" id="tagBudget" />
-<input type="hidden" name="type_bien" id="typeBienHidden" />
-<input type="hidden" name="demande" id="demandeHidden" />
 
-<p id="contactFormError" style="color:#ff9090;font-size:0.82rem;display:none;margin:-4px 0 0 0;"></p>
-<button type="submit">Envoyer ma demande</button>
+<p id="contactFormError" style="color:#ff9090;font-size:0.82rem;display:none;margin:-4px 0 0 0;text-align:center;"></p>
+<div style="text-align:center;margin-top:12px;">
+  <button type="submit" style="padding:16px 48px;border-radius:50px;font-size:0.85rem;letter-spacing:0.08em;">Envoyer ma demande</button>
+</div>
 </div><!-- fin contact-fullwidth -->
 </form>
 
@@ -1227,15 +1153,16 @@ document.getElementById('typeBien').addEventListener('change', function() {
   yearSel.addEventListener('change', syncEcheance);
 })();
 
-/* --- Compteur de caractères textarea --- */
+/* --- Compteur de caractères textarea (limite stricte 50) --- */
 (function() {
   var ta = document.querySelector('textarea[name="message"]');
-  var counter = document.getElementById('charCount');
+  var counter = document.getElementById('charCounter');
   if (ta && counter) {
     ta.addEventListener('input', function() {
-      var len = ta.value.length;
+      if (this.value.length > 50) this.value = this.value.substring(0, 50);
+      var len = this.value.length;
       counter.textContent = len + ' / 50';
-      counter.style.color = len >= 50 ? '#ff9090' : 'var(--muted)';
+      counter.style.color = len >= 45 ? '#C4745A' : 'var(--muted)';
     });
   }
 })();
@@ -1301,20 +1228,6 @@ document.getElementById('contactForm').addEventListener('submit', function(e) {
   var form = this;
   var errEl = document.getElementById('contactFormError');
   var btn = form.querySelector('button[type="submit"]');
-  var prenom = form.prenom ? form.prenom.value.trim() : '';
-
-  if (!prenom) {
-    errEl.textContent = 'Merci de renseigner votre prénom.';
-    errEl.style.display = 'block';
-    if (form.prenom) form.prenom.focus();
-    return;
-  }
-
-  if (form.prenom) form.prenom.value = prenom;
-  if (form.nom) form.nom.value = form.nom.value.trim();
-  if (form.email) form.email.value = form.email.value.trim();
-  if (form.telephone) form.telephone.value = form.telephone.value.trim();
-  if (form.adresse) form.adresse.value = form.adresse.value.trim();
 
   // Valider qu'au moins le type de projet est sélectionné
   var structured = collectStructuredData();
@@ -1348,8 +1261,9 @@ document.getElementById('contactForm').addEventListener('submit', function(e) {
 
   // Écrire le résumé dans le champ message pour compatibilité
   if (form.message) form.message.value = demande;
-  if (document.getElementById('typeBienHidden')) document.getElementById('typeBienHidden').value = form.typeBien ? form.typeBien.value : '';
-  if (document.getElementById('demandeHidden')) document.getElementById('demandeHidden').value = demande;
+
+  var formData = new FormData(form);
+  var body = new URLSearchParams(formData).toString();
 
   // Préparer les données structurées pour Marcel (JSON)
   var marcelData = {
@@ -1372,9 +1286,6 @@ document.getElementById('contactForm').addEventListener('submit', function(e) {
     echeance: form.echeance ? form.echeance.value : '',
     message: msgText
   };
-
-  var formData = new FormData(form);
-  var body = new URLSearchParams(formData).toString();
 
   // 1) Soumettre à Netlify Forms
   fetch('/', {
@@ -1400,7 +1311,7 @@ document.getElementById('contactForm').addEventListener('submit', function(e) {
       body: body
     }).catch(function() {});
 
-    // 3) Message de succès
+    // 4) Message de succès
     form.innerHTML = '<div style="text-align:center;padding:40px 0;">' +
       '<div style="font-size:2.5rem;margin-bottom:16px;">✓</div>' +
       '<h3 style="font-family:Cormorant Garamond,serif;font-size:1.5rem;font-weight:300;color:var(--green);margin-bottom:12px;">Demande envoy\u00e9e avec succ\u00e8s</h3>' +
@@ -1414,7 +1325,6 @@ document.getElementById('contactForm').addEventListener('submit', function(e) {
   });
 });
 </script>
-</div>
 </section>
 
 <footer>

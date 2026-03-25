@@ -1,3 +1,5 @@
+const { upsertClientPipeline } = require('./_client-pipeline');
+
 /**
  * Scantorenov — Hook d'inscription Identity
  *
@@ -66,6 +68,29 @@ exports.handler = async function(event) {
   }
 
   // Accepter l'inscription — phase 3 = premiere visite espace client
+  try {
+    await upsertClientPipeline({
+      email,
+      status: 'account_created',
+      fields: {
+        nom: meta.full_name || undefined,
+        telephone: meta.telephone || undefined,
+        phone: meta.telephone || undefined,
+        adresse: meta.adresse || undefined,
+        type_bien: meta.type_bien || undefined,
+        project_type: meta.type_bien || undefined,
+        demande: meta.demande || undefined,
+        project_details: meta.demande || undefined,
+        surface: meta.surface || undefined,
+        echeance: meta.echeance || undefined,
+        budget: meta.budget || undefined,
+        phase: 3
+      }
+    });
+  } catch (pipelineError) {
+    console.error('[PIPELINE] Signup sync error:', pipelineError.message);
+  }
+
   return {
     statusCode: 200,
     body: JSON.stringify({

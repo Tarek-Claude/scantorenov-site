@@ -268,6 +268,14 @@ exports.handler = async function(event) {
     // Générer le prompt
     const systemPrompt = generateMarcelSystemPrompt(formData);
 
+    // Convertir les champs multi-valeurs en arrays pour les colonnes jsonb
+    function toJsonbArray(val) {
+      if (!val) return null;
+      if (Array.isArray(val)) return val;
+      if (typeof val === 'string') return val.split(', ').filter(Boolean);
+      return null;
+    }
+
     // Stocker dans Supabase
     const clientRecord = {
       email: formData.email.toLowerCase().trim(),
@@ -278,10 +286,10 @@ exports.handler = async function(event) {
       precision_bien: formData.precision || null,
       qualite: formData.qualite || null,
       type_projet: formData.typeProjet || null,
-      incluant: formData.incluant || null,
+      incluant: toJsonbArray(formData.incluant),
       nb_pieces: formData.nbPieces || null,
-      espaces: formData.espaces || null,
-      travaux: formData.travaux || null,
+      espaces: toJsonbArray(formData.espaces),
+      travaux: toJsonbArray(formData.travaux),
       surface: formData.surface || null,
       budget: formData.budget || null,
       echeance: formData.echeance || null,

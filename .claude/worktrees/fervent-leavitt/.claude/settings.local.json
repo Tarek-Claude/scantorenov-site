@@ -1,0 +1,24 @@
+{
+  "permissions": {
+    "allow": [
+      "WebFetch(domain:scantorenov.netlify.app)",
+      "mcp__Claude_Preview__preview_start",
+      "WebFetch(domain:www.npmjs.com)",
+      "WebFetch(domain:github.com)",
+      "WebSearch",
+      "Read(//tmp/**)",
+      "Bash(npx netlify-cli:*)",
+      "Bash(node -c netlify/functions/chat.js)",
+      "Bash(node -c netlify/functions/marcel-prompt.js)",
+      "Bash(cmd //c \"netstat -aon | findstr :8888\")",
+      "Bash(cmd //c \"where netlify\")",
+      "Bash(npm install:*)",
+      "Bash(netlify status:*)",
+      "Bash(cmd //c \"taskkill /PID 3956 /F\")",
+      "Bash(netlify dev:*)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(git push:*)"
+    ]
+  }
+}

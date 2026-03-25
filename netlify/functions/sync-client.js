@@ -1,32 +1,14 @@
 /**
- * Scantorenov — Synchronisation client vers Supabase
+ * Scantorenov - Synchronisation client vers Supabase
  *
- * Reçoit les données client depuis le script PC et les écrit dans Supabase.
- * Protégé par ADMIN_SECRET.
+ * Recoit les donnees client depuis le script PC et les ecrit dans Supabase.
+ * Protege par ADMIN_SECRET.
  *
  * POST /.netlify/functions/sync-client
  * Headers: Authorization: Bearer <ADMIN_SECRET>
- * Body: {
- *   email: "client@example.com",
- *   nom: "Prénom NOM",
- *   adresse: "...",
- *   type_bien: "...",
- *   demande: "...",
- *   surface: "...",
- *   telephone: "...",
- *   budget: "...",
- *   echeance: "...",
- *   phase: 5,
- *   matterport_model_id: "ABC123",
- *   matterport_iframe: "https://my.matterport.com/show/?m=ABC123",
- *   matterport_data: { ... },
- *   proposal_url: "...",
- *   moe: { ... },
- *   chantier: { ... }
- * }
  */
 
-const { createClient } = require('@supabase/supabase-js');
+const { PIPELINE_STATUSES, upsertClientPipeline } = require('./_client-pipeline');
 
 const headers = {
   'Access-Control-Allow-Origin': '*',
@@ -43,7 +25,6 @@ exports.handler = async function(event) {
     return { statusCode: 405, headers, body: JSON.stringify({ error: 'Method not allowed' }) };
   }
 
-  // --- Authentification ---
   const adminSecret = process.env.ADMIN_SECRET;
   const authHeader = event.headers.authorization || '';
 
@@ -54,21 +35,6 @@ exports.handler = async function(event) {
     return { statusCode: 401, headers, body: JSON.stringify({ error: 'Non autorise' }) };
   }
 
-  // --- Supabase ---
-  const supabaseUrl = process.env.SUPABASE_URL;
-  const supabaseKey = process.env.SUPABASE_SERVICE_KEY;
-
-  if (!supabaseUrl || !supabaseKey) {
-    return {
-      statusCode: 500,
-      headers,
-      body: JSON.stringify({ error: 'SUPABASE_URL et SUPABASE_SERVICE_KEY requis' })
-    };
-  }
-
-  const supabase = createClient(supabaseUrl, supabaseKey);
-
-  // --- Parse body ---
   let body;
   try {
     body = JSON.parse(event.body);
@@ -82,30 +48,64 @@ exports.handler = async function(event) {
   }
 
   try {
-    // Préparer les données (ne garder que les champs définis)
     const clientData = { email };
+    const requestedStatus = typeof body.status === 'string' && PIPELINE_STATUSES.includes(body.status)
+      ? body.status
+      : undefined;
     const fields = [
       'nom', 'adresse', 'type_bien', 'demande', 'surface',
       'echeance', 'budget', 'telephone', 'phase',
       'matterport_model_id', 'matterport_iframe', 'matterport_data',
-      'proposal_url', 'moe', 'moe_accepted', 'chantier'
+      'proposal_url', 'moe', 'moe_accepted', 'chantier',
+      'phone', 'project_type', 'project_details',
+      'call_scheduled_at', 'call_notes',
+      'scan_date_proposed', 'scan_date_confirmed', 'scan_confirmed_by_client',
+      'matterport_url', 'plans_urls', 'photos_urls',
+      'marcel_enabled', 'avant_projet_enabled', 'last_action_required'
     ];
 
-    for (const f of fields) {
-      if (body[f] !== undefined) clientData[f] = body[f];
+    for (const field of fields) {
+      if (body[field] !== undefined) {
+        clientData[field] = body[field];
+      }
     }
 
-    // Upsert : crée si nouveau, met à jour si existant (basé sur email unique)
-    const { data, error } = await supabase
-      .from('clients')
-      .upsert(clientData, { onConflict: 'email' })
-      .select();
-
-    if (error) {
-      throw new Error(`Supabase erreur: ${error.message}`);
+    if (clientData.phone !== undefined && clientData.telephone === undefined) {
+      clientData.telephone = clientData.phone;
+    }
+    if (clientData.telephone !== undefined && clientData.phone === undefined) {
+      clientData.phone = clientData.telephone;
+    }
+    if (clientData.project_type !== undefined && clientData.type_bien === undefined) {
+      clientData.type_bien = clientData.project_type;
+    }
+    if (clientData.type_bien !== undefined && clientData.project_type === undefined) {
+      clientData.project_type = clientData.type_bien;
+    }
+    if (clientData.project_details !== undefined && clientData.demande === undefined) {
+      clientData.demande = clientData.project_details;
+    }
+    if (clientData.demande !== undefined && clientData.project_details === undefined) {
+      clientData.project_details = clientData.demande;
+    }
+    if (clientData.matterport_url !== undefined && clientData.matterport_iframe === undefined) {
+      clientData.matterport_iframe = clientData.matterport_url;
+    }
+    if (clientData.matterport_iframe !== undefined && clientData.matterport_url === undefined) {
+      clientData.matterport_url = clientData.matterport_iframe;
     }
 
-    console.log(`[SYNC] Client ${email} synchronise — phase: ${clientData.phase || 'inchangee'}`);
+    const result = await upsertClientPipeline({
+      email,
+      fields: clientData,
+      status: requestedStatus,
+      inferStatusFromFields: !requestedStatus,
+      strict: true
+    });
+
+    console.log(
+      `[SYNC] Client ${email} synchronise - phase: ${clientData.phase || 'inchangee'} - status: ${result.status || 'inchange'}`
+    );
 
     return {
       statusCode: 200,
@@ -113,10 +113,9 @@ exports.handler = async function(event) {
       body: JSON.stringify({
         success: true,
         email,
-        data: data[0] || clientData
+        data: result.data || clientData
       })
     };
-
   } catch (err) {
     console.error('[SYNC] Erreur:', err.message);
     return { statusCode: 500, headers, body: JSON.stringify({ error: err.message }) };

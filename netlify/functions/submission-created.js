@@ -1,3 +1,5 @@
+const { upsertClientPipeline } = require('./_client-pipeline');
+
 exports.handler = async (event) => {
   const { payload } = JSON.parse(event.body);
   const { nom, email, telephone, sujet, message } = payload.data || {};
@@ -13,6 +15,24 @@ exports.handler = async (event) => {
   const alertTo = 'scantorenov@gmail.com';
 
   // ── 1. Alerte interne → scantorenov@gmail.com ──
+  const projectDetails = [sujet, message].filter(Boolean).join('\n\n') || null;
+
+  try {
+    await upsertClientPipeline({
+      email,
+      status: 'new_lead',
+      fields: {
+        nom,
+        telephone: telephone || null,
+        phone: telephone || null,
+        demande: projectDetails,
+        project_details: projectDetails
+      }
+    });
+  } catch (pipelineError) {
+    console.error('[PIPELINE] Submission sync error:', pipelineError.message);
+  }
+
   const alertHtml = `
     <div style="font-family:Inter,sans-serif;max-width:600px;margin:0 auto;padding:24px;">
       <h2 style="color:#2D5F3E;margin-bottom:16px;">📩 Nouvelle demande de contact</h2>

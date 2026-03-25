@@ -1,25 +1,27 @@
 const { Resend } = require('resend');
+const { upsertClientPipeline } = require('./_client-pipeline');
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 
-// URL de création de compte client
 const SITE_URL = process.env.DEPLOY_URL || 'https://scantorenov.com';
-const getSignupUrl = (data) => {
+
+function getSignupUrl(data) {
   const params = [
     'email=' + encodeURIComponent(data.email),
-    'full_name=' + encodeURIComponent(`${data.genre} ${data.prenom} ${data.nom}`.trim()),
+    'full_name=' + encodeURIComponent([data.genre, data.prenom, data.nom].filter(Boolean).join(' ').trim()),
     'telephone=' + encodeURIComponent(data.telephone),
     'adresse=' + encodeURIComponent(data.adresse),
-    'type_bien=' + encodeURIComponent(data.typeBien),
-    'demande=' + encodeURIComponent(data.message || ''),
+    'type_bien=' + encodeURIComponent(data.type_bien),
+    'demande=' + encodeURIComponent(data.demande || ''),
     'qualite=' + encodeURIComponent(data.qualite),
     'budget=' + encodeURIComponent(data.budget),
     'surface=' + encodeURIComponent(data.surface),
     'echeance=' + encodeURIComponent(data.echeance),
     'precision=' + encodeURIComponent(data.precision)
   ];
+
   return `${SITE_URL}/connexion.html#inscription&${params.join('&')}`;
-};
+}
 
 exports.handler = async (event) => {
   if (event.httpMethod !== 'POST') {
@@ -27,49 +29,70 @@ exports.handler = async (event) => {
   }
 
   try {
-    // Netlify Forms envoie en x-www-form-urlencoded
     const params = new URLSearchParams(event.body);
     const data = {
       genre: params.get('genre') || '',
-      prenom: params.get('prenom') || '',
-      nom: params.get('nom') || '',
-      email: params.get('email') || '',
-      telephone: params.get('telephone') || '',
-      adresse: params.get('adresse') || '',
+      prenom: (params.get('prenom') || '').trim(),
+      nom: (params.get('nom') || '').trim(),
+      email: (params.get('email') || '').trim(),
+      telephone: (params.get('telephone') || '').trim(),
+      adresse: (params.get('adresse') || '').trim(),
       qualite: params.get('qualite') || '',
-      typeBien: params.get('typeBien') || '',
+      type_bien: params.get('type_bien') || params.get('typeBien') || '',
       precision: params.get('precision') || '',
       surface: params.get('surface') || '',
       echeance: params.get('echeance') || '',
       budget: params.get('budget') || '',
+      demande: params.get('demande') || params.get('message') || '',
       message: params.get('message') || ''
     };
 
-    const fullName = `${data.genre} ${data.prenom} ${data.nom}`.trim();
+    const fullName = [data.genre, data.prenom, data.nom].filter(Boolean).join(' ').trim();
 
-    // 1) Mail d'alerte interne → Scantorenov
+    try {
+      await upsertClientPipeline({
+        email: data.email,
+        status: 'new_lead',
+        fields: {
+          genre: data.genre || null,
+          prenom: data.prenom || null,
+          nom: data.nom || null,
+          telephone: data.telephone || null,
+          phone: data.telephone || null,
+          adresse: data.adresse || null,
+          type_bien: data.type_bien || null,
+          project_type: data.type_bien || null,
+          demande: data.demande || null,
+          project_details: data.demande || null,
+          budget: data.budget || null,
+          echeance: data.echeance || null
+        }
+      });
+    } catch (pipelineError) {
+      console.error('[PIPELINE] Contact sync error:', pipelineError.message);
+    }
+
     await resend.emails.send({
       from: 'Scantorenov <contact@scantorenov.com>',
       to: ['scantorenov@gmail.com'],
-      subject: `Nouvelle demande : ${fullName} — ${data.typeBien}`,
+      subject: `Nouvelle demande : ${fullName} â€” ${data.type_bien}`,
       html: `
         <h2 style="color:#2D5F3E;">Nouvelle demande de contact</h2>
         <table style="border-collapse:collapse;font-family:Arial,sans-serif;font-size:14px;">
-          <tr><td style="padding:6px 12px;font-weight:bold;">Nom</td><td style="padding:6px 12px;">${fullName}</td></tr>
+          <tr><td style="padding:6px 12px;font-weight:bold;">Prénom</td><td style="padding:6px 12px;">${data.prenom}</td></tr>
+          <tr><td style="padding:6px 12px;font-weight:bold;">Nom</td><td style="padding:6px 12px;">${data.nom}</td></tr>
           <tr><td style="padding:6px 12px;font-weight:bold;">Email</td><td style="padding:6px 12px;"><a href="mailto:${data.email}">${data.email}</a></td></tr>
           <tr><td style="padding:6px 12px;font-weight:bold;">Téléphone</td><td style="padding:6px 12px;">${data.telephone}</td></tr>
           <tr><td style="padding:6px 12px;font-weight:bold;">Adresse</td><td style="padding:6px 12px;">${data.adresse}</td></tr>
           <tr><td style="padding:6px 12px;font-weight:bold;">Qualité</td><td style="padding:6px 12px;">${data.qualite}</td></tr>
-          <tr><td style="padding:6px 12px;font-weight:bold;">Type de bien</td><td style="padding:6px 12px;">${data.typeBien} — ${data.precision}</td></tr>
-          <tr><td style="padding:6px 12px;font-weight:bold;">Surface estimée</td><td style="padding:6px 12px;">${data.surface}</td></tr>
+          <tr><td style="padding:6px 12px;font-weight:bold;">Type de bien</td><td style="padding:6px 12px;">${data.type_bien} â€” ${data.precision}</td></tr>
           <tr><td style="padding:6px 12px;font-weight:bold;">Échéance</td><td style="padding:6px 12px;">${data.echeance}</td></tr>
           <tr><td style="padding:6px 12px;font-weight:bold;">Budget</td><td style="padding:6px 12px;">${data.budget}</td></tr>
-          <tr><td style="padding:6px 12px;font-weight:bold;">Message</td><td style="padding:6px 12px;">${data.message}</td></tr>
+          <tr><td style="padding:6px 12px;font-weight:bold;">Demande</td><td style="padding:6px 12px;">${data.demande}</td></tr>
         </table>
       `
     });
 
-    // 2) Mail de confirmation → Demandeur + invitation à créer le compte
     const signupUrl = getSignupUrl(data);
     await resend.emails.send({
       from: 'Scantorenov <contact@scantorenov.com>',
@@ -122,22 +145,19 @@ exports.handler = async (event) => {
           <hr style="border:none;border-top:1px solid #E8E8E8;margin:32px 0;" />
 
           <p style="font-size:0.75rem;color:#8A8A8A;text-align:center;margin:0;padding:0 24px;">
-            Scantorenov — Précision d'intérieur<br/>
+            Scantorenov â€” Précision d'intérieur<br/>
             <a href="mailto:contact@scantorenov.com" style="color:#2D5F3E;text-decoration:none;">contact@scantorenov.com</a>
           </p>
         </div>
       `
     });
 
-    // Retourner succès (Netlify Forms gère la redirection)
     return {
       statusCode: 200,
       body: JSON.stringify({ success: true })
     };
-
   } catch (error) {
     console.error('Email error:', error);
-    // Ne pas bloquer la soumission du formulaire même si l'email échoue
     return {
       statusCode: 200,
       body: JSON.stringify({ success: true, emailError: error.message })
