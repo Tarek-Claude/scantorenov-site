@@ -7,6 +7,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&family=Inter:wght@300;400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet" />
   <script src="https://identity.netlify.com/v1/netlify-identity-widget.js"></script>
+  <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     html, body { height: 100%; }
@@ -81,6 +82,48 @@
     .f-input:focus { border-color: var(--green); }
     .f-input::placeholder { color: rgba(0,0,0,0.3); }
     .f-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+    .pw-wrapper {
+      position: relative;
+    }
+    .pw-wrapper .f-input {
+      padding-right: 44px;
+    }
+    .pw-toggle {
+      position: absolute;
+      right: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      background: none;
+      border: none;
+      cursor: pointer;
+      color: var(--muted);
+      padding: 4px;
+      display: flex;
+      align-items: center;
+    }
+    .pw-toggle:hover {
+      color: var(--green);
+    }
+
+    /* Indicateur de force */
+    .pw-strength {
+      height: 4px;
+      border-radius: 2px;
+      background: var(--border);
+      margin-top: 8px;
+      overflow: hidden;
+    }
+    .pw-strength-bar {
+      height: 100%;
+      width: 0%;
+      border-radius: 2px;
+      transition: width 0.3s, background 0.3s;
+    }
+    .pw-strength-text {
+      font-size: 0.7rem;
+      margin-top: 4px;
+      color: var(--muted);
+    }
 
     .btn-submit {
       width: 100%; padding: 14px; background: var(--green); color: #FFFFFF;
@@ -152,7 +195,19 @@
             </div>
             <div class="f-group">
               <label class="f-label">Mot de passe</label>
-              <input type="password" class="f-input" id="loginPass" placeholder="&#8226;&#8226;&#8226;&#8226;&#8226;&#8226;&#8226;&#8226;" required />
+              <div class="pw-wrapper">
+                <input type="password" class="f-input" id="loginPass" placeholder="••••••••" required />
+                <button type="button" class="pw-toggle" onclick="togglePw(this)" aria-label="Afficher le mot de passe">
+                  <svg class="eye-open" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8S1 12 1 12z"/>
+                    <circle cx="12" cy="12" r="3"/>
+                  </svg>
+                  <svg class="eye-closed" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="display:none;">
+                    <path d="M17.94 17.94A10.07 10.07 0 0112 20c-7 0-11-8-11-8a18.45 18.45 0 015.06-5.94M9.9 4.24A9.12 9.12 0 0112 4c7 0 11 8 11 8a18.5 18.5 0 01-2.16 3.19m-6.72-1.07a3 3 0 11-4.24-4.24"/>
+                    <line x1="1" y1="1" x2="23" y2="23"/>
+                  </svg>
+                </button>
+              </div>
             </div>
             <button type="submit" class="btn-submit" id="loginBtn">Acc&#233;der &#224; mon espace &#8594;</button>
           </form>
@@ -173,12 +228,39 @@
             </div>
             <div class="f-group">
               <label class="f-label">Mot de passe</label>
-              <input type="password" class="f-input" id="signupPass" placeholder="&#8226;&#8226;&#8226;&#8226;&#8226;&#8226;&#8226;&#8226;" required />
+              <div class="pw-wrapper">
+                <input type="password" class="f-input" id="signupPass" placeholder="••••••••" required />
+                <button type="button" class="pw-toggle" onclick="togglePw(this)" aria-label="Afficher le mot de passe">
+                  <svg class="eye-open" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8S1 12 1 12z"/>
+                    <circle cx="12" cy="12" r="3"/>
+                  </svg>
+                  <svg class="eye-closed" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="display:none;">
+                    <path d="M17.94 17.94A10.07 10.07 0 0112 20c-7 0-11-8-11-8a18.45 18.45 0 015.06-5.94M9.9 4.24A9.12 9.12 0 0112 4c7 0 11 8 11 8a18.5 18.5 0 01-2.16 3.19m-6.72-1.07a3 3 0 11-4.24-4.24"/>
+                    <line x1="1" y1="1" x2="23" y2="23"/>
+                  </svg>
+                </button>
+              </div>
+              <div class="pw-strength"><div class="pw-strength-bar" id="pwStrengthBar"></div></div>
+              <div class="pw-strength-text" id="pwStrengthText"></div>
             </div>
             <div class="f-group">
               <label class="f-label">Confirmer le mot de passe</label>
-              <input type="password" class="f-input" id="signupPassConfirm" placeholder="&#8226;&#8226;&#8226;&#8226;&#8226;&#8226;&#8226;&#8226;" required />
+              <div class="pw-wrapper">
+                <input type="password" class="f-input" id="signupPassConfirm" placeholder="••••••••" required />
+                <button type="button" class="pw-toggle" onclick="togglePw(this)" aria-label="Afficher le mot de passe">
+                  <svg class="eye-open" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8S1 12 1 12z"/>
+                    <circle cx="12" cy="12" r="3"/>
+                  </svg>
+                  <svg class="eye-closed" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="display:none;">
+                    <path d="M17.94 17.94A10.07 10.07 0 0112 20c-7 0-11-8-11-8a18.45 18.45 0 015.06-5.94M9.9 4.24A9.12 9.12 0 0112 4c7 0 11 8 11 8a18.5 18.5 0 01-2.16 3.19m-6.72-1.07a3 3 0 11-4.24-4.24"/>
+                    <line x1="1" y1="1" x2="23" y2="23"/>
+                  </svg>
+                </button>
+              </div>
             </div>
+            <div class="cf-turnstile" data-sitekey="0x4AAAAAACwcr3yjgnalefD8" data-theme="light" data-language="fr" style="margin-bottom:12px;"></div>
             <button type="submit" class="btn-submit" id="signupBtn">Cr&#233;er mon compte &#8594;</button>
           </form>
           <p class="form-note" style="margin-top:24px; line-height:1.7;">D&#233;j&#224; inscrit ?<br><a href="javascript:showLogin()" style="color:var(--green);text-decoration:none;">Se connecter</a></p>
@@ -261,6 +343,50 @@ netlifyIdentity.on('login', function(user) {
 });
 
 /* ── Login handler (direct API call) ── */
+/* Toggle password visibility */
+function togglePw(btn) {
+  var input = btn.parentElement.querySelector('input');
+  var openIcon = btn.querySelector('.eye-open');
+  var closedIcon = btn.querySelector('.eye-closed');
+  if (input.type === 'password') {
+    input.type = 'text';
+    openIcon.style.display = 'none';
+    closedIcon.style.display = 'block';
+  } else {
+    input.type = 'password';
+    openIcon.style.display = 'block';
+    closedIcon.style.display = 'none';
+  }
+}
+
+/* Password strength indicator */
+var signupPassEl = document.getElementById('signupPass');
+if (signupPassEl) {
+  signupPassEl.addEventListener('input', function() {
+    var val = this.value;
+    var score = 0;
+    if (val.length >= 8) score++;
+    if (/[A-Z]/.test(val)) score++;
+    if (/[0-9]/.test(val)) score++;
+    if (/[^A-Za-z0-9]/.test(val)) score++;
+
+    var bar = document.getElementById('pwStrengthBar');
+    var text = document.getElementById('pwStrengthText');
+    var levels = [
+      { width: '0%', color: 'transparent', label: '' },
+      { width: '25%', color: '#e74c3c', label: 'Faible' },
+      { width: '50%', color: '#f39c12', label: 'Moyen' },
+      { width: '75%', color: '#27ae60', label: 'Bon' },
+      { width: '100%', color: '#2D5F3E', label: 'Fort' }
+    ];
+    var level = val.length === 0 ? levels[0] : levels[score] || levels[1];
+    bar.style.width = level.width;
+    bar.style.background = level.color;
+    text.textContent = level.label;
+    text.style.color = level.color;
+  });
+}
+
 function handleLogin(e) {
   e.preventDefault();
   var btn = document.getElementById('loginBtn');
@@ -317,7 +443,7 @@ function resetPass() {
 }
 
 /* ── Signup handler ── */
-function handleSignup(e) {
+async function handleSignup(e) {
   e.preventDefault();
   var btn = document.getElementById('signupBtn');
   var errEl = document.getElementById('signupError');
@@ -334,6 +460,37 @@ function handleSignup(e) {
     errEl.textContent = 'Les mots de passe ne correspondent pas.';
     errEl.style.display = 'block';
     btn.textContent = 'Cr\u00e9er mon compte \u2192'; btn.disabled = false;
+    return;
+  }
+
+  // Verification captcha Turnstile
+  var turnstileResponse = document.querySelector('[name="cf-turnstile-response"]');
+  if (!turnstileResponse || !turnstileResponse.value) {
+    errEl.textContent = 'Veuillez completer la verification de securite.';
+    errEl.style.display = 'block';
+    btn.textContent = 'Cr\u00e9er mon compte \u2192'; btn.disabled = false;
+    return;
+  }
+
+  // Verifier le captcha cote serveur
+  var captchaValid = false;
+  try {
+    var captchaRes = await fetch('/.netlify/functions/verify-captcha', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ token: turnstileResponse.value })
+    });
+    var captchaData = await captchaRes.json();
+    captchaValid = captchaData.success;
+  } catch (captchaErr) {
+    console.warn('Captcha verification failed:', captchaErr);
+  }
+
+  if (!captchaValid) {
+    errEl.textContent = 'La verification de securite a echoue. Veuillez reessayer.';
+    errEl.style.display = 'block';
+    btn.textContent = 'Cr\u00e9er mon compte \u2192'; btn.disabled = false;
+    if (typeof turnstile !== 'undefined') turnstile.reset();
     return;
   }
 

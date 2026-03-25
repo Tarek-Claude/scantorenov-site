@@ -41,3 +41,5 @@
 [context.production.environment]
   NODE_VERSION = "18"
   SUPABASE_URL = "https://qvovfabwzyfhmkaluzss.supabase.co"
+  # SUPABASE_SERVICE_KEY et RESEND_API_KEY → à définir dans le dashboard Netlify
+  # Site settings → Environment variables (NE PAS mettre les clés ici)

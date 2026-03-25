@@ -981,7 +981,7 @@ window.location.replace('/connexion'+h);
 </select>
 
 <!-- Type de bien -->
-<select name="typeBien" id="typeBien" required>
+<select name="type_bien" id="typeBien" required>
   <option value="" disabled selected>Type de bien</option>
   <option value="R&#233;sidentiel">R&#233;sidentiel</option>
   <option value="Tertiaire">Tertiaire</option>
@@ -1115,8 +1115,22 @@ window.location.replace('/connexion'+h);
 
 <!-- Champ libre optionnel -->
 <div class="form-divider"></div>
-<textarea name="message" class="compact" placeholder="Un d&#233;tail sp&#233;cifique &#224; pr&#233;ciser ? (Facultatif - 50 caract&#232;res maximum)" maxlength="50"></textarea>
+<textarea name="demande" class="compact" placeholder="Un d&#233;tail sp&#233;cifique &#224; pr&#233;ciser ? (Facultatif - 50 caract&#232;res maximum)" maxlength="50"></textarea>
 <small class="char-count" id="charCount" style="display:block;text-align:right;max-width:700px;margin:4px auto 0;color:var(--muted);font-size:0.75rem;">0 / 50</small>
+
+<fieldset style="margin: 15px 0; border: 1px solid #e0e0e0; padding: 12px; border-radius: 4px;">
+  <legend style="font-weight: bold; font-size: 14px;">Type de demande</legend>
+
+  <label style="display: block; margin: 8px 0;">
+    <input type="radio" name="requestType" value="inquiry" checked />
+    Renseignement sur vos services
+  </label>
+
+  <label style="display: block; margin: 8px 0;">
+    <input type="radio" name="requestType" value="callback" />
+    Demande de rappel téléphonique
+  </label>
+</fieldset>
 
 <!-- Champs cachés pour les données structurées -->
 <input type="hidden" name="typeProjet" id="tagTypeProjet" />
@@ -1126,8 +1140,6 @@ window.location.replace('/connexion'+h);
 <input type="hidden" name="travaux" id="tagTravaux" />
 <input type="hidden" name="surface" id="tagSurface" />
 <input type="hidden" name="budget" id="tagBudget" />
-<input type="hidden" name="type_bien" id="typeBienHidden" />
-<input type="hidden" name="demande" id="demandeHidden" />
 
 <p id="contactFormError" style="color:#ff9090;font-size:0.82rem;display:none;margin:-4px 0 0 0;"></p>
 <button type="submit">Envoyer ma demande</button>
@@ -1229,7 +1241,7 @@ document.getElementById('typeBien').addEventListener('change', function() {
 
 /* --- Compteur de caractères textarea --- */
 (function() {
-  var ta = document.querySelector('textarea[name="message"]');
+  var ta = document.querySelector('textarea[name="demande"]');
   var counter = document.getElementById('charCount');
   if (ta && counter) {
     ta.addEventListener('input', function() {
@@ -1336,8 +1348,10 @@ document.getElementById('contactForm').addEventListener('submit', function(e) {
   btn.disabled = true;
   btn.textContent = 'Envoi en cours...';
 
-  // Construire le message structuré pour Marcel (JSON dans le champ message)
-  var msgText = form.message ? form.message.value.trim() : '';
+  // Construire le message structuré pour Marcel (JSON dans le champ demande)
+  var msgText = form.demande ? form.demande.value.trim() : '';
+  var requestTypeEl = document.querySelector('input[name="requestType"]:checked');
+  var requestType = requestTypeEl ? requestTypeEl.value : 'inquiry';
   var demande = 'Projet : ' + (structured.typeProjet || '-') +
     ' | Pi\u00e8ces : ' + (structured.nbPieces || '-') +
     ' | Espaces : ' + (structured.espaces && structured.espaces.length ? structured.espaces.join(', ') : '-') +
@@ -1346,10 +1360,8 @@ document.getElementById('contactForm').addEventListener('submit', function(e) {
     ' | Budget : ' + (structured.budget || '-');
   if (msgText) demande += ' | Note : ' + msgText;
 
-  // Écrire le résumé dans le champ message pour compatibilité
-  if (form.message) form.message.value = demande;
-  if (document.getElementById('typeBienHidden')) document.getElementById('typeBienHidden').value = form.typeBien ? form.typeBien.value : '';
-  if (document.getElementById('demandeHidden')) document.getElementById('demandeHidden').value = demande;
+  // Écrire le résumé dans le champ demande pour compatibilité
+  if (form.demande) form.demande.value = demande;
 
   // Préparer les données structurées pour Marcel (JSON)
   var marcelData = {
@@ -1358,9 +1370,10 @@ document.getElementById('contactForm').addEventListener('submit', function(e) {
     nom: form.nom ? form.nom.value : '',
     email: form.email ? form.email.value : '',
     telephone: form.telephone ? form.telephone.value : '',
+    indicatif: form.indicatif ? form.indicatif.value : '',
     adresse: form.adresse ? form.adresse.value : '',
     qualite: form.qualite ? form.qualite.value : '',
-    typeBien: form.typeBien ? form.typeBien.value : '',
+    type_bien: form.type_bien ? form.type_bien.value : '',
     precision: form.precision ? form.precision.value : '',
     typeProjet: structured.typeProjet || '',
     incluant: structured.incluant || [],
@@ -1370,10 +1383,12 @@ document.getElementById('contactForm').addEventListener('submit', function(e) {
     surface: structured.surface || '',
     budget: structured.budget || '',
     echeance: form.echeance ? form.echeance.value : '',
-    message: msgText
+    demande: msgText,
+    requestType: requestType
   };
 
   var formData = new FormData(form);
+  formData.set('requestType', requestType);
   var body = new URLSearchParams(formData).toString();
 
   // 1) Soumettre à Netlify Forms
@@ -1398,7 +1413,9 @@ document.getElementById('contactForm').addEventListener('submit', function(e) {
       method: 'POST',
       headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
       body: body
-    }).catch(function() {});
+    }).then(function(r) { return r.json(); })
+      .then(function(res) { console.log('Email submission:', res.success ? 'envoyé' : 'erreur email'); })
+      .catch(function(err) { console.warn('Erreur contact function:', err); });
 
     // 3) Message de succès
     form.innerHTML = '<div style="text-align:center;padding:40px 0;">' +

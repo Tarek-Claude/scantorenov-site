@@ -1654,6 +1654,153 @@
       .rp-visuel-card { break-inside: avoid; }
       @page { margin: 12mm; size: A4; }
     }
+
+    /* ── APPOINTMENT BOOKING (Phase 1-2, B-3) ── */
+    .appointment-booking-section {
+      padding: 40px 32px;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      margin-bottom: 48px;
+      box-shadow: 0 2px 16px rgba(0,0,0,0.04);
+    }
+    .appointment-booking-section h3 {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.4rem;
+      font-weight: 300;
+      color: var(--text);
+      margin-bottom: 12px;
+      text-align: center;
+    }
+    .appointment-booking-section p {
+      color: var(--text-soft);
+      font-size: 0.88rem;
+      text-align: center;
+      line-height: 1.7;
+    }
+    .appointment-status-card {
+      padding: 24px;
+      background: rgba(45,95,62,0.08);
+      border: 1px solid rgba(45,95,62,0.15);
+      border-radius: 8px;
+      text-align: center;
+    }
+    .appointment-status-card h4 {
+      font-size: 1.1rem;
+      color: var(--text);
+      margin-bottom: 12px;
+      font-weight: 600;
+    }
+    .appointment-details {
+      color: var(--text-soft);
+      font-size: 0.88rem;
+      line-height: 1.6;
+    }
+    /* ─── B-4a: Confirmed Appointments Table ─── */
+    .appointments-card {
+      padding: 40px 32px;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      box-shadow: 0 2px 16px rgba(0,0,0,0.04);
+      margin-bottom: 48px;
+    }
+    .appointments-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 32px;
+    }
+    .appointments-icon {
+      font-size: 1.5rem;
+    }
+    .appointments-header h3 {
+      margin: 0;
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: var(--text);
+    }
+    .appointments-table-container {
+      overflow-x: auto;
+    }
+    .appointments-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.9rem;
+    }
+    .appointments-table thead {
+      background: var(--bg-soft);
+      border-bottom: 2px solid var(--border);
+    }
+    .appointments-table th {
+      padding: 12px 16px;
+      text-align: left;
+      font-weight: 600;
+      color: var(--text-soft);
+      white-space: nowrap;
+    }
+    .appointments-table tbody tr {
+      border-bottom: 1px solid var(--border);
+      transition: background-color 0.2s ease;
+    }
+    .appointments-table tbody tr:hover {
+      background-color: var(--bg-soft);
+    }
+    .appointments-table td {
+      padding: 12px 16px;
+      color: var(--text);
+    }
+    .status-badge {
+      display: inline-block;
+      padding: 4px 12px;
+      border-radius: 6px;
+      font-size: 0.8rem;
+      font-weight: 500;
+      white-space: nowrap;
+    }
+    .status-requested {
+      background: rgba(255, 152, 0, 0.1);
+      color: #e65100;
+    }
+    .status-confirmed {
+      background: rgba(45, 95, 62, 0.1);
+      color: #1b5e20;
+    }
+    .status-completed {
+      background: rgba(33, 150, 243, 0.1);
+      color: #1565c0;
+    }
+    .status-cancelled {
+      background: rgba(244, 67, 54, 0.1);
+      color: #c62828;
+    }
+    .appointment-actions {
+      display: flex;
+      gap: 8px;
+    }
+    .appointment-btn {
+      padding: 6px 12px;
+      font-size: 0.8rem;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      font-weight: 500;
+    }
+    .confirm-btn {
+      background: rgba(45, 95, 62, 0.15);
+      color: #2d5f3e;
+    }
+    .confirm-btn:hover {
+      background: rgba(45, 95, 62, 0.25);
+    }
+    .cancel-btn {
+      background: rgba(244, 67, 54, 0.15);
+      color: #d32f2f;
+    }
+    .cancel-btn:hover {
+      background: rgba(244, 67, 54, 0.25);
+    }
   </style>
 </head>
 <body>
@@ -1891,6 +2038,33 @@
         </div>
       </div>
 
+      <!-- ═══════════  PHASE 1-2 : PRISE DE RDV TÉLÉPHONIQUE (B-3)  ═══════════ -->
+      <div class="appointment-booking-section phase-section" id="appointmentBookingSection" data-min-phase="1" data-max-phase="2">
+        <h3>Réserver votre entretien téléphonique</h3>
+        <p style="color:var(--text-soft);margin-bottom:20px;">Sélectionnez un créneau qui vous convient pour discuter de votre projet avec notre équipe.</p>
+
+        <!-- Calendly embed iframe -->
+        <div style="border-radius:8px;overflow:hidden;border:1px solid var(--border-color);padding:0;min-height:700px;">
+          <iframe
+            src="https://calendly.com/scantorenov?hide_event_type_details=1&hide_gdpr_banner=1"
+            width="100%"
+            height="700"
+            frameborder="0"
+            style="border:none;"
+            title="Calendly">
+          </iframe>
+        </div>
+
+        <!-- Appointment status display (after booking) -->
+        <div class="appointment-status-card" id="appointmentStatusCard" style="display:none;margin-top:24px;">
+          <h4>Votre rendez-vous est confirmé ✓</h4>
+          <div class="appointment-details" id="appointmentDetails"></div>
+          <p style="color:var(--text-soft);font-size:0.88rem;margin-top:16px;">
+            Vous recevrez un email de confirmation avec les détails de l'entretien.
+          </p>
+        </div>
+      </div>
+
       <!-- Bouton demander a etre rappele (Phase 3 uniquement) -->
       <div class="callback-section" id="callbackSection" style="display:none">
         <h3>Prochaine &#233;tape</h3>
@@ -1899,6 +2073,36 @@
           <span class="callback-icon">&#x1F4DE;</span>
           Demander &#224; &#234;tre rappel&#233;
         </button>
+      </div>
+    </div>
+
+    <!-- ═══════════  PHASE 3+ : RENDEZ-VOUS CONFIRMÉS  ═══════════ -->
+    <div class="phase-section" id="confirmedAppointmentsSection" data-min-phase="3">
+      <div class="appointments-card">
+        <div class="appointments-header">
+          <span class="appointments-icon">📅</span>
+          <h3>Vos rendez-vous programmés</h3>
+        </div>
+        <div class="appointments-table-container" id="appointmentsTableContainer">
+          <table class="appointments-table" id="appointmentsTable" style="display:none;">
+            <thead>
+              <tr>
+                <th>Date</th>
+                <th>Heure</th>
+                <th>Durée</th>
+                <th>Type</th>
+                <th>Statut</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="appointmentsTableBody">
+              <!-- Rempli dynamiquement -->
+            </tbody>
+          </table>
+          <div id="noAppointmentsMsg" style="text-align:center;padding:32px 24px;color:var(--text-soft);font-size:0.95rem;">
+            Aucun rendez-vous programmé pour le moment. Vous verrez ici vos rendez-vous une fois confirmés.
+          </div>
+        </div>
       </div>
     </div>
 
@@ -2645,6 +2849,200 @@ function renderPhase3(project) {
   } else {
     if (stepperEl) stepperEl.style.display = 'none';
     if (callbackEl) callbackEl.style.display = currentPhase <= 3 ? '' : 'none';
+  }
+
+  // B-4a: Load confirmed appointments for phase 3+
+  if (currentPhase >= 3) {
+    loadAppointments();
+  }
+}
+
+/* ═══════════════════════════════════════════════════════
+   B-4a: CONFIRMED APPOINTMENTS — Charger et afficher RDV
+   ═══════════════════════════════════════════════════════ */
+async function loadAppointments() {
+  if (!supabase || !currentClientId) {
+    console.warn('loadAppointments: supabase ou clientId non disponible');
+    return;
+  }
+
+  try {
+    // Récupérer les appointments pour ce client
+    const { data, error } = await supabase
+      .from('appointments')
+      .select('*')
+      .eq('client_id', currentClientId)
+      .order('scheduled_at', { ascending: true });
+
+    if (error) {
+      console.error('Erreur chargement appointments:', error);
+      return;
+    }
+
+    renderAppointmentsTable(data || []);
+  } catch (err) {
+    console.error('loadAppointments exception:', err);
+  }
+}
+
+function renderAppointmentsTable(appointments) {
+  const table = document.getElementById('appointmentsTable');
+  const tbody = document.getElementById('appointmentsTableBody');
+  const noMsg = document.getElementById('noAppointmentsMsg');
+
+  if (!appointments || appointments.length === 0) {
+    // Afficher le message "Aucun rendez-vous"
+    if (table) table.style.display = 'none';
+    if (noMsg) noMsg.style.display = '';
+    return;
+  }
+
+  // Remplir le tableau
+  tbody.innerHTML = '';
+  appointments.forEach(function(appt) {
+    const row = document.createElement('tr');
+
+    // Parser la date ISO
+    const date = new Date(appt.scheduled_at);
+    const dateStr = date.toLocaleDateString('fr-FR', { weekday: 'short', year: 'numeric', month: 'long', day: 'numeric' });
+    const timeStr = date.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
+
+    // Statut badge
+    const statusClass = 'status-' + (appt.status || 'requested');
+    const statusLabel = {
+      'requested': 'Demandé',
+      'confirmed': 'Confirmé',
+      'completed': 'Réalisé',
+      'cancelled': 'Annulé'
+    }[appt.status] || appt.status;
+
+    // Type label
+    const typeLabel = appt.type === 'phone_call' ? 'Appel téléphonique' : appt.type;
+
+    // Durée
+    const duration = appt.duration_minutes ? appt.duration_minutes + ' min' : '—';
+
+    // Boutons d'action
+    let actions = '';
+    if (appt.status === 'requested') {
+      actions = `
+        <div class="appointment-actions">
+          <button class="appointment-btn confirm-btn" onclick="confirmAppointment('${appt.id}')">Confirmer</button>
+          <button class="appointment-btn cancel-btn" onclick="cancelAppointment('${appt.id}')">Annuler</button>
+        </div>
+      `;
+    } else if (appt.status === 'confirmed') {
+      actions = `
+        <div class="appointment-actions">
+          <button class="appointment-btn cancel-btn" onclick="cancelAppointment('${appt.id}')">Annuler</button>
+        </div>
+      `;
+    } else {
+      actions = '<div class="appointment-actions">—</div>';
+    }
+
+    row.innerHTML = `
+      <td>${dateStr}</td>
+      <td>${timeStr}</td>
+      <td>${duration}</td>
+      <td>${typeLabel}</td>
+      <td><span class="status-badge ${statusClass}">${statusLabel}</span></td>
+      <td>${actions}</td>
+    `;
+
+    tbody.appendChild(row);
+  });
+
+  // Afficher le tableau, masquer le message
+  if (table) table.style.display = '';
+  if (noMsg) noMsg.style.display = 'none';
+}
+
+/* ═══════════════════════════════════════════════════════
+   B-4c: APPOINTMENT CONFIRMATION/CANCELLATION
+   ═══════════════════════════════════════════════════════ */
+
+async function confirmAppointment(appointmentId) {
+  if (!currentClientId) {
+    alert('Identifiant client manquant');
+    return;
+  }
+
+  // Confirmation
+  const confirmed = confirm('Êtes-vous sûr de vouloir confirmer ce rendez-vous ?');
+  if (!confirmed) return;
+
+  try {
+    const response = await fetch('/.netlify/functions/confirm-appointment', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        appointmentId: appointmentId,
+        action: 'confirm',
+        clientId: currentClientId
+      })
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      console.error('Erreur confirmation:', data);
+      alert('Erreur lors de la confirmation du rendez-vous: ' + (data.error || 'erreur inconnue'));
+      return;
+    }
+
+    console.log('Rendez-vous confirmé:', data.appointment);
+
+    // Recharger la table
+    await loadAppointments();
+
+    // Message de succès
+    alert('Rendez-vous confirmé avec succès !');
+  } catch (err) {
+    console.error('Exception confirmAppointment:', err);
+    alert('Erreur lors de la confirmation: ' + err.message);
+  }
+}
+
+async function cancelAppointment(appointmentId) {
+  if (!currentClientId) {
+    alert('Identifiant client manquant');
+    return;
+  }
+
+  // Confirmation
+  const confirmed = confirm('Êtes-vous sûr de vouloir annuler ce rendez-vous ?');
+  if (!confirmed) return;
+
+  try {
+    const response = await fetch('/.netlify/functions/confirm-appointment', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        appointmentId: appointmentId,
+        action: 'cancel',
+        clientId: currentClientId
+      })
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      console.error('Erreur annulation:', data);
+      alert('Erreur lors de l\'annulation du rendez-vous: ' + (data.error || 'erreur inconnue'));
+      return;
+    }
+
+    console.log('Rendez-vous annulé:', data.appointment);
+
+    // Recharger la table
+    await loadAppointments();
+
+    // Message de succès
+    alert('Rendez-vous annulé.');
+  } catch (err) {
+    console.error('Exception cancelAppointment:', err);
+    alert('Erreur lors de l\'annulation: ' + err.message);
   }
 }
 
@@ -4307,6 +4705,149 @@ function closeRapport() {
 function printRapport() {
   window.print();
 }
+
+// ═════════════════════════════════════════════════════════════════════════════
+// APPOINTMENT BOOKING (B-3) - Handle Calendly webhook callback
+// ═════════════════════════════════════════════════════════════════════════════
+
+/**
+ * Listen for Calendly postMessage event when an appointment is scheduled
+ * Calendly iframe posts message with appointment details via postMessage API
+ */
+window.addEventListener('message', function(e) {
+  if (e.origin !== 'https://calendly.com') return;
+
+  // Check if this is a calendly event
+  if (e.data.event && e.data.event.indexOf('calendly') === 0) {
+    console.log('📞 Calendly event received:', e.data);
+
+    // When invitee.created event fires, Calendly shows a confirmation
+    // We'll also update our UI to show appointment was confirmed
+    if (e.data.event === 'calendly.event_scheduled') {
+      handleAppointmentConfirmed(e.data.payload);
+    }
+  }
+});
+
+/**
+ * Handle appointment confirmation from Calendly
+ * Display confirmation message and update UI
+ */
+function handleAppointmentConfirmed(payload) {
+  console.log('✅ Appointment confirmed:', payload);
+
+  // Fade the Calendly iframe
+  const calendarlyContainer = document.querySelector('.appointment-booking-section div[style*="border"]');
+  if (calendarlyContainer) {
+    calendarlyContainer.style.opacity = '0.5';
+    calendarlyContainer.style.pointerEvents = 'none';
+  }
+
+  // Show appointment status card
+  const statusCard = document.getElementById('appointmentStatusCard');
+  const detailsDiv = document.getElementById('appointmentDetails');
+
+  if (statusCard && detailsDiv) {
+    // Extract appointment info from payload
+    const eventTitle = payload.event?.title || 'Entretien téléphonique';
+    const eventStartTime = payload.event?.start_time;
+    const eventEndTime = payload.event?.end_time;
+
+    // Format dates for display
+    const startDate = eventStartTime ? new Date(eventStartTime) : null;
+    const formattedDate = startDate
+      ? startDate.toLocaleDateString('fr-FR', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })
+      : 'Date confirmée';
+    const formattedTime = startDate
+      ? startDate.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })
+      : '';
+
+    // Update details HTML
+    detailsDiv.innerHTML = `
+      <p><strong>${eventTitle}</strong></p>
+      <p>${formattedDate} à ${formattedTime}</p>
+    `;
+
+    // Show the status card with animation
+    statusCard.style.display = 'block';
+    setTimeout(() => {
+      statusCard.style.opacity = '1';
+      statusCard.style.animation = 'fadeIn 0.6s ease-in-out';
+    }, 100);
+  }
+}
+
+/**
+ * Poll backend for appointment status
+ * Alternative to relying solely on Calendly postMessage
+ * (Optional, for redundancy)
+ */
+async function checkAppointmentStatus() {
+  try {
+    const user = supabase.auth.user();
+    if (!user) return;
+
+    // Query latest appointment for this user
+    const { data, error } = await supabase
+      .from('appointments')
+      .select('*')
+      .eq('client_id', user.id)
+      .order('created_at', { ascending: false })
+      .limit(1);
+
+    if (error) {
+      console.warn('Error fetching appointment:', error);
+      return;
+    }
+
+    if (data && data.length > 0) {
+      const appointment = data[0];
+      console.log('📞 Latest appointment found:', appointment);
+
+      // If appointment was created in the last 2 minutes, show confirmation
+      const createdTime = new Date(appointment.created_at);
+      const now = new Date();
+      const diffMinutes = (now - createdTime) / 60000;
+
+      if (diffMinutes < 2) {
+        handleAppointmentConfirmed({
+          event: {
+            title: appointment.type === 'phone_call' ? 'Entretien téléphonique' : appointment.type,
+            start_time: appointment.scheduled_at,
+            end_time: appointment.scheduled_at
+          }
+        });
+      }
+    }
+  } catch (error) {
+    console.error('Error checking appointment:', error);
+  }
+}
+
+// Check for appointments when user first loads the page
+document.addEventListener('DOMContentLoaded', function() {
+  // Small delay to ensure Supabase is initialized
+  setTimeout(checkAppointmentStatus, 500);
+});
+
+// Add fade-in animation
+const style = document.createElement('style');
+style.textContent = `
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+      transform: translateY(-10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+  .appointment-status-card {
+    opacity: 0;
+  }
+`;
+document.head.appendChild(style);
 </script>
 
 <!-- ═══ OVERLAY RAPPORT AVANT-PROJET ═══ -->
