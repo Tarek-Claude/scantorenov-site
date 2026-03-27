@@ -7,9 +7,11 @@ const PIPELINE_STATUSES = [
   'call_requested',
   'call_done',
   'scan_scheduled',
+  'scan_payment_completed',
   'scan_completed',
   'analysis_ready',
-  'avant_projet_ready'
+  'avant_projet_ready',
+  'accompaniment_subscribed'
 ];
 
 const STATUS_RANK = PIPELINE_STATUSES.reduce((acc, status, index) => {

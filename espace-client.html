@@ -653,6 +653,13 @@
     /* ── PHASE SECTION VISIBILITY ── */
     .phase-section { display: none; }
     .phase-section.phase-visible { display: block; }
+    .scan-booking-section {
+      background: var(--card-bg, #fff);
+      border: 1px solid var(--border-color, #E8E8E8);
+      border-radius: 12px;
+      padding: 32px;
+      margin-bottom: 24px;
+    }
 
     @media (max-width: 768px) {
       .client-info-grid { grid-template-columns: 1fr; }
@@ -2120,6 +2127,76 @@
       </div>
     </div>
 
+    <!-- ═══════════  PHASE CALL_DONE : PRISE DE RDV SCAN 3D (D-2)  ═══════════ -->
+    <div class="scan-booking-section phase-section" id="scanBookingSection"
+         data-pipeline-status="call_done">
+      <h3>Réserver votre scan 3D</h3>
+      <p style="color:var(--text-soft);margin-bottom:20px;">
+        Choisissez un créneau pour la réalisation de votre scan Matterport.
+        La réservation sera confirmée après règlement de <strong>180 € TTC</strong>.
+      </p>
+
+      <div class="scan-duration-info" id="scanDurationInfo" style="display:none;
+           margin-bottom:20px;padding:16px;background:#F5F9F6;border-radius:8px;
+           border-left:4px solid #2D5F3E;">
+        <p style="margin:0;font-size:0.9rem;color:#2D5F3E;">
+          📐 <span id="scanDurationText">Durée estimée à confirmer lors de la prise de RDV</span>
+        </p>
+      </div>
+
+      <div id="scanCalendlyContainer" style="border-radius:8px;overflow:hidden;
+           border:1px solid var(--border-color);min-height:700px;">
+        <iframe
+          src="https://calendly.com/scantorenov/scan-3d?hide_event_type_details=1&hide_gdpr_banner=1"
+          width="100%"
+          height="700"
+          frameborder="0"
+          style="border:none;"
+          id="scanCalendlyIframe"
+          title="Réserver un scan 3D">
+        </iframe>
+      </div>
+
+      <div id="scanSlotSelected" style="display:none;margin-top:24px;
+           padding:24px;border:1px solid #E8E8E8;border-radius:8px;background:#FBFAF7;">
+        <h4 style="color:#2D5F3E;margin:0 0 12px 0;">✓ Créneau sélectionné</h4>
+        <div id="scanSlotDetails" style="font-size:0.9rem;color:#5A5A5A;"></div>
+        <p style="font-size:0.85rem;color:#9A9A9A;margin-top:12px;">
+          Pour confirmer définitivement ce créneau, procédez au règlement ci-dessous.
+        </p>
+      </div>
+    </div>
+
+    <!-- ═══════════  PAIEMENT SCAN 3D (D-3)  ═══════════ -->
+    <div class="phase-section" id="scanPaymentSection" data-pipeline-status="scan_scheduled"
+         style="display:none;margin-top:24px;padding:24px;border:1px solid #E8E8E8;border-radius:12px;background:#FBFAF7;">
+      <h3 style="color:#2D5F3E;margin:0 0 16px 0;">Valider votre réservation</h3>
+      <p style="font-size:0.9rem;color:#5A5A5A;margin:0 0 20px 0;">
+        Pour confirmer définitivement votre créneau, réglez la prestation de scan en ligne.
+        Vous serez redirigé vers notre page de paiement sécurisée Stripe.
+      </p>
+
+      <div style="display:flex;align-items:center;gap:12px;padding:16px;
+           background:#fff;border:1px solid #E8E8E8;border-radius:8px;margin-bottom:20px;">
+        <span style="font-size:1.4rem;">💳</span>
+        <div>
+          <div style="font-weight:600;font-size:1rem;color:#2A2A2A;">Scan 3D Matterport</div>
+          <div style="font-size:0.85rem;color:#9A9A9A;">Paiement unique sécurisé</div>
+        </div>
+        <div style="margin-left:auto;font-size:1.2rem;font-weight:700;color:#2D5F3E;">180 € TTC</div>
+      </div>
+
+      <button id="payNowBtn" onclick="initiateScanPayment()"
+              style="width:100%;background:#2D5F3E;color:#fff;border:none;cursor:pointer;
+                     padding:16px 24px;border-radius:6px;font-size:0.95rem;font-weight:600;
+                     letter-spacing:0.05em;text-transform:uppercase;">
+        💳  VALIDER ET PAYER 180 €
+      </button>
+
+      <p id="paymentError" style="display:none;color:#C62828;font-size:0.85rem;
+         text-align:center;margin-top:12px;"></p>
+    </div>
+
     <!-- ═══════════  PHASE 4 : CONFIRMATION DATE SCAN  ═══════════ -->
     <div class="phase-section" id="phaseScanDate" data-min-phase="4" data-max-phase="4">
 
@@ -2597,7 +2674,22 @@ var netlifyIdentity = window.netlifyIdentity;
 var currentUser = null;
 var currentPhase = 3;
 var currentClientId = null;
+var currentPipelineStatus = 'new_lead';
 var clientProject = {};
+
+window.__pipelineRank = {
+  new_lead: 0,
+  account_created: 1,
+  onboarding_completed: 2,
+  call_requested: 3,
+  call_done: 4,
+  scan_scheduled: 5,
+  scan_payment_completed: 6,
+  scan_completed: 7,
+  analysis_ready: 8,
+  avant_projet_ready: 9,
+  accompaniment_subscribed: 10
+};
 
 function showDashboard(user) {
   currentUser = user;
@@ -2636,6 +2728,7 @@ function showDashboard(user) {
             telephone: sb.telephone || clientProject.telephone,
             matterport_data: sb.matterport_data || clientProject.matterport_data
           };
+          currentPipelineStatus = sb.status || 'new_lead';
           if (sb.phase && sb.phase > currentPhase) currentPhase = sb.phase;
           if (sb.matterport_model_id) appMeta.matterport_id = sb.matterport_model_id;
           if (sb.matterport_iframe) appMeta.matterport_iframe = sb.matterport_iframe;
@@ -2665,6 +2758,7 @@ function applyDashboardData(user, meta, appMeta) {
   // Charger la phase et les donnees projet
   currentPhase = appMeta.phase || 3;
   clientProject = appMeta.project || {};
+  currentPipelineStatus = appMeta.status || currentPipelineStatus || 'new_lead';
 
   // Rendre la phase
   renderPhase(currentPhase, clientProject, appMeta);
@@ -2787,6 +2881,17 @@ function renderPhase(phase, project, appMeta) {
     }
   });
 
+  // Gestion des sections par statut pipeline (data-pipeline-status)
+  var statusSections = document.querySelectorAll('[data-pipeline-status]');
+  statusSections.forEach(function(section) {
+    var requiredStatus = section.getAttribute('data-pipeline-status');
+    if (currentPipelineStatus === requiredStatus) {
+      section.classList.add('phase-visible');
+    } else {
+      section.classList.remove('phase-visible');
+    }
+  });
+
   // 3. Rendre les sections specifiques a la phase
   if (phase >= 3) renderPhase3(project);
   if (phase === 4) renderPhase4(appMeta);
@@ -2811,6 +2916,14 @@ function renderPhase(phase, project, appMeta) {
   // Masquer la signature pour les phases < 5
   var sigEl = document.querySelector('.welcome-signature');
   if (sigEl) sigEl.style.display = phase >= 5 ? '' : 'none';
+
+  if (currentPipelineStatus === 'call_done') {
+    loadScanDurationHint();
+  } else if (currentPipelineStatus === 'scan_scheduled') {
+    hydratePendingScanAppointment();
+  } else {
+    resetScanBookingDisplay();
+  }
 }
 
 /* ── Phase 3 : Informations personnelles + description projet ── */
@@ -4707,6 +4820,270 @@ function printRapport() {
   window.print();
 }
 
+function getIdentityAccessToken() {
+  if (currentUser && currentUser.token && currentUser.token.access_token) {
+    return currentUser.token.access_token;
+  }
+
+  try {
+    var stored = JSON.parse(localStorage.getItem('gotrue.user') || 'null');
+    return stored && stored.token ? stored.token.access_token : null;
+  } catch (error) {
+    return null;
+  }
+}
+
+function getScanDurationLabel(surface) {
+  if (surface <= 50) return '45 min à 1h';
+  if (surface <= 100) return '1h à 1h30';
+  if (surface <= 200) return '1h30 à 2h30';
+  return '2h30 à 3h';
+}
+
+function resetScanBookingDisplay() {
+  var info = document.getElementById('scanDurationInfo');
+  var text = document.getElementById('scanDurationText');
+  var container = document.getElementById('scanCalendlyContainer');
+  var slotSelected = document.getElementById('scanSlotSelected');
+  var slotDetails = document.getElementById('scanSlotDetails');
+
+  if (info) info.style.display = 'none';
+  if (text) text.textContent = 'Durée estimée à confirmer lors de la prise de RDV';
+  if (container) {
+    container.style.opacity = '';
+    container.style.pointerEvents = '';
+  }
+  if (slotSelected) slotSelected.style.display = 'none';
+  if (slotDetails) slotDetails.innerHTML = '';
+}
+
+async function loadScanDurationHint() {
+  if (!supabaseClient || !currentClientId) return;
+
+  try {
+    var result = await supabaseClient
+      .from('project_notes')
+      .select('confirmed_surface')
+      .eq('client_id', currentClientId)
+      .eq('type', 'phone_summary')
+      .order('created_at', { ascending: false })
+      .limit(1)
+      .single();
+
+    if (result.error || !result.data || !result.data.confirmed_surface) return;
+
+    var surface = parseInt(result.data.confirmed_surface, 10);
+    var label = surface
+      ? 'Durée estimée : ' + getScanDurationLabel(surface) + ' (surface ~' + surface + ' m²)'
+      : 'Durée estimée communiquée lors de la prise de RDV';
+    var el = document.getElementById('scanDurationText');
+    var info = document.getElementById('scanDurationInfo');
+    if (el) el.textContent = label;
+    if (info) info.style.display = '';
+  } catch (error) {
+    console.warn('loadScanDurationHint error:', error);
+  }
+}
+
+function revealScanPaymentSection() {
+  var paymentSection = document.getElementById('scanPaymentSection');
+  if (paymentSection) {
+    paymentSection.style.display = 'block';
+  }
+}
+
+async function hydratePendingScanAppointment() {
+  if (!supabaseClient || !currentClientId) return null;
+
+  try {
+    var result = await supabaseClient
+      .from('appointments')
+      .select('id, type, status, scheduled_at')
+      .eq('client_id', currentClientId)
+      .eq('type', 'scan_3d')
+      .in('status', ['requested', 'scheduled'])
+      .order('created_at', { ascending: false })
+      .limit(1)
+      .single();
+
+    if (result.error || !result.data) return null;
+
+    window.__pendingScanAppointmentId = result.data.id;
+    window.__pendingScanSlot = {
+      startTime: result.data.scheduled_at,
+      eventTitle: 'Scan 3D Matterport'
+    };
+    applyScanSlotDisplay({
+      event: {
+        title: 'Scan 3D Matterport',
+        start_time: result.data.scheduled_at
+      }
+    });
+    revealScanPaymentSection();
+    return result.data;
+  } catch (error) {
+    console.warn('hydratePendingScanAppointment error:', error);
+    return null;
+  }
+}
+
+function applyScanSlotDisplay(payload) {
+  var eventTitle = payload.event && payload.event.title ? payload.event.title : 'Scan 3D Matterport';
+  var startTime = payload.event && payload.event.start_time ? payload.event.start_time : null;
+  var startDate = startTime ? new Date(startTime) : null;
+  var formattedDate = startDate
+    ? startDate.toLocaleDateString('fr-FR', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })
+    : 'Date confirmée';
+  var formattedTime = startDate
+    ? startDate.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })
+    : '';
+
+  var container = document.getElementById('scanCalendlyContainer');
+  if (container) {
+    container.style.opacity = '0.4';
+    container.style.pointerEvents = 'none';
+  }
+
+  var slotSelected = document.getElementById('scanSlotSelected');
+  var slotDetails = document.getElementById('scanSlotDetails');
+  if (slotSelected && slotDetails) {
+    slotDetails.innerHTML =
+      '<p style="margin:0;"><strong>' + eventTitle + '</strong></p>' +
+      '<p style="margin:4px 0 0 0;">' + formattedDate + (formattedTime ? ' à ' + formattedTime : '') + '</p>';
+    slotSelected.style.display = 'block';
+  }
+}
+
+async function bookScanAppointment(scheduledAt, eventTitle) {
+  if (!currentClientId) {
+    console.warn('bookScanAppointment: currentClientId manquant');
+    return null;
+  }
+
+  try {
+    var token = getIdentityAccessToken();
+    var response = await fetch('/.netlify/functions/book-scan', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': token ? 'Bearer ' + token : ''
+      },
+      body: JSON.stringify({
+        clientId: currentClientId,
+        scheduledAt: scheduledAt,
+        durationMinutes: 90,
+        location: clientProject && clientProject.adresse ? clientProject.adresse : '',
+        eventTitle: eventTitle
+      })
+    });
+
+    var data = await response.json();
+    if (!response.ok) {
+      console.error('bookScanAppointment error:', data.error || data);
+      return null;
+    }
+
+    console.log('✅ RDV scan enregistré:', data.appointmentId);
+    window.__pendingScanAppointmentId = data.appointmentId;
+    currentPipelineStatus = 'scan_scheduled';
+    revealScanPaymentSection();
+    return data.appointmentId;
+  } catch (err) {
+    console.error('bookScanAppointment exception:', err);
+    return null;
+  }
+}
+
+async function initiateScanPayment() {
+  var btn = document.getElementById('payNowBtn');
+  var errEl = document.getElementById('paymentError');
+
+  if (!currentClientId || !window.__pendingScanAppointmentId) {
+    var hydrated = await hydratePendingScanAppointment();
+    if (!hydrated && errEl) {
+      errEl.textContent = 'Erreur : RDV ou identifiant client manquant.';
+      errEl.style.display = 'block';
+      return;
+    }
+  }
+
+  if (!btn) return;
+
+  btn.disabled = true;
+  btn.textContent = 'Redirection en cours…';
+  if (errEl) errEl.style.display = 'none';
+
+  try {
+    var token = getIdentityAccessToken();
+    var resp = await fetch('/.netlify/functions/create-checkout', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': token ? 'Bearer ' + token : ''
+      },
+      body: JSON.stringify({
+        clientId: currentClientId,
+        appointmentId: window.__pendingScanAppointmentId,
+        productType: 'scan_3d'
+      })
+    });
+    var data = await resp.json();
+
+    if (!resp.ok || !data.checkoutUrl) {
+      throw new Error(data.error || 'Erreur lors de la création du paiement');
+    }
+
+    window.location.href = data.checkoutUrl;
+  } catch (err) {
+    console.error('initiateScanPayment error:', err);
+    btn.disabled = false;
+    btn.textContent = '💳  VALIDER ET PAYER 180 €';
+    if (errEl) {
+      errEl.textContent = 'Erreur : ' + err.message;
+      errEl.style.display = 'block';
+    }
+  }
+}
+
+function handleScanSlotSelected(payload) {
+  console.log('📐 Scan 3D slot selected:', payload);
+
+  var eventTitle = payload.event && payload.event.title ? payload.event.title : 'Scan 3D Matterport';
+  var startTime = payload.event && payload.event.start_time ? payload.event.start_time : null;
+
+  applyScanSlotDisplay(payload);
+  window.__pendingScanSlot = { startTime: startTime, eventTitle: eventTitle };
+  revealScanPaymentSection();
+  var paySection = document.getElementById('scanPaymentSection');
+  if (paySection) {
+    paySection.style.display = 'block';
+    paySection.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  }
+  bookScanAppointment(startTime, eventTitle);
+}
+
+function showPaymentSuccessBanner() {
+  var banner = document.createElement('div');
+  banner.style.cssText =
+    'position:fixed;top:16px;left:50%;transform:translateX(-50%);' +
+    'background:#2D5F3E;color:#fff;padding:16px 28px;border-radius:8px;' +
+    'font-size:0.95rem;font-weight:500;z-index:9999;box-shadow:0 4px 20px rgba(0,0,0,0.15);';
+  banner.textContent = '✅ Paiement confirmé — votre RDV scan est validé !';
+  document.body.appendChild(banner);
+  setTimeout(function() { banner.remove(); }, 6000);
+}
+
+function showPaymentCancelledBanner() {
+  var banner = document.createElement('div');
+  banner.style.cssText =
+    'position:fixed;top:16px;left:50%;transform:translateX(-50%);' +
+    'background:#C62828;color:#fff;padding:16px 28px;border-radius:8px;' +
+    'font-size:0.95rem;font-weight:500;z-index:9999;box-shadow:0 4px 20px rgba(0,0,0,0.15);';
+  banner.textContent = 'Paiement annulé — votre créneau n\'est pas encore confirmé.';
+  document.body.appendChild(banner);
+  setTimeout(function() { banner.remove(); }, 5000);
+}
+
 // ═════════════════════════════════════════════════════════════════════════════
 // APPOINTMENT BOOKING (B-3) - Handle Calendly webhook callback
 // ═════════════════════════════════════════════════════════════════════════════
@@ -4725,7 +5102,14 @@ window.addEventListener('message', function(e) {
     // When invitee.created event fires, Calendly shows a confirmation
     // We'll also update our UI to show appointment was confirmed
     if (e.data.event === 'calendly.event_scheduled') {
-      handleAppointmentConfirmed(e.data.payload);
+      var sourceFrame = e.source;
+      var scanIframe = document.getElementById('scanCalendlyIframe');
+
+      if (scanIframe && scanIframe.contentWindow === sourceFrame) {
+        handleScanSlotSelected(e.data.payload);
+      } else {
+        handleAppointmentConfirmed(e.data.payload);
+      }
     }
   }
 });
@@ -4811,13 +5195,25 @@ async function checkAppointmentStatus() {
       const diffMinutes = (now - createdTime) / 60000;
 
       if (diffMinutes < 2) {
-        handleAppointmentConfirmed({
+        var payload = {
           event: {
-            title: appointment.type === 'phone_call' ? 'Entretien téléphonique' : appointment.type,
+            title: appointment.type === 'scan_3d' ? 'Scan 3D Matterport' : 'Entretien téléphonique',
             start_time: appointment.scheduled_at,
             end_time: appointment.scheduled_at
           }
-        });
+        };
+
+        if (appointment.type === 'scan_3d') {
+          window.__pendingScanAppointmentId = appointment.id;
+          window.__pendingScanSlot = {
+            startTime: appointment.scheduled_at,
+            eventTitle: payload.event.title
+          };
+          applyScanSlotDisplay(payload);
+          revealScanPaymentSection();
+        } else {
+          handleAppointmentConfirmed(payload);
+        }
       }
     }
   } catch (error) {
@@ -4830,6 +5226,20 @@ document.addEventListener('DOMContentLoaded', function() {
   // Small delay to ensure Supabase is initialized
   setTimeout(checkAppointmentStatus, 500);
 });
+
+(function checkPaymentReturn() {
+  var params = new URLSearchParams(window.location.search);
+  var paymentStatus = params.get('payment');
+  if (!paymentStatus) return;
+
+  window.history.replaceState({}, '', '/espace-client.html');
+
+  if (paymentStatus === 'success') {
+    showPaymentSuccessBanner();
+  } else if (paymentStatus === 'cancelled') {
+    showPaymentCancelledBanner();
+  }
+})();
 
 // Add fade-in animation
 const style = document.createElement('style');
