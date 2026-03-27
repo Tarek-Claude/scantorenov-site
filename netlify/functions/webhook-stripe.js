@@ -30,6 +30,20 @@ exports.handler = async (event) => {
 
   if (stripeEvent.type === 'checkout.session.completed') {
     const session = stripeEvent.data.object;
+
+    // Idempotence : vérifier si ce session.id a déjà été traité
+    const { data: existingPayment } = await supabase
+      .from('payments')
+      .select('id, status')
+      .eq('stripe_session_id', session.id)
+      .eq('status', 'completed')
+      .maybeSingle();
+
+    if (existingPayment) {
+      console.log(`webhook-stripe: session ${session.id} déjà traitée, ignorée (idempotence)`);
+      return { statusCode: 200, body: JSON.stringify({ received: true, duplicate: true }) };
+    }
+
     await handleCheckoutCompleted(session);
   }
 
@@ -71,7 +85,10 @@ async function handleCheckoutCompleted(session) {
   try {
     const response = await fetch(`${SITE_URL}/.netlify/functions/confirm-scan`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: {
+        'Content-Type': 'application/json',
+        'x-admin-secret': process.env.ADMIN_SECRET
+      },
       body: JSON.stringify({ clientId, appointmentId })
     });
 

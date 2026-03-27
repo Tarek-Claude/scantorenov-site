@@ -195,7 +195,8 @@ exports.handler = async (event) => {
       return { statusCode: 400, headers, body: JSON.stringify({ error: 'clientId et appointmentId requis' }) };
     }
 
-    if (adminSecret && adminSecret !== process.env.ADMIN_SECRET) {
+    if (!adminSecret || adminSecret !== process.env.ADMIN_SECRET) {
+      console.warn('confirm-scan: accès refusé — admin-secret manquant ou invalide');
       return { statusCode: 401, headers, body: JSON.stringify({ error: 'Unauthorized' }) };
     }
 

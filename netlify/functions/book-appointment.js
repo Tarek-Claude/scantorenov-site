@@ -120,6 +120,28 @@ exports.handler = async (event, context) => {
 
     console.log(`✅ Found client: ${clientId}`);
 
+    // Idempotence : vérifier si un RDV identique existe déjà (même client + même créneau)
+    const { data: existingAppt } = await supabase
+      .from('appointments')
+      .select('id')
+      .eq('client_id', clientId)
+      .eq('scheduled_at', scheduledAt)
+      .eq('type', 'phone_call')
+      .maybeSingle();
+
+    if (existingAppt) {
+      console.log(`⚠️  Appointment already exists for ${clientEmail} at ${scheduledAt} (id: ${existingAppt.id}) — skipping (idempotence)`);
+      return {
+        statusCode: 200,
+        body: JSON.stringify({
+          success: true,
+          duplicate: true,
+          message: 'Appointment already recorded',
+          appointmentId: existingAppt.id,
+        }),
+      };
+    }
+
     // Insert appointment into Supabase
     const { data, error } = await supabase
       .from('appointments')

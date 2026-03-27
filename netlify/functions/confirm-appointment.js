@@ -82,12 +82,12 @@ function buildConfirmEmailHtml({ prenom, nom, scheduledAt, durationMinutes, type
       </p>
 
       <p style="font-size:0.9rem;color:#5A5A5A;margin:0 0 32px 0;padding:0 24px;">
-        Pour toute question, contactez-nous à <a href="mailto:contact@scantorenov.com" style="color:#2D5F3E;">contact@scantorenov.com</a>.
+        Pour toute question, contactez-nous à <a href="mailto:avant-projet@scantorenov.com" style="color:#2D5F3E;">avant-projet@scantorenov.com</a>.
       </p>
 
       <div style="text-align:center;padding:24px 0;border-top:1px solid #E8E8E8;margin-top:32px;">
         <p style="font-size:0.78rem;color:#9A9A9A;margin:0;">
-          Scantorenov · <a href="${SITE_URL}" style="color:#9A9A9A;">scantorenov.com</a> · contact@scantorenov.com
+          Scantorenov · <a href="${SITE_URL}" style="color:#9A9A9A;">scantorenov.com</a> · avant-projet@scantorenov.com
         </p>
       </div>
     </div>
@@ -125,12 +125,12 @@ function buildCancelEmailHtml({ prenom, nom, scheduledAt, type }) {
       </p>
 
       <p style="font-size:0.9rem;color:#5A5A5A;margin:0 0 32px 0;padding:0 24px;">
-        Pour toute question : <a href="mailto:contact@scantorenov.com" style="color:#2D5F3E;">contact@scantorenov.com</a>
+        Pour toute question : <a href="mailto:avant-projet@scantorenov.com" style="color:#2D5F3E;">avant-projet@scantorenov.com</a>
       </p>
 
       <div style="text-align:center;padding:24px 0;border-top:1px solid #E8E8E8;margin-top:32px;">
         <p style="font-size:0.78rem;color:#9A9A9A;margin:0;">
-          Scantorenov · <a href="${SITE_URL}" style="color:#9A9A9A;">scantorenov.com</a> · contact@scantorenov.com
+          Scantorenov · <a href="${SITE_URL}" style="color:#9A9A9A;">scantorenov.com</a> · avant-projet@scantorenov.com
         </p>
       </div>
     </div>
@@ -165,7 +165,7 @@ exports.handler = async (event) => {
   const headers = {
     'Access-Control-Allow-Origin': '*',
     'Access-Control-Allow-Methods': 'POST, OPTIONS',
-    'Access-Control-Allow-Headers': 'Content-Type',
+    'Access-Control-Allow-Headers': 'Content-Type, Authorization, x-admin-secret',
     'Content-Type': 'application/json',
   };
 
@@ -178,6 +178,41 @@ exports.handler = async (event) => {
   }
 
   try {
+    // ── Auth : admin-secret OU Supabase JWT valide ──
+    const adminSecret = event.headers['x-admin-secret'];
+    const authHeader = event.headers['authorization'] || '';
+    const supabaseToken = authHeader.replace(/^Bearer\s+/i, '');
+
+    let isAuthenticated = false;
+
+    // Voie 1 : admin-secret (appels internes serveur-à-serveur)
+    if (adminSecret && adminSecret === process.env.ADMIN_SECRET) {
+      isAuthenticated = true;
+    }
+
+    // Voie 2 : Token Netlify Identity (appel depuis l'espace client)
+    if (!isAuthenticated && supabaseToken) {
+      try {
+        const identityResp = await fetch(`${process.env.URL || 'https://scantorenov.com'}/.netlify/identity/user`, {
+          headers: { 'Authorization': `Bearer ${supabaseToken}` }
+        });
+        if (identityResp.ok) {
+          isAuthenticated = true;
+        }
+      } catch (identityErr) {
+        console.warn('Netlify Identity validation failed:', identityErr.message);
+      }
+    }
+
+    if (!isAuthenticated) {
+      console.warn('confirm-appointment: accès refusé — ni admin-secret ni JWT valide');
+      return {
+        statusCode: 401,
+        headers,
+        body: JSON.stringify({ error: 'Unauthorized' }),
+      };
+    }
+
     const body = JSON.parse(event.body);
     const { appointmentId, action, clientId } = body;
 
@@ -285,7 +320,7 @@ exports.handler = async (event) => {
     const emailResults = await Promise.allSettled([
       // Email au client
       resend.emails.send({
-        from: 'ScantoRenov <contact@scantorenov.com>',
+        from: 'ScantoRenov <avant-projet@scantorenov.com>',
         to: [clientEmail],
         subject: action === 'confirm'
           ? `Confirmation de votre rendez-vous – ScantoRenov`
@@ -296,7 +331,7 @@ exports.handler = async (event) => {
       }),
       // Notification admin
       resend.emails.send({
-        from: 'ScantoRenov <contact@scantorenov.com>',
+        from: 'ScantoRenov <avant-projet@scantorenov.com>',
         to: ['scantorenov@gmail.com'],
         subject: action === 'confirm'
           ? `[RDV CONFIRMÉ] ${[prenom, nom].filter(Boolean).join(' ')}`

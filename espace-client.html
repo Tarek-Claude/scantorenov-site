@@ -3103,9 +3103,13 @@ async function confirmAppointment(appointmentId) {
   if (!confirmed) return;
 
   try {
+    const confirmHeaders = { 'Content-Type': 'application/json' };
+    const identityToken = getIdentityAccessToken();
+    if (identityToken) confirmHeaders['Authorization'] = 'Bearer ' + identityToken;
+
     const response = await fetch('/.netlify/functions/confirm-appointment', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: confirmHeaders,
       body: JSON.stringify({
         appointmentId: appointmentId,
         action: 'confirm',
@@ -3145,9 +3149,13 @@ async function cancelAppointment(appointmentId) {
   if (!confirmed) return;
 
   try {
+    const cancelHeaders = { 'Content-Type': 'application/json' };
+    const cancelToken = getIdentityAccessToken();
+    if (cancelToken) cancelHeaders['Authorization'] = 'Bearer ' + cancelToken;
+
     const response = await fetch('/.netlify/functions/confirm-appointment', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: cancelHeaders,
       body: JSON.stringify({
         appointmentId: appointmentId,
         action: 'cancel',
