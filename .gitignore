@@ -13,6 +13,10 @@ package-lock.json
 # Visual Studio Code
 .vscode/
 
+# Claude / local agent files
+.claude/settings.local.json
+.claude/worktrees/
+
 # OS
 .DS_Store
 Thumbs.db

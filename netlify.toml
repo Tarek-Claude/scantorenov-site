@@ -32,12 +32,6 @@
 # Activez Identity dans votre dashboard Netlify :
 # Site settings → Identity → Enable Identity
 
-# ── Secrets scanning — ignorer la fausse alerte ────────────────────
-# La clé anon (publique) dans espace-client.html partage un préfixe
-# avec la clé service_role. Netlify confond les deux.
-[build.environment]
-  SECRETS_SCAN_OMIT_KEYS = "SUPABASE_SERVICE_KEY"
-
 [context.production.environment]
   NODE_VERSION = "18"
   SUPABASE_URL = "https://qvovfabwzyfhmkaluzss.supabase.co"

@@ -3505,12 +3505,10 @@ function loadExpertPhotos() {
   if (!email) return;
 
   var safeEmail = email.replace('@', '_at_');
-  var supabaseUrl = 'https://qvovfabwzyfhmkaluzss.supabase.co';
-  var anonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InF2b3ZmYWJ3enlmaG1rYWx1enNzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzMzNjQ0ODUsImV4cCI6MjA4ODk0MDQ4NX0._h-AjJwSGcaq1QGSpDEa4PAXNVBcyWjjEpAIboQaGU8';
 
   // Lister les fichiers dans le bucket "plans" pour ce client
-  fetch(supabaseUrl + '/storage/v1/object/list/plans/' + safeEmail, {
-    headers: { 'apikey': anonKey, 'Authorization': 'Bearer ' + anonKey }
+  fetch(SUPABASE_URL + '/storage/v1/object/list/plans/' + safeEmail, {
+    headers: { 'apikey': SUPABASE_ANON, 'Authorization': 'Bearer ' + SUPABASE_ANON }
   })
   .then(function(r) { return r.json(); })
   .then(function(files) {
