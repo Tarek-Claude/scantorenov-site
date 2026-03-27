@@ -257,7 +257,31 @@ exports.handler = async (event) => {
       type: appt.type,
     };
 
-    // 3. B-4b : Envoyer les emails via Resend
+    // 3. B-4d : Mettre à jour le pipeline client si confirmation
+    if (action === 'confirm') {
+      try {
+        const { error: pipelineError } = await supabase
+          .from('clients')
+          .update({
+            status: 'call_requested',
+            call_scheduled_at: appt.scheduled_at,
+            updated_at: new Date().toISOString(),
+          })
+          .eq('id', clientId)
+          // Ne rétrograder jamais : n'écraser que si le statut actuel est en dessous de call_requested
+          .in('status', ['new_lead', 'account_created', 'onboarding_completed', 'call_requested']);
+
+        if (pipelineError) {
+          console.warn('B-4d pipeline update failed (non-blocking):', pipelineError.message);
+        } else {
+          console.log(`B-4d: client ${clientId} pipeline → call_requested, call_scheduled_at=${appt.scheduled_at}`);
+        }
+      } catch (pipelineErr) {
+        console.warn('B-4d pipeline exception (non-blocking):', pipelineErr.message);
+      }
+    }
+
+    // 4. B-4b : Envoyer les emails via Resend
     const emailResults = await Promise.allSettled([
       // Email au client
       resend.emails.send({
