@@ -30,12 +30,12 @@
 
 const { createClient } = require('@supabase/supabase-js');
 
-// Initialize Supabase client
+// Initialize Supabase client — service key requis : webhook Calendly non authentifié
 const supabaseUrl = process.env.SUPABASE_URL;
-const supabaseKey = process.env.SUPABASE_ANON_KEY;
+const supabaseKey = process.env.SUPABASE_SERVICE_KEY;
 
 if (!supabaseUrl || !supabaseKey) {
-  console.error('Missing Supabase credentials in environment variables');
+  console.error('Missing Supabase credentials in environment variables (SUPABASE_URL / SUPABASE_SERVICE_KEY)');
 }
 
 const supabase = createClient(supabaseUrl, supabaseKey);

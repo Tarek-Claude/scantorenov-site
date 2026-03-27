@@ -2073,6 +2073,20 @@
           <span class="callback-icon">&#x1F4DE;</span>
           Demander &#224; &#234;tre rappel&#233;
         </button>
+        <div id="phone-rdv-planning" style="display:none;margin-top:24px;">
+          <h3>Choisissez votre créneau téléphonique</h3>
+          <p>Sélectionnez un rendez-vous dans le planning ci-dessous.</p>
+          <div style="border-radius:8px;overflow:hidden;border:1px solid var(--border);padding:0;min-height:700px;">
+            <iframe
+              src="https://calendly.com/scantorenov?hide_event_type_details=1&hide_gdpr_banner=1"
+              width="100%"
+              height="700"
+              frameborder="0"
+              style="border:none;"
+              title="Calendly">
+            </iframe>
+          </div>
+        </div>
       </div>
     </div>
 
@@ -2582,6 +2596,7 @@ var supabaseClient = window.supabase ? window.supabase.createClient(SUPABASE_URL
 var netlifyIdentity = window.netlifyIdentity;
 var currentUser = null;
 var currentPhase = 3;
+var currentClientId = null;
 var clientProject = {};
 
 function showDashboard(user) {
@@ -2607,6 +2622,8 @@ function showDashboard(user) {
       .then(function(result) {
         if (result.data) {
           var sb = result.data;
+          // Stocker l'UUID client Supabase pour les requêtes appointments
+          currentClientId = sb.id;
           // Fusionner les données Supabase dans appMeta et clientProject
           clientProject = {
             nom: sb.nom || clientProject.nom,
@@ -2861,14 +2878,14 @@ function renderPhase3(project) {
    B-4a: CONFIRMED APPOINTMENTS — Charger et afficher RDV
    ═══════════════════════════════════════════════════════ */
 async function loadAppointments() {
-  if (!supabase || !currentClientId) {
-    console.warn('loadAppointments: supabase ou clientId non disponible');
+  if (!supabaseClient || !currentClientId) {
+    console.warn('loadAppointments: supabaseClient ou clientId non disponible');
     return;
   }
 
   try {
     // Récupérer les appointments pour ce client
-    const { data, error } = await supabase
+    const { data, error } = await supabaseClient
       .from('appointments')
       .select('*')
       .eq('client_id', currentClientId)
@@ -3905,28 +3922,12 @@ function renderPhase9(appMeta) {
 /* ── Actions Phase 3 ── */
 function requestCallback() {
   var btn = document.getElementById('callbackBtn');
-  if (!btn || !currentUser) return;
+  var planning = document.getElementById('phone-rdv-planning');
+  if (!btn || !planning) return;
 
-  btn.disabled = true;
-  btn.innerHTML = '<span class="callback-icon">\u2713</span> Demande envoy\u00e9e';
-
-  // Envoyer une notification a l'admin
-  var project = clientProject;
-  fetch('/.netlify/functions/contact', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-    body: 'genre=&prenom=' + encodeURIComponent((project.nom || '').split(' ')[0])
-      + '&nom=' + encodeURIComponent((project.nom || '').split(' ').slice(1).join(' '))
-      + '&email=' + encodeURIComponent(currentUser.email)
-      + '&telephone=' + encodeURIComponent(project.telephone || '')
-      + '&adresse=' + encodeURIComponent(project.adresse || '')
-      + '&qualite=' + encodeURIComponent(project.qualite || '')
-      + '&typeBien=' + encodeURIComponent(project.type_bien || '')
-      + '&precision=&echeance=&budget=' + encodeURIComponent(project.budget || '')
-      + '&message=' + encodeURIComponent('DEMANDE DE RAPPEL - Le client souhaite \u00eatre rappel\u00e9 par un chef de projet.')
-  }).catch(function() {});
-
-  alert('Votre demande de rappel a bien \u00e9t\u00e9 envoy\u00e9e.\nUn chef de projet vous contactera tr\u00e8s prochainement.');
+  btn.style.display = 'none';
+  planning.style.display = 'block';
+  planning.scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
 
 /* ── Actions Phase 4 ── */
@@ -4784,14 +4785,14 @@ function handleAppointmentConfirmed(payload) {
  */
 async function checkAppointmentStatus() {
   try {
-    const user = supabase.auth.user();
-    if (!user) return;
+    // Utilise Netlify Identity (currentUser) + UUID Supabase (currentClientId)
+    if (!currentUser || !currentClientId) return;
 
     // Query latest appointment for this user
-    const { data, error } = await supabase
+    const { data, error } = await supabaseClient
       .from('appointments')
       .select('*')
-      .eq('client_id', user.id)
+      .eq('client_id', currentClientId)
       .order('created_at', { ascending: false })
       .limit(1);
 
