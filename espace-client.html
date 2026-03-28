@@ -1703,295 +1703,176 @@
       font-size: 0.88rem;
       line-height: 1.6;
     }
-    .native-booking-mount {
+    .slot-picker-mount {
       margin-top: 8px;
     }
-    .native-booking {
+    .slot-picker {
       background: #FBFAF7;
       border: 1px solid #E8E8E8;
       border-radius: 12px;
       padding: 24px;
-      box-shadow: inset 0 1px 0 rgba(255,255,255,0.65);
-      transition: opacity 0.25s ease;
+      transition: opacity 0.2s ease;
     }
-    .native-booking.is-locked {
+    .slot-picker.is-locked {
       opacity: 0.55;
       pointer-events: none;
     }
-    .native-booking-top {
-      display: flex;
-      justify-content: space-between;
-      align-items: flex-start;
-      gap: 18px;
+    .slot-picker-header {
       margin-bottom: 18px;
     }
-    .native-booking-copy h4 {
+    .slot-picker-header h4 {
       font-family: 'Space Grotesk', sans-serif;
       font-size: 0.95rem;
       font-weight: 600;
       color: var(--text);
       margin-bottom: 6px;
     }
-    .native-booking-copy p {
+    .slot-picker-header p {
       color: var(--text-soft);
       font-size: 0.82rem;
       line-height: 1.6;
+      text-align: left;
     }
-    .native-booking-legend {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 10px;
-      color: var(--text-soft);
-      font-size: 0.76rem;
-    }
-    .native-legend-item {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-    }
-    .native-legend-dot {
-      width: 10px;
-      height: 10px;
-      border-radius: 999px;
-      display: inline-block;
-    }
-    .native-legend-dot.available {
-      background: #2D5F3E;
-    }
-    .native-legend-dot.unavailable {
-      background: #E0E0E0;
-      border: 1px solid #CFCFCF;
-    }
-    .native-booking-shell {
-      display: grid;
-      grid-template-columns: minmax(320px, 1.15fr) minmax(0, 1fr);
-      gap: 22px;
-      align-items: flex-start;
-    }
-    .native-calendar-panel,
-    .native-slots-panel {
-      background: #FFFFFF;
-      border: 1px solid #E8E8E8;
-      border-radius: 10px;
-      padding: 18px;
-    }
-    .native-month-header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 12px;
-      margin-bottom: 16px;
-    }
-    .native-month-title {
-      font-family: 'Space Grotesk', sans-serif;
-      font-size: 0.95rem;
-      font-weight: 600;
-      color: var(--text);
-      text-transform: capitalize;
-    }
-    .native-month-btn {
-      width: 36px;
-      height: 36px;
-      border-radius: 999px;
-      border: 1px solid #E8E8E8;
-      background: #FFFFFF;
-      color: var(--text);
-      font-size: 1rem;
-      cursor: pointer;
-      transition: all 0.2s ease;
-    }
-    .native-month-btn:hover:not(:disabled) {
-      border-color: #2D5F3E;
-      color: #2D5F3E;
-      transform: translateY(-1px);
-    }
-    .native-month-btn:disabled {
-      opacity: 0.35;
-      cursor: not-allowed;
-    }
-    .native-weekdays,
-    .native-days-grid {
-      display: grid;
-      grid-template-columns: repeat(7, minmax(0, 1fr));
-      gap: 8px;
-    }
-    .native-weekdays {
+    .slot-picker-label {
+      display: block;
       margin-bottom: 8px;
-    }
-    .native-weekday {
-      text-align: center;
-      font-size: 0.7rem;
-      font-weight: 600;
-      letter-spacing: 0.08em;
-      text-transform: uppercase;
-      color: #9A9A9A;
-    }
-    .native-day {
-      min-height: 72px;
-      border: 1px solid #E8E8E8;
-      border-radius: 10px;
-      background: #FFFFFF;
-      padding: 9px 8px;
-      display: flex;
-      flex-direction: column;
-      justify-content: space-between;
-      gap: 8px;
-      transition: border-color 0.2s ease, transform 0.2s ease, background 0.2s ease;
-    }
-    .native-day.is-empty {
-      visibility: hidden;
-      pointer-events: none;
-    }
-    .native-day.is-selectable {
-      cursor: pointer;
-    }
-    .native-day.is-selectable:hover {
-      border-color: rgba(45,95,62,0.45);
-      transform: translateY(-1px);
-    }
-    .native-day.is-disabled {
-      background: #F4F1EB;
-      border-style: dashed;
-      color: #B0B0B0;
-    }
-    .native-day.is-selected {
-      border-color: #2D5F3E;
-      background: rgba(45,95,62,0.08);
-      box-shadow: inset 0 0 0 1px rgba(45,95,62,0.12);
-    }
-    .native-day-number {
-      font-family: 'Space Grotesk', sans-serif;
-      font-size: 0.95rem;
-      font-weight: 600;
-      color: inherit;
-    }
-    .native-day-meta {
-      font-size: 0.72rem;
-      color: var(--text-soft);
-      line-height: 1.35;
-    }
-    .native-day.is-disabled .native-day-meta {
-      color: #A8A8A8;
-    }
-    .native-slots-panel h5 {
-      font-family: 'Space Grotesk', sans-serif;
-      font-size: 0.9rem;
+      font-size: 0.82rem;
       font-weight: 600;
       color: var(--text);
-      margin-bottom: 6px;
+      text-align: left;
     }
-    .native-slots-subtitle {
-      color: var(--text-soft);
-      font-size: 0.8rem;
-      line-height: 1.6;
-      margin-bottom: 16px;
+    .slot-picker-date-input {
+      width: 100%;
+      max-width: 300px;
+      padding: 12px 16px;
+      border: 1px solid #E8E8E8;
+      border-radius: 6px;
+      font-size: 1rem;
+      color: var(--text);
+      background: #FFFFFF;
     }
-    .native-slot-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-      gap: 12px;
+    .slot-picker-date-input:focus {
+      outline: 2px solid rgba(45,95,62,0.15);
+      border-color: #2D5F3E;
     }
-    .native-slot-btn {
-      border: none;
-      border-radius: 10px;
-      padding: 14px 12px;
-      font-size: 0.88rem;
-      font-weight: 600;
-      transition: transform 0.15s ease, box-shadow 0.15s ease, opacity 0.15s ease;
+    .slot-picker-feedback {
+      margin-top: 12px;
+      text-align: left;
     }
-    .native-slot-btn.available {
-      background: #2D5F3E;
-      color: #FFFFFF;
-      cursor: pointer;
-    }
-    .native-slot-btn.available:hover {
-      transform: translateY(-1px);
-      box-shadow: 0 10px 18px rgba(45,95,62,0.16);
-    }
-    .native-slot-btn.unavailable {
-      background: #E0E0E0;
-      color: #999999;
-      cursor: not-allowed;
-    }
-    .native-slot-btn.selected {
-      box-shadow: 0 0 0 3px rgba(45,95,62,0.18);
-    }
-    .native-confirm-panel {
-      margin-top: 18px;
-      padding-top: 18px;
-      border-top: 1px solid #E8E8E8;
-    }
-    .native-confirm-summary {
-      color: var(--text-soft);
+    .slot-picker-message {
       font-size: 0.84rem;
       line-height: 1.6;
-      margin-bottom: 12px;
+      color: #5A5A5A;
     }
-    .native-confirm-btn {
+    .slot-picker-message.error {
+      color: #C62828;
+    }
+    .slot-picker-message.success {
+      color: #2D5F3E;
+    }
+    .slot-picker-loading,
+    .slot-picker-empty {
+      margin-top: 18px;
+      padding: 16px;
+      border: 1px dashed #E8E8E8;
+      border-radius: 8px;
+      background: #FFFFFF;
+      color: #5A5A5A;
+      font-size: 0.84rem;
+      line-height: 1.6;
+      text-align: left;
+    }
+    .slot-picker-slots {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 18px;
+    }
+    .slot-picker-slot {
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      gap: 8px;
-      padding: 14px 22px;
+      padding: 10px 18px;
+      border-radius: 6px;
+      margin: 4px 0;
+      font-size: 0.9rem;
+      border: none;
+      cursor: pointer;
+      background: #2D5F3E;
+      color: #FFFFFF;
+      transition: transform 0.15s ease, box-shadow 0.15s ease, opacity 0.15s ease;
+    }
+    .slot-picker-slot:hover:not(:disabled) {
+      transform: translateY(-1px);
+      box-shadow: 0 8px 16px rgba(45,95,62,0.16);
+    }
+    .slot-picker-slot.is-unavailable {
+      background: #E8E8E8;
+      color: #999999;
+      cursor: not-allowed;
+      box-shadow: none;
+    }
+    .slot-picker-slot.is-selected {
+      background: #1A3D28;
+      outline: 2px solid #2D5F3E;
+      outline-offset: 1px;
+    }
+    .slot-picker-summary {
+      margin-top: 18px;
+      padding: 16px;
+      border: 1px solid #E8E8E8;
+      border-radius: 8px;
+      background: #FFFFFF;
+      color: #5A5A5A;
+      font-size: 0.9rem;
+      line-height: 1.6;
+      text-align: left;
+    }
+    .slot-picker-confirm {
+      width: 100%;
       background: #2D5F3E;
       color: #FFFFFF;
       border: none;
-      border-radius: 8px;
-      font-size: 0.78rem;
-      font-weight: 700;
-      letter-spacing: 0.1em;
-      text-transform: uppercase;
+      padding: 16px 24px;
+      border-radius: 6px;
+      font-size: 0.95rem;
+      font-weight: 600;
       cursor: pointer;
-      transition: all 0.2s ease;
+      margin-top: 16px;
+      transition: background 0.2s ease, opacity 0.2s ease;
     }
-    .native-confirm-btn:hover:not(:disabled) {
+    .slot-picker-confirm:hover:not(:disabled) {
       background: #3A7A50;
-      box-shadow: 0 12px 24px rgba(45,95,62,0.18);
-      transform: translateY(-1px);
     }
-    .native-confirm-btn:disabled {
-      opacity: 0.55;
+    .slot-picker-confirm:disabled {
+      opacity: 0.65;
       cursor: wait;
     }
-    .native-inline-error {
-      color: #C62828;
-      font-size: 0.82rem;
-      line-height: 1.6;
+    .slot-picker-retry {
       margin-top: 12px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 10px 16px;
+      border-radius: 6px;
+      border: 1px solid #E8E8E8;
+      background: #FFFFFF;
+      color: #2D5F3E;
+      font-size: 0.84rem;
+      font-weight: 600;
+      cursor: pointer;
     }
-    .native-inline-info,
-    .native-loading {
-      color: var(--text-soft);
-      font-size: 0.82rem;
-      line-height: 1.6;
-    }
-    .native-inline-info {
-      padding: 16px;
-      background: #F7F4EF;
-      border: 1px dashed #E8E8E8;
-      border-radius: 10px;
-    }
-    @media (max-width: 900px) {
-      .native-booking-shell {
-        grid-template-columns: 1fr;
-      }
+    .slot-picker-retry:hover {
+      border-color: #2D5F3E;
+      background: rgba(45,95,62,0.04);
     }
     @media (max-width: 640px) {
-      .native-booking {
+      .slot-picker {
         padding: 18px;
       }
-      .native-booking-top {
-        flex-direction: column;
-      }
-      .native-calendar-panel,
-      .native-slots-panel {
-        padding: 16px;
-      }
-      .native-slot-grid {
-        grid-template-columns: 1fr 1fr;
-      }
-      .native-day {
-        min-height: 64px;
+      .slot-picker-slot {
+        width: calc(50% - 8px);
+        min-width: 0;
       }
     }
     /* ─── B-4a: Confirmed Appointments Table ─── */
@@ -2342,7 +2223,7 @@
         <p style="color:var(--text-soft);margin-bottom:20px;">Sélectionnez un créneau qui vous convient pour discuter de votre projet avec notre équipe.</p>
 
         <!-- Calendrier de reservation natif -->
-        <div id="phoneBookingCalendarPrimary" class="native-booking-mount"></div>
+        <div id="phoneBookingCalendarPrimary" class="slot-picker-mount"></div>
 
         <div class="appointment-status-card" id="appointmentStatusCard" style="display:none;margin-top:24px;">
           <h4>Votre demande de rendez-vous est enregistrée</h4>
@@ -2364,7 +2245,7 @@
         <div id="phone-rdv-planning" style="display:none;margin-top:24px;">
           <h3>Choisissez votre créneau téléphonique</h3>
           <p>Sélectionnez un rendez-vous dans le planning ci-dessous.</p>
-          <div id="phoneBookingCalendarSecondary" class="native-booking-mount"></div>
+          <div id="phoneBookingCalendarSecondary" class="slot-picker-mount"></div>
           <div class="appointment-status-card" id="appointmentStatusCardSecondary" style="display:none;margin-top:24px;">
             <h4>Votre demande de rendez-vous est enregistrée</h4>
             <div class="appointment-details" id="appointmentDetailsSecondary"></div>
@@ -2423,9 +2304,8 @@
         </p>
       </div>
 
-      <div id="scanBookingCalendarContainer" style="border-radius:8px;overflow:hidden;
-           border:1px solid var(--border-color);min-height:700px;">
-        <div id="scanBookingCalendar" class="native-booking-mount"></div>
+      <div id="scanBookingCalendarContainer" style="margin-top:8px;">
+        <div id="scanBookingCalendar" class="slot-picker-mount"></div>
       </div>
 
       <div id="scanSlotSelected" style="display:none;margin-top:24px;
@@ -5111,8 +4991,7 @@ function getIdentityAccessToken() {
 }
 
 var BOOKING_TIME_ZONE = 'Europe/Paris';
-var bookingCalendars = {};
-var bookingAvailabilityCache = {};
+var slotPickers = {};
 var bookingFormatterCache = {};
 var bookingWeekdayMap = {
   Sun: 0,
@@ -5243,54 +5122,6 @@ function formatParisTime(dateLike) {
   });
 }
 
-function normalizeMonth(year, month) {
-  var normalized = new Date(Date.UTC(year, month - 1, 1));
-  return {
-    year: normalized.getUTCFullYear(),
-    month: normalized.getUTCMonth() + 1
-  };
-}
-
-function shiftMonthDescriptor(descriptor, delta) {
-  return normalizeMonth(descriptor.year, descriptor.month + delta);
-}
-
-function getMonthDescriptor(date) {
-  var parts = getParisParts(date);
-  return { year: parts.year, month: parts.month };
-}
-
-function getMonthKey(descriptor) {
-  return descriptor.year + '-' + pad2(descriptor.month);
-}
-
-function getMonthStart(descriptor) {
-  return descriptor.year + '-' + pad2(descriptor.month) + '-01';
-}
-
-function getMonthEnd(descriptor) {
-  return shiftIsoDate(getMonthStart(shiftMonthDescriptor(descriptor, 1)), -1);
-}
-
-function getMonthTitle(descriptor) {
-  return new Date(Date.UTC(descriptor.year, descriptor.month - 1, 1)).toLocaleDateString('fr-FR', {
-    month: 'long',
-    year: 'numeric',
-    timeZone: 'UTC'
-  });
-}
-
-function getBookingWindowForType(type) {
-  var rule = bookingRules[type];
-  var firstDate = shiftIsoDate(getParisDateString(new Date()), rule.startOffsetDays);
-  var lastDate = shiftIsoDate(firstDate, rule.horizonDays - 1);
-  return {
-    firstDate: firstDate,
-    lastDate: lastDate,
-    minStart: new Date(Date.now() + rule.minLeadMinutes * 60 * 1000)
-  };
-}
-
 function getWeekdayFromDateString(dateString) {
   return getParisParts(buildParisDateTime(dateString, '12:00:00')).weekday;
 }
@@ -5336,8 +5167,8 @@ function renderPhoneAppointmentStatus(scheduledAt) {
     card.style.animation = 'fadeIn 0.6s ease-in-out';
   }
 
-  if (bookingCalendars.phonePrimary) bookingCalendars.phonePrimary.setLocked(true);
-  if (bookingCalendars.phoneSecondary) bookingCalendars.phoneSecondary.setLocked(true);
+  if (slotPickers.phonePrimary) slotPickers.phonePrimary.hide();
+  if (slotPickers.phoneSecondary) slotPickers.phoneSecondary.hide();
 }
 
 function mapBookingError(status, data) {
@@ -5356,318 +5187,237 @@ async function readJsonResponse(response) {
   }
 }
 
-function markSelectedSlotUnavailable(calendar, slot) {
-  if (!calendar || !slot || !calendar.state) return;
-  var monthData = calendar.state.monthCache[getMonthKey(calendar.state.month)];
-  if (!monthData || !monthData.byDate[slot.date]) return;
-
-  var daySlots = monthData.byDate[slot.date];
-  for (var i = 0; i < daySlots.length; i++) {
-    if (daySlots[i].time === slot.time) {
-      daySlots[i].available = false;
-    }
-  }
+function createBookingError(status, data) {
+  var error = new Error(mapBookingError(status, data));
+  error.status = status;
+  error.payload = data;
+  return error;
 }
 
-function createNativeBookingCalendar(rootId, options) {
-  var root = document.getElementById(rootId);
+function createSlotPicker(containerId, options) {
+  var root = document.getElementById(containerId);
   if (!root) return null;
 
-  var bookingWindow = getBookingWindowForType(options.type);
+  var today = getParisDateString(new Date());
+  var bounds = options.type === 'scan_3d'
+    ? { minDate: shiftIsoDate(today, 1), maxDate: shiftIsoDate(today, 60) }
+    : { minDate: today, maxDate: shiftIsoDate(today, 30) };
   var state = {
-    month: getMonthDescriptor(buildParisDateTime(bookingWindow.firstDate, '12:00:00')),
-    monthCache: {},
-    selectedDate: null,
-    selectedSlotKey: null,
+    selectedDate: '',
+    slots: [],
+    selectedSlotTime: '',
     loading: false,
-    fetchError: '',
-    actionError: '',
-    booking: false,
-    locked: false
+    loadError: '',
+    dateError: '',
+    submitError: '',
+    submitting: false,
+    locked: false,
+    hidden: false
   };
 
-  function canGoToPreviousMonth() {
-    return getMonthEnd(shiftMonthDescriptor(state.month, -1)) >= bookingWindow.firstDate;
-  }
-
-  function canGoToNextMonth() {
-    return getMonthStart(shiftMonthDescriptor(state.month, 1)) <= bookingWindow.lastDate;
-  }
-
-  function ensureSelectedDate() {
-    var monthData = state.monthCache[getMonthKey(state.month)];
-    if (!monthData) return;
-
-    if (state.selectedDate && monthData.byDate[state.selectedDate]) {
-      return;
-    }
-
-    var dates = Object.keys(monthData.byDate).sort();
-    var preferred = null;
-
-    for (var i = 0; i < dates.length; i++) {
-      var slots = monthData.byDate[dates[i]] || [];
-      var hasAvailable = slots.some(function(slot) { return slot.available; });
-      if (hasAvailable) {
-        preferred = dates[i];
-        break;
+  function getSelectedSlot() {
+    for (var i = 0; i < state.slots.length; i++) {
+      if (state.slots[i].time === state.selectedSlotTime) {
+        return state.slots[i];
       }
     }
-
-    state.selectedDate = preferred || (dates.length ? dates[0] : null);
-    state.selectedSlotKey = null;
-  }
-
-  function getSelectedSlots() {
-    var monthData = state.monthCache[getMonthKey(state.month)];
-    if (!monthData || !state.selectedDate) return [];
-    return monthData.byDate[state.selectedDate] || [];
+    return null;
   }
 
   function render() {
-    var monthData = state.monthCache[getMonthKey(state.month)];
-    var daysHtml = '';
-    var firstDayOffset = (getWeekdayFromDateString(getMonthStart(state.month)) + 6) % 7;
-    var totalDays = Number(getMonthEnd(state.month).slice(-2));
-
-    for (var emptyIndex = 0; emptyIndex < firstDayOffset; emptyIndex++) {
-      daysHtml += '<div class="native-day is-empty" aria-hidden="true"></div>';
+    if (state.hidden) {
+      root.innerHTML = '';
+      return;
     }
 
-    for (var day = 1; day <= totalDays; day++) {
-      var dateString = state.month.year + '-' + pad2(state.month.month) + '-' + pad2(day);
-      var daySlots = monthData && monthData.byDate[dateString] ? monthData.byDate[dateString] : [];
-      var hasSlots = daySlots.length > 0;
-      var hasAvailable = daySlots.some(function(slot) { return slot.available; });
-      var dayClasses = ['native-day'];
-      var metaLabel = '';
-      var disabled = !hasSlots || state.locked;
+    var selectedDateLabel = state.selectedDate
+      ? formatParisDate(buildParisDateTime(state.selectedDate, '12:00:00'))
+      : '';
+    var slotsHtml = '';
 
-      if (!hasSlots) {
-        dayClasses.push('is-disabled');
-        metaLabel = getWeekdayFromDateString(dateString) === 0 ? 'Fermé' : 'Aucun créneau';
-      } else if (hasAvailable) {
-        dayClasses.push('is-selectable');
-        metaLabel = daySlots.filter(function(slot) { return slot.available; }).length + ' dispo';
-      } else {
-        dayClasses.push('is-selectable');
-        metaLabel = 'Complet';
+    if (state.loading) {
+      slotsHtml = '<div class="slot-picker-loading">Chargement des créneaux disponibles...</div>';
+    } else if (state.loadError) {
+      slotsHtml =
+        '<div class="slot-picker-feedback">' +
+          '<div class="slot-picker-message error">' + state.loadError + '</div>' +
+          '<button type="button" class="slot-picker-retry" data-slot-retry="true">Réessayer</button>' +
+        '</div>';
+    } else if (!state.selectedDate) {
+      slotsHtml = '<div class="slot-picker-empty">Sélectionnez une date pour afficher les créneaux disponibles.</div>';
+    } else if (!state.slots.length) {
+      slotsHtml = '<div class="slot-picker-empty">Aucun créneau disponible pour cette date.</div>';
+    } else {
+      var buttons = '';
+
+      for (var i = 0; i < state.slots.length; i++) {
+        var slot = state.slots[i];
+        var classes = ['slot-picker-slot'];
+
+        if (!slot.available) classes.push('is-unavailable');
+        if (state.selectedSlotTime === slot.time) classes.push('is-selected');
+
+        buttons +=
+          '<button type="button" class="' + classes.join(' ') + '" data-slot-time="' + slot.time + '"' +
+            (slot.available && !state.locked ? '' : ' disabled') +
+            (slot.available ? '' : ' title="Ce créneau est déjà réservé"') +
+          '>' + formatNativeSlotLabel(options.type, slot.time) + '</button>';
       }
 
-      if (state.selectedDate === dateString) {
-        dayClasses.push('is-selected');
-      }
+      slotsHtml =
+        '<div class="slot-picker-feedback"><div class="slot-picker-message">' + selectedDateLabel + '</div></div>' +
+        '<div class="slot-picker-slots">' + buttons + '</div>';
+    }
 
-      daysHtml +=
-        '<button type="button" class="' + dayClasses.join(' ') + '" data-date="' + dateString + '"' + (disabled ? ' disabled' : '') + '>' +
-          '<span class="native-day-number">' + day + '</span>' +
-          '<span class="native-day-meta">' + metaLabel + '</span>' +
+    var selectedSlot = getSelectedSlot();
+    var summaryHtml = '';
+    if (selectedSlot) {
+      summaryHtml =
+        '<div class="slot-picker-summary">Créneau sélectionné : ' + selectedDateLabel +
+          (options.type === 'scan_3d'
+            ? ' - ' + formatNativeSlotLabel(options.type, selectedSlot.time)
+            : ' à ' + formatNativeSlotLabel(options.type, selectedSlot.time)) +
+        '</div>' +
+        '<button type="button" class="slot-picker-confirm" data-slot-confirm="true"' + (state.submitting ? ' disabled' : '') + '>' +
+          (state.submitting ? 'Réservation en cours...' : '✓ Confirmer ce rendez-vous') +
         '</button>';
     }
 
-    var slotsHtml = '';
-    if (state.loading) {
-      slotsHtml = '<div class="native-loading">Chargement des créneaux...</div>';
-    } else if (state.fetchError) {
-      slotsHtml = '<div class="native-inline-error">' + state.fetchError + '</div>';
-    } else if (!state.selectedDate) {
-      slotsHtml = '<div class="native-inline-info">Sélectionnez un jour pour afficher les créneaux disponibles.</div>';
-    } else {
-      var selectedSlots = getSelectedSlots();
-      var selectedDateLabel = formatParisDate(buildParisDateTime(state.selectedDate, '12:00:00'));
-
-      if (!selectedSlots.length) {
-        slotsHtml = '<div class="native-inline-info">Aucun créneau disponible sur cette journée.</div>';
-      } else {
-        var slotButtons = '';
-        for (var slotIndex = 0; slotIndex < selectedSlots.length; slotIndex++) {
-          var slot = selectedSlots[slotIndex];
-          var slotKey = slot.date + '|' + slot.time;
-          var slotClasses = ['native-slot-btn', slot.available ? 'available' : 'unavailable'];
-          if (state.selectedSlotKey === slotKey) {
-            slotClasses.push('selected');
-          }
-
-          slotButtons +=
-            '<button type="button" class="' + slotClasses.join(' ') + '" data-slot-key="' + slotKey + '"' +
-              (slot.available && !state.locked ? '' : ' disabled') +
-              (slot.available ? '' : ' title="Créneau indisponible"') +
-            '>' + formatNativeSlotLabel(options.type, slot.time) + '</button>';
-        }
-
-        slotsHtml =
-          '<h5>' + selectedDateLabel + '</h5>' +
-          '<div class="native-slots-subtitle">' + options.slotsSubtitle + '</div>' +
-          '<div class="native-slot-grid">' + slotButtons + '</div>';
-
-        if (state.selectedSlotKey && !state.locked) {
-          var parts = state.selectedSlotKey.split('|');
-          var selectedTime = parts[1];
-          var selectedSlotLabel = formatNativeSlotLabel(options.type, selectedTime);
-          var summary = options.type === 'scan_3d'
-            ? 'Créneau retenu : ' + selectedDateLabel + ' - ' + selectedSlotLabel
-            : 'Créneau retenu : ' + selectedDateLabel + ' à ' + selectedSlotLabel;
-
-          slotsHtml +=
-            '<div class="native-confirm-panel">' +
-              '<div class="native-confirm-summary">' + summary + '</div>' +
-              '<button type="button" class="native-confirm-btn" data-confirm-slot="true"' + (state.booking ? ' disabled' : '') + '>' +
-                (state.booking ? 'Confirmation...' : options.confirmLabel) +
-              '</button>' +
-              (state.actionError ? '<div class="native-inline-error">' + state.actionError + '</div>' : '') +
-            '</div>';
-        } else if (state.actionError) {
-          slotsHtml += '<div class="native-inline-error">' + state.actionError + '</div>';
-        }
-      }
-    }
-
     root.innerHTML =
-      '<div class="native-booking' + (state.locked ? ' is-locked' : '') + '">' +
-        '<div class="native-booking-top">' +
-          '<div class="native-booking-copy">' +
-            '<h4>' + options.heading + '</h4>' +
-            '<p>' + options.description + '</p>' +
-          '</div>' +
-          '<div class="native-booking-legend">' +
-            '<span class="native-legend-item"><span class="native-legend-dot available"></span>Disponible</span>' +
-            '<span class="native-legend-item"><span class="native-legend-dot unavailable"></span>Indisponible</span>' +
-          '</div>' +
+      '<div class="slot-picker' + (state.locked ? ' is-locked' : '') + '">' +
+        '<div class="slot-picker-header">' +
+          '<h4>' + options.heading + '</h4>' +
+          '<p>' + options.description + '</p>' +
         '</div>' +
-        '<div class="native-booking-shell">' +
-          '<div class="native-calendar-panel">' +
-            '<div class="native-month-header">' +
-              '<button type="button" class="native-month-btn" data-nav="prev"' + (canGoToPreviousMonth() && !state.locked ? '' : ' disabled') + '>←</button>' +
-              '<div class="native-month-title">' + getMonthTitle(state.month) + '</div>' +
-              '<button type="button" class="native-month-btn" data-nav="next"' + (canGoToNextMonth() && !state.locked ? '' : ' disabled') + '>→</button>' +
-            '</div>' +
-            '<div class="native-weekdays">' + bookingWeekdayLabels.map(function(label) {
-              return '<div class="native-weekday">' + label + '</div>';
-            }).join('') + '</div>' +
-            '<div class="native-days-grid">' + daysHtml + '</div>' +
-          '</div>' +
-          '<div class="native-slots-panel">' + slotsHtml + '</div>' +
-        '</div>' +
+        '<label class="slot-picker-label" for="' + containerId + '-date">Choisissez une date</label>' +
+        '<input type="date" id="' + containerId + '-date" class="slot-picker-date-input"' +
+          ' min="' + bounds.minDate + '"' +
+          ' max="' + bounds.maxDate + '"' +
+          ' value="' + state.selectedDate + '"' +
+          (state.locked ? ' disabled' : '') +
+        ' />' +
+        (state.dateError
+          ? '<div class="slot-picker-feedback"><div class="slot-picker-message error">' + state.dateError + '</div></div>'
+          : '') +
+        slotsHtml +
+        summaryHtml +
+        (state.submitError
+          ? '<div class="slot-picker-feedback"><div class="slot-picker-message error">' + state.submitError + '</div></div>'
+          : '') +
       '</div>';
 
-    var prevButton = root.querySelector('[data-nav="prev"]');
-    var nextButton = root.querySelector('[data-nav="next"]');
+    var dateInput = root.querySelector('.slot-picker-date-input');
+    if (dateInput) {
+      dateInput.addEventListener('change', function() {
+        state.selectedSlotTime = '';
+        state.submitError = '';
+        state.loadError = '';
+        state.dateError = '';
 
-    if (prevButton) {
-      prevButton.addEventListener('click', function() {
-        state.month = shiftMonthDescriptor(state.month, -1);
-        state.selectedDate = null;
-        state.selectedSlotKey = null;
-        state.actionError = '';
-        loadMonth();
+        if (!this.value) {
+          state.selectedDate = '';
+          state.slots = [];
+          render();
+          return;
+        }
+
+        if (getWeekdayFromDateString(this.value) === 0) {
+          this.value = '';
+          state.selectedDate = '';
+          state.slots = [];
+          state.dateError = 'Les dimanches ne sont pas disponibles';
+          render();
+          return;
+        }
+
+        state.selectedDate = this.value;
+        loadSlots();
       });
     }
 
-    if (nextButton) {
-      nextButton.addEventListener('click', function() {
-        state.month = shiftMonthDescriptor(state.month, 1);
-        state.selectedDate = null;
-        state.selectedSlotKey = null;
-        state.actionError = '';
-        loadMonth();
+    var retryButton = root.querySelector('[data-slot-retry="true"]');
+    if (retryButton) {
+      retryButton.addEventListener('click', function() {
+        loadSlots();
       });
     }
 
-    var dayButtons = root.querySelectorAll('[data-date]');
-    for (var dayButtonIndex = 0; dayButtonIndex < dayButtons.length; dayButtonIndex++) {
-      dayButtons[dayButtonIndex].addEventListener('click', function() {
-        state.selectedDate = this.getAttribute('data-date');
-        state.selectedSlotKey = null;
-        state.actionError = '';
-        render();
-      });
-    }
-
-    var slotButtons = root.querySelectorAll('[data-slot-key]');
+    var slotButtons = root.querySelectorAll('[data-slot-time]');
     for (var slotButtonIndex = 0; slotButtonIndex < slotButtons.length; slotButtonIndex++) {
       slotButtons[slotButtonIndex].addEventListener('click', function() {
-        state.selectedSlotKey = this.getAttribute('data-slot-key');
-        state.actionError = '';
+        state.selectedSlotTime = this.getAttribute('data-slot-time');
+        state.submitError = '';
         render();
       });
     }
 
-    var confirmButton = root.querySelector('[data-confirm-slot="true"]');
+    var confirmButton = root.querySelector('[data-slot-confirm="true"]');
     if (confirmButton) {
       confirmButton.addEventListener('click', async function() {
-        if (!state.selectedSlotKey) return;
+        if (!state.selectedDate || !state.selectedSlotTime) return;
 
-        var selectedParts = state.selectedSlotKey.split('|');
-        var slot = { date: selectedParts[0], time: selectedParts[1] };
-
-        state.booking = true;
-        state.actionError = '';
+        state.submitting = true;
+        state.submitError = '';
         render();
 
         try {
-          await options.onConfirm(slot);
-          markSelectedSlotUnavailable(api, slot);
+          var appointment = await (options.onConfirm || (async function() { return null; }))({
+            date: state.selectedDate,
+            time: state.selectedSlotTime
+          });
+
+          state.submitting = false;
+          state.hidden = true;
+          render();
+
+          if (typeof options.onBooked === 'function') {
+            await options.onBooked(appointment, api);
+          }
         } catch (error) {
-          state.actionError = error && error.message ? error.message : 'Une erreur est survenue.';
-        } finally {
-          state.booking = false;
+          state.submitting = false;
+
+          if (error && error.status === 409) {
+            state.selectedSlotTime = '';
+            state.submitError = 'Ce créneau vient d’être réservé. Veuillez en choisir un autre.';
+            await loadSlots(true);
+            return;
+          }
+
+          state.submitError = error && error.message ? error.message : 'Une erreur est survenue.';
           render();
         }
       });
     }
   }
 
-  async function loadMonth() {
-    var currentMonthKey = getMonthKey(state.month);
-    if (state.monthCache[currentMonthKey]) {
-      ensureSelectedDate();
-      render();
-      return;
-    }
-
-    var sharedCacheKey = options.type + '|' + currentMonthKey;
-    if (bookingAvailabilityCache[sharedCacheKey]) {
-      state.monthCache[currentMonthKey] = bookingAvailabilityCache[sharedCacheKey];
-      ensureSelectedDate();
+  async function loadSlots(preserveSubmitError) {
+    if (!state.selectedDate) {
       render();
       return;
     }
 
     state.loading = true;
-    state.fetchError = '';
+    state.loadError = '';
+    if (!preserveSubmitError) state.submitError = '';
     render();
 
     try {
       var response = await fetch(
         '/.netlify/functions/get-available-slots?type=' + encodeURIComponent(options.type) +
-        '&from=' + encodeURIComponent(getMonthStart(state.month)) +
-        '&to=' + encodeURIComponent(getMonthEnd(state.month))
+        '&from=' + encodeURIComponent(state.selectedDate) +
+        '&to=' + encodeURIComponent(state.selectedDate)
       );
       var data = await readJsonResponse(response);
 
       if (!response.ok) {
-        throw new Error(mapBookingError(response.status, data));
+        throw new Error('Impossible de charger les créneaux. Veuillez réessayer.');
       }
 
-      var slots = Array.isArray(data.slots) ? data.slots.slice() : [];
-      slots.sort(function(a, b) {
-        if (a.date === b.date) return a.time.localeCompare(b.time);
-        return a.date.localeCompare(b.date);
-      });
-
-      var byDate = {};
-      for (var i = 0; i < slots.length; i++) {
-        if (!byDate[slots[i].date]) {
-          byDate[slots[i].date] = [];
-        }
-        byDate[slots[i].date].push(slots[i]);
-      }
-
-      state.monthCache[currentMonthKey] = { byDate: byDate };
-      bookingAvailabilityCache[sharedCacheKey] = state.monthCache[currentMonthKey];
-      ensureSelectedDate();
+      state.slots = Array.isArray(data.slots) ? data.slots : [];
     } catch (error) {
-      state.fetchError = error && error.message ? error.message : 'Impossible de charger les créneaux.';
+      state.slots = [];
+      state.selectedSlotTime = '';
+      state.loadError = 'Impossible de charger les créneaux. Veuillez réessayer.';
     } finally {
       state.loading = false;
       render();
@@ -5675,55 +5425,119 @@ function createNativeBookingCalendar(rootId, options) {
   }
 
   var api = {
-    state: state,
+    hide: function() {
+      state.hidden = true;
+      render();
+    },
+    show: function() {
+      state.hidden = false;
+      render();
+    },
     setLocked: function(locked) {
       state.locked = !!locked;
       render();
     },
-    refresh: function() {
-      delete bookingAvailabilityCache[options.type + '|' + getMonthKey(state.month)];
-      delete state.monthCache[getMonthKey(state.month)];
-      return loadMonth();
+    reset: function() {
+      state.selectedDate = '';
+      state.slots = [];
+      state.selectedSlotTime = '';
+      state.loading = false;
+      state.loadError = '';
+      state.dateError = '';
+      state.submitError = '';
+      state.submitting = false;
+      state.locked = false;
+      state.hidden = false;
+      render();
+    },
+    reload: function() {
+      return loadSlots(false);
     }
   };
 
   render();
-  loadMonth();
-
   return api;
 }
 
-function initNativeBookingCalendars() {
-  if (!bookingCalendars.phonePrimary) {
-    bookingCalendars.phonePrimary = createNativeBookingCalendar('phoneBookingCalendarPrimary', {
+async function handlePhoneAppointmentBooked(appointment) {
+  if (!appointment || !appointment.scheduledAt) return;
+
+  currentPipelineStatus = 'call_requested';
+  renderPhoneAppointmentStatus(appointment.scheduledAt);
+  try {
+    await checkAppointmentStatus();
+    if (currentPhase >= 3) await loadAppointments();
+  } catch (error) {
+    console.warn('handlePhoneAppointmentBooked follow-up error:', error);
+  }
+
+  var visibleCard = getVisibleElement(['appointmentStatusCardSecondary', 'appointmentStatusCard']);
+  if (visibleCard) {
+    visibleCard.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  }
+}
+
+async function handleScanAppointmentBooked(appointment) {
+  if (!appointment || !appointment.scheduledAt) return;
+
+  window.__pendingScanAppointmentId = appointment.appointmentId || null;
+  window.__pendingScanSlot = {
+    startTime: appointment.scheduledAt,
+    eventTitle: appointment.eventTitle || formatNativeSlotLabel('scan_3d', appointment.time || '')
+  };
+  currentPipelineStatus = 'scan_scheduled';
+  applyScanSlotDisplay({
+    startTime: appointment.scheduledAt,
+    eventTitle: window.__pendingScanSlot.eventTitle
+  });
+  revealScanPaymentSection();
+  try {
+    await checkAppointmentStatus();
+    if (currentPhase >= 3) await loadAppointments();
+  } catch (error) {
+    console.warn('handleScanAppointmentBooked follow-up error:', error);
+  }
+
+  var paySection = document.getElementById('scanPaymentSection');
+  if (paySection) {
+    paySection.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  }
+}
+
+function initSlotPickers() {
+  if (!slotPickers.phonePrimary) {
+    slotPickers.phonePrimary = createSlotPicker('phoneBookingCalendarPrimary', {
       type: 'phone_call',
       heading: 'Choisissez une date puis un créneau',
       description: 'Disponibilités mises à jour en temps réel pour les entretiens téléphoniques.',
       slotsSubtitle: 'Créneaux de 30 minutes, du lundi au samedi entre 8h00 et 20h00.',
       confirmLabel: 'Confirmer ce créneau',
-      onConfirm: submitPhoneAppointment
+      onConfirm: submitPhoneAppointment,
+      onBooked: handlePhoneAppointmentBooked
     });
   }
 
-  if (!bookingCalendars.phoneSecondary) {
-    bookingCalendars.phoneSecondary = createNativeBookingCalendar('phoneBookingCalendarSecondary', {
+  if (!slotPickers.phoneSecondary) {
+    slotPickers.phoneSecondary = createSlotPicker('phoneBookingCalendarSecondary', {
       type: 'phone_call',
       heading: 'Choisissez une date puis un créneau',
       description: 'Sélectionnez le créneau le plus confortable pour votre échange avec notre équipe.',
       slotsSubtitle: 'Créneaux de 30 minutes, du lundi au samedi entre 8h00 et 20h00.',
       confirmLabel: 'Confirmer ce créneau',
-      onConfirm: submitPhoneAppointment
+      onConfirm: submitPhoneAppointment,
+      onBooked: handlePhoneAppointmentBooked
     });
   }
 
-  if (!bookingCalendars.scan) {
-    bookingCalendars.scan = createNativeBookingCalendar('scanBookingCalendar', {
+  if (!slotPickers.scan) {
+    slotPickers.scan = createSlotPicker('scanBookingCalendar', {
       type: 'scan_3d',
       heading: 'Sélectionnez votre demi-journée',
       description: 'Deux passages sont proposés par jour pour planifier votre scan 3D.',
       slotsSubtitle: 'Deux créneaux par jour : matin (8h-12h) ou après-midi (14h-18h).',
       confirmLabel: 'Confirmer ce créneau',
-      onConfirm: bookScanAppointment
+      onConfirm: bookScanAppointment,
+      onBooked: handleScanAppointmentBooked
     });
   }
 }
@@ -5745,12 +5559,13 @@ function resetScanBookingDisplay() {
   if (info) info.style.display = 'none';
   if (text) text.textContent = 'Durée estimée à confirmer lors de la prise de RDV';
   if (container) {
+    container.style.display = '';
     container.style.opacity = '';
     container.style.pointerEvents = '';
   }
   if (slotSelected) slotSelected.style.display = 'none';
   if (slotDetails) slotDetails.innerHTML = '';
-  if (bookingCalendars.scan) bookingCalendars.scan.setLocked(false);
+  if (slotPickers.scan) slotPickers.scan.reset();
 }
 
 async function loadScanDurationHint() {
@@ -5833,10 +5648,11 @@ function applyScanSlotDisplay(payload) {
 
   var container = document.getElementById('scanBookingCalendarContainer');
   if (container) {
-    container.style.opacity = '0.4';
+    container.style.display = 'none';
+    container.style.opacity = '';
     container.style.pointerEvents = 'none';
   }
-  if (bookingCalendars.scan) bookingCalendars.scan.setLocked(true);
+  if (slotPickers.scan) slotPickers.scan.hide();
 
   var slotSelected = document.getElementById('scanSlotSelected');
   var slotDetails = document.getElementById('scanSlotDetails');
@@ -5870,19 +5686,16 @@ async function submitPhoneAppointment(slot) {
 
   var data = await readJsonResponse(response);
   if (!response.ok) {
-    throw new Error(mapBookingError(response.status, data));
+    throw createBookingError(response.status, data);
   }
 
-  currentPipelineStatus = 'call_requested';
-  renderPhoneAppointmentStatus(scheduledAt);
-  if (currentPhase >= 3) loadAppointments();
-
-  var visibleCard = getVisibleElement(['appointmentStatusCardSecondary', 'appointmentStatusCard']);
-  if (visibleCard) {
-    visibleCard.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-  }
-
-  return data;
+  return {
+    appointmentId: data.appointmentId || null,
+    scheduledAt: scheduledAt,
+    date: slot.date,
+    time: slot.time,
+    type: 'phone_call'
+  };
 }
 
 async function bookScanAppointment(slot) {
@@ -5910,30 +5723,19 @@ async function bookScanAppointment(slot) {
 
   var data = await readJsonResponse(response);
   if (!response.ok) {
-    throw new Error(mapBookingError(response.status, data));
+    throw createBookingError(response.status, data);
   }
 
   console.log('✅ RDV scan enregistré:', data.appointmentId);
-  window.__pendingScanAppointmentId = data.appointmentId;
-  window.__pendingScanSlot = {
-    startTime: scheduledAt,
+  return {
+    appointmentId: data.appointmentId || (data.appointment && data.appointment.id) || null,
+    appointment: data.appointment || null,
+    scheduledAt: scheduledAt,
+    date: slot.date,
+    time: slot.time,
+    type: 'scan_3d',
     eventTitle: eventTitle
   };
-  currentPipelineStatus = 'scan_scheduled';
-  applyScanSlotDisplay({
-    startTime: scheduledAt,
-    eventTitle: eventTitle
-  });
-  revealScanPaymentSection();
-  if (currentPhase >= 3) loadAppointments();
-
-  var paySection = document.getElementById('scanPaymentSection');
-  if (paySection) {
-    paySection.style.display = 'block';
-    paySection.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-  }
-
-  return data.appointmentId;
 }
 
 async function initiateScanPayment() {
@@ -6054,7 +5856,7 @@ async function checkAppointmentStatus() {
 }
 
 document.addEventListener('DOMContentLoaded', function() {
-  initNativeBookingCalendars();
+  initSlotPickers();
   setTimeout(checkAppointmentStatus, 500);
 });
 
@@ -6103,3 +5905,4 @@ document.head.appendChild(style);
 
 </body>
 </html>
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  
