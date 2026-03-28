@@ -1,4 +1,4 @@
-const { createClient } = require('@supabase/supabase-js');
+const { resolveIdentityClient } = require('./_identity-client');
 
 const headers = {
   'Access-Control-Allow-Origin': '*',
@@ -6,11 +6,6 @@ const headers = {
   'Access-Control-Allow-Headers': 'Content-Type, Authorization',
   'Content-Type': 'application/json',
 };
-
-const supabase = createClient(
-  process.env.SUPABASE_URL,
-  process.env.SUPABASE_SERVICE_KEY
-);
 
 exports.handler = async (event, context) => {
   if (event.httpMethod === 'OPTIONS') {
@@ -25,74 +20,28 @@ exports.handler = async (event, context) => {
     };
   }
 
-  const identityUser = context && context.clientContext ? context.clientContext.user : null;
-  if (!identityUser) {
-    return {
-      statusCode: 401,
-      headers,
-      body: JSON.stringify({ error: 'Unauthorized' }),
-    };
-  }
-
-  const email = identityUser.email;
-  if (!email) {
-    return {
-      statusCode: 400,
-      headers,
-      body: JSON.stringify({ error: 'Email manquant' }),
-    };
-  }
-
   try {
-    const { data: existing, error: selectError } = await supabase
-      .from('clients')
-      .select('*')
-      .eq('email', email)
-      .maybeSingle();
-
-    if (selectError) throw selectError;
-
-    if (existing) {
-      return {
-        statusCode: 200,
-        headers,
-        body: JSON.stringify({
-          ...existing,
-          clientId: existing.id,
-          nom: existing.nom || existing.prenom || email,
-          status: existing.status || 'account_created',
-        }),
-      };
-    }
-
-    const { data: created, error: insertError } = await supabase
-      .from('clients')
-      .insert([
-        {
-          email,
-          status: 'account_created',
-          nom: email,
-        },
-      ])
-      .select('*')
-      .single();
-
-    if (insertError) throw insertError;
+    const resolution = await resolveIdentityClient({
+      context,
+      createIfMissing: true
+    });
+    const client = resolution.client;
 
     return {
       statusCode: 200,
       headers,
       body: JSON.stringify({
-        ...created,
-        clientId: created.id,
-        nom: created.nom || email,
-        status: created.status || 'account_created',
+        ...client,
+        clientId: client.id,
+        nom: client.nom || client.prenom || resolution.normalizedEmail,
+        status: client.status || 'account_created',
       }),
     };
   } catch (error) {
+    const statusCode = error && error.statusCode ? error.statusCode : 500;
     console.error('resolve-client error:', error);
     return {
-      statusCode: 500,
+      statusCode,
       headers,
       body: JSON.stringify({ error: error && error.message ? error.message : 'Erreur serveur' }),
     };

@@ -1,5 +1,6 @@
 const { createClient } = require('@supabase/supabase-js');
 const { APPOINTMENT_RULES, findConflict, isSlotBookable } = require('./_appointment-utils');
+const { resolveIdentityClient } = require('./_identity-client');
 
 const supabase = createClient(
   process.env.SUPABASE_URL,
@@ -12,10 +13,6 @@ const headers = {
   'Access-Control-Allow-Headers': 'Content-Type, Authorization',
   'Content-Type': 'application/json',
 };
-
-function normalizeEmail(email) {
-  return typeof email === 'string' ? email.trim().toLowerCase() : '';
-}
 
 exports.handler = async (event, context) => {
   if (event.httpMethod === 'OPTIONS') {
@@ -51,17 +48,17 @@ exports.handler = async (event, context) => {
   }
 
   try {
-    const clientId = body.clientId;
+    const requestedClientId = body.clientId;
     const scheduledAt = body.scheduledAt;
     const durationMinutes = APPOINTMENT_RULES.scan_3d.durationMinutes;
     const location = body.location;
     const eventTitle = body.eventTitle;
 
-    if (!clientId || !scheduledAt) {
+    if (!scheduledAt) {
       return {
         statusCode: 400,
         headers,
-        body: JSON.stringify({ error: 'clientId et scheduledAt requis' }),
+        body: JSON.stringify({ error: 'scheduledAt requis' }),
       };
     }
 
@@ -82,31 +79,13 @@ exports.handler = async (event, context) => {
       };
     }
 
-    const { data: client, error: clientError } = await supabase
-      .from('clients')
-      .select('id, email, status, adresse')
-      .eq('id', clientId)
-      .single();
-
-    if (clientError || !client) {
-      return {
-        statusCode: 404,
-        headers,
-        body: JSON.stringify({ error: 'Client introuvable' }),
-      };
-    }
-
-    if (
-      normalizeEmail(identityUser.email) &&
-      normalizeEmail(client.email) &&
-      normalizeEmail(identityUser.email) !== normalizeEmail(client.email)
-    ) {
-      return {
-        statusCode: 403,
-        headers,
-        body: JSON.stringify({ error: 'Forbidden' }),
-      };
-    }
+    const resolution = await resolveIdentityClient({
+      context,
+      requestedClientId,
+      createIfMissing: false
+    });
+    const client = resolution.client;
+    const clientId = client.id;
 
     if (client.status !== 'call_done') {
       return {
@@ -168,11 +147,12 @@ exports.handler = async (event, context) => {
       body: JSON.stringify({ success: true, appointmentId: appt.id, appointment: appt }),
     };
   } catch (err) {
+    const statusCode = err && err.statusCode ? err.statusCode : 500;
     console.error('book-scan error:', err);
     return {
-      statusCode: 500,
+      statusCode,
       headers,
-      body: JSON.stringify({ error: err.message }),
+      body: JSON.stringify({ error: err && err.message ? err.message : 'Internal server error' }),
     };
   }
 };

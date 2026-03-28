@@ -1,9 +1,10 @@
 const { createClient } = require('@supabase/supabase-js');
 const { Resend } = require('resend');
+const { resolveIdentityClient } = require('./_identity-client');
 
 const SITE_URL = 'https://scantorenov.com';
 
-// Service key pour bypasser RLS et lire les données client
+// Service key pour bypasser RLS et lire les donnees client
 const supabase = createClient(
   process.env.SUPABASE_URL,
   process.env.SUPABASE_SERVICE_KEY
@@ -11,12 +12,15 @@ const supabase = createClient(
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 
-/* ── Helpers ─────────────────────────────────────────── */
+/* Helpers */
 
 function formatDateFR(isoString) {
   const d = new Date(isoString);
   return d.toLocaleDateString('fr-FR', {
-    weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'
+    weekday: 'long',
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric'
   });
 }
 
@@ -26,11 +30,13 @@ function formatTimeFR(isoString) {
 }
 
 function typeLabelFR(type) {
-  const map = { phone_call: 'Appel téléphonique', video: 'Visioconférence', on_site: 'Visite sur site' };
+  const map = {
+    phone_call: 'Appel telephonique',
+    video: 'Visioconference',
+    on_site: 'Visite sur site'
+  };
   return map[type] || type;
 }
-
-/* ── Email client : confirmation ─────────────────────── */
 
 function buildConfirmEmailHtml({ prenom, nom, scheduledAt, durationMinutes, type }) {
   const dateStr = formatDateFR(scheduledAt);
@@ -45,7 +51,7 @@ function buildConfirmEmailHtml({ prenom, nom, scheduledAt, durationMinutes, type
       </div>
 
       <h2 style="color:#2D5F3E;font-family:'Cormorant Garamond',Georgia,serif;font-weight:300;font-size:1.5rem;text-align:center;margin:0 0 28px 0;">
-        Rendez-vous confirmé
+        Rendez-vous confirme
       </h2>
 
       <p style="font-size:0.95rem;color:#5A5A5A;margin:0 0 18px 0;padding:0 24px;">
@@ -53,7 +59,7 @@ function buildConfirmEmailHtml({ prenom, nom, scheduledAt, durationMinutes, type
       </p>
 
       <p style="font-size:0.95rem;color:#5A5A5A;margin:0 0 18px 0;padding:0 24px;">
-        Votre rendez-vous avec l'équipe <strong>ScantoRenov</strong> est confirmé. Voici le récapitulatif :
+        Votre rendez-vous avec l'equipe <strong>ScantoRenov</strong> est confirme. Voici le recapitulatif :
       </p>
 
       <div style="margin:24px;padding:24px;border:1px solid #E8E8E8;background:#FBFAF7;border-radius:8px;">
@@ -71,18 +77,18 @@ function buildConfirmEmailHtml({ prenom, nom, scheduledAt, durationMinutes, type
             <td style="padding:8px 0;color:#5A5A5A;">${timeStr}</td>
           </tr>
           <tr>
-            <td style="padding:8px 0;font-weight:600;color:#2D5F3E;">Durée</td>
+            <td style="padding:8px 0;font-weight:600;color:#2D5F3E;">Duree</td>
             <td style="padding:8px 0;color:#5A5A5A;">${durationMinutes} minutes</td>
           </tr>
         </table>
       </div>
 
       <p style="font-size:0.9rem;color:#5A5A5A;margin:0 0 18px 0;padding:0 24px;">
-        Vous pouvez consulter et gérer vos rendez-vous depuis votre <a href="${SITE_URL}/espace-client" style="color:#2D5F3E;font-weight:600;">espace client</a>.
+        Vous pouvez consulter et gerer vos rendez-vous depuis votre <a href="${SITE_URL}/espace-client" style="color:#2D5F3E;font-weight:600;">espace client</a>.
       </p>
 
       <p style="font-size:0.9rem;color:#5A5A5A;margin:0 0 32px 0;padding:0 24px;">
-        Pour toute question, contactez-nous à <a href="mailto:avant-projet@scantorenov.com" style="color:#2D5F3E;">avant-projet@scantorenov.com</a>.
+        Pour toute question, contactez-nous a <a href="mailto:avant-projet@scantorenov.com" style="color:#2D5F3E;">avant-projet@scantorenov.com</a>.
       </p>
 
       <div style="text-align:center;padding:24px 0;border-top:1px solid #E8E8E8;margin-top:32px;">
@@ -93,8 +99,6 @@ function buildConfirmEmailHtml({ prenom, nom, scheduledAt, durationMinutes, type
     </div>
   `;
 }
-
-/* ── Email client : annulation ───────────────────────── */
 
 function buildCancelEmailHtml({ prenom, nom, scheduledAt, type }) {
   const dateStr = formatDateFR(scheduledAt);
@@ -108,7 +112,7 @@ function buildCancelEmailHtml({ prenom, nom, scheduledAt, type }) {
       </div>
 
       <h2 style="color:#2D5F3E;font-family:'Cormorant Garamond',Georgia,serif;font-weight:300;font-size:1.5rem;text-align:center;margin:0 0 28px 0;">
-        Rendez-vous annulé
+        Rendez-vous annule
       </h2>
 
       <p style="font-size:0.95rem;color:#5A5A5A;margin:0 0 18px 0;padding:0 24px;">
@@ -116,7 +120,7 @@ function buildCancelEmailHtml({ prenom, nom, scheduledAt, type }) {
       </p>
 
       <p style="font-size:0.95rem;color:#5A5A5A;margin:0 0 18px 0;padding:0 24px;">
-        Votre rendez-vous du <strong>${dateStr} à ${timeStr}</strong> (${typeLabel}) a bien été annulé.
+        Votre rendez-vous du <strong>${dateStr} a ${timeStr}</strong> (${typeLabel}) a bien ete annule.
       </p>
 
       <p style="font-size:0.9rem;color:#5A5A5A;margin:0 0 18px 0;padding:0 24px;">
@@ -137,14 +141,12 @@ function buildCancelEmailHtml({ prenom, nom, scheduledAt, type }) {
   `;
 }
 
-/* ── Email admin : notification ──────────────────────── */
-
 function buildAdminEmailHtml({ action, prenom, nom, email, scheduledAt, durationMinutes, type }) {
   const dateStr = formatDateFR(scheduledAt);
   const timeStr = formatTimeFR(scheduledAt);
   const typeLabel = typeLabelFR(type);
   const fullName = [prenom, nom].filter(Boolean).join(' ');
-  const actionLabel = action === 'confirm' ? '✅ CONFIRMÉ' : '❌ ANNULÉ';
+  const actionLabel = action === 'confirm' ? 'CONFIRME' : 'ANNULE';
   const color = action === 'confirm' ? '#2D5F3E' : '#C62828';
 
   return `
@@ -153,15 +155,13 @@ function buildAdminEmailHtml({ action, prenom, nom, email, scheduledAt, duration
       <tr><td style="padding:6px 12px;font-weight:bold;">Client</td><td style="padding:6px 12px;">${fullName}</td></tr>
       <tr><td style="padding:6px 12px;font-weight:bold;">Email</td><td style="padding:6px 12px;"><a href="mailto:${email}">${email}</a></td></tr>
       <tr><td style="padding:6px 12px;font-weight:bold;">Type</td><td style="padding:6px 12px;">${typeLabel}</td></tr>
-      <tr><td style="padding:6px 12px;font-weight:bold;">Date</td><td style="padding:6px 12px;">${dateStr} à ${timeStr}</td></tr>
-      <tr><td style="padding:6px 12px;font-weight:bold;">Durée</td><td style="padding:6px 12px;">${durationMinutes} min</td></tr>
+      <tr><td style="padding:6px 12px;font-weight:bold;">Date</td><td style="padding:6px 12px;">${dateStr} a ${timeStr}</td></tr>
+      <tr><td style="padding:6px 12px;font-weight:bold;">Duree</td><td style="padding:6px 12px;">${durationMinutes} min</td></tr>
     </table>
   `;
 }
 
-/* ── Handler principal ───────────────────────────────── */
-
-exports.handler = async (event) => {
+exports.handler = async (event, context) => {
   const headers = {
     'Access-Control-Allow-Origin': '*',
     'Access-Control-Allow-Methods': 'POST, OPTIONS',
@@ -178,34 +178,11 @@ exports.handler = async (event) => {
   }
 
   try {
-    // ── Auth : admin-secret OU Supabase JWT valide ──
     const adminSecret = event.headers['x-admin-secret'];
-    const authHeader = event.headers['authorization'] || '';
-    const supabaseToken = authHeader.replace(/^Bearer\s+/i, '');
+    const isAdminCall = !!(adminSecret && adminSecret === process.env.ADMIN_SECRET);
 
-    let isAuthenticated = false;
-
-    // Voie 1 : admin-secret (appels internes serveur-à-serveur)
-    if (adminSecret && adminSecret === process.env.ADMIN_SECRET) {
-      isAuthenticated = true;
-    }
-
-    // Voie 2 : Token Netlify Identity (appel depuis l'espace client)
-    if (!isAuthenticated && supabaseToken) {
-      try {
-        const identityResp = await fetch(`${process.env.URL || 'https://scantorenov.com'}/.netlify/identity/user`, {
-          headers: { 'Authorization': `Bearer ${supabaseToken}` }
-        });
-        if (identityResp.ok) {
-          isAuthenticated = true;
-        }
-      } catch (identityErr) {
-        console.warn('Netlify Identity validation failed:', identityErr.message);
-      }
-    }
-
-    if (!isAuthenticated) {
-      console.warn('confirm-appointment: accès refusé — ni admin-secret ni JWT valide');
+    if (!isAdminCall && !(context && context.clientContext && context.clientContext.user)) {
+      console.warn('confirm-appointment: access denied - no admin secret and no identity user');
       return {
         statusCode: 401,
         headers,
@@ -213,14 +190,14 @@ exports.handler = async (event) => {
       };
     }
 
-    const body = JSON.parse(event.body);
-    const { appointmentId, action, clientId } = body;
+    const body = JSON.parse(event.body || '{}');
+    const { appointmentId, action, clientId: requestedClientId } = body;
 
-    if (!appointmentId || !action || !clientId) {
+    if (!appointmentId || !action) {
       return {
         statusCode: 400,
         headers,
-        body: JSON.stringify({ error: 'Missing required fields: appointmentId, action, clientId' }),
+        body: JSON.stringify({ error: 'Missing required fields: appointmentId, action' }),
       };
     }
 
@@ -233,13 +210,30 @@ exports.handler = async (event) => {
     }
 
     const newStatus = action === 'confirm' ? 'confirmed' : 'cancelled';
+    let resolvedClient = null;
+    let resolvedClientId = requestedClientId || null;
 
-    // 1. Mettre à jour le statut du rendez-vous
+    if (!isAdminCall) {
+      const resolution = await resolveIdentityClient({
+        context,
+        requestedClientId,
+        createIfMissing: false
+      });
+      resolvedClient = resolution.client;
+      resolvedClientId = resolvedClient.id;
+    } else if (!resolvedClientId) {
+      return {
+        statusCode: 400,
+        headers,
+        body: JSON.stringify({ error: 'clientId requis pour un appel admin' }),
+      };
+    }
+
     const { data: apptData, error: updateError } = await supabase
       .from('appointments')
       .update({ status: newStatus, updated_at: new Date().toISOString() })
       .eq('id', appointmentId)
-      .eq('client_id', clientId)
+      .eq('client_id', resolvedClientId)
       .select();
 
     if (updateError) {
@@ -260,18 +254,23 @@ exports.handler = async (event) => {
     }
 
     const appt = apptData[0];
-    console.log(`Appointment ${appointmentId} → ${newStatus}`);
+    console.log(`Appointment ${appointmentId} -> ${newStatus}`);
 
-    // 2. Récupérer les données du client (service key bypasse RLS)
-    const { data: clientData, error: clientError } = await supabase
-      .from('clients')
-      .select('email, prenom, nom')
-      .eq('id', clientId)
-      .single();
+    let clientData = resolvedClient;
+    let clientError = null;
+
+    if (!clientData) {
+      const clientResult = await supabase
+        .from('clients')
+        .select('id, email, prenom, nom')
+        .eq('id', resolvedClientId)
+        .single();
+      clientData = clientResult.data;
+      clientError = clientResult.error;
+    }
 
     if (clientError || !clientData) {
-      console.warn('Client data not found, skipping email:', clientError?.message);
-      // On retourne quand même le succès de la mise à jour
+      console.warn('Client data not found, skipping email:', clientError && clientError.message ? clientError.message : '');
       return {
         statusCode: 200,
         headers,
@@ -292,7 +291,6 @@ exports.handler = async (event) => {
       type: appt.type,
     };
 
-    // 3. B-4d : Mettre à jour le pipeline client si confirmation
     if (action === 'confirm') {
       try {
         const { error: pipelineError } = await supabase
@@ -302,40 +300,36 @@ exports.handler = async (event) => {
             call_scheduled_at: appt.scheduled_at,
             updated_at: new Date().toISOString(),
           })
-          .eq('id', clientId)
-          // Ne rétrograder jamais : n'écraser que si le statut actuel est en dessous de call_requested
+          .eq('id', resolvedClientId)
           .in('status', ['new_lead', 'account_created', 'onboarding_completed', 'call_requested']);
 
         if (pipelineError) {
           console.warn('B-4d pipeline update failed (non-blocking):', pipelineError.message);
         } else {
-          console.log(`B-4d: client ${clientId} pipeline → call_requested, call_scheduled_at=${appt.scheduled_at}`);
+          console.log(`B-4d: client ${resolvedClientId} pipeline -> call_requested, call_scheduled_at=${appt.scheduled_at}`);
         }
       } catch (pipelineErr) {
         console.warn('B-4d pipeline exception (non-blocking):', pipelineErr.message);
       }
     }
 
-    // 4. B-4b : Envoyer les emails via Resend
     const emailResults = await Promise.allSettled([
-      // Email au client
       resend.emails.send({
         from: 'ScantoRenov <avant-projet@scantorenov.com>',
         to: [clientEmail],
         subject: action === 'confirm'
-          ? `Confirmation de votre rendez-vous – ScantoRenov`
-          : `Annulation de votre rendez-vous – ScantoRenov`,
+          ? 'Confirmation de votre rendez-vous - ScantoRenov'
+          : 'Annulation de votre rendez-vous - ScantoRenov',
         html: action === 'confirm'
           ? buildConfirmEmailHtml(emailContext)
           : buildCancelEmailHtml(emailContext),
       }),
-      // Notification admin
       resend.emails.send({
         from: 'ScantoRenov <avant-projet@scantorenov.com>',
         to: ['scantorenov@gmail.com'],
         subject: action === 'confirm'
-          ? `[RDV CONFIRMÉ] ${[prenom, nom].filter(Boolean).join(' ')}`
-          : `[RDV ANNULÉ] ${[prenom, nom].filter(Boolean).join(' ')}`,
+          ? `[RDV CONFIRME] ${[prenom, nom].filter(Boolean).join(' ')}`
+          : `[RDV ANNULE] ${[prenom, nom].filter(Boolean).join(' ')}`,
         html: buildAdminEmailHtml({ action, ...emailContext }),
       }),
     ]);
@@ -344,7 +338,7 @@ exports.handler = async (event) => {
       if (result.status === 'rejected') {
         console.error(`Email ${i === 0 ? 'client' : 'admin'} failed:`, result.reason);
       } else {
-        console.log(`Email ${i === 0 ? 'client' : 'admin'} sent:`, result.value?.data?.id);
+        console.log(`Email ${i === 0 ? 'client' : 'admin'} sent:`, result.value && result.value.data ? result.value.data.id : null);
       }
     });
 
@@ -358,11 +352,15 @@ exports.handler = async (event) => {
       }),
     };
   } catch (err) {
+    const statusCode = err && err.statusCode ? err.statusCode : 500;
     console.error('confirm-appointment error:', err);
     return {
-      statusCode: 500,
+      statusCode,
       headers,
-      body: JSON.stringify({ error: 'Internal server error', message: err.message }),
+      body: JSON.stringify({
+        error: statusCode === 500 ? 'Internal server error' : err.message,
+        message: err && err.message ? err.message : 'Unknown error'
+      }),
     };
   }
 };

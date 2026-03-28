@@ -1,6 +1,7 @@
 const { createClient } = require('@supabase/supabase-js');
 const { upsertClientPipeline } = require('./_client-pipeline');
 const { APPOINTMENT_RULES, findConflict, isSlotBookable } = require('./_appointment-utils');
+const { resolveIdentityClient } = require('./_identity-client');
 
 const headers = {
   'Access-Control-Allow-Origin': '*',
@@ -13,10 +14,6 @@ const supabase = createClient(
   process.env.SUPABASE_URL,
   process.env.SUPABASE_SERVICE_KEY
 );
-
-function normalizeEmail(email) {
-  return typeof email === 'string' ? email.trim().toLowerCase() : '';
-}
 
 exports.handler = async (event, context) => {
   if (event.httpMethod === 'OPTIONS') {
@@ -52,15 +49,15 @@ exports.handler = async (event, context) => {
   }
 
   try {
-    const clientId = body.clientId;
+    const requestedClientId = body.clientId;
     const scheduledAt = body.scheduledAt;
     const durationMinutes = APPOINTMENT_RULES.phone_call.durationMinutes;
 
-    if (!clientId || !scheduledAt) {
+    if (!scheduledAt) {
       return {
         statusCode: 400,
         headers,
-        body: JSON.stringify({ error: 'clientId and scheduledAt are required' }),
+        body: JSON.stringify({ error: 'scheduledAt is required' }),
       };
     }
 
@@ -81,31 +78,13 @@ exports.handler = async (event, context) => {
       };
     }
 
-    const { data: client, error: clientError } = await supabase
-      .from('clients')
-      .select('id, email, status')
-      .eq('id', clientId)
-      .single();
-
-    if (clientError || !client) {
-      return {
-        statusCode: 404,
-        headers,
-        body: JSON.stringify({ error: 'Client introuvable' }),
-      };
-    }
-
-    if (
-      normalizeEmail(identityUser.email) &&
-      normalizeEmail(client.email) &&
-      normalizeEmail(identityUser.email) !== normalizeEmail(client.email)
-    ) {
-      return {
-        statusCode: 403,
-        headers,
-        body: JSON.stringify({ error: 'Forbidden' }),
-      };
-    }
+    const resolution = await resolveIdentityClient({
+      context,
+      requestedClientId,
+      createIfMissing: true
+    });
+    const client = resolution.client;
+    const clientId = client.id;
 
     const conflict = await findConflict(supabase, requestedStart, durationMinutes);
     if (conflict) {
@@ -163,11 +142,12 @@ exports.handler = async (event, context) => {
       }),
     };
   } catch (error) {
+    const statusCode = error && error.statusCode ? error.statusCode : 500;
     console.error('book-appointment error:', error);
     return {
-      statusCode: 500,
+      statusCode,
       headers,
-      body: JSON.stringify({ error: 'Internal server error' }),
+      body: JSON.stringify({ error: error && error.message ? error.message : 'Internal server error' }),
     };
   }
 };

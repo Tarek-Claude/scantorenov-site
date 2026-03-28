@@ -1,5 +1,6 @@
 const { createClient } = require('@supabase/supabase-js');
 const Stripe = require('stripe');
+const { resolveIdentityClient } = require('./_identity-client');
 
 const supabase = createClient(
   process.env.SUPABASE_URL,
@@ -38,15 +39,15 @@ exports.handler = async (event, context) => {
   }
 
   try {
-    const clientId = body.clientId;
+    const requestedClientId = body.clientId;
     const appointmentId = body.appointmentId;
     const productType = body.productType || 'scan_3d';
 
-    if (!clientId || !appointmentId) {
+    if (!appointmentId) {
       return {
         statusCode: 400,
         headers,
-        body: JSON.stringify({ error: 'clientId et appointmentId requis' })
+        body: JSON.stringify({ error: 'appointmentId requis' })
       };
     }
 
@@ -66,36 +67,30 @@ exports.handler = async (event, context) => {
       throw new Error('STRIPE_PRICE_SCAN_ID non configuré');
     }
 
-    const [clientResult, apptResult] = await Promise.all([
-      supabase
-        .from('clients')
-        .select('id, email, prenom, nom, status')
-        .eq('id', clientId)
-        .single(),
-      supabase
-        .from('appointments')
-        .select('id, client_id, type, scheduled_at, status')
-        .eq('id', appointmentId)
-        .single()
-    ]);
+    const resolution = await resolveIdentityClient({
+      context,
+      requestedClientId,
+      createIfMissing: false
+    });
+    const client = resolution.client;
+    const clientId = client.id;
 
-    const client = clientResult.data;
-    const appt = apptResult.data;
+    const { data: appt, error: apptError } = await supabase
+      .from('appointments')
+      .select('id, client_id, type, scheduled_at, status')
+      .eq('id', appointmentId)
+      .single();
 
-    if (clientResult.error || !client) {
-      return { statusCode: 404, headers, body: JSON.stringify({ error: 'Client introuvable' }) };
-    }
-
-    if (identityUser.email && client.email && identityUser.email !== client.email) {
-      return { statusCode: 403, headers, body: JSON.stringify({ error: 'Forbidden' }) };
-    }
-
-    if (apptResult.error || !appt) {
+    if (apptError || !appt) {
       return { statusCode: 404, headers, body: JSON.stringify({ error: 'RDV introuvable' }) };
     }
 
     if (appt.client_id !== clientId) {
-      return { statusCode: 400, headers, body: JSON.stringify({ error: 'RDV non associé à ce client' }) };
+      return {
+        statusCode: 400,
+        headers,
+        body: JSON.stringify({ error: 'RDV non associé au client connecté' })
+      };
     }
 
     if (appt.type !== 'scan_3d') {
@@ -144,7 +139,12 @@ exports.handler = async (event, context) => {
       body: JSON.stringify({ checkoutUrl: session.url, sessionId: session.id })
     };
   } catch (err) {
+    const statusCode = err && err.statusCode ? err.statusCode : 500;
     console.error('create-checkout error:', err);
-    return { statusCode: 500, headers, body: JSON.stringify({ error: err.message }) };
+    return {
+      statusCode,
+      headers,
+      body: JSON.stringify({ error: err && err.message ? err.message : 'Internal server error' })
+    };
   }
 };
