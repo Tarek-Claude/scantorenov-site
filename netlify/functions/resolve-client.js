@@ -46,7 +46,7 @@ exports.handler = async (event, context) => {
   try {
     const { data: existing, error: selectError } = await supabase
       .from('clients')
-      .select('id, nom, prenom, status, phase')
+      .select('*')
       .eq('email', email)
       .maybeSingle();
 
@@ -57,6 +57,7 @@ exports.handler = async (event, context) => {
         statusCode: 200,
         headers,
         body: JSON.stringify({
+          ...existing,
           clientId: existing.id,
           nom: existing.nom || existing.prenom || email,
           status: existing.status || 'account_created',
@@ -73,7 +74,7 @@ exports.handler = async (event, context) => {
           nom: email,
         },
       ])
-      .select('id, nom, status')
+      .select('*')
       .single();
 
     if (insertError) throw insertError;
@@ -82,6 +83,7 @@ exports.handler = async (event, context) => {
       statusCode: 200,
       headers,
       body: JSON.stringify({
+        ...created,
         clientId: created.id,
         nom: created.nom || email,
         status: created.status || 'account_created',

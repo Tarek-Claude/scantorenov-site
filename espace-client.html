@@ -2997,11 +2997,9 @@ async function findOrCreateClientRecord(user, meta, appMeta) {
     throw new Error('clientId manquant dans la réponse');
   }
 
-  return {
-    id: data.clientId,
-    nom: data.nom,
-    status: data.status
-  };
+  return Object.assign({}, data, {
+    id: data.id || data.clientId
+  });
 }
 
 function persistIdentitySession(tokenData, userData) {
@@ -6117,4 +6115,51 @@ document.addEventListener('DOMContentLoaded', function() {
   }
 
   initSlotPickers();
-  setTimeout(checkAppointmentStat
+  setTimeout(checkAppointmentStatus, 500);
+});
+
+(function checkPaymentReturn() {
+  var params = new URLSearchParams(window.location.search);
+  var paymentStatus = params.get('payment');
+  if (!paymentStatus) return;
+
+  window.history.replaceState({}, '', '/espace-client.html');
+
+  if (paymentStatus === 'success') {
+    showPaymentSuccessBanner();
+  } else if (paymentStatus === 'cancelled') {
+    showPaymentCancelledBanner();
+  }
+})();
+
+// Add fade-in animation
+const style = document.createElement('style');
+style.textContent = `
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+      transform: translateY(-10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+  .appointment-status-card {
+    opacity: 0;
+  }
+`;
+document.head.appendChild(style);
+</script>
+
+<!-- ═══ OVERLAY RAPPORT AVANT-PROJET ═══ -->
+<div class="rapport-overlay" id="rapportOverlay">
+  <button class="rp-btn-print" onclick="printRapport()">&#x1F5A8; Imprimer / PDF</button>
+  <button class="rapport-close" onclick="closeRapport()">&#x2715; Fermer</button>
+  <div class="rapport-container" id="rapportContent">
+    <!-- Rempli dynamiquement par generateRapport() -->
+  </div>
+</div>
+
+</body>
+</html>
