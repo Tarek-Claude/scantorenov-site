@@ -47,6 +47,67 @@
       cursor: pointer; transition: all 0.3s; text-decoration: none;
     }
     .auth-btn:hover { background: var(--bl); box-shadow: 0 8px 32px rgba(45,95,62,0.3); }
+    .auth-btn:disabled { opacity: 0.7; cursor: wait; box-shadow: none; }
+    .auth-card {
+      width: 100%;
+      max-width: 420px;
+      padding: 32px;
+      background: rgba(255,255,255,0.92);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      box-shadow: var(--shadow);
+    }
+    .auth-form {
+      display: grid;
+      gap: 12px;
+      margin-top: 24px;
+      text-align: left;
+    }
+    .auth-label {
+      font-size: 0.78rem;
+      font-weight: 600;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      color: var(--text-soft);
+    }
+    .auth-input {
+      width: 100%;
+      padding: 13px 15px;
+      border: 1px solid rgba(42,42,42,0.12);
+      border-radius: 10px;
+      background: #FFFFFF;
+      color: var(--text);
+      font-size: 0.95rem;
+    }
+    .auth-input:focus {
+      outline: 2px solid rgba(45,95,62,0.14);
+      border-color: var(--blue);
+    }
+    .auth-feedback {
+      margin: 14px 0 0 0;
+      font-size: 0.84rem;
+      line-height: 1.6;
+      color: var(--text-soft);
+    }
+    .auth-feedback.error { color: #C62828; }
+    .auth-actions {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 10px;
+      margin-top: 20px;
+    }
+    .auth-link-button {
+      border: none;
+      background: none;
+      color: var(--blue);
+      font-size: 0.82rem;
+      font-weight: 600;
+      cursor: pointer;
+      text-decoration: underline;
+      text-underline-offset: 3px;
+    }
+    .auth-link-button:hover { color: var(--bl); }
     .back-link {
       display: inline-block; margin-top: 24px; color: var(--muted);
       font-size: 0.78rem; text-decoration: none; letter-spacing: 0.06em;
@@ -1988,10 +2049,23 @@
      AUTH GUARD — affich&#233; si l'utilisateur n'est pas connect&#233;
      ════════════════════════════════════════════════════════════════ -->
 <div class="auth-guard" id="authGuard">
-  <h1>Espace Client</h1>
-  <p>Connectez-vous pour acc&#233;der &#224; votre espace personnel.</p>
-  <a href="connexion.html" class="auth-btn">Se connecter</a>
-  <a href="index.html" class="back-link">&#8592; Retour au site</a>
+  <div class="auth-card">
+    <h1>Espace Client</h1>
+    <p>Connectez-vous pour acc&#233;der &#224; votre espace personnel et r&#233;server votre rendez-vous.</p>
+    <form class="auth-form" id="authLoginForm">
+      <label class="auth-label" for="authLoginEmail">Adresse email</label>
+      <input class="auth-input" id="authLoginEmail" type="email" autocomplete="email" required />
+      <label class="auth-label" for="authLoginPassword">Mot de passe</label>
+      <input class="auth-input" id="authLoginPassword" type="password" autocomplete="current-password" required />
+      <button type="submit" class="auth-btn" id="authLoginBtn">Se connecter</button>
+    </form>
+    <p class="auth-feedback" id="authLoginFeedback" style="display:none;"></p>
+    <div class="auth-actions">
+      <button type="button" class="auth-link-button" id="authOpenSignupBtn">Cr&#233;er un compte</button>
+      <a href="connexion.html" class="back-link" style="margin-top:0;">Ouvrir la page de connexion compl&#232;te</a>
+      <a href="index.html" class="back-link" style="margin-top:0;">&#8592; Retour au site</a>
+    </div>
+  </div>
 </div>
 
 <!-- ════════════════════════════════════════════════════════════════
@@ -2822,11 +2896,13 @@ var supabaseClient = window.supabase ? window.supabase.createClient(SUPABASE_URL
 
 /* ── Auth ── */
 var netlifyIdentity = window.netlifyIdentity;
+var IDENTITY_API = '/.netlify/identity';
 var currentUser = null;
 var currentPhase = 3;
 var currentClientId = null;
 var currentPipelineStatus = 'new_lead';
 var clientProject = {};
+var bookingClientMessage = 'Connectez-vous pour rÃ©server un crÃ©neau.';
 
 window.__pipelineRank = {
   new_lead: 0,
@@ -2842,7 +2918,156 @@ window.__pipelineRank = {
   accompaniment_subscribed: 10
 };
 
-function showDashboard(user) {
+function setAuthLoginFeedback(message, isError) {
+  var feedback = document.getElementById('authLoginFeedback');
+  if (!feedback) return;
+
+  if (!message) {
+    feedback.style.display = 'none';
+    feedback.textContent = '';
+    feedback.classList.remove('error');
+    return;
+  }
+
+  feedback.textContent = message;
+  feedback.style.display = 'block';
+  feedback.classList.toggle('error', !!isError);
+}
+
+function setSlotPickerClientContext(clientId, message) {
+  var pickerIds = ['phonePrimary', 'phoneSecondary', 'scan'];
+  if (!slotPickers) slotPickers = {};
+  currentClientId = clientId || null;
+  bookingClientMessage = message || '';
+  initSlotPickers();
+
+  for (var i = 0; i < pickerIds.length; i++) {
+    var picker = slotPickers[pickerIds[i]];
+    if (picker && typeof picker.setClientContext === 'function') {
+      picker.setClientContext(currentClientId, bookingClientMessage);
+    }
+  }
+}
+
+function applySupabaseClientRecord(sb, appMeta) {
+  if (!sb) return;
+
+  setSlotPickerClientContext(sb.id, '');
+  clientProject = {
+    nom: sb.nom || clientProject.nom,
+    adresse: sb.adresse || clientProject.adresse,
+    type_bien: sb.type_bien || clientProject.type_bien,
+    demande: sb.demande || clientProject.demande,
+    surface: sb.surface || clientProject.surface,
+    echeance: sb.echeance || clientProject.echeance,
+    budget: sb.budget || clientProject.budget,
+    telephone: sb.telephone || clientProject.telephone,
+    matterport_data: sb.matterport_data || clientProject.matterport_data
+  };
+  currentPipelineStatus = sb.status || 'new_lead';
+  if (sb.phase && sb.phase > currentPhase) currentPhase = sb.phase;
+  if (sb.matterport_model_id) appMeta.matterport_id = sb.matterport_model_id;
+  if (sb.matterport_iframe) appMeta.matterport_iframe = sb.matterport_iframe;
+  if (sb.matterport_data) appMeta.matterport_data = sb.matterport_data;
+  if (sb.proposal_url) appMeta.proposal_url = sb.proposal_url;
+  if (sb.moe) appMeta.moe = sb.moe;
+  if (sb.moe_accepted) appMeta.moe_accepted = sb.moe_accepted;
+  if (sb.chantier) appMeta.chantier = sb.chantier;
+  renderPhase(currentPhase, clientProject, appMeta);
+}
+
+async function findOrCreateClientRecord(user, meta, appMeta) {
+  var token = getIdentityAccessToken();
+  if (!token) return null;
+
+  var response = await fetch('/.netlify/functions/resolve-client', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': 'Bearer ' + token
+    }
+  });
+  var data = await readJsonResponse(response);
+
+  if (!response.ok) {
+    throw new Error(data && data.error ? data.error : 'Impossible de résoudre le dossier client');
+  }
+
+  if (!data.clientId) {
+    throw new Error('clientId manquant dans la réponse');
+  }
+
+  return {
+    id: data.clientId,
+    nom: data.nom,
+    status: data.status
+  };
+}
+
+function persistIdentitySession(tokenData, userData) {
+  userData.token = {
+    access_token: tokenData.access_token,
+    token_type: tokenData.token_type,
+    expires_in: tokenData.expires_in,
+    refresh_token: tokenData.refresh_token,
+    expires_at: Date.now() + tokenData.expires_in * 1000
+  };
+  localStorage.setItem('gotrue.user', JSON.stringify(userData));
+  return userData;
+}
+
+async function handleAuthLoginSubmit(event) {
+  event.preventDefault();
+
+  var emailInput = document.getElementById('authLoginEmail');
+  var passwordInput = document.getElementById('authLoginPassword');
+  var submitBtn = document.getElementById('authLoginBtn');
+  if (!emailInput || !passwordInput || !submitBtn) return;
+
+  var email = emailInput.value.trim();
+  var password = passwordInput.value;
+  if (!email || !password) {
+    setAuthLoginFeedback('Veuillez renseigner votre email et votre mot de passe.', true);
+    return;
+  }
+
+  submitBtn.disabled = true;
+  submitBtn.textContent = 'Connexion...';
+  setAuthLoginFeedback('', false);
+
+  try {
+    var tokenResponse = await fetch(IDENTITY_API + '/token', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: 'grant_type=password&username=' + encodeURIComponent(email) + '&password=' + encodeURIComponent(password)
+    });
+    var tokenData = await readJsonResponse(tokenResponse);
+    if (!tokenResponse.ok) {
+      throw new Error(tokenData.error_description || tokenData.msg || 'Email ou mot de passe incorrect.');
+    }
+
+    var userResponse = await fetch(IDENTITY_API + '/user', {
+      headers: { 'Authorization': 'Bearer ' + tokenData.access_token }
+    });
+    if (!userResponse.ok) {
+      throw new Error('Impossible de recuperer votre session.');
+    }
+
+    var userData = await userResponse.json();
+    persistIdentitySession(tokenData, userData);
+    if (document.getElementById('authLoginForm')) {
+      document.getElementById('authLoginForm').reset();
+    }
+    await showDashboard(userData);
+  } catch (error) {
+    setAuthLoginFeedback(error && error.message ? error.message : 'Une erreur est survenue.', true);
+  } finally {
+    submitBtn.disabled = false;
+    submitBtn.textContent = 'Se connecter';
+  }
+}
+
+async function showDashboard(user) {
   currentUser = user;
   document.getElementById('authGuard').style.display = 'none';
   document.getElementById('dashNav').style.display = '';
@@ -2851,48 +3076,32 @@ function showDashboard(user) {
 
   var meta = user.user_metadata || {};
   var appMeta = user.app_metadata || {};
+  setAuthLoginFeedback('', false);
+  currentClientId = null;
+  applyDashboardData(currentUser, meta, appMeta);
+  initSlotPickers();
+  setSlotPickerClientContext(null, 'Preparation de votre dossier client...');
+
+  try {
+    var clientRecord = await findOrCreateClientRecord(user, meta, appMeta);
+    if (clientRecord) {
+      applySupabaseClientRecord(clientRecord, appMeta);
+    } else {
+      setSlotPickerClientContext(null, "Impossible d'identifier votre dossier client.");
+    }
+  } catch (error) {
+    console.error('showDashboard client sync error:', error);
+    setSlotPickerClientContext(null, "Impossible d'identifier votre dossier client.");
+  }
 
   // D'abord afficher avec les données locales/Identity
-  applyDashboardData(user, meta, appMeta);
 
   // Puis tenter de charger depuis Supabase (plus à jour)
-  if (supabaseClient && user.email) {
-    supabaseClient
-      .from('clients')
-      .select('*')
-      .eq('email', user.email)
-      .single()
-      .then(function(result) {
-        if (result.data) {
-          var sb = result.data;
+  /* dead code removed
           // Stocker l'UUID client Supabase pour les requêtes appointments
-          currentClientId = sb.id;
           // Fusionner les données Supabase dans appMeta et clientProject
-          clientProject = {
-            nom: sb.nom || clientProject.nom,
-            adresse: sb.adresse || clientProject.adresse,
-            type_bien: sb.type_bien || clientProject.type_bien,
-            demande: sb.demande || clientProject.demande,
-            surface: sb.surface || clientProject.surface,
-            echeance: sb.echeance || clientProject.echeance,
-            budget: sb.budget || clientProject.budget,
-            telephone: sb.telephone || clientProject.telephone,
-            matterport_data: sb.matterport_data || clientProject.matterport_data
-          };
-          currentPipelineStatus = sb.status || 'new_lead';
-          if (sb.phase && sb.phase > currentPhase) currentPhase = sb.phase;
-          if (sb.matterport_model_id) appMeta.matterport_id = sb.matterport_model_id;
-          if (sb.matterport_iframe) appMeta.matterport_iframe = sb.matterport_iframe;
-          if (sb.matterport_data) appMeta.matterport_data = sb.matterport_data;
-          if (sb.proposal_url) appMeta.proposal_url = sb.proposal_url;
-          if (sb.moe) appMeta.moe = sb.moe;
-          if (sb.moe_accepted) appMeta.moe_accepted = sb.moe_accepted;
-          if (sb.chantier) appMeta.chantier = sb.chantier;
           // Recharger l'affichage avec les données Supabase
-          renderPhase(currentPhase, clientProject, appMeta);
-        }
-      });
-  }
+  */
 }
 
 function applyDashboardData(user, meta, appMeta) {
@@ -2917,6 +3126,8 @@ function applyDashboardData(user, meta, appMeta) {
 
 function showLogin() {
   currentUser = null;
+  setSlotPickerClientContext(null, 'Connectez-vous pour reserver un creneau.');
+  setAuthLoginFeedback('', false);
   document.getElementById('authGuard').style.display = '';
   document.getElementById('dashNav').style.display = 'none';
   document.getElementById('dashboard').classList.remove('visible');
@@ -2927,6 +3138,7 @@ if (netlifyIdentity) {
   netlifyIdentity.on('init', function(user) { if (user) showDashboard(user); else checkLocalStorage(); });
   netlifyIdentity.on('login', function(user) { showDashboard(user); });
   netlifyIdentity.on('logout', function() { showLogin(); });
+  netlifyIdentity.init();
 } else {
   checkLocalStorage();
 }
@@ -4197,6 +4409,7 @@ function requestCallback() {
 
   btn.style.display = 'none';
   planning.style.display = 'block';
+  initSlotPickers();
   planning.scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
 
@@ -5206,6 +5419,8 @@ function createSlotPicker(containerId, options) {
     selectedDate: '',
     slots: [],
     selectedSlotTime: '',
+    clientId: options.clientId || null,
+    clientMessage: options.clientMessage || '',
     loading: false,
     loadError: '',
     dateError: '',
@@ -5235,7 +5450,9 @@ function createSlotPicker(containerId, options) {
       : '';
     var slotsHtml = '';
 
-    if (state.loading) {
+    if (state.clientMessage && !state.clientId) {
+      slotsHtml = '<div class="slot-picker-empty">' + state.clientMessage + '</div>';
+    } else if (state.loading) {
       slotsHtml = '<div class="slot-picker-loading">Chargement des créneaux disponibles...</div>';
     } else if (state.loadError) {
       slotsHtml =
@@ -5294,7 +5511,7 @@ function createSlotPicker(containerId, options) {
           ' min="' + bounds.minDate + '"' +
           ' max="' + bounds.maxDate + '"' +
           ' value="' + state.selectedDate + '"' +
-          (state.locked ? ' disabled' : '') +
+          (state.locked || !state.clientId ? ' disabled' : '') +
         ' />' +
         (state.dateError
           ? '<div class="slot-picker-feedback"><div class="slot-picker-message error">' + state.dateError + '</div></div>'
@@ -5355,6 +5572,11 @@ function createSlotPicker(containerId, options) {
     if (confirmButton) {
       confirmButton.addEventListener('click', async function() {
         if (!state.selectedDate || !state.selectedSlotTime) return;
+        if (!state.clientId) {
+          state.submitError = state.clientMessage || "Impossible d'identifier votre dossier client.";
+          render();
+          return;
+        }
 
         state.submitting = true;
         state.submitError = '';
@@ -5363,7 +5585,8 @@ function createSlotPicker(containerId, options) {
         try {
           var appointment = await (options.onConfirm || (async function() { return null; }))({
             date: state.selectedDate,
-            time: state.selectedSlotTime
+            time: state.selectedSlotTime,
+            clientId: state.clientId
           });
 
           state.submitting = false;
@@ -5425,6 +5648,19 @@ function createSlotPicker(containerId, options) {
   }
 
   var api = {
+    setClientContext: function(clientId, message) {
+      state.clientId = clientId || null;
+      state.clientMessage = message || '';
+      state.loadError = '';
+      state.dateError = '';
+      state.submitError = '';
+      if (!state.clientId) {
+        state.selectedDate = '';
+        state.slots = [];
+        state.selectedSlotTime = '';
+      }
+      render();
+    },
     hide: function() {
       state.hidden = true;
       render();
@@ -5512,6 +5748,8 @@ function initSlotPickers() {
       description: 'Disponibilités mises à jour en temps réel pour les entretiens téléphoniques.',
       slotsSubtitle: 'Créneaux de 30 minutes, du lundi au samedi entre 8h00 et 20h00.',
       confirmLabel: 'Confirmer ce créneau',
+      clientId: currentClientId,
+      clientMessage: bookingClientMessage,
       onConfirm: submitPhoneAppointment,
       onBooked: handlePhoneAppointmentBooked
     });
@@ -5519,6 +5757,8 @@ function initSlotPickers() {
 
   if (!slotPickers.phoneSecondary) {
     slotPickers.phoneSecondary = createSlotPicker('phoneBookingCalendarSecondary', {
+      clientId: currentClientId,
+      clientMessage: bookingClientMessage,
       type: 'phone_call',
       heading: 'Choisissez une date puis un créneau',
       description: 'Sélectionnez le créneau le plus confortable pour votre échange avec notre équipe.',
@@ -5536,6 +5776,8 @@ function initSlotPickers() {
       description: 'Deux passages sont proposés par jour pour planifier votre scan 3D.',
       slotsSubtitle: 'Deux créneaux par jour : matin (8h-12h) ou après-midi (14h-18h).',
       confirmLabel: 'Confirmer ce créneau',
+      clientId: currentClientId,
+      clientMessage: bookingClientMessage,
       onConfirm: bookScanAppointment,
       onBooked: handleScanAppointmentBooked
     });
@@ -5665,7 +5907,8 @@ function applyScanSlotDisplay(payload) {
 }
 
 async function submitPhoneAppointment(slot) {
-  if (!currentClientId) {
+  var clientId = slot && slot.clientId ? slot.clientId : currentClientId;
+  if (!clientId) {
     throw new Error('Identifiant client manquant.');
   }
 
@@ -5678,7 +5921,7 @@ async function submitPhoneAppointment(slot) {
       'Authorization': token ? 'Bearer ' + token : ''
     },
     body: JSON.stringify({
-      clientId: currentClientId,
+      clientId: clientId,
       scheduledAt: scheduledAt,
       durationMinutes: bookingRules.phone_call.durationMinutes
     })
@@ -5699,7 +5942,8 @@ async function submitPhoneAppointment(slot) {
 }
 
 async function bookScanAppointment(slot) {
-  if (!currentClientId) {
+  var clientId = slot && slot.clientId ? slot.clientId : currentClientId;
+  if (!clientId) {
     throw new Error('Identifiant client manquant.');
   }
 
@@ -5713,7 +5957,7 @@ async function bookScanAppointment(slot) {
       'Authorization': token ? 'Bearer ' + token : ''
     },
     body: JSON.stringify({
-      clientId: currentClientId,
+      clientId: clientId,
       scheduledAt: scheduledAt,
       durationMinutes: bookingRules.scan_3d.durationMinutes,
       location: clientProject && clientProject.adresse ? clientProject.adresse : '',
@@ -5856,53 +6100,21 @@ async function checkAppointmentStatus() {
 }
 
 document.addEventListener('DOMContentLoaded', function() {
+  var authLoginForm = document.getElementById('authLoginForm');
+  if (authLoginForm) {
+    authLoginForm.addEventListener('submit', handleAuthLoginSubmit);
+  }
+
+  var authOpenSignupBtn = document.getElementById('authOpenSignupBtn');
+  if (authOpenSignupBtn) {
+    authOpenSignupBtn.addEventListener('click', function() {
+      if (netlifyIdentity && typeof netlifyIdentity.open === 'function') {
+        netlifyIdentity.open('signup');
+      } else {
+        window.location.href = 'connexion.html';
+      }
+    });
+  }
+
   initSlotPickers();
-  setTimeout(checkAppointmentStatus, 500);
-});
-
-(function checkPaymentReturn() {
-  var params = new URLSearchParams(window.location.search);
-  var paymentStatus = params.get('payment');
-  if (!paymentStatus) return;
-
-  window.history.replaceState({}, '', '/espace-client.html');
-
-  if (paymentStatus === 'success') {
-    showPaymentSuccessBanner();
-  } else if (paymentStatus === 'cancelled') {
-    showPaymentCancelledBanner();
-  }
-})();
-
-// Add fade-in animation
-const style = document.createElement('style');
-style.textContent = `
-  @keyframes fadeIn {
-    from {
-      opacity: 0;
-      transform: translateY(-10px);
-    }
-    to {
-      opacity: 1;
-      transform: translateY(0);
-    }
-  }
-  .appointment-status-card {
-    opacity: 0;
-  }
-`;
-document.head.appendChild(style);
-</script>
-
-<!-- ═══ OVERLAY RAPPORT AVANT-PROJET ═══ -->
-<div class="rapport-overlay" id="rapportOverlay">
-  <button class="rp-btn-print" onclick="printRapport()">&#x1F5A8; Imprimer / PDF</button>
-  <button class="rapport-close" onclick="closeRapport()">&#x2715; Fermer</button>
-  <div class="rapport-container" id="rapportContent">
-    <!-- Rempli dynamiquement par generateRapport() -->
-  </div>
-</div>
-
-</body>
-</html>
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  
+  setTimeout(checkAppointmentStat
