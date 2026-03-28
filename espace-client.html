@@ -1703,6 +1703,297 @@
       font-size: 0.88rem;
       line-height: 1.6;
     }
+    .native-booking-mount {
+      margin-top: 8px;
+    }
+    .native-booking {
+      background: #FBFAF7;
+      border: 1px solid #E8E8E8;
+      border-radius: 12px;
+      padding: 24px;
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.65);
+      transition: opacity 0.25s ease;
+    }
+    .native-booking.is-locked {
+      opacity: 0.55;
+      pointer-events: none;
+    }
+    .native-booking-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 18px;
+      margin-bottom: 18px;
+    }
+    .native-booking-copy h4 {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 0.95rem;
+      font-weight: 600;
+      color: var(--text);
+      margin-bottom: 6px;
+    }
+    .native-booking-copy p {
+      color: var(--text-soft);
+      font-size: 0.82rem;
+      line-height: 1.6;
+    }
+    .native-booking-legend {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      color: var(--text-soft);
+      font-size: 0.76rem;
+    }
+    .native-legend-item {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .native-legend-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 999px;
+      display: inline-block;
+    }
+    .native-legend-dot.available {
+      background: #2D5F3E;
+    }
+    .native-legend-dot.unavailable {
+      background: #E0E0E0;
+      border: 1px solid #CFCFCF;
+    }
+    .native-booking-shell {
+      display: grid;
+      grid-template-columns: minmax(320px, 1.15fr) minmax(0, 1fr);
+      gap: 22px;
+      align-items: flex-start;
+    }
+    .native-calendar-panel,
+    .native-slots-panel {
+      background: #FFFFFF;
+      border: 1px solid #E8E8E8;
+      border-radius: 10px;
+      padding: 18px;
+    }
+    .native-month-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+    .native-month-title {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 0.95rem;
+      font-weight: 600;
+      color: var(--text);
+      text-transform: capitalize;
+    }
+    .native-month-btn {
+      width: 36px;
+      height: 36px;
+      border-radius: 999px;
+      border: 1px solid #E8E8E8;
+      background: #FFFFFF;
+      color: var(--text);
+      font-size: 1rem;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    .native-month-btn:hover:not(:disabled) {
+      border-color: #2D5F3E;
+      color: #2D5F3E;
+      transform: translateY(-1px);
+    }
+    .native-month-btn:disabled {
+      opacity: 0.35;
+      cursor: not-allowed;
+    }
+    .native-weekdays,
+    .native-days-grid {
+      display: grid;
+      grid-template-columns: repeat(7, minmax(0, 1fr));
+      gap: 8px;
+    }
+    .native-weekdays {
+      margin-bottom: 8px;
+    }
+    .native-weekday {
+      text-align: center;
+      font-size: 0.7rem;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: #9A9A9A;
+    }
+    .native-day {
+      min-height: 72px;
+      border: 1px solid #E8E8E8;
+      border-radius: 10px;
+      background: #FFFFFF;
+      padding: 9px 8px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      gap: 8px;
+      transition: border-color 0.2s ease, transform 0.2s ease, background 0.2s ease;
+    }
+    .native-day.is-empty {
+      visibility: hidden;
+      pointer-events: none;
+    }
+    .native-day.is-selectable {
+      cursor: pointer;
+    }
+    .native-day.is-selectable:hover {
+      border-color: rgba(45,95,62,0.45);
+      transform: translateY(-1px);
+    }
+    .native-day.is-disabled {
+      background: #F4F1EB;
+      border-style: dashed;
+      color: #B0B0B0;
+    }
+    .native-day.is-selected {
+      border-color: #2D5F3E;
+      background: rgba(45,95,62,0.08);
+      box-shadow: inset 0 0 0 1px rgba(45,95,62,0.12);
+    }
+    .native-day-number {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 0.95rem;
+      font-weight: 600;
+      color: inherit;
+    }
+    .native-day-meta {
+      font-size: 0.72rem;
+      color: var(--text-soft);
+      line-height: 1.35;
+    }
+    .native-day.is-disabled .native-day-meta {
+      color: #A8A8A8;
+    }
+    .native-slots-panel h5 {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: var(--text);
+      margin-bottom: 6px;
+    }
+    .native-slots-subtitle {
+      color: var(--text-soft);
+      font-size: 0.8rem;
+      line-height: 1.6;
+      margin-bottom: 16px;
+    }
+    .native-slot-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: 12px;
+    }
+    .native-slot-btn {
+      border: none;
+      border-radius: 10px;
+      padding: 14px 12px;
+      font-size: 0.88rem;
+      font-weight: 600;
+      transition: transform 0.15s ease, box-shadow 0.15s ease, opacity 0.15s ease;
+    }
+    .native-slot-btn.available {
+      background: #2D5F3E;
+      color: #FFFFFF;
+      cursor: pointer;
+    }
+    .native-slot-btn.available:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 10px 18px rgba(45,95,62,0.16);
+    }
+    .native-slot-btn.unavailable {
+      background: #E0E0E0;
+      color: #999999;
+      cursor: not-allowed;
+    }
+    .native-slot-btn.selected {
+      box-shadow: 0 0 0 3px rgba(45,95,62,0.18);
+    }
+    .native-confirm-panel {
+      margin-top: 18px;
+      padding-top: 18px;
+      border-top: 1px solid #E8E8E8;
+    }
+    .native-confirm-summary {
+      color: var(--text-soft);
+      font-size: 0.84rem;
+      line-height: 1.6;
+      margin-bottom: 12px;
+    }
+    .native-confirm-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 14px 22px;
+      background: #2D5F3E;
+      color: #FFFFFF;
+      border: none;
+      border-radius: 8px;
+      font-size: 0.78rem;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    .native-confirm-btn:hover:not(:disabled) {
+      background: #3A7A50;
+      box-shadow: 0 12px 24px rgba(45,95,62,0.18);
+      transform: translateY(-1px);
+    }
+    .native-confirm-btn:disabled {
+      opacity: 0.55;
+      cursor: wait;
+    }
+    .native-inline-error {
+      color: #C62828;
+      font-size: 0.82rem;
+      line-height: 1.6;
+      margin-top: 12px;
+    }
+    .native-inline-info,
+    .native-loading {
+      color: var(--text-soft);
+      font-size: 0.82rem;
+      line-height: 1.6;
+    }
+    .native-inline-info {
+      padding: 16px;
+      background: #F7F4EF;
+      border: 1px dashed #E8E8E8;
+      border-radius: 10px;
+    }
+    @media (max-width: 900px) {
+      .native-booking-shell {
+        grid-template-columns: 1fr;
+      }
+    }
+    @media (max-width: 640px) {
+      .native-booking {
+        padding: 18px;
+      }
+      .native-booking-top {
+        flex-direction: column;
+      }
+      .native-calendar-panel,
+      .native-slots-panel {
+        padding: 16px;
+      }
+      .native-slot-grid {
+        grid-template-columns: 1fr 1fr;
+      }
+      .native-day {
+        min-height: 64px;
+      }
+    }
     /* ─── B-4a: Confirmed Appointments Table ─── */
     .appointments-card {
       padding: 40px 32px;
@@ -2050,24 +2341,14 @@
         <h3>Réserver votre entretien téléphonique</h3>
         <p style="color:var(--text-soft);margin-bottom:20px;">Sélectionnez un créneau qui vous convient pour discuter de votre projet avec notre équipe.</p>
 
-        <!-- Calendly embed iframe -->
-        <div style="border-radius:8px;overflow:hidden;border:1px solid var(--border-color);padding:0;min-height:700px;">
-          <iframe
-            src="https://calendly.com/scantorenov?hide_event_type_details=1&hide_gdpr_banner=1"
-            width="100%"
-            height="700"
-            frameborder="0"
-            style="border:none;"
-            title="Calendly">
-          </iframe>
-        </div>
+        <!-- Calendrier de reservation natif -->
+        <div id="phoneBookingCalendarPrimary" class="native-booking-mount"></div>
 
-        <!-- Appointment status display (after booking) -->
         <div class="appointment-status-card" id="appointmentStatusCard" style="display:none;margin-top:24px;">
-          <h4>Votre rendez-vous est confirmé ✓</h4>
+          <h4>Votre demande de rendez-vous est enregistrée</h4>
           <div class="appointment-details" id="appointmentDetails"></div>
           <p style="color:var(--text-soft);font-size:0.88rem;margin-top:16px;">
-            Vous recevrez un email de confirmation avec les détails de l'entretien.
+            Notre équipe reviendra vers vous avec tous les détails utiles.
           </p>
         </div>
       </div>
@@ -2083,15 +2364,13 @@
         <div id="phone-rdv-planning" style="display:none;margin-top:24px;">
           <h3>Choisissez votre créneau téléphonique</h3>
           <p>Sélectionnez un rendez-vous dans le planning ci-dessous.</p>
-          <div style="border-radius:8px;overflow:hidden;border:1px solid var(--border);padding:0;min-height:700px;">
-            <iframe
-              src="https://calendly.com/scantorenov?hide_event_type_details=1&hide_gdpr_banner=1"
-              width="100%"
-              height="700"
-              frameborder="0"
-              style="border:none;"
-              title="Calendly">
-            </iframe>
+          <div id="phoneBookingCalendarSecondary" class="native-booking-mount"></div>
+          <div class="appointment-status-card" id="appointmentStatusCardSecondary" style="display:none;margin-top:24px;">
+            <h4>Votre demande de rendez-vous est enregistrée</h4>
+            <div class="appointment-details" id="appointmentDetailsSecondary"></div>
+            <p style="color:var(--text-soft);font-size:0.88rem;margin-top:16px;">
+              Notre équipe reviendra vers vous avec tous les détails utiles.
+            </p>
           </div>
         </div>
       </div>
@@ -2144,17 +2423,9 @@
         </p>
       </div>
 
-      <div id="scanCalendlyContainer" style="border-radius:8px;overflow:hidden;
+      <div id="scanBookingCalendarContainer" style="border-radius:8px;overflow:hidden;
            border:1px solid var(--border-color);min-height:700px;">
-        <iframe
-          src="https://calendly.com/scantorenov/scan-3d?hide_event_type_details=1&hide_gdpr_banner=1"
-          width="100%"
-          height="700"
-          frameborder="0"
-          style="border:none;"
-          id="scanCalendlyIframe"
-          title="Réserver un scan 3D">
-        </iframe>
+        <div id="scanBookingCalendar" class="native-booking-mount"></div>
       </div>
 
       <div id="scanSlotSelected" style="display:none;margin-top:24px;
@@ -4839,6 +5110,624 @@ function getIdentityAccessToken() {
   }
 }
 
+var BOOKING_TIME_ZONE = 'Europe/Paris';
+var bookingCalendars = {};
+var bookingAvailabilityCache = {};
+var bookingFormatterCache = {};
+var bookingWeekdayMap = {
+  Sun: 0,
+  Mon: 1,
+  Tue: 2,
+  Wed: 3,
+  Thu: 4,
+  Fri: 5,
+  Sat: 6
+};
+var bookingRules = {
+  phone_call: {
+    durationMinutes: 30,
+    minLeadMinutes: 120,
+    horizonDays: 30,
+    startOffsetDays: 0
+  },
+  scan_3d: {
+    durationMinutes: 240,
+    minLeadMinutes: 24 * 60,
+    horizonDays: 60,
+    startOffsetDays: 1
+  }
+};
+var bookingWeekdayLabels = ['Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam', 'Dim'];
+
+function pad2(value) {
+  return String(value).padStart(2, '0');
+}
+
+function getBookingFormatter(timeZone) {
+  if (!bookingFormatterCache[timeZone]) {
+    bookingFormatterCache[timeZone] = new Intl.DateTimeFormat('en-CA', {
+      timeZone: timeZone,
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit',
+      hourCycle: 'h23',
+      weekday: 'short'
+    });
+  }
+
+  return bookingFormatterCache[timeZone];
+}
+
+function getParisParts(date) {
+  var values = {};
+  var parts = getBookingFormatter(BOOKING_TIME_ZONE).formatToParts(date);
+
+  for (var i = 0; i < parts.length; i++) {
+    if (parts[i].type !== 'literal') {
+      values[parts[i].type] = parts[i].value;
+    }
+  }
+
+  return {
+    year: Number(values.year),
+    month: Number(values.month),
+    day: Number(values.day),
+    hour: Number(values.hour),
+    minute: Number(values.minute),
+    second: Number(values.second),
+    weekday: bookingWeekdayMap[values.weekday]
+  };
+}
+
+function getParisOffsetMilliseconds(date) {
+  var parts = getParisParts(date);
+  var asUtc = Date.UTC(parts.year, parts.month - 1, parts.day, parts.hour, parts.minute, parts.second);
+  return asUtc - date.getTime();
+}
+
+function getParisDateString(date) {
+  var parts = getParisParts(date);
+  return parts.year + '-' + pad2(parts.month) + '-' + pad2(parts.day);
+}
+
+function shiftIsoDate(dateString, days) {
+  var values = String(dateString).split('-').map(function(part) { return Number(part); });
+  var shifted = new Date(Date.UTC(values[0], values[1] - 1, values[2] + days));
+  return shifted.toISOString().slice(0, 10);
+}
+
+function buildParisDateTime(dateString, timeString) {
+  var dateParts = String(dateString).split('-').map(function(part) { return Number(part); });
+  var timeParts = String(timeString || '00:00:00').split(':').map(function(part) { return Number(part); });
+  var utcGuess = Date.UTC(
+    dateParts[0],
+    dateParts[1] - 1,
+    dateParts[2],
+    timeParts[0] || 0,
+    timeParts[1] || 0,
+    timeParts[2] || 0
+  );
+  var offset = getParisOffsetMilliseconds(new Date(utcGuess));
+  var resolved = utcGuess - offset;
+  var correctedOffset = getParisOffsetMilliseconds(new Date(resolved));
+
+  if (correctedOffset !== offset) {
+    resolved = utcGuess - correctedOffset;
+  }
+
+  return new Date(resolved);
+}
+
+function formatParisDate(dateLike) {
+  var date = dateLike instanceof Date ? dateLike : new Date(dateLike);
+  if (Number.isNaN(date.getTime())) return '';
+  return date.toLocaleDateString('fr-FR', {
+    weekday: 'long',
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric',
+    timeZone: BOOKING_TIME_ZONE
+  });
+}
+
+function formatParisTime(dateLike) {
+  var date = dateLike instanceof Date ? dateLike : new Date(dateLike);
+  if (Number.isNaN(date.getTime())) return '';
+  return date.toLocaleTimeString('fr-FR', {
+    hour: '2-digit',
+    minute: '2-digit',
+    timeZone: BOOKING_TIME_ZONE
+  });
+}
+
+function normalizeMonth(year, month) {
+  var normalized = new Date(Date.UTC(year, month - 1, 1));
+  return {
+    year: normalized.getUTCFullYear(),
+    month: normalized.getUTCMonth() + 1
+  };
+}
+
+function shiftMonthDescriptor(descriptor, delta) {
+  return normalizeMonth(descriptor.year, descriptor.month + delta);
+}
+
+function getMonthDescriptor(date) {
+  var parts = getParisParts(date);
+  return { year: parts.year, month: parts.month };
+}
+
+function getMonthKey(descriptor) {
+  return descriptor.year + '-' + pad2(descriptor.month);
+}
+
+function getMonthStart(descriptor) {
+  return descriptor.year + '-' + pad2(descriptor.month) + '-01';
+}
+
+function getMonthEnd(descriptor) {
+  return shiftIsoDate(getMonthStart(shiftMonthDescriptor(descriptor, 1)), -1);
+}
+
+function getMonthTitle(descriptor) {
+  return new Date(Date.UTC(descriptor.year, descriptor.month - 1, 1)).toLocaleDateString('fr-FR', {
+    month: 'long',
+    year: 'numeric',
+    timeZone: 'UTC'
+  });
+}
+
+function getBookingWindowForType(type) {
+  var rule = bookingRules[type];
+  var firstDate = shiftIsoDate(getParisDateString(new Date()), rule.startOffsetDays);
+  var lastDate = shiftIsoDate(firstDate, rule.horizonDays - 1);
+  return {
+    firstDate: firstDate,
+    lastDate: lastDate,
+    minStart: new Date(Date.now() + rule.minLeadMinutes * 60 * 1000)
+  };
+}
+
+function getWeekdayFromDateString(dateString) {
+  return getParisParts(buildParisDateTime(dateString, '12:00:00')).weekday;
+}
+
+function formatNativeSlotLabel(type, timeString) {
+  if (type === 'scan_3d') {
+    if (timeString === '08:00') return 'Matin (8h-12h)';
+    if (timeString === '14:00') return 'Après-midi (14h-18h)';
+  }
+  return timeString;
+}
+
+function buildPhoneStatusHtml(scheduledAt) {
+  var formattedDate = formatParisDate(scheduledAt);
+  var formattedTime = formatParisTime(scheduledAt);
+  return '<p><strong>Entretien téléphonique</strong></p><p>' + formattedDate + (formattedTime ? ' à ' + formattedTime : '') + '</p>';
+}
+
+function getVisibleElement(ids) {
+  for (var i = 0; i < ids.length; i++) {
+    var element = document.getElementById(ids[i]);
+    if (element && element.offsetParent !== null) {
+      return element;
+    }
+  }
+  return null;
+}
+
+function renderPhoneAppointmentStatus(scheduledAt) {
+  var cards = [
+    { cardId: 'appointmentStatusCard', detailsId: 'appointmentDetails' },
+    { cardId: 'appointmentStatusCardSecondary', detailsId: 'appointmentDetailsSecondary' }
+  ];
+  var detailsHtml = buildPhoneStatusHtml(scheduledAt);
+
+  for (var i = 0; i < cards.length; i++) {
+    var card = document.getElementById(cards[i].cardId);
+    var details = document.getElementById(cards[i].detailsId);
+    if (!card || !details) continue;
+    details.innerHTML = detailsHtml;
+    card.style.display = 'block';
+    card.style.opacity = '1';
+    card.style.animation = 'fadeIn 0.6s ease-in-out';
+  }
+
+  if (bookingCalendars.phonePrimary) bookingCalendars.phonePrimary.setLocked(true);
+  if (bookingCalendars.phoneSecondary) bookingCalendars.phoneSecondary.setLocked(true);
+}
+
+function mapBookingError(status, data) {
+  if (status === 401) return 'Votre session a expiré. Merci de vous reconnecter.';
+  if (status === 403) return 'Ce compte ne correspond pas au dossier en cours.';
+  if (status === 404) return 'Client introuvable.';
+  if (status === 409) return 'Ce créneau vient d’être réservé. Merci d’en choisir un autre.';
+  return data && data.error ? data.error : 'Une erreur est survenue.';
+}
+
+async function readJsonResponse(response) {
+  try {
+    return await response.json();
+  } catch (error) {
+    return {};
+  }
+}
+
+function markSelectedSlotUnavailable(calendar, slot) {
+  if (!calendar || !slot || !calendar.state) return;
+  var monthData = calendar.state.monthCache[getMonthKey(calendar.state.month)];
+  if (!monthData || !monthData.byDate[slot.date]) return;
+
+  var daySlots = monthData.byDate[slot.date];
+  for (var i = 0; i < daySlots.length; i++) {
+    if (daySlots[i].time === slot.time) {
+      daySlots[i].available = false;
+    }
+  }
+}
+
+function createNativeBookingCalendar(rootId, options) {
+  var root = document.getElementById(rootId);
+  if (!root) return null;
+
+  var bookingWindow = getBookingWindowForType(options.type);
+  var state = {
+    month: getMonthDescriptor(buildParisDateTime(bookingWindow.firstDate, '12:00:00')),
+    monthCache: {},
+    selectedDate: null,
+    selectedSlotKey: null,
+    loading: false,
+    fetchError: '',
+    actionError: '',
+    booking: false,
+    locked: false
+  };
+
+  function canGoToPreviousMonth() {
+    return getMonthEnd(shiftMonthDescriptor(state.month, -1)) >= bookingWindow.firstDate;
+  }
+
+  function canGoToNextMonth() {
+    return getMonthStart(shiftMonthDescriptor(state.month, 1)) <= bookingWindow.lastDate;
+  }
+
+  function ensureSelectedDate() {
+    var monthData = state.monthCache[getMonthKey(state.month)];
+    if (!monthData) return;
+
+    if (state.selectedDate && monthData.byDate[state.selectedDate]) {
+      return;
+    }
+
+    var dates = Object.keys(monthData.byDate).sort();
+    var preferred = null;
+
+    for (var i = 0; i < dates.length; i++) {
+      var slots = monthData.byDate[dates[i]] || [];
+      var hasAvailable = slots.some(function(slot) { return slot.available; });
+      if (hasAvailable) {
+        preferred = dates[i];
+        break;
+      }
+    }
+
+    state.selectedDate = preferred || (dates.length ? dates[0] : null);
+    state.selectedSlotKey = null;
+  }
+
+  function getSelectedSlots() {
+    var monthData = state.monthCache[getMonthKey(state.month)];
+    if (!monthData || !state.selectedDate) return [];
+    return monthData.byDate[state.selectedDate] || [];
+  }
+
+  function render() {
+    var monthData = state.monthCache[getMonthKey(state.month)];
+    var daysHtml = '';
+    var firstDayOffset = (getWeekdayFromDateString(getMonthStart(state.month)) + 6) % 7;
+    var totalDays = Number(getMonthEnd(state.month).slice(-2));
+
+    for (var emptyIndex = 0; emptyIndex < firstDayOffset; emptyIndex++) {
+      daysHtml += '<div class="native-day is-empty" aria-hidden="true"></div>';
+    }
+
+    for (var day = 1; day <= totalDays; day++) {
+      var dateString = state.month.year + '-' + pad2(state.month.month) + '-' + pad2(day);
+      var daySlots = monthData && monthData.byDate[dateString] ? monthData.byDate[dateString] : [];
+      var hasSlots = daySlots.length > 0;
+      var hasAvailable = daySlots.some(function(slot) { return slot.available; });
+      var dayClasses = ['native-day'];
+      var metaLabel = '';
+      var disabled = !hasSlots || state.locked;
+
+      if (!hasSlots) {
+        dayClasses.push('is-disabled');
+        metaLabel = getWeekdayFromDateString(dateString) === 0 ? 'Fermé' : 'Aucun créneau';
+      } else if (hasAvailable) {
+        dayClasses.push('is-selectable');
+        metaLabel = daySlots.filter(function(slot) { return slot.available; }).length + ' dispo';
+      } else {
+        dayClasses.push('is-selectable');
+        metaLabel = 'Complet';
+      }
+
+      if (state.selectedDate === dateString) {
+        dayClasses.push('is-selected');
+      }
+
+      daysHtml +=
+        '<button type="button" class="' + dayClasses.join(' ') + '" data-date="' + dateString + '"' + (disabled ? ' disabled' : '') + '>' +
+          '<span class="native-day-number">' + day + '</span>' +
+          '<span class="native-day-meta">' + metaLabel + '</span>' +
+        '</button>';
+    }
+
+    var slotsHtml = '';
+    if (state.loading) {
+      slotsHtml = '<div class="native-loading">Chargement des créneaux...</div>';
+    } else if (state.fetchError) {
+      slotsHtml = '<div class="native-inline-error">' + state.fetchError + '</div>';
+    } else if (!state.selectedDate) {
+      slotsHtml = '<div class="native-inline-info">Sélectionnez un jour pour afficher les créneaux disponibles.</div>';
+    } else {
+      var selectedSlots = getSelectedSlots();
+      var selectedDateLabel = formatParisDate(buildParisDateTime(state.selectedDate, '12:00:00'));
+
+      if (!selectedSlots.length) {
+        slotsHtml = '<div class="native-inline-info">Aucun créneau disponible sur cette journée.</div>';
+      } else {
+        var slotButtons = '';
+        for (var slotIndex = 0; slotIndex < selectedSlots.length; slotIndex++) {
+          var slot = selectedSlots[slotIndex];
+          var slotKey = slot.date + '|' + slot.time;
+          var slotClasses = ['native-slot-btn', slot.available ? 'available' : 'unavailable'];
+          if (state.selectedSlotKey === slotKey) {
+            slotClasses.push('selected');
+          }
+
+          slotButtons +=
+            '<button type="button" class="' + slotClasses.join(' ') + '" data-slot-key="' + slotKey + '"' +
+              (slot.available && !state.locked ? '' : ' disabled') +
+              (slot.available ? '' : ' title="Créneau indisponible"') +
+            '>' + formatNativeSlotLabel(options.type, slot.time) + '</button>';
+        }
+
+        slotsHtml =
+          '<h5>' + selectedDateLabel + '</h5>' +
+          '<div class="native-slots-subtitle">' + options.slotsSubtitle + '</div>' +
+          '<div class="native-slot-grid">' + slotButtons + '</div>';
+
+        if (state.selectedSlotKey && !state.locked) {
+          var parts = state.selectedSlotKey.split('|');
+          var selectedTime = parts[1];
+          var selectedSlotLabel = formatNativeSlotLabel(options.type, selectedTime);
+          var summary = options.type === 'scan_3d'
+            ? 'Créneau retenu : ' + selectedDateLabel + ' - ' + selectedSlotLabel
+            : 'Créneau retenu : ' + selectedDateLabel + ' à ' + selectedSlotLabel;
+
+          slotsHtml +=
+            '<div class="native-confirm-panel">' +
+              '<div class="native-confirm-summary">' + summary + '</div>' +
+              '<button type="button" class="native-confirm-btn" data-confirm-slot="true"' + (state.booking ? ' disabled' : '') + '>' +
+                (state.booking ? 'Confirmation...' : options.confirmLabel) +
+              '</button>' +
+              (state.actionError ? '<div class="native-inline-error">' + state.actionError + '</div>' : '') +
+            '</div>';
+        } else if (state.actionError) {
+          slotsHtml += '<div class="native-inline-error">' + state.actionError + '</div>';
+        }
+      }
+    }
+
+    root.innerHTML =
+      '<div class="native-booking' + (state.locked ? ' is-locked' : '') + '">' +
+        '<div class="native-booking-top">' +
+          '<div class="native-booking-copy">' +
+            '<h4>' + options.heading + '</h4>' +
+            '<p>' + options.description + '</p>' +
+          '</div>' +
+          '<div class="native-booking-legend">' +
+            '<span class="native-legend-item"><span class="native-legend-dot available"></span>Disponible</span>' +
+            '<span class="native-legend-item"><span class="native-legend-dot unavailable"></span>Indisponible</span>' +
+          '</div>' +
+        '</div>' +
+        '<div class="native-booking-shell">' +
+          '<div class="native-calendar-panel">' +
+            '<div class="native-month-header">' +
+              '<button type="button" class="native-month-btn" data-nav="prev"' + (canGoToPreviousMonth() && !state.locked ? '' : ' disabled') + '>←</button>' +
+              '<div class="native-month-title">' + getMonthTitle(state.month) + '</div>' +
+              '<button type="button" class="native-month-btn" data-nav="next"' + (canGoToNextMonth() && !state.locked ? '' : ' disabled') + '>→</button>' +
+            '</div>' +
+            '<div class="native-weekdays">' + bookingWeekdayLabels.map(function(label) {
+              return '<div class="native-weekday">' + label + '</div>';
+            }).join('') + '</div>' +
+            '<div class="native-days-grid">' + daysHtml + '</div>' +
+          '</div>' +
+          '<div class="native-slots-panel">' + slotsHtml + '</div>' +
+        '</div>' +
+      '</div>';
+
+    var prevButton = root.querySelector('[data-nav="prev"]');
+    var nextButton = root.querySelector('[data-nav="next"]');
+
+    if (prevButton) {
+      prevButton.addEventListener('click', function() {
+        state.month = shiftMonthDescriptor(state.month, -1);
+        state.selectedDate = null;
+        state.selectedSlotKey = null;
+        state.actionError = '';
+        loadMonth();
+      });
+    }
+
+    if (nextButton) {
+      nextButton.addEventListener('click', function() {
+        state.month = shiftMonthDescriptor(state.month, 1);
+        state.selectedDate = null;
+        state.selectedSlotKey = null;
+        state.actionError = '';
+        loadMonth();
+      });
+    }
+
+    var dayButtons = root.querySelectorAll('[data-date]');
+    for (var dayButtonIndex = 0; dayButtonIndex < dayButtons.length; dayButtonIndex++) {
+      dayButtons[dayButtonIndex].addEventListener('click', function() {
+        state.selectedDate = this.getAttribute('data-date');
+        state.selectedSlotKey = null;
+        state.actionError = '';
+        render();
+      });
+    }
+
+    var slotButtons = root.querySelectorAll('[data-slot-key]');
+    for (var slotButtonIndex = 0; slotButtonIndex < slotButtons.length; slotButtonIndex++) {
+      slotButtons[slotButtonIndex].addEventListener('click', function() {
+        state.selectedSlotKey = this.getAttribute('data-slot-key');
+        state.actionError = '';
+        render();
+      });
+    }
+
+    var confirmButton = root.querySelector('[data-confirm-slot="true"]');
+    if (confirmButton) {
+      confirmButton.addEventListener('click', async function() {
+        if (!state.selectedSlotKey) return;
+
+        var selectedParts = state.selectedSlotKey.split('|');
+        var slot = { date: selectedParts[0], time: selectedParts[1] };
+
+        state.booking = true;
+        state.actionError = '';
+        render();
+
+        try {
+          await options.onConfirm(slot);
+          markSelectedSlotUnavailable(api, slot);
+        } catch (error) {
+          state.actionError = error && error.message ? error.message : 'Une erreur est survenue.';
+        } finally {
+          state.booking = false;
+          render();
+        }
+      });
+    }
+  }
+
+  async function loadMonth() {
+    var currentMonthKey = getMonthKey(state.month);
+    if (state.monthCache[currentMonthKey]) {
+      ensureSelectedDate();
+      render();
+      return;
+    }
+
+    var sharedCacheKey = options.type + '|' + currentMonthKey;
+    if (bookingAvailabilityCache[sharedCacheKey]) {
+      state.monthCache[currentMonthKey] = bookingAvailabilityCache[sharedCacheKey];
+      ensureSelectedDate();
+      render();
+      return;
+    }
+
+    state.loading = true;
+    state.fetchError = '';
+    render();
+
+    try {
+      var response = await fetch(
+        '/.netlify/functions/get-available-slots?type=' + encodeURIComponent(options.type) +
+        '&from=' + encodeURIComponent(getMonthStart(state.month)) +
+        '&to=' + encodeURIComponent(getMonthEnd(state.month))
+      );
+      var data = await readJsonResponse(response);
+
+      if (!response.ok) {
+        throw new Error(mapBookingError(response.status, data));
+      }
+
+      var slots = Array.isArray(data.slots) ? data.slots.slice() : [];
+      slots.sort(function(a, b) {
+        if (a.date === b.date) return a.time.localeCompare(b.time);
+        return a.date.localeCompare(b.date);
+      });
+
+      var byDate = {};
+      for (var i = 0; i < slots.length; i++) {
+        if (!byDate[slots[i].date]) {
+          byDate[slots[i].date] = [];
+        }
+        byDate[slots[i].date].push(slots[i]);
+      }
+
+      state.monthCache[currentMonthKey] = { byDate: byDate };
+      bookingAvailabilityCache[sharedCacheKey] = state.monthCache[currentMonthKey];
+      ensureSelectedDate();
+    } catch (error) {
+      state.fetchError = error && error.message ? error.message : 'Impossible de charger les créneaux.';
+    } finally {
+      state.loading = false;
+      render();
+    }
+  }
+
+  var api = {
+    state: state,
+    setLocked: function(locked) {
+      state.locked = !!locked;
+      render();
+    },
+    refresh: function() {
+      delete bookingAvailabilityCache[options.type + '|' + getMonthKey(state.month)];
+      delete state.monthCache[getMonthKey(state.month)];
+      return loadMonth();
+    }
+  };
+
+  render();
+  loadMonth();
+
+  return api;
+}
+
+function initNativeBookingCalendars() {
+  if (!bookingCalendars.phonePrimary) {
+    bookingCalendars.phonePrimary = createNativeBookingCalendar('phoneBookingCalendarPrimary', {
+      type: 'phone_call',
+      heading: 'Choisissez une date puis un créneau',
+      description: 'Disponibilités mises à jour en temps réel pour les entretiens téléphoniques.',
+      slotsSubtitle: 'Créneaux de 30 minutes, du lundi au samedi entre 8h00 et 20h00.',
+      confirmLabel: 'Confirmer ce créneau',
+      onConfirm: submitPhoneAppointment
+    });
+  }
+
+  if (!bookingCalendars.phoneSecondary) {
+    bookingCalendars.phoneSecondary = createNativeBookingCalendar('phoneBookingCalendarSecondary', {
+      type: 'phone_call',
+      heading: 'Choisissez une date puis un créneau',
+      description: 'Sélectionnez le créneau le plus confortable pour votre échange avec notre équipe.',
+      slotsSubtitle: 'Créneaux de 30 minutes, du lundi au samedi entre 8h00 et 20h00.',
+      confirmLabel: 'Confirmer ce créneau',
+      onConfirm: submitPhoneAppointment
+    });
+  }
+
+  if (!bookingCalendars.scan) {
+    bookingCalendars.scan = createNativeBookingCalendar('scanBookingCalendar', {
+      type: 'scan_3d',
+      heading: 'Sélectionnez votre demi-journée',
+      description: 'Deux passages sont proposés par jour pour planifier votre scan 3D.',
+      slotsSubtitle: 'Deux créneaux par jour : matin (8h-12h) ou après-midi (14h-18h).',
+      confirmLabel: 'Confirmer ce créneau',
+      onConfirm: bookScanAppointment
+    });
+  }
+}
+
 function getScanDurationLabel(surface) {
   if (surface <= 50) return '45 min à 1h';
   if (surface <= 100) return '1h à 1h30';
@@ -4849,7 +5738,7 @@ function getScanDurationLabel(surface) {
 function resetScanBookingDisplay() {
   var info = document.getElementById('scanDurationInfo');
   var text = document.getElementById('scanDurationText');
-  var container = document.getElementById('scanCalendlyContainer');
+  var container = document.getElementById('scanBookingCalendarContainer');
   var slotSelected = document.getElementById('scanSlotSelected');
   var slotDetails = document.getElementById('scanSlotDetails');
 
@@ -4861,6 +5750,7 @@ function resetScanBookingDisplay() {
   }
   if (slotSelected) slotSelected.style.display = 'none';
   if (slotDetails) slotDetails.innerHTML = '';
+  if (bookingCalendars.scan) bookingCalendars.scan.setLocked(false);
 }
 
 async function loadScanDurationHint() {
@@ -4914,16 +5804,15 @@ async function hydratePendingScanAppointment() {
 
     if (result.error || !result.data) return null;
 
+    var slotLabel = formatNativeSlotLabel('scan_3d', formatParisTime(result.data.scheduled_at));
     window.__pendingScanAppointmentId = result.data.id;
     window.__pendingScanSlot = {
       startTime: result.data.scheduled_at,
-      eventTitle: 'Scan 3D Matterport'
+      eventTitle: slotLabel
     };
     applyScanSlotDisplay({
-      event: {
-        title: 'Scan 3D Matterport',
-        start_time: result.data.scheduled_at
-      }
+      startTime: result.data.scheduled_at,
+      eventTitle: slotLabel
     });
     revealScanPaymentSection();
     return result.data;
@@ -4934,70 +5823,117 @@ async function hydratePendingScanAppointment() {
 }
 
 function applyScanSlotDisplay(payload) {
-  var eventTitle = payload.event && payload.event.title ? payload.event.title : 'Scan 3D Matterport';
-  var startTime = payload.event && payload.event.start_time ? payload.event.start_time : null;
+  var eventTitle = payload && payload.eventTitle ? payload.eventTitle : 'Scan 3D Matterport';
+  var startTime = payload && payload.startTime ? payload.startTime : null;
   var startDate = startTime ? new Date(startTime) : null;
   var formattedDate = startDate
-    ? startDate.toLocaleDateString('fr-FR', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })
+    ? formatParisDate(startDate)
     : 'Date confirmée';
-  var formattedTime = startDate
-    ? startDate.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })
-    : '';
+  var formattedSlot = startDate ? formatNativeSlotLabel('scan_3d', formatParisTime(startDate)) : eventTitle;
 
-  var container = document.getElementById('scanCalendlyContainer');
+  var container = document.getElementById('scanBookingCalendarContainer');
   if (container) {
     container.style.opacity = '0.4';
     container.style.pointerEvents = 'none';
   }
+  if (bookingCalendars.scan) bookingCalendars.scan.setLocked(true);
 
   var slotSelected = document.getElementById('scanSlotSelected');
   var slotDetails = document.getElementById('scanSlotDetails');
   if (slotSelected && slotDetails) {
     slotDetails.innerHTML =
-      '<p style="margin:0;"><strong>' + eventTitle + '</strong></p>' +
-      '<p style="margin:4px 0 0 0;">' + formattedDate + (formattedTime ? ' à ' + formattedTime : '') + '</p>';
+      '<p style="margin:0;"><strong>Scan 3D Matterport</strong></p>' +
+      '<p style="margin:4px 0 0 0;">' + formattedDate + (formattedSlot ? ' - ' + formattedSlot : '') + '</p>';
     slotSelected.style.display = 'block';
   }
 }
 
-async function bookScanAppointment(scheduledAt, eventTitle) {
+async function submitPhoneAppointment(slot) {
   if (!currentClientId) {
-    console.warn('bookScanAppointment: currentClientId manquant');
-    return null;
+    throw new Error('Identifiant client manquant.');
   }
 
-  try {
-    var token = getIdentityAccessToken();
-    var response = await fetch('/.netlify/functions/book-scan', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': token ? 'Bearer ' + token : ''
-      },
-      body: JSON.stringify({
-        clientId: currentClientId,
-        scheduledAt: scheduledAt,
-        durationMinutes: 90,
-        location: clientProject && clientProject.adresse ? clientProject.adresse : '',
-        eventTitle: eventTitle
-      })
-    });
+  var scheduledAt = buildParisDateTime(slot.date, slot.time).toISOString();
+  var token = getIdentityAccessToken();
+  var response = await fetch('/.netlify/functions/book-appointment', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': token ? 'Bearer ' + token : ''
+    },
+    body: JSON.stringify({
+      clientId: currentClientId,
+      scheduledAt: scheduledAt,
+      durationMinutes: bookingRules.phone_call.durationMinutes
+    })
+  });
 
-    var data = await response.json();
-    if (!response.ok) {
-      console.error('bookScanAppointment error:', data.error || data);
-      return null;
-    }
-
-    console.log('✅ RDV scan enregistré:', data.appointmentId);
-    window.__pendingScanAppointmentId = data.appointmentId;
-    currentPipelineStatus = 'scan_scheduled';
-    revealScanPaymentSection();
-    return data.appointmentId;
-  } catch (err) {
-    console.error('bookScanAppointment exception:', err);
-    return null;
+  var data = await readJsonResponse(response);
+  if (!response.ok) {
+    throw new Error(mapBookingError(response.status, data));
   }
+
+  currentPipelineStatus = 'call_requested';
+  renderPhoneAppointmentStatus(scheduledAt);
+  if (currentPhase >= 3) loadAppointments();
+
+  var visibleCard = getVisibleElement(['appointmentStatusCardSecondary', 'appointmentStatusCard']);
+  if (visibleCard) {
+    visibleCard.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  }
+
+  return data;
+}
+
+async function bookScanAppointment(slot) {
+  if (!currentClientId) {
+    throw new Error('Identifiant client manquant.');
+  }
+
+  var scheduledAt = buildParisDateTime(slot.date, slot.time).toISOString();
+  var eventTitle = formatNativeSlotLabel('scan_3d', slot.time);
+  var token = getIdentityAccessToken();
+  var response = await fetch('/.netlify/functions/book-scan', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': token ? 'Bearer ' + token : ''
+    },
+    body: JSON.stringify({
+      clientId: currentClientId,
+      scheduledAt: scheduledAt,
+      durationMinutes: bookingRules.scan_3d.durationMinutes,
+      location: clientProject && clientProject.adresse ? clientProject.adresse : '',
+      eventTitle: eventTitle
+    })
+  });
+
+  var data = await readJsonResponse(response);
+  if (!response.ok) {
+    throw new Error(mapBookingError(response.status, data));
+  }
+
+  console.log('✅ RDV scan enregistré:', data.appointmentId);
+  window.__pendingScanAppointmentId = data.appointmentId;
+  window.__pendingScanSlot = {
+    startTime: scheduledAt,
+    eventTitle: eventTitle
+  };
+  currentPipelineStatus = 'scan_scheduled';
+  applyScanSlotDisplay({
+    startTime: scheduledAt,
+    eventTitle: eventTitle
+  });
+  revealScanPaymentSection();
+  if (currentPhase >= 3) loadAppointments();
+
+  var paySection = document.getElementById('scanPaymentSection');
+  if (paySection) {
+    paySection.style.display = 'block';
+    paySection.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  }
+
+  return data.appointmentId;
 }
 
 async function initiateScanPayment() {
@@ -5051,23 +5987,6 @@ async function initiateScanPayment() {
   }
 }
 
-function handleScanSlotSelected(payload) {
-  console.log('📐 Scan 3D slot selected:', payload);
-
-  var eventTitle = payload.event && payload.event.title ? payload.event.title : 'Scan 3D Matterport';
-  var startTime = payload.event && payload.event.start_time ? payload.event.start_time : null;
-
-  applyScanSlotDisplay(payload);
-  window.__pendingScanSlot = { startTime: startTime, eventTitle: eventTitle };
-  revealScanPaymentSection();
-  var paySection = document.getElementById('scanPaymentSection');
-  if (paySection) {
-    paySection.style.display = 'block';
-    paySection.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-  }
-  bookScanAppointment(startTime, eventTitle);
-}
-
 function showPaymentSuccessBanner() {
   var banner = document.createElement('div');
   banner.style.cssText =
@@ -5090,95 +6009,10 @@ function showPaymentCancelledBanner() {
   setTimeout(function() { banner.remove(); }, 5000);
 }
 
-// ═════════════════════════════════════════════════════════════════════════════
-// APPOINTMENT BOOKING (B-3) - Handle Calendly webhook callback
-// ═════════════════════════════════════════════════════════════════════════════
-
-/**
- * Listen for Calendly postMessage event when an appointment is scheduled
- * Calendly iframe posts message with appointment details via postMessage API
- */
-window.addEventListener('message', function(e) {
-  if (e.origin !== 'https://calendly.com') return;
-
-  // Check if this is a calendly event
-  if (e.data.event && e.data.event.indexOf('calendly') === 0) {
-    console.log('📞 Calendly event received:', e.data);
-
-    // When invitee.created event fires, Calendly shows a confirmation
-    // We'll also update our UI to show appointment was confirmed
-    if (e.data.event === 'calendly.event_scheduled') {
-      var sourceFrame = e.source;
-      var scanIframe = document.getElementById('scanCalendlyIframe');
-
-      if (scanIframe && scanIframe.contentWindow === sourceFrame) {
-        handleScanSlotSelected(e.data.payload);
-      } else {
-        handleAppointmentConfirmed(e.data.payload);
-      }
-    }
-  }
-});
-
-/**
- * Handle appointment confirmation from Calendly
- * Display confirmation message and update UI
- */
-function handleAppointmentConfirmed(payload) {
-  console.log('✅ Appointment confirmed:', payload);
-
-  // Fade the Calendly iframe
-  const calendarlyContainer = document.querySelector('.appointment-booking-section div[style*="border"]');
-  if (calendarlyContainer) {
-    calendarlyContainer.style.opacity = '0.5';
-    calendarlyContainer.style.pointerEvents = 'none';
-  }
-
-  // Show appointment status card
-  const statusCard = document.getElementById('appointmentStatusCard');
-  const detailsDiv = document.getElementById('appointmentDetails');
-
-  if (statusCard && detailsDiv) {
-    // Extract appointment info from payload
-    const eventTitle = payload.event?.title || 'Entretien téléphonique';
-    const eventStartTime = payload.event?.start_time;
-    const eventEndTime = payload.event?.end_time;
-
-    // Format dates for display
-    const startDate = eventStartTime ? new Date(eventStartTime) : null;
-    const formattedDate = startDate
-      ? startDate.toLocaleDateString('fr-FR', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })
-      : 'Date confirmée';
-    const formattedTime = startDate
-      ? startDate.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })
-      : '';
-
-    // Update details HTML
-    detailsDiv.innerHTML = `
-      <p><strong>${eventTitle}</strong></p>
-      <p>${formattedDate} à ${formattedTime}</p>
-    `;
-
-    // Show the status card with animation
-    statusCard.style.display = 'block';
-    setTimeout(() => {
-      statusCard.style.opacity = '1';
-      statusCard.style.animation = 'fadeIn 0.6s ease-in-out';
-    }, 100);
-  }
-}
-
-/**
- * Poll backend for appointment status
- * Alternative to relying solely on Calendly postMessage
- * (Optional, for redundancy)
- */
 async function checkAppointmentStatus() {
   try {
-    // Utilise Netlify Identity (currentUser) + UUID Supabase (currentClientId)
     if (!currentUser || !currentClientId) return;
 
-    // Query latest appointment for this user
     const { data, error } = await supabaseClient
       .from('appointments')
       .select('*')
@@ -5191,45 +6025,36 @@ async function checkAppointmentStatus() {
       return;
     }
 
-    if (data && data.length > 0) {
-      const appointment = data[0];
-      console.log('📞 Latest appointment found:', appointment);
+    if (!data || data.length === 0) return;
 
-      // If appointment was created in the last 2 minutes, show confirmation
-      const createdTime = new Date(appointment.created_at);
-      const now = new Date();
-      const diffMinutes = (now - createdTime) / 60000;
+    var appointment = data[0];
+    if (appointment.status === 'cancelled') return;
 
-      if (diffMinutes < 2) {
-        var payload = {
-          event: {
-            title: appointment.type === 'scan_3d' ? 'Scan 3D Matterport' : 'Entretien téléphonique',
-            start_time: appointment.scheduled_at,
-            end_time: appointment.scheduled_at
-          }
-        };
+    if (appointment.type === 'scan_3d' && currentPipelineStatus === 'scan_scheduled') {
+      var slotLabel = formatNativeSlotLabel('scan_3d', formatParisTime(appointment.scheduled_at));
+      window.__pendingScanAppointmentId = appointment.id;
+      window.__pendingScanSlot = {
+        startTime: appointment.scheduled_at,
+        eventTitle: slotLabel
+      };
+      applyScanSlotDisplay({
+        startTime: appointment.scheduled_at,
+        eventTitle: slotLabel
+      });
+      revealScanPaymentSection();
+      return;
+    }
 
-        if (appointment.type === 'scan_3d') {
-          window.__pendingScanAppointmentId = appointment.id;
-          window.__pendingScanSlot = {
-            startTime: appointment.scheduled_at,
-            eventTitle: payload.event.title
-          };
-          applyScanSlotDisplay(payload);
-          revealScanPaymentSection();
-        } else {
-          handleAppointmentConfirmed(payload);
-        }
-      }
+    if (appointment.type === 'phone_call' && currentPipelineStatus === 'call_requested') {
+      renderPhoneAppointmentStatus(appointment.scheduled_at);
     }
   } catch (error) {
     console.error('Error checking appointment:', error);
   }
 }
 
-// Check for appointments when user first loads the page
 document.addEventListener('DOMContentLoaded', function() {
-  // Small delay to ensure Supabase is initialized
+  initNativeBookingCalendars();
   setTimeout(checkAppointmentStatus, 500);
 });
 

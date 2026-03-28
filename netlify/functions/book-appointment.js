@@ -1,190 +1,173 @@
-/**
- * Netlify Function: book-appointment.js
- *
- * Purpose:
- *   - Receive Calendly webhook POST for scheduled appointment events
- *   - Extract appointment data from webhook payload
- *   - Insert new appointment record into Supabase appointments table
- *   - Return 200 OK to acknowledge webhook receipt
- *
- * Webhook Integration:
- *   - Calendly webhook URL: https://<site-url>/.netlify/functions/book-appointment
- *   - Event types: "invitee.created" (when a booking is made)
- *
- * Expected Calendly payload structure:
- *   {
- *     "event": "invitee.created",
- *     "payload": {
- *       "scheduled_event": {
- *         "event_memberships": [{ "user": { "email": "..." } }],
- *         "start_time": "2026-03-28T14:00:00Z",
- *         "duration_minutes": 30
- *       },
- *       "invitee": {
- *         "email": "client@example.com",
- *         "name": "Client Name"
- *       }
- *     }
- *   }
- */
-
 const { createClient } = require('@supabase/supabase-js');
+const { upsertClientPipeline } = require('./_client-pipeline');
+const { APPOINTMENT_RULES, findConflict, isSlotBookable } = require('./_appointment-utils');
 
-// Initialize Supabase client — service key requis : webhook Calendly non authentifié
-const supabaseUrl = process.env.SUPABASE_URL;
-const supabaseKey = process.env.SUPABASE_SERVICE_KEY;
+const headers = {
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Methods': 'POST, OPTIONS',
+  'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+  'Content-Type': 'application/json',
+};
 
-if (!supabaseUrl || !supabaseKey) {
-  console.error('Missing Supabase credentials in environment variables (SUPABASE_URL / SUPABASE_SERVICE_KEY)');
+const supabase = createClient(
+  process.env.SUPABASE_URL,
+  process.env.SUPABASE_SERVICE_KEY
+);
+
+function normalizeEmail(email) {
+  return typeof email === 'string' ? email.trim().toLowerCase() : '';
 }
 
-const supabase = createClient(supabaseUrl, supabaseKey);
-
-/**
- * Helper: Get or find client_id from email
- * Searches clients table for matching email
- * Returns client_id or null if not found
- */
-async function getClientIdFromEmail(email) {
-  try {
-    const { data, error } = await supabase
-      .from('clients')
-      .select('id')
-      .eq('email', email)
-      .single();
-
-    if (error) {
-      console.warn(`Client not found for email: ${email}`, error.message);
-      return null;
-    }
-
-    return data?.id || null;
-  } catch (err) {
-    console.error(`Error fetching client for email ${email}:`, err);
-    return null;
-  }
-}
-
-/**
- * Main handler function
- */
 exports.handler = async (event, context) => {
-  console.log('📞 Received webhook from Calendly');
+  if (event.httpMethod === 'OPTIONS') {
+    return { statusCode: 200, headers, body: '' };
+  }
 
-  // Only accept POST requests
   if (event.httpMethod !== 'POST') {
     return {
       statusCode: 405,
+      headers,
       body: JSON.stringify({ error: 'Method not allowed' }),
     };
   }
 
+  const identityUser = context && context.clientContext ? context.clientContext.user : null;
+  if (!identityUser) {
+    return {
+      statusCode: 401,
+      headers,
+      body: JSON.stringify({ error: 'Unauthorized' }),
+    };
+  }
+
+  let body;
   try {
-    // Parse webhook payload
-    const payload = typeof event.body === 'string'
-      ? JSON.parse(event.body)
-      : event.body;
+    body = JSON.parse(event.body || '{}');
+  } catch (error) {
+    return {
+      statusCode: 400,
+      headers,
+      body: JSON.stringify({ error: 'Invalid JSON body' }),
+    };
+  }
 
-    // Verify webhook is for a scheduled event
-    if (payload.event !== 'invitee.created') {
-      console.log(`⚠️  Ignoring event type: ${payload.event}`);
-      return { statusCode: 200, body: JSON.stringify({ received: true }) };
+  try {
+    const clientId = body.clientId;
+    const scheduledAt = body.scheduledAt;
+    const durationMinutes = APPOINTMENT_RULES.phone_call.durationMinutes;
+
+    if (!clientId || !scheduledAt) {
+      return {
+        statusCode: 400,
+        headers,
+        body: JSON.stringify({ error: 'clientId and scheduledAt are required' }),
+      };
     }
 
-    const inviteeData = payload.payload?.invitee;
-    const scheduledEvent = payload.payload?.scheduled_event;
-
-    if (!inviteeData || !scheduledEvent) {
-      console.warn('⚠️  Missing invitee or scheduled_event data in webhook');
-      return { statusCode: 400, body: JSON.stringify({ error: 'Invalid payload' }) };
+    const requestedStart = new Date(scheduledAt);
+    if (Number.isNaN(requestedStart.getTime())) {
+      return {
+        statusCode: 400,
+        headers,
+        body: JSON.stringify({ error: 'scheduledAt must be a valid ISO datetime' }),
+      };
     }
 
-    // Extract appointment data
-    const clientEmail = inviteeData.email;
-    const clientName = inviteeData.name;
-    const scheduledAt = scheduledEvent.start_time;
-    const durationMinutes = scheduledEvent.duration_minutes || 30;
+    if (!isSlotBookable('phone_call', requestedStart)) {
+      return {
+        statusCode: 400,
+        headers,
+        body: JSON.stringify({ error: 'Requested slot is outside booking rules' }),
+      };
+    }
 
-    console.log(`📅 Processing appointment for ${clientEmail} at ${scheduledAt}`);
+    const { data: client, error: clientError } = await supabase
+      .from('clients')
+      .select('id, email, status')
+      .eq('id', clientId)
+      .single();
 
-    // Find client_id from email
-    const clientId = await getClientIdFromEmail(clientEmail);
-
-    if (!clientId) {
-      console.error(`❌ Client not found for email: ${clientEmail}`);
+    if (clientError || !client) {
       return {
         statusCode: 404,
-        body: JSON.stringify({ error: 'Client not found' }),
+        headers,
+        body: JSON.stringify({ error: 'Client introuvable' }),
       };
     }
 
-    console.log(`✅ Found client: ${clientId}`);
-
-    // Idempotence : vérifier si un RDV identique existe déjà (même client + même créneau)
-    const { data: existingAppt } = await supabase
-      .from('appointments')
-      .select('id')
-      .eq('client_id', clientId)
-      .eq('scheduled_at', scheduledAt)
-      .eq('type', 'phone_call')
-      .maybeSingle();
-
-    if (existingAppt) {
-      console.log(`⚠️  Appointment already exists for ${clientEmail} at ${scheduledAt} (id: ${existingAppt.id}) — skipping (idempotence)`);
+    if (
+      normalizeEmail(identityUser.email) &&
+      normalizeEmail(client.email) &&
+      normalizeEmail(identityUser.email) !== normalizeEmail(client.email)
+    ) {
       return {
-        statusCode: 200,
-        body: JSON.stringify({
-          success: true,
-          duplicate: true,
-          message: 'Appointment already recorded',
-          appointmentId: existingAppt.id,
-        }),
+        statusCode: 403,
+        headers,
+        body: JSON.stringify({ error: 'Forbidden' }),
       };
     }
 
-    // Insert appointment into Supabase
-    const { data, error } = await supabase
+    const conflict = await findConflict(supabase, requestedStart, durationMinutes);
+    if (conflict) {
+      return {
+        statusCode: 409,
+        headers,
+        body: JSON.stringify({ error: 'Ce creneau est deja indisponible' }),
+      };
+    }
+
+    const { data: appointment, error: insertError } = await supabase
       .from('appointments')
       .insert([
         {
           client_id: clientId,
           type: 'phone_call',
           status: 'requested',
-          scheduled_at: scheduledAt,
+          scheduled_at: requestedStart.toISOString(),
           duration_minutes: durationMinutes,
           location: 'phone',
-          notes: `Scheduled via Calendly by ${clientName} (${clientEmail})`,
+          notes: 'Reserve via espace client',
         },
       ])
-      .select();
+      .select('id, scheduled_at, duration_minutes, status, type')
+      .single();
 
-    if (error) {
-      console.error('❌ Error inserting appointment:', error);
+    if (insertError || !appointment) {
+      console.error('book-appointment insert error:', insertError);
       return {
         statusCode: 500,
-        body: JSON.stringify({ error: 'Failed to save appointment', details: error.message }),
+        headers,
+        body: JSON.stringify({ error: 'Failed to save appointment' }),
       };
     }
 
-    console.log(`✅ Appointment created:`, data[0]);
+    try {
+      await upsertClientPipeline({
+        email: client.email,
+        fields: {
+          call_scheduled_at: appointment.scheduled_at,
+        },
+        status: 'call_requested',
+        strict: true,
+      });
+    } catch (updateError) {
+      console.warn('book-appointment pipeline update failed:', updateError.message);
+    }
 
-    // Return success response to Calendly
     return {
       statusCode: 200,
+      headers,
       body: JSON.stringify({
         success: true,
-        message: 'Appointment recorded successfully',
-        appointmentId: data[0].id,
+        appointmentId: appointment.id,
       }),
     };
   } catch (error) {
-    console.error('❌ Webhook handler error:', error);
+    console.error('book-appointment error:', error);
     return {
       statusCode: 500,
-      body: JSON.stringify({
-        error: 'Internal server error',
-        message: error.message
-      }),
+      headers,
+      body: JSON.stringify({ error: 'Internal server error' }),
     };
   }
 };

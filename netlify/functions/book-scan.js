@@ -1,42 +1,59 @@
 const { createClient } = require('@supabase/supabase-js');
+const { APPOINTMENT_RULES, findConflict, isSlotBookable } = require('./_appointment-utils');
 
 const supabase = createClient(
   process.env.SUPABASE_URL,
   process.env.SUPABASE_SERVICE_KEY
 );
 
-exports.handler = async (event, context) => {
-  const headers = {
-    'Access-Control-Allow-Origin': '*',
-    'Access-Control-Allow-Methods': 'POST, OPTIONS',
-    'Access-Control-Allow-Headers': 'Content-Type, Authorization',
-    'Content-Type': 'application/json'
-  };
+const headers = {
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Methods': 'POST, OPTIONS',
+  'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+  'Content-Type': 'application/json',
+};
 
+function normalizeEmail(email) {
+  return typeof email === 'string' ? email.trim().toLowerCase() : '';
+}
+
+exports.handler = async (event, context) => {
   if (event.httpMethod === 'OPTIONS') {
     return { statusCode: 200, headers, body: '' };
   }
 
   if (event.httpMethod !== 'POST') {
-    return { statusCode: 405, headers, body: JSON.stringify({ error: 'Method not allowed' }) };
+    return {
+      statusCode: 405,
+      headers,
+      body: JSON.stringify({ error: 'Method not allowed' }),
+    };
   }
 
   const identityUser = context && context.clientContext ? context.clientContext.user : null;
   if (!identityUser) {
-    return { statusCode: 401, headers, body: JSON.stringify({ error: 'Unauthorized' }) };
+    return {
+      statusCode: 401,
+      headers,
+      body: JSON.stringify({ error: 'Unauthorized' }),
+    };
   }
 
   let body;
   try {
     body = JSON.parse(event.body || '{}');
   } catch (error) {
-    return { statusCode: 400, headers, body: JSON.stringify({ error: 'Invalid JSON body' }) };
+    return {
+      statusCode: 400,
+      headers,
+      body: JSON.stringify({ error: 'Invalid JSON body' }),
+    };
   }
 
   try {
     const clientId = body.clientId;
     const scheduledAt = body.scheduledAt;
-    const durationMinutes = body.durationMinutes || 90;
+    const durationMinutes = APPOINTMENT_RULES.scan_3d.durationMinutes;
     const location = body.location;
     const eventTitle = body.eventTitle;
 
@@ -44,7 +61,24 @@ exports.handler = async (event, context) => {
       return {
         statusCode: 400,
         headers,
-        body: JSON.stringify({ error: 'clientId et scheduledAt requis' })
+        body: JSON.stringify({ error: 'clientId et scheduledAt requis' }),
+      };
+    }
+
+    const requestedStart = new Date(scheduledAt);
+    if (Number.isNaN(requestedStart.getTime())) {
+      return {
+        statusCode: 400,
+        headers,
+        body: JSON.stringify({ error: 'scheduledAt invalide' }),
+      };
+    }
+
+    if (!isSlotBookable('scan_3d', requestedStart)) {
+      return {
+        statusCode: 400,
+        headers,
+        body: JSON.stringify({ error: 'Creneau hors des regles de reservation' }),
       };
     }
 
@@ -58,15 +92,19 @@ exports.handler = async (event, context) => {
       return {
         statusCode: 404,
         headers,
-        body: JSON.stringify({ error: 'Client introuvable' })
+        body: JSON.stringify({ error: 'Client introuvable' }),
       };
     }
 
-    if (identityUser.email && client.email && identityUser.email !== client.email) {
+    if (
+      normalizeEmail(identityUser.email) &&
+      normalizeEmail(client.email) &&
+      normalizeEmail(identityUser.email) !== normalizeEmail(client.email)
+    ) {
       return {
         statusCode: 403,
         headers,
-        body: JSON.stringify({ error: 'Forbidden' })
+        body: JSON.stringify({ error: 'Forbidden' }),
       };
     }
 
@@ -74,27 +112,42 @@ exports.handler = async (event, context) => {
       return {
         statusCode: 400,
         headers,
-        body: JSON.stringify({ error: `Statut invalide : ${client.status} (attendu: call_done)` })
+        body: JSON.stringify({ error: `Statut invalide : ${client.status} (attendu: call_done)` }),
+      };
+    }
+
+    const conflict = await findConflict(supabase, requestedStart, durationMinutes);
+    if (conflict) {
+      return {
+        statusCode: 409,
+        headers,
+        body: JSON.stringify({ error: 'Ce creneau est deja indisponible' }),
       };
     }
 
     const { data: appt, error: apptError } = await supabase
       .from('appointments')
-      .insert([{
-        client_id: clientId,
-        type: 'scan_3d',
-        status: 'requested',
-        scheduled_at: scheduledAt,
-        duration_minutes: durationMinutes,
-        location: location || client.adresse || '',
-        notes: `Réservé via Calendly. Créneau: ${eventTitle || 'Scan 3D Matterport'}`
-      }])
+      .insert([
+        {
+          client_id: clientId,
+          type: 'scan_3d',
+          status: 'requested',
+          scheduled_at: requestedStart.toISOString(),
+          duration_minutes: durationMinutes,
+          location: location || client.adresse || '',
+          notes: `Reserve via espace client. Creneau: ${eventTitle || 'Scan 3D Matterport'}`,
+        },
+      ])
       .select()
       .single();
 
-    if (apptError) {
+    if (apptError || !appt) {
       console.error('Erreur INSERT appointment:', apptError);
-      return { statusCode: 500, headers, body: JSON.stringify({ error: apptError.message }) };
+      return {
+        statusCode: 500,
+        headers,
+        body: JSON.stringify({ error: apptError ? apptError.message : 'Insert failed' }),
+      };
     }
 
     const { error: updateError } = await supabase
@@ -107,15 +160,19 @@ exports.handler = async (event, context) => {
       console.warn('book-scan client status update failed:', updateError.message);
     }
 
-    console.log(`RDV scan créé : ${appt.id} pour client ${clientId}`);
+    console.log(`RDV scan cree : ${appt.id} pour client ${clientId}`);
 
     return {
       statusCode: 200,
       headers,
-      body: JSON.stringify({ success: true, appointmentId: appt.id, appointment: appt })
+      body: JSON.stringify({ success: true, appointmentId: appt.id, appointment: appt }),
     };
   } catch (err) {
     console.error('book-scan error:', err);
-    return { statusCode: 500, headers, body: JSON.stringify({ error: err.message }) };
+    return {
+      statusCode: 500,
+      headers,
+      body: JSON.stringify({ error: err.message }),
+    };
   }
 };
