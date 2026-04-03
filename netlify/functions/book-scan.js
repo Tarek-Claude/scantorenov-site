@@ -1,4 +1,5 @@
 const { createClient } = require('@supabase/supabase-js');
+const { upsertClientPipeline } = require('./_client-pipeline');
 const { APPOINTMENT_RULES, findConflict, isSlotBookable } = require('./_appointment-utils');
 const { resolveIdentityClient } = require('./_identity-client');
 
@@ -129,13 +130,13 @@ exports.handler = async (event, context) => {
       };
     }
 
-    const { error: updateError } = await supabase
-      .from('clients')
-      .update({ status: 'scan_scheduled', updated_at: new Date().toISOString() })
-      .eq('id', clientId)
-      .in('status', ['call_done']);
-
-    if (updateError) {
+    try {
+      await upsertClientPipeline({
+        email: client.email,
+        status: 'scan_scheduled',
+        strict: true,
+      });
+    } catch (updateError) {
       console.warn('book-scan client status update failed:', updateError.message);
     }
 

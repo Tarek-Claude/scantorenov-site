@@ -119,7 +119,7 @@ async function resolveIdentityClient(options = {}) {
   if (!resolvedClient && createIfMissing) {
     const result = await upsertClientPipeline({
       email: normalizedEmail,
-      status: 'account_created',
+      status: 'identity_created',
       strict: true
     });
     resolvedClient = result && result.data ? result.data : null;

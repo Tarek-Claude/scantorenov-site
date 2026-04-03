@@ -59,7 +59,7 @@ exports.handler = async (event) => {
     const isCallbackRequest = data.requestType === 'callback' || (data.requestType !== 'inquiry' && inferredCallbackRequest);
     const requestTypeLabel = isCallbackRequest ? 'Demande de rappel téléphonique' : 'Renseignement';
     const requestPriorityLabel = isCallbackRequest ? 'HAUTE (rappel demandé)' : 'Normal';
-    const pipelineStatus = isCallbackRequest ? 'call_requested' : 'new_lead';
+    const pipelineStatus = isCallbackRequest ? 'call_requested' : 'contact_submitted';
     const adminSubject = isCallbackRequest
       ? `[RAPPEL TÉLÉPHONIQUE] Demande de rappel : ${fullName} – ${data.type_bien}`
       : `[RENSEIGNEMENT] Nouvelle demande : ${fullName} – ${data.type_bien}`;

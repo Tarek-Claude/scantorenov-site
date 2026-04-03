@@ -1,0 +1,2636 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - ScantoRenov</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Cormorant+Garamond:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+    <style>
+        :root {
+            --green: #2D5F3E;
+            --bg: #F5F2ED;
+            --card: #FFFFFF;
+            --text: #2A2A2A;
+            --muted: #8A8A8A;
+            --border: rgba(42, 42, 42, 0.1);
+            --success: #4CAF50;
+            --warning: #FF9800;
+            --error: #F44336;
+            --info: #2196F3;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html, body {
+            height: 100%;
+            width: 100%;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+        }
+
+        h1, h2, h3, h4 {
+            font-family: 'Cormorant Garamond', serif;
+            font-weight: 500;
+        }
+
+        button {
+            font-family: 'Inter', sans-serif;
+            cursor: pointer;
+            border: none;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.2s ease;
+        }
+
+        input, textarea {
+            font-family: 'Inter', sans-serif;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            padding: 10px 12px;
+            font-size: 14px;
+            transition: all 0.2s ease;
+        }
+
+        input:focus, textarea:focus {
+            outline: none;
+            border-color: var(--green);
+            box-shadow: 0 0 0 3px rgba(45, 95, 62, 0.1);
+        }
+
+        /* AUTH SCREEN */
+        .auth-screen {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            background: linear-gradient(135deg, var(--bg) 0%, #EFE9E0 100%);
+            padding: 20px;
+        }
+
+        .auth-card {
+            background: var(--card);
+            border-radius: 12px;
+            padding: 40px;
+            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+            width: 100%;
+            max-width: 400px;
+        }
+
+        .auth-card h1 {
+            font-size: 28px;
+            margin-bottom: 8px;
+            color: var(--green);
+        }
+
+        .auth-card p {
+            font-size: 14px;
+            color: var(--muted);
+            margin-bottom: 24px;
+        }
+
+        .auth-form {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .form-group label {
+            font-size: 13px;
+            font-weight: 500;
+            color: var(--text);
+        }
+
+        .form-group input {
+            width: 100%;
+        }
+
+        .auth-submit {
+            background-color: var(--green);
+            color: white;
+            padding: 12px 16px;
+            font-weight: 600;
+            margin-top: 8px;
+        }
+
+        .auth-submit:hover {
+            background-color: #235033;
+        }
+
+        .auth-error {
+            background-color: #FFEBEE;
+            color: #C62828;
+            padding: 12px;
+            border-radius: 6px;
+            font-size: 13px;
+            display: none;
+        }
+
+        .auth-error.show {
+            display: block;
+        }
+
+        /* MAIN DASHBOARD */
+        .dashboard {
+            display: none;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .dashboard.active {
+            display: flex;
+        }
+
+        .dashboard-header {
+            background: var(--card);
+            border-bottom: 1px solid var(--border);
+            padding: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 20px;
+        }
+
+        .dashboard-header h1 {
+            font-size: 24px;
+            color: var(--green);
+            margin: 0;
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+        }
+
+        .logout-btn {
+            background-color: #F5F2ED;
+            color: var(--text);
+            padding: 8px 16px;
+            font-size: 13px;
+        }
+
+        .logout-btn:hover {
+            background-color: #EAE7E0;
+        }
+
+        .dashboard-content {
+            display: flex;
+            flex: 1;
+            overflow: hidden;
+            gap: 20px;
+            padding: 20px;
+        }
+
+        /* SIDEBAR */
+        .dashboard-sidebar {
+            width: 280px;
+            background: var(--card);
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+            overflow-y: auto;
+        }
+
+        .sidebar-section {
+            margin-bottom: 24px;
+        }
+
+        .sidebar-section h3 {
+            font-size: 13px;
+            font-weight: 600;
+            text-transform: uppercase;
+            color: var(--muted);
+            margin-bottom: 12px;
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 6px 10px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+
+        .status-new-lead {
+            background-color: #E3F2FD;
+            color: #1976D2;
+        }
+
+        .status-account-created {
+            background-color: #E8F5E9;
+            color: #388E3C;
+        }
+
+        .status-onboarding-completed {
+            background-color: #E8F5E9;
+            color: #388E3C;
+        }
+
+        .status-contact-submitted,
+        .status-identity-created {
+            background-color: #EEF4FF;
+            color: #2457A6;
+        }
+
+        .status-call-requested {
+            background-color: #FFF3E0;
+            color: #F57C00;
+        }
+
+        .status-call-done {
+            background-color: #E8F5E9;
+            color: #388E3C;
+        }
+
+        .status-scan-scheduled {
+            background-color: #FCE4EC;
+            color: #C2185B;
+        }
+
+        .status-scan-payment-completed {
+            background-color: #E0F2F1;
+            color: #00796B;
+        }
+
+        .status-scan-completed {
+            background-color: #E8F5E9;
+            color: #388E3C;
+        }
+
+        .status-analysis-ready {
+            background-color: #E8F5E9;
+            color: #388E3C;
+        }
+
+        .status-avant-projet-ready {
+            background-color: #E8F5E9;
+            color: #388E3C;
+        }
+
+        .status-avant-projet-transmitted {
+            background-color: #E3F2FD;
+            color: #1565C0;
+        }
+
+        .status-accompaniment-subscribed {
+            background-color: #C8E6C9;
+            color: #1B5E20;
+        }
+
+        .status-abandoned {
+            background-color: #FBE9E7;
+            color: #BF360C;
+        }
+
+        .status-paused {
+            background-color: #FFF8E1;
+            color: #8D6E00;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-bottom: 12px;
+        }
+
+        .stat-box {
+            background: linear-gradient(135deg, var(--bg) 0%, #EFE9E0 100%);
+            padding: 12px;
+            border-radius: 6px;
+            text-align: center;
+        }
+
+        .stat-number {
+            font-size: 20px;
+            font-weight: 700;
+            color: var(--green);
+        }
+
+        .stat-label {
+            font-size: 11px;
+            color: var(--muted);
+            margin-top: 4px;
+        }
+
+        .pending-list {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .pending-item {
+            padding: 10px;
+            background: var(--bg);
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-size: 13px;
+        }
+
+        .pending-item:hover {
+            background: #EFE9E0;
+        }
+
+        .pending-item-name {
+            font-weight: 500;
+            margin-bottom: 4px;
+        }
+
+        .pending-item-action {
+            font-size: 12px;
+            color: var(--muted);
+        }
+
+        /* MAIN CONTENT */
+        .dashboard-main {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            overflow-y: auto;
+        }
+
+        .search-box {
+            background: var(--card);
+            border-radius: 8px;
+            padding: 16px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+            position: relative;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 12px 16px;
+            font-size: 14px;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+        }
+
+        .autocomplete-dropdown {
+            position: absolute;
+            top: 100%;
+            left: 16px;
+            right: 16px;
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-top: none;
+            border-radius: 0 0 6px 6px;
+            max-height: 300px;
+            overflow-y: auto;
+            z-index: 100;
+            display: none;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        .autocomplete-dropdown.show {
+            display: block;
+        }
+
+        .autocomplete-item {
+            padding: 12px 16px;
+            border-bottom: 1px solid var(--border);
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-size: 14px;
+        }
+
+        .autocomplete-item:last-child {
+            border-bottom: none;
+        }
+
+        .autocomplete-item:hover {
+            background-color: var(--bg);
+        }
+
+        .autocomplete-item-main {
+            font-weight: 500;
+            margin-bottom: 4px;
+        }
+
+        .autocomplete-item-info {
+            font-size: 12px;
+            color: var(--muted);
+        }
+
+        /* CLIENT PROFILE */
+        .client-profile {
+            display: none;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .client-profile.active {
+            display: flex;
+        }
+
+        .profile-header {
+            background: var(--card);
+            border-radius: 8px;
+            padding: 24px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+        }
+
+        .profile-header-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .profile-header-info h2 {
+            font-size: 24px;
+            margin-bottom: 8px;
+        }
+
+        .profile-header-contact {
+            font-size: 13px;
+            color: var(--muted);
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .profile-header-details {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 20px;
+            padding-top: 20px;
+            border-top: 1px solid var(--border);
+        }
+
+        .detail-item {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .detail-label {
+            font-size: 12px;
+            color: var(--muted);
+            font-weight: 500;
+            text-transform: uppercase;
+        }
+
+        .detail-value {
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        /* TIMELINE */
+        .timeline-section {
+            background: var(--card);
+            border-radius: 8px;
+            padding: 24px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+        }
+
+        .timeline-section h3 {
+            font-size: 16px;
+            margin-bottom: 20px;
+        }
+
+        .timeline-container {
+            overflow-x: auto;
+            padding-bottom: 12px;
+        }
+
+        .timeline {
+            display: flex;
+            gap: 8px;
+            min-width: min-content;
+            align-items: center;
+        }
+
+        .timeline-step {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+            position: relative;
+            flex-shrink: 0;
+        }
+
+        .timeline-step-circle {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            border: 2px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: white;
+            position: relative;
+            z-index: 10;
+        }
+
+        .timeline-step-circle.completed {
+            background-color: var(--green);
+            border-color: var(--green);
+            color: white;
+            font-weight: 700;
+            font-size: 12px;
+        }
+
+        .timeline-step-circle.current {
+            background-color: var(--green);
+            border-color: var(--green);
+            color: white;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% {
+                box-shadow: 0 0 0 0 rgba(45, 95, 62, 0.7);
+            }
+            50% {
+                box-shadow: 0 0 0 8px rgba(45, 95, 62, 0);
+            }
+        }
+
+        .timeline-step-label {
+            font-size: 11px;
+            text-align: center;
+            max-width: 60px;
+            color: var(--muted);
+            line-height: 1.3;
+        }
+
+        .timeline-step-label.completed {
+            color: var(--text);
+            font-weight: 500;
+        }
+
+        .timeline-connector {
+            width: 20px;
+            height: 2px;
+            background-color: var(--border);
+            flex-shrink: 0;
+        }
+
+        .timeline-connector.completed {
+            background-color: var(--green);
+        }
+
+        /* ACTION PANEL */
+        .action-panel {
+            background: var(--card);
+            border-radius: 8px;
+            padding: 24px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+        }
+
+        .action-panel h3 {
+            font-size: 16px;
+            margin-bottom: 8px;
+        }
+
+        .action-panel-description {
+            font-size: 13px;
+            color: var(--muted);
+            margin-bottom: 16px;
+        }
+
+        .action-button {
+            background-color: var(--green);
+            color: white;
+            padding: 12px 20px;
+            font-weight: 600;
+            margin-top: 12px;
+        }
+
+        .action-button:hover {
+            background-color: #235033;
+        }
+
+        .action-button:disabled {
+            background-color: var(--muted);
+            cursor: not-allowed;
+        }
+
+        .task-list {
+            display: grid;
+            gap: 12px;
+            margin-top: 16px;
+        }
+
+        .task-card {
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 14px 16px;
+            background: var(--bg);
+        }
+
+        .task-card-header {
+            display: flex;
+            justify-content: space-between;
+            gap: 12px;
+            align-items: flex-start;
+            margin-bottom: 6px;
+        }
+
+        .task-card-title {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--text);
+        }
+
+        .task-card-desc {
+            font-size: 13px;
+            color: var(--muted);
+            line-height: 1.5;
+        }
+
+        .task-meta {
+            margin-top: 8px;
+            font-size: 12px;
+            color: var(--muted);
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .task-state-badge {
+            display: inline-flex;
+            align-items: center;
+            padding: 4px 8px;
+            border-radius: 999px;
+            background: #E8F1EA;
+            color: var(--green);
+            font-size: 11px;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+
+        /* MARCEL CHAT */
+        .chat-panel {
+            background: var(--card);
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+            display: flex;
+            flex-direction: column;
+            height: 500px;
+        }
+
+        .chat-panel h3 {
+            font-size: 16px;
+            margin-bottom: 16px;
+        }
+
+        .chat-messages {
+            flex: 1;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-bottom: 16px;
+            padding: 12px;
+            background: var(--bg);
+            border-radius: 6px;
+        }
+
+        .chat-message {
+            display: flex;
+            gap: 8px;
+            max-width: 85%;
+        }
+
+        .chat-message.admin {
+            align-self: flex-end;
+            margin-left: auto;
+        }
+
+        .chat-bubble {
+            padding: 12px 16px;
+            border-radius: 6px;
+            font-size: 13px;
+            line-height: 1.5;
+        }
+
+        .chat-message.admin .chat-bubble {
+            background-color: var(--green);
+            color: white;
+        }
+
+        .chat-message.marcel .chat-bubble {
+            background-color: #F0F0F0;
+            color: var(--text);
+        }
+
+        .chat-input-group {
+            display: flex;
+            gap: 8px;
+        }
+
+        .chat-input-group input {
+            flex: 1;
+        }
+
+        .chat-send {
+            background-color: var(--green);
+            color: white;
+            padding: 10px 16px;
+            white-space: nowrap;
+        }
+
+        .chat-send:hover {
+            background-color: #235033;
+        }
+
+        /* FILE MANAGEMENT */
+        .files-section {
+            background: var(--card);
+            border-radius: 8px;
+            padding: 24px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+        }
+
+        .files-section h3 {
+            font-size: 16px;
+            margin-bottom: 20px;
+        }
+
+        .file-inputs {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px;
+            margin-bottom: 20px;
+        }
+
+        .file-input-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .file-input-group label {
+            font-size: 13px;
+            font-weight: 500;
+        }
+
+        .file-input-group input[type="file"],
+        .file-input-group textarea {
+            font-size: 12px;
+        }
+
+        .file-input-group textarea {
+            min-height: 80px;
+            resize: vertical;
+        }
+
+        .file-upload-button {
+            background-color: var(--green);
+            color: white;
+            padding: 12px 20px;
+            font-weight: 600;
+        }
+
+        .file-upload-button:hover {
+            background-color: #235033;
+        }
+
+        .file-previews {
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 1px solid var(--border);
+        }
+
+        .file-preview-section {
+            margin-bottom: 16px;
+        }
+
+        .file-preview-section h4 {
+            font-size: 13px;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .file-preview-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+            gap: 12px;
+        }
+
+        .file-preview-item {
+            position: relative;
+            border-radius: 6px;
+            overflow: hidden;
+            background: var(--bg);
+            aspect-ratio: 1;
+        }
+
+        .file-preview-item img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        /* MATTERPORT VIEWER & TABS */
+        .matterport-section {
+            background: var(--card);
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+        }
+
+        .matterport-viewer {
+            width: 100%;
+            height: 500px;
+        }
+
+        .mp-tab {
+            padding: 10px 18px;
+            background: none;
+            color: var(--muted);
+            font-size: 13px;
+            font-weight: 500;
+            border: none;
+            border-bottom: 2px solid transparent;
+            margin-bottom: -2px;
+            transition: all 0.2s;
+        }
+
+        .mp-tab:hover { color: var(--text); }
+
+        .mp-tab.active {
+            color: var(--green);
+            border-bottom-color: var(--green);
+        }
+
+        .mp-tab-content { display: none; }
+        .mp-tab-content.active { display: block; }
+
+        .mp-pano-card {
+            border-radius: 8px;
+            overflow: hidden;
+            background: var(--bg);
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .mp-pano-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+
+        .mp-pano-card img {
+            width: 100%;
+            height: 140px;
+            object-fit: cover;
+        }
+
+        .mp-pano-card .mp-pano-info {
+            padding: 8px 12px;
+            font-size: 12px;
+            color: var(--text-soft);
+        }
+
+        .mp-dim-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 13px;
+        }
+
+        .mp-dim-table th {
+            background: var(--bg);
+            padding: 10px 12px;
+            text-align: left;
+            font-weight: 600;
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+            color: var(--muted);
+        }
+
+        .mp-dim-table td {
+            padding: 10px 12px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .mp-dim-table tr:hover td {
+            background: rgba(45, 95, 62, 0.04);
+        }
+
+        .mp-floorplan-card {
+            border-radius: 8px;
+            overflow: hidden;
+            background: var(--bg);
+            padding: 12px;
+        }
+
+        .mp-floorplan-card img {
+            width: 100%;
+            border-radius: 6px;
+            margin-bottom: 8px;
+        }
+
+        .mp-floorplan-card h4 {
+            font-size: 14px;
+            margin-bottom: 4px;
+        }
+
+        .mp-sync-spinner {
+            display: inline-block;
+            width: 14px;
+            height: 14px;
+            border: 2px solid rgba(45,95,62,0.3);
+            border-top-color: var(--green);
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+            margin-right: 8px;
+            vertical-align: middle;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* RESPONSIVE */
+        @media (max-width: 1200px) {
+            .dashboard-content {
+                flex-direction: column;
+            }
+
+            .dashboard-sidebar {
+                width: 100%;
+                max-height: 300px;
+            }
+
+            .stats-grid {
+                grid-template-columns: repeat(4, 1fr);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .dashboard-header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .dashboard-content {
+                gap: 12px;
+                padding: 12px;
+            }
+
+            .profile-header-top {
+                flex-direction: column;
+            }
+
+            .profile-header-details {
+                grid-template-columns: 1fr 1fr;
+            }
+
+            .file-inputs {
+                grid-template-columns: 1fr;
+            }
+
+            .stats-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+
+            .chat-panel {
+                height: 400px;
+            }
+
+            .matterport-viewer {
+                height: 300px;
+            }
+
+            .timeline-step-label {
+                max-width: 50px;
+                font-size: 9px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .auth-card {
+                padding: 24px;
+            }
+
+            .dashboard-header h1 {
+                font-size: 20px;
+            }
+
+            .profile-header {
+                padding: 16px;
+            }
+
+            .profile-header-details {
+                grid-template-columns: 1fr;
+                gap: 12px;
+            }
+
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .file-preview-grid {
+                grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+            }
+        }
+
+        /* UTILITIES */
+        .loading {
+            display: inline-block;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .divider {
+            height: 1px;
+            background-color: var(--border);
+            margin: 20px 0;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 40px 20px;
+            color: var(--muted);
+        }
+
+        .empty-state p {
+            margin: 8px 0;
+        }
+
+        .success-message {
+            background-color: #E8F5E9;
+            color: #2E7D32;
+            padding: 12px 16px;
+            border-radius: 6px;
+            margin-bottom: 16px;
+            display: none;
+        }
+
+        .success-message.show {
+            display: block;
+        }
+
+        .error-message {
+            background-color: #FFEBEE;
+            color: #C62828;
+            padding: 12px 16px;
+            border-radius: 6px;
+            margin-bottom: 16px;
+            display: none;
+        }
+
+        .error-message.show {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <!-- AUTH SCREEN -->
+    <div class="auth-screen" id="authScreen">
+        <div class="auth-card">
+            <h1>Admin</h1>
+            <p>Connectez-vous pour accéder au tableau de bord</p>
+            <div class="auth-error" id="authError"></div>
+            <form class="auth-form" id="authForm">
+                <div class="form-group">
+                    <label for="supabaseUrl">Supabase URL</label>
+                    <input type="text" id="supabaseUrl" placeholder="https://..." required>
+                </div>
+                <div class="form-group">
+                    <label for="supabaseKey">Service Key</label>
+                    <input type="password" id="supabaseKey" placeholder="eyJ..." required>
+                </div>
+                <div class="form-group">
+                    <label for="adminSecret">Admin Secret</label>
+                    <input type="password" id="adminSecret" placeholder="Votre clé admin" required>
+                </div>
+                <button type="submit" class="auth-submit">Connexion</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- MAIN DASHBOARD -->
+    <div class="dashboard" id="dashboard">
+        <!-- HEADER -->
+        <div class="dashboard-header">
+            <h1>Poste de pilotage interne</h1>
+            <div class="header-actions">
+                <button class="logout-btn" id="logoutBtn">Déconnexion</button>
+            </div>
+        </div>
+
+        <!-- CONTENT -->
+        <div class="dashboard-content">
+            <!-- SIDEBAR -->
+            <div class="dashboard-sidebar">
+                <div class="sidebar-section">
+                    <h3>Vue d'ensemble</h3>
+                    <div class="stats-grid" id="statsGrid">
+                        <div class="stat-box">
+                            <div class="stat-number" id="statTotal">0</div>
+                            <div class="stat-label">Total clients</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="sidebar-section">
+                    <h3>A traiter maintenant</h3>
+                    <div class="pending-list" id="pendingList">
+                        <div class="empty-state">
+                            <p>Aucune action en attente</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- MAIN CONTENT -->
+            <div class="dashboard-main">
+                <!-- SEARCH BOX -->
+                <div class="search-box">
+                    <input type="text" class="search-input" id="searchInput" placeholder="Tapez 3 lettres du nom, prenom ou email du client...">
+                    <div class="autocomplete-dropdown" id="autocomplete"></div>
+                </div>
+
+                <!-- CLIENT PROFILE -->
+                <div class="client-profile" id="clientProfile">
+                    <!-- SUCCESS MESSAGE -->
+                    <div class="success-message" id="successMessage"></div>
+                    <div class="error-message" id="errorMessage"></div>
+
+                    <!-- PROFILE HEADER -->
+                    <div class="profile-header">
+                        <div class="profile-header-top">
+                            <div class="profile-header-info">
+                                <h2 id="clientName">-</h2>
+                                <div class="profile-header-contact">
+                                    <div>Email: <strong id="clientEmail">-</strong></div>
+                                    <div>Tél: <strong id="clientPhone">-</strong></div>
+                                </div>
+                            </div>
+                            <div id="clientStatusBadge"></div>
+                        </div>
+                        <div class="profile-header-details">
+                            <div class="detail-item">
+                                <div class="detail-label">Type de bien</div>
+                                <div class="detail-value" id="clientTypeBien">-</div>
+                            </div>
+                            <div class="detail-item">
+                                <div class="detail-label">Adresse</div>
+                                <div class="detail-value" id="clientAdresse">-</div>
+                            </div>
+                            <div class="detail-item">
+                                <div class="detail-label">Surface</div>
+                                <div class="detail-value" id="clientSurface">-</div>
+                            </div>
+                            <div class="detail-item">
+                                <div class="detail-label">Budget</div>
+                                <div class="detail-value" id="clientBudget">-</div>
+                            </div>
+                            <div class="detail-item">
+                                <div class="detail-label">Échéance</div>
+                                <div class="detail-value" id="clientEcheance">-</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- TIMELINE -->
+                    <div class="timeline-section">
+                        <h3>Parcours client</h3>
+                        <div class="timeline-container">
+                            <div class="timeline" id="timeline"></div>
+                        </div>
+                    </div>
+
+                    <!-- ACTION PANEL -->
+                    <div class="action-panel" id="actionPanel">
+                        <!-- Dynamically populated -->
+                    </div>
+
+                    <!-- MATTERPORT INTEGRATION (Pro Account) -->
+                    <div class="matterport-section" id="matterportSection" style="display: none;">
+                        <div style="padding: 20px;">
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+                                <h3 style="margin: 0;">Visite 3D Matterport</h3>
+                                <div style="display: flex; gap: 8px;">
+                                    <button class="action-button" onclick="fetchMatterportData()" id="btnFetchMatterport" style="font-size: 12px; padding: 8px 14px;">
+                                        Synchroniser depuis Matterport
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!-- Matterport Model ID Input -->
+                            <div id="matterportIdInput" style="margin-bottom: 16px; padding: 16px; background: var(--bg); border-radius: 8px;">
+                                <label style="font-size: 13px; font-weight: 600; display: block; margin-bottom: 8px;">ID du modèle Matterport</label>
+                                <div style="display: flex; gap: 8px;">
+                                    <input type="text" id="matterportModelId" placeholder="Ex: SxQL3iGyoDo" style="flex: 1;">
+                                    <input type="password" id="matterportApiToken" placeholder="Token API Matterport" style="flex: 1;">
+                                    <button class="action-button" onclick="fetchMatterportData()" style="white-space: nowrap; font-size: 12px; padding: 8px 14px;">
+                                        Récupérer
+                                    </button>
+                                </div>
+                                <p style="font-size: 11px; color: var(--muted); margin-top: 6px;">
+                                    Token API : Dashboard Matterport &rarr; Developers &rarr; API Token
+                                </p>
+                            </div>
+
+                            <!-- Matterport Sync Status -->
+                            <div id="matterportSyncStatus" style="display: none; padding: 12px 16px; border-radius: 8px; margin-bottom: 16px; font-size: 13px;"></div>
+
+                            <!-- Matterport Data Tabs -->
+                            <div id="matterportTabs" style="display: none; margin-bottom: 16px;">
+                                <div style="display: flex; gap: 4px; border-bottom: 2px solid var(--border); margin-bottom: 16px;">
+                                    <button class="mp-tab active" onclick="switchMpTab('viewer')">Visite 3D</button>
+                                    <button class="mp-tab" onclick="switchMpTab('panoramas')">Panoramas</button>
+                                    <button class="mp-tab" onclick="switchMpTab('dimensions')">Dimensions</button>
+                                    <button class="mp-tab" onclick="switchMpTab('floorplans')">Plans</button>
+                                </div>
+
+                                <!-- Tab: 3D Viewer -->
+                                <div class="mp-tab-content active" id="mpTabViewer">
+                                    <iframe class="matterport-viewer" id="matterportIframe" style="border: none;"></iframe>
+                                </div>
+
+                                <!-- Tab: Panoramas -->
+                                <div class="mp-tab-content" id="mpTabPanoramas">
+                                    <div id="panoramasGrid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 12px;"></div>
+                                    <button class="action-button" id="btnDownloadPanos" onclick="downloadAllPanoramas()" style="margin-top: 16px; font-size: 12px; padding: 8px 14px; display: none;">
+                                        Télécharger toutes les panoramiques
+                                    </button>
+                                </div>
+
+                                <!-- Tab: Dimensions -->
+                                <div class="mp-tab-content" id="mpTabDimensions">
+                                    <div id="dimensionsData" style="overflow-x: auto;"></div>
+                                    <button class="action-button" id="btnExportCsv" onclick="exportDimensionsCsv()" style="margin-top: 16px; font-size: 12px; padding: 8px 14px; display: none;">
+                                        Exporter en CSV
+                                    </button>
+                                </div>
+
+                                <!-- Tab: Floorplans -->
+                                <div class="mp-tab-content" id="mpTabFloorplans">
+                                    <div id="floorplansGrid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 16px;"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- MARCEL CHAT (when needed) -->
+                    <div class="chat-panel" id="chatPanel" style="display: none;">
+                        <h3>Marcel - Assistant IA</h3>
+                        <div class="chat-messages" id="chatMessages"></div>
+                        <div class="chat-input-group">
+                            <input type="text" id="chatInput" placeholder="Votre message...">
+                            <button class="chat-send" id="chatSend">Envoyer</button>
+                        </div>
+                    </div>
+
+                    <!-- FILES (manual upload + Matterport auto) -->
+                    <div class="files-section" id="filesSection" style="display: none;">
+                        <h3>Gestion des fichiers</h3>
+                        <div class="file-inputs">
+                            <div class="file-input-group">
+                                <label>Photos du bien</label>
+                                <input type="file" id="photosInput" multiple accept="image/*">
+                            </div>
+                            <div class="file-input-group">
+                                <label>Plans / PDFs</label>
+                                <input type="file" id="plansInput" multiple accept=".pdf,image/*">
+                            </div>
+                            <div class="file-input-group">
+                                <label>Fichier CSV Matterport</label>
+                                <input type="file" id="csvInput" accept=".csv">
+                            </div>
+                            <div class="file-input-group">
+                                <label>iframe Matterport (ou ID modèle ci-dessus)</label>
+                                <textarea id="matterportIframeInput" placeholder="Collez le code iframe ou utilisez la synchronisation automatique..."></textarea>
+                            </div>
+                        </div>
+                        <button class="file-upload-button" id="uploadBtn">Envoyer les fichiers</button>
+
+                        <div class="file-previews" id="filePreviews"></div>
+                    </div>
+                </div>
+
+                <!-- EMPTY STATE -->
+                <div class="empty-state" id="emptyState">
+                    <p>Sélectionnez un client pour voir les détails</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ========== CONSTANTS & CONFIG ==========
+        const PIPELINE_STATUSES = [
+            'new_lead',
+            'account_created',
+            'onboarding_completed',
+            'call_requested',
+            'call_done',
+            'scan_scheduled',
+            'scan_payment_completed',
+            'scan_completed',
+            'analysis_ready',
+            'avant_projet_ready',
+            'accompaniment_subscribed'
+        ];
+
+        const STATUS_LABELS = {
+            'new_lead': 'Nouveau contact',
+            'account_created': 'Compte créé',
+            'onboarding_completed': 'Profil complété',
+            'call_requested': 'RDV tel demandé',
+            'call_done': 'Appel réalisé',
+            'scan_scheduled': 'Scan programmé',
+            'scan_payment_completed': 'Paiement scan',
+            'scan_completed': 'Scan réalisé',
+            'analysis_ready': 'Analyse prête',
+            'avant_projet_ready': 'Avant-projet prêt',
+            'accompaniment_subscribed': 'Accompagnement'
+        };
+
+        const STATUS_ALIASES = {
+            'new_lead': 'contact_submitted',
+            'account_created': 'identity_created',
+            'avant_project_transmitted': 'avant_projet_transmitted'
+        };
+
+        PIPELINE_STATUSES.splice(0, PIPELINE_STATUSES.length,
+            'contact_submitted',
+            'identity_created',
+            'onboarding_completed',
+            'call_requested',
+            'call_done',
+            'scan_scheduled',
+            'scan_payment_completed',
+            'scan_completed',
+            'analysis_ready',
+            'avant_projet_ready',
+            'avant_projet_transmitted',
+            'accompaniment_subscribed'
+        );
+
+        Object.assign(STATUS_LABELS, {
+            'contact_submitted': 'Contact soumis',
+            'identity_created': 'Compte cree',
+            'onboarding_completed': 'Onboarding termine',
+            'call_requested': 'RDV tel demande',
+            'call_done': 'Appel realise',
+            'scan_scheduled': 'Scan programme',
+            'scan_payment_completed': 'Paiement scan',
+            'scan_completed': 'Scan realise',
+            'analysis_ready': 'Analyse prete',
+            'avant_projet_ready': 'Avant-projet pret',
+            'avant_projet_transmitted': 'Avant-projet transmis',
+            'accompaniment_subscribed': 'Accompagnement',
+            'abandoned': 'Abandonne',
+            'paused': 'En pause'
+        });
+
+        const TASK_STATE_LABELS = {
+            'open': 'A faire',
+            'awaiting_validation': 'A valider',
+            'waiting_client': 'En attente client',
+            'blocked': 'Bloque',
+            'done': 'Termine',
+            'cancelled': 'Annule'
+        };
+
+        function normalizeDashboardStatus(status) {
+            if (!status) return 'contact_submitted';
+            return STATUS_ALIASES[status] || status;
+        }
+
+        function getStatusLabel(status) {
+            const normalized = normalizeDashboardStatus(status);
+            return STATUS_LABELS[normalized] || normalized;
+        }
+
+        // ========== STATE ==========
+        let supabase = null;
+        let currentClient = null;
+        let adminSecret = null;
+        let chatHistory = [];
+        let matterportCache = {}; // Cache des données Matterport par client
+
+        let currentClientTasks = [];
+
+        // ========== DOM ELEMENTS ==========
+        const authScreen = document.getElementById('authScreen');
+        const dashboard = document.getElementById('dashboard');
+        const authForm = document.getElementById('authForm');
+        const authError = document.getElementById('authError');
+        const logoutBtn = document.getElementById('logoutBtn');
+        const searchInput = document.getElementById('searchInput');
+        const autocomplete = document.getElementById('autocomplete');
+        const clientProfile = document.getElementById('clientProfile');
+        const emptyState = document.getElementById('emptyState');
+        const successMessage = document.getElementById('successMessage');
+        const errorMessage = document.getElementById('errorMessage');
+
+        // ========== AUTH LOGIC ==========
+        authForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const url = document.getElementById('supabaseUrl').value;
+            const key = document.getElementById('supabaseKey').value;
+            adminSecret = document.getElementById('adminSecret').value;
+
+            if (!url || !key || !adminSecret) {
+                showAuthError('Tous les champs sont requis');
+                return;
+            }
+
+            try {
+                supabase = window.supabase.createClient(url, key);
+
+                // Test connection
+                const { data, error } = await supabase.from('clients').select('id').limit(1);
+                if (error) throw error;
+
+                // Store in sessionStorage
+                sessionStorage.setItem('sb_url', url);
+                sessionStorage.setItem('sb_key', key);
+                sessionStorage.setItem('admin_secret', adminSecret);
+
+                // Show dashboard
+                authScreen.style.display = 'none';
+                dashboard.classList.add('active');
+                loadDashboard();
+            } catch (err) {
+                showAuthError('Erreur de connexion: ' + err.message);
+            }
+        });
+
+        logoutBtn.addEventListener('click', () => {
+            sessionStorage.clear();
+            supabase = null;
+            currentClient = null;
+            chatHistory = [];
+            authScreen.style.display = 'flex';
+            dashboard.classList.remove('active');
+            authForm.reset();
+        });
+
+        function showAuthError(msg) {
+            authError.textContent = msg;
+            authError.classList.add('show');
+            setTimeout(() => authError.classList.remove('show'), 5000);
+        }
+
+        // ========== DASHBOARD LOGIC ==========
+        async function loadDashboard() {
+            try {
+                const { data: clients } = await supabase.from('clients').select('*');
+                const normalizedClients = (clients || []).map(client => ({
+                    ...client,
+                    status: normalizeDashboardStatus(client.status)
+                }));
+
+                let tasks = [];
+                try {
+                    const { data: taskRows, error: taskError } = await supabase
+                        .from('admin_tasks')
+                        .select('id,client_id,task_type,title,status,priority,due_date')
+                        .in('status', ['open', 'awaiting_validation', 'waiting_client', 'blocked'])
+                        .order('priority', { ascending: false })
+                        .limit(40);
+
+                    if (taskError) throw taskError;
+                    tasks = taskRows || [];
+                } catch (taskErr) {
+                    console.warn('Task loading skipped:', taskErr.message);
+                }
+
+                renderDashboardStats(normalizedClients, tasks);
+                updatePendingList(normalizedClients, tasks);
+            } catch (err) {
+                console.error('Error loading dashboard:', err);
+            }
+        }
+
+        function renderDashboardStats(clients, tasks) {
+            const statsGrid = document.getElementById('statsGrid');
+            const totalClients = clients?.length || 0;
+            const openTasks = tasks.filter(task => task.status === 'open').length;
+            const waitingTasks = tasks.filter(task => task.status === 'waiting_client').length;
+            const blockedTasks = tasks.filter(task => task.status === 'blocked').length;
+
+            statsGrid.innerHTML = `
+                <div class="stat-box">
+                    <div class="stat-number">${totalClients}</div>
+                    <div class="stat-label">Total clients</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-number">${openTasks}</div>
+                    <div class="stat-label">Taches a faire</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-number">${waitingTasks}</div>
+                    <div class="stat-label">En attente client</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-number">${blockedTasks}</div>
+                    <div class="stat-label">Bloquees</div>
+                </div>
+            `;
+        }
+
+        function updatePendingList(clients, tasks) {
+            const pendingList = document.getElementById('pendingList');
+            const clientsById = new Map((clients || []).map(client => [client.id, client]));
+
+            if (tasks && tasks.length > 0) {
+                pendingList.innerHTML = tasks.map(task => {
+                    const client = clientsById.get(task.client_id);
+                    const clientName = client ? `${client.prenom || ''} ${client.nom || ''}`.trim() || client.email : 'Client';
+                    const stateLabel = TASK_STATE_LABELS[task.status] || task.status;
+                    return `
+                        <div class="pending-item" onclick="selectClientById('${task.client_id}')">
+                            <div class="pending-item-name">${clientName}</div>
+                            <div class="pending-item-action">${task.title} • ${stateLabel}</div>
+                        </div>
+                    `;
+                }).join('');
+                return;
+            }
+
+            const pending = clients?.filter(c => {
+                const status = normalizeDashboardStatus(c.status);
+                return ['call_requested', 'scan_scheduled', 'scan_completed', 'analysis_ready'].includes(status);
+            }) || [];
+
+            if (pending.length === 0) {
+                pendingList.innerHTML = '<div class="empty-state"><p>Aucune action en attente</p></div>';
+                return;
+            }
+
+            pendingList.innerHTML = pending.map(client => `
+                <div class="pending-item" onclick="selectClientById('${client.id}')">
+                    <div class="pending-item-name">${client.prenom} ${client.nom}</div>
+                    <div class="pending-item-action">${getStatusLabel(client.status)}</div>
+                </div>
+            `).join('');
+        }
+
+        // ========== SEARCH LOGIC ==========
+        searchInput.addEventListener('input', async (e) => {
+            const query = e.target.value.trim();
+            if (query.length < 3) {
+                autocomplete.classList.remove('show');
+                return;
+            }
+
+            try {
+                const { data: results } = await supabase
+                    .from('clients')
+                    .select('id,nom,prenom,email,status,type_bien')
+                    .or(`nom.ilike.%${query}%,prenom.ilike.%${query}%,email.ilike.%${query}%`)
+                    .limit(8);
+
+                if (results && results.length > 0) {
+                    autocomplete.innerHTML = results.map(client => `
+                        <div class="autocomplete-item" onclick="selectClient('${client.id}')">
+                            <div class="autocomplete-item-main">${client.prenom} ${client.nom}</div>
+                            <div class="autocomplete-item-info">${client.email} • ${client.type_bien || 'N/A'}</div>
+                        </div>
+                    `).join('');
+                    autocomplete.classList.add('show');
+                } else {
+                    autocomplete.classList.remove('show');
+                }
+            } catch (err) {
+                console.error('Search error:', err);
+            }
+        });
+
+        document.addEventListener('click', (e) => {
+            if (!e.target.closest('.search-box')) {
+                autocomplete.classList.remove('show');
+            }
+        });
+
+        async function selectClient(clientId) {
+            await selectClientById(clientId);
+        }
+
+        async function selectClientById(clientId) {
+            try {
+                const { data: client } = await supabase.from('clients').select('*').eq('id', clientId).single();
+                if (client) {
+                    currentClient = {
+                        ...client,
+                        status: normalizeDashboardStatus(client.status)
+                    };
+                    renderClientProfile(client);
+                    searchInput.value = '';
+                    autocomplete.classList.remove('show');
+                    emptyState.style.display = 'none';
+                    clientProfile.classList.add('active');
+                    await syncCockpitTasks(client.id);
+                    await loadClientTasks(client.id);
+                }
+            } catch (err) {
+                console.error('Error loading client:', err);
+            }
+        }
+
+        // ========== CLIENT PROFILE RENDERING ==========
+        function renderClientProfile(client) {
+            // Header
+            document.getElementById('clientName').textContent = `${client.prenom} ${client.nom}`;
+            document.getElementById('clientEmail').textContent = client.email;
+            document.getElementById('clientPhone').textContent = client.telephone || '-';
+            document.getElementById('clientTypeBien').textContent = client.type_bien || '-';
+            document.getElementById('clientAdresse').textContent = client.adresse || '-';
+            document.getElementById('clientSurface').textContent = client.surface ? `${client.surface} m²` : '-';
+            document.getElementById('clientBudget').textContent = client.budget ? `${client.budget.toLocaleString('fr-FR')} €` : '-';
+            document.getElementById('clientEcheance').textContent = client.echeance || '-';
+
+            // Status badge
+            const status = normalizeDashboardStatus(client.status);
+            const badgeClass = `status-${status.replace(/_/g, '-')}`;
+            document.getElementById('clientStatusBadge').innerHTML = `
+                <div class="status-badge ${badgeClass}">${getStatusLabel(status)}</div>
+            `;
+
+            // Timeline
+            renderTimeline(status);
+
+            // Action panel
+            renderActionPanel(client, status);
+
+            // Matterport — toujours visible pour permettre la saisie du model ID
+            document.getElementById('matterportSection').style.display = 'block';
+
+            // Pré-remplir le model ID si existant
+            if (client.matterport_model_id) {
+                document.getElementById('matterportModelId').value = client.matterport_model_id;
+            } else {
+                document.getElementById('matterportModelId').value = '';
+            }
+
+            // Récupérer le token stocké en session
+            const storedToken = sessionStorage.getItem('mp_api_token');
+            if (storedToken) {
+                document.getElementById('matterportApiToken').value = storedToken;
+            }
+
+            // Afficher la visite 3D si on a l'iframe ou l'URL
+            if (client.matterport_iframe || client.matterport_url || client.matterport_model_id) {
+                document.getElementById('matterportTabs').style.display = 'block';
+                if (client.matterport_iframe) {
+                    document.getElementById('matterportIframe').srcdoc = client.matterport_iframe;
+                } else if (client.matterport_url) {
+                    document.getElementById('matterportIframe').src = client.matterport_url;
+                } else if (client.matterport_model_id) {
+                    document.getElementById('matterportIframe').src =
+                        `https://my.matterport.com/show/?m=${client.matterport_model_id}`;
+                }
+                // Si on a des données Matterport en cache, les afficher
+                if (matterportCache[client.id]) {
+                    renderMatterportData(matterportCache[client.id]);
+                }
+            } else {
+                document.getElementById('matterportTabs').style.display = 'none';
+            }
+
+            // Si on a déjà des matterport_data (du CSV importé), les afficher dans l'onglet dimensions
+            if (client.matterport_data) {
+                renderMatterportDataFromDb(client.matterport_data);
+            }
+
+            // Files section
+            if (['scan_completed', 'analysis_ready', 'avant_projet_ready', 'accompaniment_subscribed'].includes(status)) {
+                renderFilesSection(client);
+            } else {
+                document.getElementById('filesSection').style.display = 'none';
+            }
+        }
+
+        function renderTimeline(currentStatus) {
+            const timelineEl = document.getElementById('timeline');
+            const currentIndex = PIPELINE_STATUSES.indexOf(currentStatus);
+
+            let html = '';
+            PIPELINE_STATUSES.forEach((status, idx) => {
+                const isCompleted = idx < currentIndex;
+                const isCurrent = idx === currentIndex;
+                const circleClass = isCompleted ? 'completed' : isCurrent ? 'current' : '';
+                const labelClass = isCompleted || isCurrent ? 'completed' : '';
+
+                html += `
+                    <div class="timeline-step">
+                        <div class="timeline-step-circle ${circleClass}">
+                            ${isCompleted ? '✓' : ''}
+                        </div>
+                        <div class="timeline-step-label ${labelClass}">${getStatusLabel(status)}</div>
+                    </div>
+                `;
+
+                if (idx < PIPELINE_STATUSES.length - 1) {
+                    const connectorClass = idx < currentIndex ? 'completed' : '';
+                    html += `<div class="timeline-connector ${connectorClass}"></div>`;
+                }
+            });
+
+            timelineEl.innerHTML = html;
+        }
+
+        function renderActionPanel(client, status) {
+            const panel = document.getElementById('actionPanel');
+            let html = '';
+
+            if (status === 'call_requested') {
+                html = `
+                    <h3>Synthèse d'appel téléphonique</h3>
+                    <p class="action-panel-description">Prenez note de la conversation téléphonique avec le client.</p>
+                    <button class="action-button" onclick="openMarcelChat()">Ouvrir Marcel</button>
+                `;
+                document.getElementById('chatPanel').style.display = 'flex';
+            } else if (status === 'call_done') {
+                html = `
+                    <h3>Invitation scan 3D</h3>
+                    <p class="action-panel-description">Invitez le client à programmer son scan 3D.</p>
+                    <button class="action-button" onclick="inviteScan()">Envoyer invitation</button>
+                `;
+                document.getElementById('chatPanel').style.display = 'none';
+            } else if (status === 'scan_scheduled') {
+                html = `
+                    <h3>Confirmer le scan</h3>
+                    <p class="action-panel-description">Confirmez la programmation du scan avec le client.</p>
+                    <button class="action-button" onclick="confirmScan()">Scan confirmé</button>
+                `;
+                document.getElementById('chatPanel').style.display = 'none';
+            } else if (status === 'scan_completed') {
+                html = `
+                    <h3>Fichiers du scan</h3>
+                    <p class="action-panel-description">Téléchargez les fichiers et données du scan 3D.</p>
+                    <button class="action-button" onclick="openMarcelChat()">Discuter avec Marcel</button>
+                `;
+                document.getElementById('chatPanel').style.display = 'flex';
+                document.getElementById('filesSection').style.display = 'block';
+            } else if (status === 'analysis_ready') {
+                html = `
+                    <h3>Générer l'avant-projet</h3>
+                    <p class="action-panel-description">Préparez et validez l'avant-projet avec Marcel.</p>
+                    <button class="action-button" onclick="openMarcelChat()">Discuter avec Marcel</button>
+                    <button class="action-button" onclick="generateAvantProjet()" style="background-color: #4CAF50;">Générer avant-projet</button>
+                `;
+                document.getElementById('chatPanel').style.display = 'flex';
+            } else if (status === 'avant_projet_ready') {
+                html = `
+                    <h3>Avant-projet finalisé</h3>
+                    <p class="action-panel-description">L'avant-projet est prêt. Proposez l'accompagnement.</p>
+                    <button class="action-button" onclick="proposeAccompaniment()">Proposer accompagnement</button>
+                `;
+                document.getElementById('chatPanel').style.display = 'none';
+            } else {
+                html = `
+                    <h3>Étape suivante</h3>
+                    <p class="action-panel-description">Aucune action requise pour le moment.</p>
+                `;
+                document.getElementById('chatPanel').style.display = 'none';
+            }
+
+            panel.innerHTML = html;
+        }
+
+        async function syncCockpitTasks(clientId) {
+            if (!adminSecret) return;
+
+            try {
+                await fetch('/.netlify/functions/reconcile-cockpit', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'x-admin-secret': adminSecret
+                    },
+                    body: JSON.stringify({ clientId })
+                });
+            } catch (err) {
+                console.warn('Cockpit sync skipped:', err.message);
+            }
+        }
+
+        async function loadClientTasks(clientId) {
+            try {
+                const { data: tasks, error } = await supabase
+                    .from('admin_tasks')
+                    .select('*')
+                    .eq('client_id', clientId)
+                    .in('status', ['open', 'awaiting_validation', 'waiting_client', 'blocked'])
+                    .order('priority', { ascending: false })
+                    .order('due_date', { ascending: true, nullsFirst: false });
+
+                if (error) throw error;
+
+                currentClientTasks = tasks || [];
+                if (!currentClientTasks.length) return;
+
+                const primaryTask = currentClientTasks[0];
+                const taskCards = currentClientTasks.map(task => `
+                    <div class="task-card">
+                        <div class="task-card-header">
+                            <div class="task-card-title">${task.title}</div>
+                            <div class="task-state-badge">${TASK_STATE_LABELS[task.status] || task.status}</div>
+                        </div>
+                        <div class="task-card-desc">${task.description || 'Aucune description detaillee pour le moment.'}</div>
+                        <div class="task-meta">
+                            <span>Priorite ${task.priority || 0}</span>
+                            <span>${task.screen_target || 'client_overview'}</span>
+                            ${task.due_date ? `<span>Echeance ${formatShortDate(task.due_date)}</span>` : ''}
+                        </div>
+                    </div>
+                `).join('');
+
+                document.getElementById('actionPanel').innerHTML = `
+                    <h3>Action attendue maintenant</h3>
+                    <p class="action-panel-description">${primaryTask.title}</p>
+                    <div class="task-list">${taskCards}</div>
+                `;
+            } catch (err) {
+                console.warn('Client tasks unavailable:', err.message);
+            }
+        }
+
+        // ========== MARCEL CHAT ==========
+        function openMarcelChat() {
+            document.getElementById('chatPanel').scrollIntoView({ behavior: 'smooth' });
+        }
+
+        document.getElementById('chatSend')?.addEventListener('click', sendChatMessage);
+        document.getElementById('chatInput')?.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') sendChatMessage();
+        });
+
+        async function sendChatMessage() {
+            const input = document.getElementById('chatInput');
+            const message = input.value.trim();
+            if (!message || !currentClient) return;
+
+            // Add to chat
+            addChatMessage('admin', message);
+            input.value = '';
+
+            // Call API
+            try {
+                const response = await fetch('/.netlify/functions/chat', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'x-admin-secret': adminSecret
+                    },
+                    body: JSON.stringify({
+                        message,
+                        clientId: currentClient.id,
+                        role: 'admin'
+                    })
+                });
+
+                const data = await response.json();
+                if (data.reply) {
+                    addChatMessage('marcel', data.reply);
+                }
+            } catch (err) {
+                console.error('Chat error:', err);
+            }
+        }
+
+        function addChatMessage(role, text) {
+            const messagesEl = document.getElementById('chatMessages');
+            const msgEl = document.createElement('div');
+            msgEl.className = `chat-message ${role}`;
+            msgEl.innerHTML = `<div class="chat-bubble">${escapeHtml(text)}</div>`;
+            messagesEl.appendChild(msgEl);
+            messagesEl.scrollTop = messagesEl.scrollHeight;
+        }
+
+        // ========== ACTIONS ==========
+        async function inviteScan() {
+            if (!currentClient) return;
+            try {
+                const response = await fetch('/.netlify/functions/invite-scan', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'x-admin-secret': adminSecret
+                    },
+                    body: JSON.stringify({ clientId: currentClient.id })
+                });
+
+                if (response.ok) {
+                    showSuccessMessage('Invitation envoyée');
+                    // Update status
+                    await updateClientStatus('scan_scheduled');
+                } else {
+                    showErrorMessage('Erreur lors de l\'envoi');
+                }
+            } catch (err) {
+                showErrorMessage('Erreur: ' + err.message);
+            }
+        }
+
+        async function confirmScan() {
+            if (!currentClient) return;
+            try {
+                await updateClientStatus('scan_completed');
+                showSuccessMessage('Scan confirmé');
+            } catch (err) {
+                showErrorMessage('Erreur: ' + err.message);
+            }
+        }
+
+        async function generateAvantProjet() {
+            if (!currentClient) return;
+            try {
+                await updateClientStatus('avant_projet_ready');
+                showSuccessMessage('Avant-projet généré');
+            } catch (err) {
+                showErrorMessage('Erreur: ' + err.message);
+            }
+        }
+
+        async function proposeAccompaniment() {
+            if (!currentClient) return;
+            try {
+                await updateClientStatus('accompaniment_subscribed');
+                showSuccessMessage('Accompagnement proposé');
+            } catch (err) {
+                showErrorMessage('Erreur: ' + err.message);
+            }
+        }
+
+        // ========== FILES ==========
+        function renderFilesSection(client) {
+            const section = document.getElementById('filesSection');
+            section.style.display = 'block';
+
+            let previewsHtml = '';
+
+            if (client.photos_urls && client.photos_urls.length > 0) {
+                previewsHtml += `
+                    <div class="file-preview-section">
+                        <h4>Photos du bien</h4>
+                        <div class="file-preview-grid">
+                            ${client.photos_urls.map(url => `
+                                <div class="file-preview-item">
+                                    <img src="${url}" alt="Photo du bien">
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                `;
+            }
+
+            if (client.plans_urls && client.plans_urls.length > 0) {
+                previewsHtml += `
+                    <div class="file-preview-section">
+                        <h4>Plans</h4>
+                        <div class="file-preview-grid">
+                            ${client.plans_urls.map(url => `
+                                <div class="file-preview-item">
+                                    <img src="${url}" alt="Plan">
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                `;
+            }
+
+            document.getElementById('filePreviews').innerHTML = previewsHtml;
+        }
+
+        document.getElementById('uploadBtn')?.addEventListener('click', uploadFiles);
+
+        async function uploadFiles() {
+            if (!currentClient) return;
+
+            const photosInput = document.getElementById('photosInput');
+            const plansInput = document.getElementById('plansInput');
+            const csvInput = document.getElementById('csvInput');
+            const matterportInput = document.getElementById('matterportIframeInput');
+
+            const files = {
+                photos: Array.from(photosInput.files),
+                plans: Array.from(plansInput.files),
+                csv: csvInput.files[0],
+                matterportIframe: matterportInput.value
+            };
+
+            try {
+                // Upload to storage or API
+                const formData = new FormData();
+                files.photos.forEach(f => formData.append('photos', f));
+                files.plans.forEach(f => formData.append('plans', f));
+                if (files.csv) formData.append('csv', files.csv);
+                formData.append('matterportIframe', files.matterportIframe);
+                formData.append('clientId', currentClient.id);
+
+                const response = await fetch('/.netlify/functions/admin-update-client', {
+                    method: 'POST',
+                    headers: {
+                        'x-admin-secret': adminSecret
+                    },
+                    body: formData
+                });
+
+                if (response.ok) {
+                    showSuccessMessage('Fichiers téléchargés');
+                    photosInput.value = '';
+                    plansInput.value = '';
+                    csvInput.value = '';
+                    matterportInput.value = '';
+                } else {
+                    showErrorMessage('Erreur lors du téléchargement');
+                }
+            } catch (err) {
+                showErrorMessage('Erreur: ' + err.message);
+            }
+        }
+
+        // ========== UTILITIES ==========
+        async function updateClientStatus(newStatus) {
+            if (!currentClient) return;
+            try {
+                const normalizedStatus = normalizeDashboardStatus(newStatus);
+                const { error } = await supabase
+                    .from('clients')
+                    .update({ status: normalizedStatus })
+                    .eq('id', currentClient.id);
+
+                if (error) throw error;
+
+                currentClient.status = normalizedStatus;
+                renderClientProfile(currentClient);
+                await syncCockpitTasks(currentClient.id);
+                await loadClientTasks(currentClient.id);
+                await loadDashboard();
+            } catch (err) {
+                console.error('Update error:', err);
+                throw err;
+            }
+        }
+
+        function formatShortDate(value) {
+            const date = new Date(value);
+            if (Number.isNaN(date.getTime())) return 'Date invalide';
+            return date.toLocaleDateString('fr-FR', {
+                day: '2-digit',
+                month: '2-digit',
+                year: 'numeric'
+            });
+        }
+
+        function showSuccessMessage(msg) {
+            const el = document.getElementById('successMessage');
+            el.textContent = msg;
+            el.classList.add('show');
+            setTimeout(() => el.classList.remove('show'), 4000);
+        }
+
+        function showErrorMessage(msg) {
+            const el = document.getElementById('errorMessage');
+            el.textContent = msg;
+            el.classList.add('show');
+            setTimeout(() => el.classList.remove('show'), 4000);
+        }
+
+        function escapeHtml(text) {
+            const map = {
+                '&': '&amp;',
+                '<': '&lt;',
+                '>': '&gt;',
+                '"': '&quot;',
+                "'": '&#039;'
+            };
+            return text.replace(/[&<>"']/g, m => map[m]);
+        }
+
+        // ========== MATTERPORT API INTEGRATION (Pro Account) ==========
+        const MATTERPORT_API_URL = 'https://api.matterport.com/api/models/graph';
+
+        function switchMpTab(tabName) {
+            document.querySelectorAll('.mp-tab').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.mp-tab-content').forEach(t => t.classList.remove('active'));
+            event.target.classList.add('active');
+            document.getElementById(`mpTab${tabName.charAt(0).toUpperCase() + tabName.slice(1)}`).classList.add('active');
+        }
+
+        function showMpSyncStatus(message, type) {
+            const el = document.getElementById('matterportSyncStatus');
+            el.style.display = 'block';
+            el.style.background = type === 'loading' ? '#FFF3E0' :
+                                  type === 'success' ? '#E8F5E9' :
+                                  type === 'error' ? '#FFEBEE' : '#E3F2FD';
+            el.style.color = type === 'loading' ? '#E65100' :
+                             type === 'success' ? '#2E7D32' :
+                             type === 'error' ? '#C62828' : '#1565C0';
+            const spinner = type === 'loading' ? '<span class="mp-sync-spinner"></span>' : '';
+            el.innerHTML = `${spinner}${message}`;
+        }
+
+        function hideMpSyncStatus() {
+            document.getElementById('matterportSyncStatus').style.display = 'none';
+        }
+
+        async function matterportGraphQL(query, variables, token) {
+            const response = await fetch(MATTERPORT_API_URL, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify({ query, variables })
+            });
+
+            if (!response.ok) {
+                const errText = await response.text();
+                throw new Error(`API Matterport (${response.status}): ${errText}`);
+            }
+
+            const result = await response.json();
+            if (result.errors) {
+                throw new Error(`GraphQL: ${result.errors.map(e => e.message).join(', ')}`);
+            }
+            return result.data;
+        }
+
+        async function fetchMatterportData() {
+            const modelId = document.getElementById('matterportModelId').value.trim();
+            const token = document.getElementById('matterportApiToken').value.trim();
+
+            if (!modelId || !token) {
+                showErrorMessage('ID du modèle et Token API requis');
+                return;
+            }
+
+            // Stocker le token en session pour ne pas le ressaisir
+            sessionStorage.setItem('mp_api_token', token);
+
+            showMpSyncStatus('Connexion à Matterport...', 'loading');
+
+            try {
+                // 1. Récupérer les panoramiques + embed URL
+                showMpSyncStatus('Récupération des panoramiques et données du modèle...', 'loading');
+                const sweepData = await matterportGraphQL(`
+                    fragment panoFragment on PanoramicImageLocation {
+                        id
+                        skybox(resolution: "2k") {
+                            id
+                            status
+                            format
+                            children
+                        }
+                    }
+                    query getSweeps($modelId: ID!) {
+                        model(id: $modelId) {
+                            id
+                            name
+                            description
+                            locations {
+                                id
+                                position { x y z }
+                                floor { id }
+                                room { id }
+                                panos { ...panoFragment }
+                            }
+                        }
+                    }
+                `, { modelId }, token);
+
+                // 2. Récupérer les dimensions
+                showMpSyncStatus('Récupération des dimensions des pièces...', 'loading');
+                const dimData = await matterportGraphQL(`
+                    fragment dimensions on Dimension {
+                        areaCeiling
+                        areaFloor
+                        areaFloorIndoor
+                        areaWall
+                        volume
+                        depth
+                        height
+                        width
+                        units
+                    }
+                    query getDimensions($modelId: ID!) {
+                        model(id: $modelId) {
+                            name
+                            dimensions { ...dimensions }
+                            floors {
+                                label
+                                dimensions(units: metric) { ...dimensions }
+                            }
+                            rooms {
+                                id
+                                label
+                                tags
+                                dimensions { ...dimensions }
+                            }
+                        }
+                    }
+                `, { modelId }, token);
+
+                // 3. Récupérer les plans d'étage
+                showMpSyncStatus('Récupération des plans d\'étage...', 'loading');
+                let floorData = null;
+                try {
+                    floorData = await matterportGraphQL(`
+                        query getFloorplans($modelId: ID!) {
+                            model(id: $modelId) {
+                                assets {
+                                    floorplans(provider: "matterport", flags: [photogramy]) {
+                                        floor { label sequence }
+                                        format
+                                        flags
+                                        url
+                                        origin { x y }
+                                        width
+                                        height
+                                        resolution
+                                    }
+                                }
+                            }
+                        }
+                    `, { modelId }, token);
+                } catch (e) {
+                    console.warn('Floorplans non disponibles:', e.message);
+                }
+
+                // Assembler les données
+                const mpData = {
+                    modelId,
+                    modelName: sweepData.model?.name || '',
+                    description: sweepData.model?.description || '',
+                    locations: sweepData.model?.locations || [],
+                    dimensions: dimData.model?.dimensions || null,
+                    floors: dimData.model?.floors || [],
+                    rooms: dimData.model?.rooms || [],
+                    floorplans: floorData?.model?.assets?.floorplans || []
+                };
+
+                // Mettre en cache
+                if (currentClient) {
+                    matterportCache[currentClient.id] = mpData;
+                }
+
+                // Afficher
+                document.getElementById('matterportTabs').style.display = 'block';
+                renderMatterportData(mpData);
+
+                // Mettre à jour l'iframe viewer
+                document.getElementById('matterportIframe').src =
+                    `https://my.matterport.com/show/?m=${modelId}`;
+
+                // Sauvegarder le model ID et l'URL en base
+                if (currentClient) {
+                    await saveMatterportToClient(modelId, mpData);
+                }
+
+                showMpSyncStatus(
+                    `Synchronisation réussie — ${mpData.locations.length} panoramiques, ` +
+                    `${mpData.rooms.length} pièces, ${mpData.floorplans.length} plans récupérés`,
+                    'success'
+                );
+
+                setTimeout(hideMpSyncStatus, 6000);
+
+            } catch (err) {
+                console.error('Matterport API error:', err);
+                showMpSyncStatus(`Erreur : ${err.message}`, 'error');
+            }
+        }
+
+        async function saveMatterportToClient(modelId, mpData) {
+            if (!currentClient || !supabase) return;
+
+            // Construire le format matterport_data compatible avec l'existant
+            const matterportData = {
+                surface_totale: mpData.dimensions?.areaFloor
+                    ? `${mpData.dimensions.areaFloor.toFixed(1)} m²` : null,
+                titre_scan: mpData.modelName || 'Scan 3D',
+                niveaux: mpData.floors.map(floor => ({
+                    nom: floor.label || 'Niveau',
+                    surface: floor.dimensions?.areaFloor
+                        ? `${floor.dimensions.areaFloor.toFixed(1)} m²` : null,
+                    pieces: mpData.rooms
+                        .filter(r => true) // Toutes les pièces pour l'instant
+                        .map(r => ({
+                            nom: r.label || 'Pièce',
+                            surface: r.dimensions?.areaFloor
+                                ? `${r.dimensions.areaFloor.toFixed(1)} m²` : null,
+                            hauteur: r.dimensions?.height
+                                ? `${r.dimensions.height.toFixed(2)} m` : null,
+                            largeur: r.dimensions?.width
+                                ? `${r.dimensions.width.toFixed(2)} m` : null,
+                            profondeur: r.dimensions?.depth
+                                ? `${r.dimensions.depth.toFixed(2)} m` : null,
+                            volume: r.dimensions?.volume
+                                ? `${r.dimensions.volume.toFixed(1)} m³` : null
+                        }))
+                })),
+                source: 'matterport_api',
+                synced_at: new Date().toISOString()
+            };
+
+            try {
+                const { error } = await supabase
+                    .from('clients')
+                    .update({
+                        matterport_model_id: modelId,
+                        matterport_url: `https://my.matterport.com/show/?m=${modelId}`,
+                        matterport_data: matterportData,
+                        updated_at: new Date().toISOString()
+                    })
+                    .eq('id', currentClient.id);
+
+                if (error) throw error;
+
+                // Mettre à jour l'objet client local
+                currentClient.matterport_model_id = modelId;
+                currentClient.matterport_url = `https://my.matterport.com/show/?m=${modelId}`;
+                currentClient.matterport_data = matterportData;
+
+                showSuccessMessage('Données Matterport enregistrées pour ce client');
+            } catch (err) {
+                console.error('Save matterport error:', err);
+                showErrorMessage('Erreur sauvegarde Matterport: ' + err.message);
+            }
+        }
+
+        function renderMatterportData(mpData) {
+            // Panoramas tab
+            const panoramasGrid = document.getElementById('panoramasGrid');
+            if (mpData.locations && mpData.locations.length > 0) {
+                panoramasGrid.innerHTML = mpData.locations.map((loc, idx) => {
+                    const pano = loc.panos && loc.panos[0];
+                    const skyboxChildren = pano?.skybox?.children || [];
+                    // Skybox children are 6 cube faces, take the first as thumbnail
+                    const thumbUrl = skyboxChildren.length > 0 ? skyboxChildren[0] : '';
+                    const pos = loc.position || {};
+                    return `
+                        <div class="mp-pano-card" onclick="viewPanorama(${idx})">
+                            ${thumbUrl
+                                ? `<img src="${thumbUrl}" alt="Panorama ${idx + 1}" loading="lazy">`
+                                : `<div style="height:140px; display:flex; align-items:center; justify-content:center; color:var(--muted);">Aperçu non disponible</div>`
+                            }
+                            <div class="mp-pano-info">
+                                <strong>Point ${idx + 1}</strong><br>
+                                Position : x=${pos.x?.toFixed(1) || '-'}, y=${pos.y?.toFixed(1) || '-'}, z=${pos.z?.toFixed(1) || '-'}
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+                document.getElementById('btnDownloadPanos').style.display = 'inline-block';
+            } else {
+                panoramasGrid.innerHTML = '<p style="color: var(--muted); padding: 20px;">Aucune panoramique récupérée</p>';
+            }
+
+            // Dimensions tab
+            renderDimensionsTable(mpData);
+
+            // Floorplans tab
+            const floorplansGrid = document.getElementById('floorplansGrid');
+            if (mpData.floorplans && mpData.floorplans.length > 0) {
+                floorplansGrid.innerHTML = mpData.floorplans.map(fp => `
+                    <div class="mp-floorplan-card">
+                        <img src="${fp.url}" alt="Plan ${fp.floor?.label || ''}" loading="lazy">
+                        <h4>${fp.floor?.label || 'Plan d\'étage'}</h4>
+                        <p style="font-size: 12px; color: var(--muted);">
+                            ${fp.width}×${fp.height}px • ${fp.format || 'image'}
+                        </p>
+                    </div>
+                `).join('');
+            } else {
+                floorplansGrid.innerHTML = '<p style="color: var(--muted); padding: 20px;">Aucun plan d\'étage disponible (peut nécessiter un abonnement supérieur)</p>';
+            }
+        }
+
+        function renderDimensionsTable(mpData) {
+            const container = document.getElementById('dimensionsData');
+            let html = '';
+
+            // Global dimensions
+            if (mpData.dimensions) {
+                const d = mpData.dimensions;
+                html += `
+                    <div style="margin-bottom: 20px; padding: 16px; background: var(--bg); border-radius: 8px;">
+                        <h4 style="margin-bottom: 8px;">Dimensions globales</h4>
+                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 12px; font-size: 13px;">
+                            ${d.areaFloor ? `<div><strong>Surface sol</strong><br>${d.areaFloor.toFixed(1)} m²</div>` : ''}
+                            ${d.areaFloorIndoor ? `<div><strong>Surface intérieure</strong><br>${d.areaFloorIndoor.toFixed(1)} m²</div>` : ''}
+                            ${d.areaWall ? `<div><strong>Surface murs</strong><br>${d.areaWall.toFixed(1)} m²</div>` : ''}
+                            ${d.areaCeiling ? `<div><strong>Surface plafond</strong><br>${d.areaCeiling.toFixed(1)} m²</div>` : ''}
+                            ${d.volume ? `<div><strong>Volume</strong><br>${d.volume.toFixed(1)} m³</div>` : ''}
+                        </div>
+                    </div>
+                `;
+            }
+
+            // Rooms table
+            if (mpData.rooms && mpData.rooms.length > 0) {
+                html += `
+                    <table class="mp-dim-table">
+                        <thead>
+                            <tr>
+                                <th>Pièce</th>
+                                <th>Surface</th>
+                                <th>Hauteur</th>
+                                <th>Largeur</th>
+                                <th>Profondeur</th>
+                                <th>Volume</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${mpData.rooms.map(room => {
+                                const d = room.dimensions || {};
+                                return `
+                                    <tr>
+                                        <td><strong>${room.label || 'Sans nom'}</strong></td>
+                                        <td>${d.areaFloor ? d.areaFloor.toFixed(1) + ' m²' : '-'}</td>
+                                        <td>${d.height ? d.height.toFixed(2) + ' m' : '-'}</td>
+                                        <td>${d.width ? d.width.toFixed(2) + ' m' : '-'}</td>
+                                        <td>${d.depth ? d.depth.toFixed(2) + ' m' : '-'}</td>
+                                        <td>${d.volume ? d.volume.toFixed(1) + ' m³' : '-'}</td>
+                                    </tr>
+                                `;
+                            }).join('')}
+                        </tbody>
+                    </table>
+                `;
+                document.getElementById('btnExportCsv').style.display = 'inline-block';
+            }
+
+            container.innerHTML = html || '<p style="color: var(--muted); padding: 20px;">Aucune donnée dimensionnelle disponible</p>';
+        }
+
+        function renderMatterportDataFromDb(matterportData) {
+            // Afficher les données stockées en DB (format du script import-matterport.js)
+            if (!matterportData) return;
+
+            const container = document.getElementById('dimensionsData');
+            let html = '';
+
+            if (matterportData.surface_totale) {
+                html += `
+                    <div style="margin-bottom: 20px; padding: 16px; background: var(--bg); border-radius: 8px;">
+                        <h4 style="margin-bottom: 8px;">${matterportData.titre_scan || 'Données du scan'}</h4>
+                        <div style="font-size: 14px;"><strong>Surface totale :</strong> ${matterportData.surface_totale}</div>
+                        <div style="font-size: 11px; color: var(--muted); margin-top: 4px;">
+                            Source : ${matterportData.source === 'matterport_api' ? 'API Matterport' : 'Import CSV'}
+                            ${matterportData.synced_at ? ' • Sync : ' + new Date(matterportData.synced_at).toLocaleString('fr-FR') : ''}
+                        </div>
+                    </div>
+                `;
+            }
+
+            if (matterportData.niveaux && matterportData.niveaux.length > 0) {
+                matterportData.niveaux.forEach(niveau => {
+                    html += `<h4 style="margin: 12px 0 8px;">${niveau.nom} ${niveau.surface ? `(${niveau.surface})` : ''}</h4>`;
+                    if (niveau.pieces && niveau.pieces.length > 0) {
+                        html += `
+                            <table class="mp-dim-table">
+                                <thead>
+                                    <tr><th>Pièce</th><th>Surface</th><th>Hauteur</th><th>Largeur</th><th>Profondeur</th><th>Volume</th></tr>
+                                </thead>
+                                <tbody>
+                                    ${niveau.pieces.map(p => `
+                                        <tr>
+                                            <td><strong>${p.nom}</strong></td>
+                                            <td>${p.surface || '-'}</td>
+                                            <td>${p.hauteur || '-'}</td>
+                                            <td>${p.largeur || '-'}</td>
+                                            <td>${p.profondeur || '-'}</td>
+                                            <td>${p.volume || '-'}</td>
+                                        </tr>
+                                    `).join('')}
+                                </tbody>
+                            </table>
+                        `;
+                    }
+                });
+            }
+
+            if (html) {
+                container.innerHTML = html;
+                document.getElementById('matterportTabs').style.display = 'block';
+                document.getElementById('btnExportCsv').style.display = 'inline-block';
+            }
+        }
+
+        function viewPanorama(index) {
+            if (!currentClient || !matterportCache[currentClient.id]) return;
+            const loc = matterportCache[currentClient.id].locations[index];
+            if (!loc) return;
+
+            // Naviguer vers ce point dans l'iframe Matterport
+            const iframe = document.getElementById('matterportIframe');
+            const modelId = document.getElementById('matterportModelId').value.trim();
+            if (modelId && loc.id) {
+                iframe.src = `https://my.matterport.com/show/?m=${modelId}&sr=${loc.id}`;
+            }
+
+            // Basculer sur l'onglet viewer
+            document.querySelectorAll('.mp-tab').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.mp-tab-content').forEach(t => t.classList.remove('active'));
+            document.querySelector('.mp-tab').classList.add('active');
+            document.getElementById('mpTabViewer').classList.add('active');
+        }
+
+        function exportDimensionsCsv() {
+            const mpData = currentClient ? matterportCache[currentClient.id] : null;
+            const dbData = currentClient?.matterport_data;
+
+            let csvContent = 'Pièce;Surface (m²);Hauteur (m);Largeur (m);Profondeur (m);Volume (m³)\n';
+
+            if (mpData && mpData.rooms) {
+                mpData.rooms.forEach(room => {
+                    const d = room.dimensions || {};
+                    csvContent += `${room.label || 'Sans nom'};${d.areaFloor?.toFixed(1) || ''};${d.height?.toFixed(2) || ''};${d.width?.toFixed(2) || ''};${d.depth?.toFixed(2) || ''};${d.volume?.toFixed(1) || ''}\n`;
+                });
+            } else if (dbData?.niveaux) {
+                dbData.niveaux.forEach(n => {
+                    (n.pieces || []).forEach(p => {
+                        csvContent += `${p.nom};${p.surface || ''};${p.hauteur || ''};${p.largeur || ''};${p.profondeur || ''};${p.volume || ''}\n`;
+                    });
+                });
+            }
+
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            const clientName = currentClient ? `${currentClient.prenom}_${currentClient.nom}` : 'export';
+            link.download = `dimensions_${clientName}_${new Date().toISOString().slice(0,10)}.csv`;
+            link.click();
+            URL.revokeObjectURL(link.href);
+
+            showSuccessMessage('CSV exporté');
+        }
+
+        async function downloadAllPanoramas() {
+            const mpData = currentClient ? matterportCache[currentClient.id] : null;
+            if (!mpData || !mpData.locations) return;
+
+            showMpSyncStatus('Préparation du téléchargement des panoramiques...', 'loading');
+
+            // Ouvrir chaque image panoramique dans un nouvel onglet
+            // (le téléchargement batch nécessiterait un backend)
+            let count = 0;
+            mpData.locations.forEach((loc, idx) => {
+                const pano = loc.panos && loc.panos[0];
+                const children = pano?.skybox?.children || [];
+                if (children.length > 0) {
+                    // Ouvrir la première face du skybox
+                    window.open(children[0], `_pano_${idx}`);
+                    count++;
+                }
+            });
+
+            showMpSyncStatus(`${count} panoramiques ouvertes dans de nouveaux onglets. Faites clic droit > Enregistrer sous pour les sauvegarder.`, 'success');
+            setTimeout(hideMpSyncStatus, 8000);
+        }
+
+        // ========== INITIALIZATION ==========
+        window.addEventListener('load', () => {
+            const stored = {
+                url: sessionStorage.getItem('sb_url'),
+                key: sessionStorage.getItem('sb_key'),
+                secret: sessionStorage.getItem('admin_secret')
+            };
+
+            if (stored.url && stored.key && stored.secret) {
+                document.getElementById('supabaseUrl').value = stored.url;
+                document.getElementById('supabaseKey').value = stored.key;
+                document.getElementById('adminSecret').value = stored.secret;
+                authForm.dispatchEvent(new Event('submit'));
+            }
+        });
+    </script>
+</body>
+</html>

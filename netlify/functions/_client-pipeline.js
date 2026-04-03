@@ -1,23 +1,14 @@
 const { createClient } = require('@supabase/supabase-js');
+const {
+  CANONICAL_PIPELINE_STATUSES,
+  expandStatusVariants,
+  getStatusRank,
+  isPipelineStatus,
+  normalizeClientStatus,
+} = require('./_cockpit-config');
+const { safeReconcileClientTasks } = require('./_cockpit-engine');
 
-const PIPELINE_STATUSES = [
-  'new_lead',
-  'account_created',
-  'onboarding_completed',
-  'call_requested',
-  'call_done',
-  'scan_scheduled',
-  'scan_payment_completed',
-  'scan_completed',
-  'analysis_ready',
-  'avant_projet_ready',
-  'accompaniment_subscribed'
-];
-
-const STATUS_RANK = PIPELINE_STATUSES.reduce((acc, status, index) => {
-  acc[status] = index;
-  return acc;
-}, {});
+const PIPELINE_STATUSES = CANONICAL_PIPELINE_STATUSES;
 
 function normalizeEmail(email) {
   return typeof email === 'string' ? email.trim().toLowerCase() : '';
@@ -30,19 +21,23 @@ function hasValue(value) {
 }
 
 function chooseFarthestStatus(currentStatus, nextStatus) {
-  const currentRank = STATUS_RANK[currentStatus];
-  const nextRank = STATUS_RANK[nextStatus];
+  const normalizedCurrent = normalizeClientStatus(currentStatus);
+  const normalizedNext = normalizeClientStatus(nextStatus);
+  const currentRank = getStatusRank(normalizedCurrent);
+  const nextRank = getStatusRank(normalizedNext);
 
-  if (nextRank === undefined) return currentStatus || null;
-  if (currentRank === undefined) return nextStatus;
+  if (nextRank === -1) return normalizedCurrent || null;
+  if (currentRank === -1) return normalizedNext;
 
-  return nextRank >= currentRank ? nextStatus : currentStatus;
+  return nextRank >= currentRank ? normalizedNext : normalizedCurrent;
 }
 
 function inferPipelineStatus(fields, currentStatus) {
   let inferredStatus = null;
 
-  if (fields.avant_projet_enabled === true || hasValue(fields.proposal_url)) {
+  if (fields.avant_projet_transmitted_at === true || hasValue(fields.avant_projet_transmitted_at)) {
+    inferredStatus = 'avant_projet_transmitted';
+  } else if (fields.avant_projet_enabled === true || hasValue(fields.proposal_url)) {
     inferredStatus = 'avant_projet_ready';
   } else if (
     fields.marcel_enabled === true ||
@@ -78,9 +73,11 @@ function inferPipelineStatus(fields, currentStatus) {
     hasValue(fields.echeance)
   ) {
     inferredStatus = 'onboarding_completed';
+  } else if (hasValue(fields.email)) {
+    inferredStatus = 'contact_submitted';
   }
 
-  return chooseFarthestStatus(currentStatus, inferredStatus || currentStatus || 'new_lead');
+  return chooseFarthestStatus(currentStatus, inferredStatus || currentStatus || 'contact_submitted');
 }
 
 function getSupabaseAdminClient(options = {}) {
@@ -98,13 +95,32 @@ function getSupabaseAdminClient(options = {}) {
   return createClient(supabaseUrl, supabaseKey);
 }
 
+async function fetchExistingClient(supabase, normalizedEmail) {
+  const variants = expandStatusVariants(PIPELINE_STATUSES);
+  const { data, error } = await supabase
+    .from('clients')
+    .select('*')
+    .eq('email', normalizedEmail)
+    .maybeSingle();
+
+  if (error) {
+    throw new Error(`Supabase lecture: ${error.message}`);
+  }
+
+  if (data && data.status && !variants.includes(data.status) && !normalizeClientStatus(data.status)) {
+    data.status = 'contact_submitted';
+  }
+
+  return data || null;
+}
+
 async function upsertClientPipeline(options) {
   const {
     email,
     fields = {},
     status,
     inferStatusFromFields = false,
-    strict = false
+    strict = false,
   } = options || {};
 
   const normalizedEmail = normalizeEmail(email);
@@ -117,17 +133,13 @@ async function upsertClientPipeline(options) {
     return { skipped: true, reason: 'missing_supabase_env' };
   }
 
-  const { data: existingClient, error: existingError } = await supabase
-    .from('clients')
-    .select('status')
-    .eq('email', normalizedEmail)
-    .maybeSingle();
+  const existingClient = await fetchExistingClient(supabase, normalizedEmail);
+  const currentStatus = existingClient && existingClient.status ? normalizeClientStatus(existingClient.status) : null;
 
-  if (existingError) {
-    throw new Error(`Supabase lecture: ${existingError.message}`);
-  }
-
-  const clientData = { email: normalizedEmail, updated_at: new Date().toISOString() };
+  const clientData = {
+    email: normalizedEmail,
+    updated_at: new Date().toISOString(),
+  };
 
   for (const [key, value] of Object.entries(fields)) {
     if (value !== undefined) {
@@ -135,9 +147,9 @@ async function upsertClientPipeline(options) {
     }
   }
 
-  const currentStatus = existingClient && existingClient.status ? existingClient.status : null;
-  const nextStatus = status && STATUS_RANK[status] !== undefined
-    ? chooseFarthestStatus(currentStatus, status)
+  const requestedStatus = isPipelineStatus(status) ? normalizeClientStatus(status) : normalizeClientStatus(status);
+  const nextStatus = requestedStatus && isPipelineStatus(requestedStatus)
+    ? chooseFarthestStatus(currentStatus, requestedStatus)
     : inferStatusFromFields
       ? inferPipelineStatus(clientData, currentStatus)
       : currentStatus || null;
@@ -156,14 +168,25 @@ async function upsertClientPipeline(options) {
     throw new Error(`Supabase ecriture: ${error.message}`);
   }
 
+  const reconciledClient = data || { ...(existingClient || {}), ...clientData };
+  await safeReconcileClientTasks({
+    supabase,
+    client: reconciledClient,
+  });
+
   return {
     skipped: false,
-    data: data || clientData,
-    status: nextStatus || null
+    data: reconciledClient,
+    status: nextStatus || null,
   };
 }
 
 module.exports = {
   PIPELINE_STATUSES,
-  upsertClientPipeline
+  chooseFarthestStatus,
+  getSupabaseAdminClient,
+  hasValue,
+  inferPipelineStatus,
+  normalizeClientStatus,
+  upsertClientPipeline,
 };

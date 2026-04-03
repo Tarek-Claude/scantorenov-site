@@ -34,7 +34,7 @@ exports.handler = async (event, context) => {
         ...client,
         clientId: client.id,
         nom: client.nom || client.prenom || resolution.normalizedEmail,
-        status: client.status || 'account_created',
+        status: client.status || 'identity_created',
       }),
     };
   } catch (error) {

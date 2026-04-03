@@ -1,5 +1,6 @@
 const { createClient } = require('@supabase/supabase-js');
 const Stripe = require('stripe');
+const { upsertClientPipeline } = require('./_client-pipeline');
 
 const supabase = createClient(
   process.env.SUPABASE_URL,
@@ -76,11 +77,23 @@ async function handleCheckoutCompleted(session) {
     .update({ status: 'confirmed', updated_at: new Date().toISOString() })
     .eq('id', appointmentId);
 
-  await supabase
+  const { data: client } = await supabase
     .from('clients')
-    .update({ status: 'scan_payment_completed', updated_at: new Date().toISOString() })
+    .select('email')
     .eq('id', clientId)
-    .in('status', ['scan_scheduled', 'call_done']);
+    .maybeSingle();
+
+  if (client && client.email) {
+    try {
+      await upsertClientPipeline({
+        email: client.email,
+        status: 'scan_payment_completed',
+        strict: true,
+      });
+    } catch (pipelineError) {
+      console.warn('webhook-stripe pipeline update failed:', pipelineError.message);
+    }
+  }
 
   try {
     const response = await fetch(`${SITE_URL}/.netlify/functions/confirm-scan`, {

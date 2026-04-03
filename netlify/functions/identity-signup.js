@@ -71,7 +71,7 @@ exports.handler = async function(event) {
   try {
     await upsertClientPipeline({
       email,
-      status: 'account_created',
+      status: 'identity_created',
       fields: {
         nom: meta.full_name || undefined,
         telephone: meta.telephone || undefined,

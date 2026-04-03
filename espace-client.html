@@ -2900,13 +2900,13 @@ var IDENTITY_API = '/.netlify/identity';
 var currentUser = null;
 var currentPhase = 3;
 var currentClientId = null;
-var currentPipelineStatus = 'new_lead';
+var currentPipelineStatus = 'contact_submitted';
 var clientProject = {};
 var bookingClientMessage = 'Connectez-vous pour rÃ©server un crÃ©neau.';
 
 window.__pipelineRank = {
-  new_lead: 0,
-  account_created: 1,
+  contact_submitted: 0,
+  identity_created: 1,
   onboarding_completed: 2,
   call_requested: 3,
   call_done: 4,
@@ -2915,8 +2915,20 @@ window.__pipelineRank = {
   scan_completed: 7,
   analysis_ready: 8,
   avant_projet_ready: 9,
-  accompaniment_subscribed: 10
+  avant_projet_transmitted: 10,
+  accompaniment_subscribed: 11,
+  new_lead: 0,
+  account_created: 1,
+  avant_project_transmitted: 10
 };
+
+function normalizePipelineStatus(status) {
+  if (!status) return 'contact_submitted';
+  if (status === 'new_lead') return 'contact_submitted';
+  if (status === 'account_created') return 'identity_created';
+  if (status === 'avant_project_transmitted') return 'avant_projet_transmitted';
+  return status;
+}
 
 function setAuthLoginFeedback(message, isError) {
   var feedback = document.getElementById('authLoginFeedback');
@@ -2964,7 +2976,7 @@ function applySupabaseClientRecord(sb, appMeta) {
     telephone: sb.telephone || clientProject.telephone,
     matterport_data: sb.matterport_data || clientProject.matterport_data
   };
-  currentPipelineStatus = sb.status || 'new_lead';
+  currentPipelineStatus = normalizePipelineStatus(sb.status || 'contact_submitted');
   if (sb.phase && sb.phase > currentPhase) currentPhase = sb.phase;
   if (sb.matterport_model_id) appMeta.matterport_id = sb.matterport_model_id;
   if (sb.matterport_iframe) appMeta.matterport_iframe = sb.matterport_iframe;
@@ -3116,7 +3128,7 @@ function applyDashboardData(user, meta, appMeta) {
   // Charger la phase et les donnees projet
   currentPhase = appMeta.phase || 3;
   clientProject = appMeta.project || {};
-  currentPipelineStatus = appMeta.status || currentPipelineStatus || 'new_lead';
+  currentPipelineStatus = normalizePipelineStatus(appMeta.status || currentPipelineStatus || 'contact_submitted');
 
   // Rendre la phase
   renderPhase(currentPhase, clientProject, appMeta);
@@ -5136,6 +5148,7 @@ function submitAvantProjet() {
   .then(function(res) { return res.json().then(function(d) { return { ok: res.ok, data: d }; }); })
   .then(function(result) {
     if (result.ok && result.data.success) {
+      currentPipelineStatus = 'avant_projet_transmitted';
       // Succès
       btn.textContent = '✓ Avant-projet transmis';
       btn.style.background = '#2ecc71';

@@ -20,7 +20,7 @@ exports.handler = async (event) => {
   try {
     await upsertClientPipeline({
       email,
-      status: 'new_lead',
+      status: 'contact_submitted',
       fields: {
         nom,
         telephone: telephone || null,

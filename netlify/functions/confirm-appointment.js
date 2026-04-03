@@ -1,5 +1,6 @@
 const { createClient } = require('@supabase/supabase-js');
 const { Resend } = require('resend');
+const { expandStatusVariants } = require('./_cockpit-config');
 const { resolveIdentityClient } = require('./_identity-client');
 
 const SITE_URL = 'https://scantorenov.com';
@@ -301,7 +302,7 @@ exports.handler = async (event, context) => {
             updated_at: new Date().toISOString(),
           })
           .eq('id', resolvedClientId)
-          .in('status', ['new_lead', 'account_created', 'onboarding_completed', 'call_requested']);
+          .in('status', expandStatusVariants(['contact_submitted', 'identity_created', 'onboarding_completed', 'call_requested']));
 
         if (pipelineError) {
           console.warn('B-4d pipeline update failed (non-blocking):', pipelineError.message);
