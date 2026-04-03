@@ -1,5 +1,6 @@
 const { createClient } = require('@supabase/supabase-js');
 const { Resend } = require('resend');
+const { authorizeAdminRequest } = require('./_admin-session');
 
 const SITE_URL = 'https://scantorenov.com';
 
@@ -105,7 +106,7 @@ exports.handler = async (event) => {
   const headers = {
     'Access-Control-Allow-Origin': '*',
     'Access-Control-Allow-Methods': 'POST, OPTIONS',
-    'Access-Control-Allow-Headers': 'Content-Type, x-admin-secret',
+    'Access-Control-Allow-Headers': 'Content-Type, Authorization, x-admin-secret, x-admin-session',
     'Content-Type': 'application/json',
   };
 
@@ -117,8 +118,7 @@ exports.handler = async (event) => {
     return { statusCode: 405, headers, body: JSON.stringify({ error: 'Method not allowed' }) };
   }
 
-  const adminSecret = event.headers['x-admin-secret'];
-  if (!adminSecret || adminSecret !== process.env.ADMIN_SECRET) {
+  if (!authorizeAdminRequest(event).authorized) {
     return { statusCode: 401, headers, body: JSON.stringify({ error: 'Unauthorized' }) };
   }
 

@@ -19,9 +19,11 @@
  * }
  */
 
+const { authorizeAdminRequest } = require('./_admin-session');
+
 const headers = {
   'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+  'Access-Control-Allow-Headers': 'Content-Type, Authorization, x-admin-session, x-admin-secret',
   'Access-Control-Allow-Methods': 'POST, OPTIONS',
   'Content-Type': 'application/json'
 };
@@ -35,13 +37,7 @@ exports.handler = async function(event, context) {
   }
 
   // --- Authentification ---
-  const adminSecret = process.env.ADMIN_SECRET;
-  const authHeader = event.headers.authorization || '';
-
-  if (!adminSecret) {
-    return { statusCode: 500, headers, body: JSON.stringify({ error: 'ADMIN_SECRET non configure' }) };
-  }
-  if (authHeader !== `Bearer ${adminSecret}`) {
+  if (!authorizeAdminRequest(event).authorized) {
     return { statusCode: 401, headers, body: JSON.stringify({ error: 'Non autorise' }) };
   }
 

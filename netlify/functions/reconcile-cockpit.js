@@ -1,9 +1,10 @@
 const { createClient } = require('@supabase/supabase-js');
 const { safeReconcileClientTasks } = require('./_cockpit-engine');
+const { authorizeAdminRequest } = require('./_admin-session');
 
 const headers = {
   'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'Content-Type, Authorization, x-admin-secret',
+  'Access-Control-Allow-Headers': 'Content-Type, Authorization, x-admin-secret, x-admin-session',
   'Access-Control-Allow-Methods': 'POST, OPTIONS',
   'Content-Type': 'application/json',
 };
@@ -15,17 +16,6 @@ function getSupabaseAdminClient() {
   );
 }
 
-function isAuthorized(event) {
-  const expected = process.env.ADMIN_SECRET;
-  const headerSecret = event.headers['x-admin-secret'];
-  const authorization = event.headers.authorization || '';
-  const bearer = authorization.startsWith('Bearer ')
-    ? authorization.slice('Bearer '.length)
-    : '';
-
-  return !!expected && (headerSecret === expected || bearer === expected);
-}
-
 exports.handler = async function(event) {
   if (event.httpMethod === 'OPTIONS') {
     return { statusCode: 200, headers, body: '' };
@@ -35,7 +25,7 @@ exports.handler = async function(event) {
     return { statusCode: 405, headers, body: JSON.stringify({ error: 'Method not allowed' }) };
   }
 
-  if (!isAuthorized(event)) {
+  if (!authorizeAdminRequest(event).authorized) {
     return { statusCode: 401, headers, body: JSON.stringify({ error: 'Unauthorized' }) };
   }
 

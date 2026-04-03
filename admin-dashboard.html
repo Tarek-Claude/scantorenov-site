@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
@@ -1116,7 +1116,7 @@
     <div class="auth-screen" id="authScreen">
         <div class="auth-card">
             <h1>Admin</h1>
-            <p>Connectez-vous pour accéder au tableau de bord</p>
+            <p>Connectez-vous pour accÃ©der au tableau de bord</p>
             <div class="auth-error" id="authError"></div>
             <form class="auth-form" id="authForm">
                 <div class="form-group">
@@ -1129,7 +1129,7 @@
                 </div>
                 <div class="form-group">
                     <label for="adminSecret">Admin Secret</label>
-                    <input type="password" id="adminSecret" placeholder="Votre clé admin" required>
+                    <input type="password" id="adminSecret" placeholder="Votre clÃ© admin" required>
                 </div>
                 <button type="submit" class="auth-submit">Connexion</button>
             </form>
@@ -1142,7 +1142,7 @@
         <div class="dashboard-header">
             <h1>Poste de pilotage interne</h1>
             <div class="header-actions">
-                <button class="logout-btn" id="logoutBtn">Déconnexion</button>
+                <button class="logout-btn" id="logoutBtn">DÃ©connexion</button>
             </div>
         </div>
 
@@ -1191,7 +1191,7 @@
                                 <h2 id="clientName">-</h2>
                                 <div class="profile-header-contact">
                                     <div>Email: <strong id="clientEmail">-</strong></div>
-                                    <div>Tél: <strong id="clientPhone">-</strong></div>
+                                    <div>TÃ©l: <strong id="clientPhone">-</strong></div>
                                 </div>
                             </div>
                             <div id="clientStatusBadge"></div>
@@ -1214,7 +1214,7 @@
                                 <div class="detail-value" id="clientBudget">-</div>
                             </div>
                             <div class="detail-item">
-                                <div class="detail-label">Échéance</div>
+                                <div class="detail-label">Ã‰chÃ©ance</div>
                                 <div class="detail-value" id="clientEcheance">-</div>
                             </div>
                         </div>
@@ -1247,12 +1247,12 @@
 
                             <!-- Matterport Model ID Input -->
                             <div id="matterportIdInput" style="margin-bottom: 16px; padding: 16px; background: var(--bg); border-radius: 8px;">
-                                <label style="font-size: 13px; font-weight: 600; display: block; margin-bottom: 8px;">ID du modèle Matterport</label>
+                                <label style="font-size: 13px; font-weight: 600; display: block; margin-bottom: 8px;">ID du modÃ¨le Matterport</label>
                                 <div style="display: flex; gap: 8px;">
                                     <input type="text" id="matterportModelId" placeholder="Ex: SxQL3iGyoDo" style="flex: 1;">
                                     <input type="password" id="matterportApiToken" placeholder="Token API Matterport" style="flex: 1;">
                                     <button class="action-button" onclick="fetchMatterportData()" style="white-space: nowrap; font-size: 12px; padding: 8px 14px;">
-                                        Récupérer
+                                        RÃ©cupÃ©rer
                                     </button>
                                 </div>
                                 <p style="font-size: 11px; color: var(--muted); margin-top: 6px;">
@@ -1281,7 +1281,7 @@
                                 <div class="mp-tab-content" id="mpTabPanoramas">
                                     <div id="panoramasGrid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 12px;"></div>
                                     <button class="action-button" id="btnDownloadPanos" onclick="downloadAllPanoramas()" style="margin-top: 16px; font-size: 12px; padding: 8px 14px; display: none;">
-                                        Télécharger toutes les panoramiques
+                                        TÃ©lÃ©charger toutes les panoramiques
                                     </button>
                                 </div>
 
@@ -1328,7 +1328,7 @@
                                 <input type="file" id="csvInput" accept=".csv">
                             </div>
                             <div class="file-input-group">
-                                <label>iframe Matterport (ou ID modèle ci-dessus)</label>
+                                <label>iframe Matterport (ou ID modÃ¨le ci-dessus)</label>
                                 <textarea id="matterportIframeInput" placeholder="Collez le code iframe ou utilisez la synchronisation automatique..."></textarea>
                             </div>
                         </div>
@@ -1340,7 +1340,7 @@
 
                 <!-- EMPTY STATE -->
                 <div class="empty-state" id="emptyState">
-                    <p>Sélectionnez un client pour voir les détails</p>
+                    <p>SÃ©lectionnez un client pour voir les dÃ©tails</p>
                 </div>
             </div>
         </div>
@@ -1364,15 +1364,15 @@
 
         const STATUS_LABELS = {
             'new_lead': 'Nouveau contact',
-            'account_created': 'Compte créé',
-            'onboarding_completed': 'Profil complété',
-            'call_requested': 'RDV tel demandé',
-            'call_done': 'Appel réalisé',
-            'scan_scheduled': 'Scan programmé',
+            'account_created': 'Compte crÃ©Ã©',
+            'onboarding_completed': 'Profil complÃ©tÃ©',
+            'call_requested': 'RDV tel demandÃ©',
+            'call_done': 'Appel rÃ©alisÃ©',
+            'scan_scheduled': 'Scan programmÃ©',
             'scan_payment_completed': 'Paiement scan',
-            'scan_completed': 'Scan réalisé',
-            'analysis_ready': 'Analyse prête',
-            'avant_projet_ready': 'Avant-projet prêt',
+            'scan_completed': 'Scan rÃ©alisÃ©',
+            'analysis_ready': 'Analyse prÃªte',
+            'avant_projet_ready': 'Avant-projet prÃªt',
             'accompaniment_subscribed': 'Accompagnement'
         };
 
@@ -1434,13 +1434,14 @@
         }
 
         // ========== STATE ==========
-        let supabase = null;
         let currentClient = null;
-        let adminSecret = null;
+        let adminSessionToken = null;
         let chatHistory = [];
-        let matterportCache = {}; // Cache des données Matterport par client
+        let matterportCache = {}; // Cache des donnÃ©es Matterport par client
 
         let currentClientTasks = [];
+        let dashboardClients = [];
+        let dashboardTasks = [];
 
         // ========== DOM ELEMENTS ==========
         const authScreen = document.getElementById('authScreen');
@@ -1454,47 +1455,125 @@
         const emptyState = document.getElementById('emptyState');
         const successMessage = document.getElementById('successMessage');
         const errorMessage = document.getElementById('errorMessage');
+        const adminLoginInput = document.getElementById('supabaseUrl');
+        const adminPasswordInput = document.getElementById('supabaseKey');
+        const legacyAdminSecretInput = document.getElementById('adminSecret');
+
+        function configureAuthScreen() {
+            const loginLabel = document.querySelector('label[for="supabaseUrl"]');
+            const passwordLabel = document.querySelector('label[for="supabaseKey"]');
+            const secretGroup = legacyAdminSecretInput ? legacyAdminSecretInput.closest('.form-group') : null;
+
+            if (loginLabel) loginLabel.textContent = 'Identifiant admin';
+            if (passwordLabel) passwordLabel.textContent = 'Mot de passe';
+            if (adminLoginInput) {
+                adminLoginInput.placeholder = 'Votre identifiant';
+                adminLoginInput.autocomplete = 'username';
+            }
+            if (adminPasswordInput) {
+                adminPasswordInput.placeholder = 'Votre mot de passe';
+                adminPasswordInput.autocomplete = 'current-password';
+            }
+            if (secretGroup) {
+                secretGroup.style.display = 'none';
+            }
+            if (legacyAdminSecretInput) {
+                legacyAdminSecretInput.required = false;
+                legacyAdminSecretInput.disabled = true;
+            }
+        }
+
+        function showAuthenticatedDashboard() {
+            authScreen.style.display = 'none';
+            dashboard.classList.add('active');
+        }
+
+        function resetAdminSession() {
+            adminSessionToken = null;
+            currentClient = null;
+            chatHistory = [];
+            currentClientTasks = [];
+            dashboardClients = [];
+            dashboardTasks = [];
+            sessionStorage.removeItem('admin_session_token');
+            sessionStorage.removeItem('admin_login');
+            authScreen.style.display = 'flex';
+            dashboard.classList.remove('active');
+        }
+
+        async function adminFetch(url, payload) {
+            if (!adminSessionToken) {
+                throw new Error('Session admin manquante');
+            }
+
+            const response = await fetch(url, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${adminSessionToken}`
+                },
+                body: JSON.stringify(payload || {})
+            });
+
+            let data = {};
+            try {
+                data = await response.json();
+            } catch (err) {
+                data = {};
+            }
+
+            if (response.status === 401) {
+                resetAdminSession();
+                authForm.reset();
+                showAuthError('Session admin expiree. Reconnectez-vous.');
+                throw new Error(data.error || 'Unauthorized');
+            }
+
+            if (!response.ok) {
+                throw new Error(data.error || `Erreur ${response.status}`);
+            }
+
+            return data;
+        }
 
         // ========== AUTH LOGIC ==========
         authForm.addEventListener('submit', async (e) => {
             e.preventDefault();
-            const url = document.getElementById('supabaseUrl').value;
-            const key = document.getElementById('supabaseKey').value;
-            adminSecret = document.getElementById('adminSecret').value;
+            const login = adminLoginInput.value.trim();
+            const password = adminPasswordInput.value;
 
-            if (!url || !key || !adminSecret) {
+            if (!login || !password) {
                 showAuthError('Tous les champs sont requis');
                 return;
             }
 
             try {
-                supabase = window.supabase.createClient(url, key);
+                const response = await fetch('/.netlify/functions/admin-login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ login, password })
+                });
+                const data = await response.json();
+                if (!response.ok || !data.token) {
+                    throw new Error(data.error || 'Connexion impossible');
+                }
 
-                // Test connection
-                const { data, error } = await supabase.from('clients').select('id').limit(1);
-                if (error) throw error;
+                adminSessionToken = data.token;
+                sessionStorage.setItem('admin_session_token', data.token);
+                sessionStorage.setItem('admin_login', login);
 
-                // Store in sessionStorage
-                sessionStorage.setItem('sb_url', url);
-                sessionStorage.setItem('sb_key', key);
-                sessionStorage.setItem('admin_secret', adminSecret);
-
-                // Show dashboard
-                authScreen.style.display = 'none';
-                dashboard.classList.add('active');
-                loadDashboard();
+                showAuthenticatedDashboard();
+                adminPasswordInput.value = '';
+                await loadDashboard();
             } catch (err) {
                 showAuthError('Erreur de connexion: ' + err.message);
             }
         });
 
         logoutBtn.addEventListener('click', () => {
-            sessionStorage.clear();
-            supabase = null;
-            currentClient = null;
-            chatHistory = [];
-            authScreen.style.display = 'flex';
-            dashboard.classList.remove('active');
+            resetAdminSession();
             authForm.reset();
         });
 
@@ -1507,31 +1586,18 @@
         // ========== DASHBOARD LOGIC ==========
         async function loadDashboard() {
             try {
-                const { data: clients } = await supabase.from('clients').select('*');
-                const normalizedClients = (clients || []).map(client => ({
+                const data = await adminFetch('/.netlify/functions/admin-cockpit-data', {});
+                dashboardClients = (data.clients || []).map(client => ({
                     ...client,
                     status: normalizeDashboardStatus(client.status)
                 }));
+                dashboardTasks = data.tasks || [];
 
-                let tasks = [];
-                try {
-                    const { data: taskRows, error: taskError } = await supabase
-                        .from('admin_tasks')
-                        .select('id,client_id,task_type,title,status,priority,due_date')
-                        .in('status', ['open', 'awaiting_validation', 'waiting_client', 'blocked'])
-                        .order('priority', { ascending: false })
-                        .limit(40);
-
-                    if (taskError) throw taskError;
-                    tasks = taskRows || [];
-                } catch (taskErr) {
-                    console.warn('Task loading skipped:', taskErr.message);
-                }
-
-                renderDashboardStats(normalizedClients, tasks);
-                updatePendingList(normalizedClients, tasks);
+                renderDashboardStats(dashboardClients, dashboardTasks);
+                updatePendingList(dashboardClients, dashboardTasks);
             } catch (err) {
                 console.error('Error loading dashboard:', err);
+                showErrorMessage(err.message);
             }
         }
 
@@ -1574,7 +1640,7 @@
                     return `
                         <div class="pending-item" onclick="selectClientById('${task.client_id}')">
                             <div class="pending-item-name">${clientName}</div>
-                            <div class="pending-item-action">${task.title} • ${stateLabel}</div>
+                            <div class="pending-item-action">${task.title} â€¢ ${stateLabel}</div>
                         </div>
                     `;
                 }).join('');
@@ -1601,32 +1667,32 @@
 
         // ========== SEARCH LOGIC ==========
         searchInput.addEventListener('input', async (e) => {
-            const query = e.target.value.trim();
+            const query = e.target.value.trim().toLowerCase();
             if (query.length < 3) {
                 autocomplete.classList.remove('show');
                 return;
             }
 
-            try {
-                const { data: results } = await supabase
-                    .from('clients')
-                    .select('id,nom,prenom,email,status,type_bien')
-                    .or(`nom.ilike.%${query}%,prenom.ilike.%${query}%,email.ilike.%${query}%`)
-                    .limit(8);
+            const results = (dashboardClients || [])
+                .filter(client => {
+                    const haystack = [client.nom, client.prenom, client.email, client.telephone]
+                        .filter(Boolean)
+                        .join(' ')
+                        .toLowerCase();
+                    return haystack.includes(query);
+                })
+                .slice(0, 8);
 
-                if (results && results.length > 0) {
-                    autocomplete.innerHTML = results.map(client => `
-                        <div class="autocomplete-item" onclick="selectClient('${client.id}')">
-                            <div class="autocomplete-item-main">${client.prenom} ${client.nom}</div>
-                            <div class="autocomplete-item-info">${client.email} • ${client.type_bien || 'N/A'}</div>
-                        </div>
-                    `).join('');
-                    autocomplete.classList.add('show');
-                } else {
-                    autocomplete.classList.remove('show');
-                }
-            } catch (err) {
-                console.error('Search error:', err);
+            if (results.length > 0) {
+                autocomplete.innerHTML = results.map(client => `
+                    <div class="autocomplete-item" onclick="selectClient('${client.id}')">
+                        <div class="autocomplete-item-main">${client.prenom || ''} ${client.nom || ''}</div>
+                        <div class="autocomplete-item-info">${client.email} ? ${client.type_bien || 'N/A'}</div>
+                    </div>
+                `).join('');
+                autocomplete.classList.add('show');
+            } else {
+                autocomplete.classList.remove('show');
             }
         });
 
@@ -1642,22 +1708,26 @@
 
         async function selectClientById(clientId) {
             try {
-                const { data: client } = await supabase.from('clients').select('*').eq('id', clientId).single();
-                if (client) {
+                const data = await adminFetch('/.netlify/functions/admin-client-detail', { clientId });
+                if (data.client) {
                     currentClient = {
-                        ...client,
-                        status: normalizeDashboardStatus(client.status)
+                        ...data.client,
+                        status: normalizeDashboardStatus(data.client.status)
                     };
-                    renderClientProfile(client);
+                    dashboardClients = dashboardClients.map(client =>
+                        client.id === currentClient.id ? currentClient : client
+                    );
+                    renderClientProfile(currentClient);
                     searchInput.value = '';
                     autocomplete.classList.remove('show');
                     emptyState.style.display = 'none';
                     clientProfile.classList.add('active');
-                    await syncCockpitTasks(client.id);
-                    await loadClientTasks(client.id);
+                    await syncCockpitTasks(currentClient.id);
+                    await loadClientTasks(currentClient.id, data.tasks || []);
                 }
             } catch (err) {
                 console.error('Error loading client:', err);
+                showErrorMessage(err.message);
             }
         }
 
@@ -1669,8 +1739,8 @@
             document.getElementById('clientPhone').textContent = client.telephone || '-';
             document.getElementById('clientTypeBien').textContent = client.type_bien || '-';
             document.getElementById('clientAdresse').textContent = client.adresse || '-';
-            document.getElementById('clientSurface').textContent = client.surface ? `${client.surface} m²` : '-';
-            document.getElementById('clientBudget').textContent = client.budget ? `${client.budget.toLocaleString('fr-FR')} €` : '-';
+            document.getElementById('clientSurface').textContent = client.surface ? `${client.surface} mÂ²` : '-';
+            document.getElementById('clientBudget').textContent = client.budget ? `${client.budget.toLocaleString('fr-FR')} â‚¬` : '-';
             document.getElementById('clientEcheance').textContent = client.echeance || '-';
 
             // Status badge
@@ -1686,17 +1756,17 @@
             // Action panel
             renderActionPanel(client, status);
 
-            // Matterport — toujours visible pour permettre la saisie du model ID
+            // Matterport â€” toujours visible pour permettre la saisie du model ID
             document.getElementById('matterportSection').style.display = 'block';
 
-            // Pré-remplir le model ID si existant
+            // PrÃ©-remplir le model ID si existant
             if (client.matterport_model_id) {
                 document.getElementById('matterportModelId').value = client.matterport_model_id;
             } else {
                 document.getElementById('matterportModelId').value = '';
             }
 
-            // Récupérer le token stocké en session
+            // RÃ©cupÃ©rer le token stockÃ© en session
             const storedToken = sessionStorage.getItem('mp_api_token');
             if (storedToken) {
                 document.getElementById('matterportApiToken').value = storedToken;
@@ -1713,7 +1783,7 @@
                     document.getElementById('matterportIframe').src =
                         `https://my.matterport.com/show/?m=${client.matterport_model_id}`;
                 }
-                // Si on a des données Matterport en cache, les afficher
+                // Si on a des donnÃ©es Matterport en cache, les afficher
                 if (matterportCache[client.id]) {
                     renderMatterportData(matterportCache[client.id]);
                 }
@@ -1721,7 +1791,7 @@
                 document.getElementById('matterportTabs').style.display = 'none';
             }
 
-            // Si on a déjà des matterport_data (du CSV importé), les afficher dans l'onglet dimensions
+            // Si on a dÃ©jÃ  des matterport_data (du CSV importÃ©), les afficher dans l'onglet dimensions
             if (client.matterport_data) {
                 renderMatterportDataFromDb(client.matterport_data);
             }
@@ -1748,7 +1818,7 @@
                 html += `
                     <div class="timeline-step">
                         <div class="timeline-step-circle ${circleClass}">
-                            ${isCompleted ? '✓' : ''}
+                            ${isCompleted ? 'âœ“' : ''}
                         </div>
                         <div class="timeline-step-label ${labelClass}">${getStatusLabel(status)}</div>
                     </div>
@@ -1769,15 +1839,15 @@
 
             if (status === 'call_requested') {
                 html = `
-                    <h3>Synthèse d'appel téléphonique</h3>
-                    <p class="action-panel-description">Prenez note de la conversation téléphonique avec le client.</p>
+                    <h3>SynthÃ¨se d'appel tÃ©lÃ©phonique</h3>
+                    <p class="action-panel-description">Prenez note de la conversation tÃ©lÃ©phonique avec le client.</p>
                     <button class="action-button" onclick="openMarcelChat()">Ouvrir Marcel</button>
                 `;
                 document.getElementById('chatPanel').style.display = 'flex';
             } else if (status === 'call_done') {
                 html = `
                     <h3>Invitation scan 3D</h3>
-                    <p class="action-panel-description">Invitez le client à programmer son scan 3D.</p>
+                    <p class="action-panel-description">Invitez le client Ã  programmer son scan 3D.</p>
                     <button class="action-button" onclick="inviteScan()">Envoyer invitation</button>
                 `;
                 document.getElementById('chatPanel').style.display = 'none';
@@ -1785,35 +1855,35 @@
                 html = `
                     <h3>Confirmer le scan</h3>
                     <p class="action-panel-description">Confirmez la programmation du scan avec le client.</p>
-                    <button class="action-button" onclick="confirmScan()">Scan confirmé</button>
+                    <button class="action-button" onclick="confirmScan()">Scan confirmÃ©</button>
                 `;
                 document.getElementById('chatPanel').style.display = 'none';
             } else if (status === 'scan_completed') {
                 html = `
                     <h3>Fichiers du scan</h3>
-                    <p class="action-panel-description">Téléchargez les fichiers et données du scan 3D.</p>
+                    <p class="action-panel-description">TÃ©lÃ©chargez les fichiers et donnÃ©es du scan 3D.</p>
                     <button class="action-button" onclick="openMarcelChat()">Discuter avec Marcel</button>
                 `;
                 document.getElementById('chatPanel').style.display = 'flex';
                 document.getElementById('filesSection').style.display = 'block';
             } else if (status === 'analysis_ready') {
                 html = `
-                    <h3>Générer l'avant-projet</h3>
-                    <p class="action-panel-description">Préparez et validez l'avant-projet avec Marcel.</p>
+                    <h3>GÃ©nÃ©rer l'avant-projet</h3>
+                    <p class="action-panel-description">PrÃ©parez et validez l'avant-projet avec Marcel.</p>
                     <button class="action-button" onclick="openMarcelChat()">Discuter avec Marcel</button>
-                    <button class="action-button" onclick="generateAvantProjet()" style="background-color: #4CAF50;">Générer avant-projet</button>
+                    <button class="action-button" onclick="generateAvantProjet()" style="background-color: #4CAF50;">GÃ©nÃ©rer avant-projet</button>
                 `;
                 document.getElementById('chatPanel').style.display = 'flex';
             } else if (status === 'avant_projet_ready') {
                 html = `
-                    <h3>Avant-projet finalisé</h3>
-                    <p class="action-panel-description">L'avant-projet est prêt. Proposez l'accompagnement.</p>
+                    <h3>Avant-projet finalisÃ©</h3>
+                    <p class="action-panel-description">L'avant-projet est prÃªt. Proposez l'accompagnement.</p>
                     <button class="action-button" onclick="proposeAccompaniment()">Proposer accompagnement</button>
                 `;
                 document.getElementById('chatPanel').style.display = 'none';
             } else {
                 html = `
-                    <h3>Étape suivante</h3>
+                    <h3>Ã‰tape suivante</h3>
                     <p class="action-panel-description">Aucune action requise pour le moment.</p>
                 `;
                 document.getElementById('chatPanel').style.display = 'none';
@@ -1823,36 +1893,36 @@
         }
 
         async function syncCockpitTasks(clientId) {
-            if (!adminSecret) return;
+            if (!adminSessionToken) return;
 
             try {
-                await fetch('/.netlify/functions/reconcile-cockpit', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'x-admin-secret': adminSecret
-                    },
-                    body: JSON.stringify({ clientId })
-                });
+                await adminFetch('/.netlify/functions/reconcile-cockpit', { clientId });
             } catch (err) {
                 console.warn('Cockpit sync skipped:', err.message);
             }
         }
 
-        async function loadClientTasks(clientId) {
+        async function loadClientTasks(clientId, prefetchedTasks) {
             try {
-                const { data: tasks, error } = await supabase
-                    .from('admin_tasks')
-                    .select('*')
-                    .eq('client_id', clientId)
-                    .in('status', ['open', 'awaiting_validation', 'waiting_client', 'blocked'])
-                    .order('priority', { ascending: false })
-                    .order('due_date', { ascending: true, nullsFirst: false });
-
-                if (error) throw error;
+                let tasks = prefetchedTasks;
+                if (!Array.isArray(tasks)) {
+                    const data = await adminFetch('/.netlify/functions/admin-client-detail', { clientId });
+                    tasks = data.tasks || [];
+                    if (data.client) {
+                        currentClient = {
+                            ...data.client,
+                            status: normalizeDashboardStatus(data.client.status)
+                        };
+                    }
+                }
 
                 currentClientTasks = tasks || [];
-                if (!currentClientTasks.length) return;
+                if (!currentClientTasks.length) {
+                    if (currentClient) {
+                        renderActionPanel(currentClient, currentClient.status);
+                    }
+                    return;
+                }
 
                 const primaryTask = currentClientTasks[0];
                 const taskCards = currentClientTasks.map(task => `
@@ -1905,7 +1975,7 @@
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
-                        'x-admin-secret': adminSecret
+                        'Authorization': `Bearer ${adminSessionToken}`
                     },
                     body: JSON.stringify({
                         message,
@@ -1940,13 +2010,13 @@
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
-                        'x-admin-secret': adminSecret
+                        'Authorization': `Bearer ${adminSessionToken}`
                     },
                     body: JSON.stringify({ clientId: currentClient.id })
                 });
 
                 if (response.ok) {
-                    showSuccessMessage('Invitation envoyée');
+                    showSuccessMessage('Invitation envoyÃ©e');
                     // Update status
                     await updateClientStatus('scan_scheduled');
                 } else {
@@ -1961,7 +2031,7 @@
             if (!currentClient) return;
             try {
                 await updateClientStatus('scan_completed');
-                showSuccessMessage('Scan confirmé');
+                showSuccessMessage('Scan confirmÃ©');
             } catch (err) {
                 showErrorMessage('Erreur: ' + err.message);
             }
@@ -1971,7 +2041,7 @@
             if (!currentClient) return;
             try {
                 await updateClientStatus('avant_projet_ready');
-                showSuccessMessage('Avant-projet généré');
+                showSuccessMessage('Avant-projet gÃ©nÃ©rÃ©');
             } catch (err) {
                 showErrorMessage('Erreur: ' + err.message);
             }
@@ -1981,7 +2051,7 @@
             if (!currentClient) return;
             try {
                 await updateClientStatus('accompaniment_subscribed');
-                showSuccessMessage('Accompagnement proposé');
+                showSuccessMessage('Accompagnement proposÃ©');
             } catch (err) {
                 showErrorMessage('Erreur: ' + err.message);
             }
@@ -2056,19 +2126,19 @@
                 const response = await fetch('/.netlify/functions/admin-update-client', {
                     method: 'POST',
                     headers: {
-                        'x-admin-secret': adminSecret
+                        'Authorization': `Bearer ${adminSessionToken}`
                     },
                     body: formData
                 });
 
                 if (response.ok) {
-                    showSuccessMessage('Fichiers téléchargés');
+                    showSuccessMessage('Fichiers tÃ©lÃ©chargÃ©s');
                     photosInput.value = '';
                     plansInput.value = '';
                     csvInput.value = '';
                     matterportInput.value = '';
                 } else {
-                    showErrorMessage('Erreur lors du téléchargement');
+                    showErrorMessage('Erreur lors du tÃ©lÃ©chargement');
                 }
             } catch (err) {
                 showErrorMessage('Erreur: ' + err.message);
@@ -2080,14 +2150,18 @@
             if (!currentClient) return;
             try {
                 const normalizedStatus = normalizeDashboardStatus(newStatus);
-                const { error } = await supabase
-                    .from('clients')
-                    .update({ status: normalizedStatus })
-                    .eq('id', currentClient.id);
+                const data = await adminFetch('/.netlify/functions/admin-update-status', {
+                    clientId: currentClient.id,
+                    status: normalizedStatus
+                });
 
-                if (error) throw error;
-
-                currentClient.status = normalizedStatus;
+                currentClient = {
+                    ...data.client,
+                    status: normalizeDashboardStatus(data.client.status)
+                };
+                dashboardClients = dashboardClients.map(client =>
+                    client.id === currentClient.id ? currentClient : client
+                );
                 renderClientProfile(currentClient);
                 await syncCockpitTasks(currentClient.id);
                 await loadClientTasks(currentClient.id);
@@ -2187,18 +2261,18 @@
             const token = document.getElementById('matterportApiToken').value.trim();
 
             if (!modelId || !token) {
-                showErrorMessage('ID du modèle et Token API requis');
+                showErrorMessage('ID du modÃ¨le et Token API requis');
                 return;
             }
 
             // Stocker le token en session pour ne pas le ressaisir
             sessionStorage.setItem('mp_api_token', token);
 
-            showMpSyncStatus('Connexion à Matterport...', 'loading');
+            showMpSyncStatus('Connexion Ã  Matterport...', 'loading');
 
             try {
-                // 1. Récupérer les panoramiques + embed URL
-                showMpSyncStatus('Récupération des panoramiques et données du modèle...', 'loading');
+                // 1. RÃ©cupÃ©rer les panoramiques + embed URL
+                showMpSyncStatus('RÃ©cupÃ©ration des panoramiques et donnÃ©es du modÃ¨le...', 'loading');
                 const sweepData = await matterportGraphQL(`
                     fragment panoFragment on PanoramicImageLocation {
                         id
@@ -2225,8 +2299,8 @@
                     }
                 `, { modelId }, token);
 
-                // 2. Récupérer les dimensions
-                showMpSyncStatus('Récupération des dimensions des pièces...', 'loading');
+                // 2. RÃ©cupÃ©rer les dimensions
+                showMpSyncStatus('RÃ©cupÃ©ration des dimensions des piÃ¨ces...', 'loading');
                 const dimData = await matterportGraphQL(`
                     fragment dimensions on Dimension {
                         areaCeiling
@@ -2257,8 +2331,8 @@
                     }
                 `, { modelId }, token);
 
-                // 3. Récupérer les plans d'étage
-                showMpSyncStatus('Récupération des plans d\'étage...', 'loading');
+                // 3. RÃ©cupÃ©rer les plans d'Ã©tage
+                showMpSyncStatus('RÃ©cupÃ©ration des plans d\'Ã©tage...', 'loading');
                 let floorData = null;
                 try {
                     floorData = await matterportGraphQL(`
@@ -2283,7 +2357,7 @@
                     console.warn('Floorplans non disponibles:', e.message);
                 }
 
-                // Assembler les données
+                // Assembler les donnÃ©es
                 const mpData = {
                     modelId,
                     modelName: sweepData.model?.name || '',
@@ -2304,7 +2378,7 @@
                 document.getElementById('matterportTabs').style.display = 'block';
                 renderMatterportData(mpData);
 
-                // Mettre à jour l'iframe viewer
+                // Mettre Ã  jour l'iframe viewer
                 document.getElementById('matterportIframe').src =
                     `https://my.matterport.com/show/?m=${modelId}`;
 
@@ -2314,8 +2388,8 @@
                 }
 
                 showMpSyncStatus(
-                    `Synchronisation réussie — ${mpData.locations.length} panoramiques, ` +
-                    `${mpData.rooms.length} pièces, ${mpData.floorplans.length} plans récupérés`,
+                    `Synchronisation rÃ©ussie â€” ${mpData.locations.length} panoramiques, ` +
+                    `${mpData.rooms.length} piÃ¨ces, ${mpData.floorplans.length} plans rÃ©cupÃ©rÃ©s`,
                     'success'
                 );
 
@@ -2328,23 +2402,22 @@
         }
 
         async function saveMatterportToClient(modelId, mpData) {
-            if (!currentClient || !supabase) return;
+            if (!currentClient) return;
 
-            // Construire le format matterport_data compatible avec l'existant
             const matterportData = {
                 surface_totale: mpData.dimensions?.areaFloor
-                    ? `${mpData.dimensions.areaFloor.toFixed(1)} m²` : null,
+                    ? `${mpData.dimensions.areaFloor.toFixed(1)} m??` : null,
                 titre_scan: mpData.modelName || 'Scan 3D',
                 niveaux: mpData.floors.map(floor => ({
                     nom: floor.label || 'Niveau',
                     surface: floor.dimensions?.areaFloor
-                        ? `${floor.dimensions.areaFloor.toFixed(1)} m²` : null,
+                        ? `${floor.dimensions.areaFloor.toFixed(1)} m??` : null,
                     pieces: mpData.rooms
-                        .filter(r => true) // Toutes les pièces pour l'instant
+                        .filter(r => true)
                         .map(r => ({
-                            nom: r.label || 'Pièce',
+                            nom: r.label || 'Pi??ce',
                             surface: r.dimensions?.areaFloor
-                                ? `${r.dimensions.areaFloor.toFixed(1)} m²` : null,
+                                ? `${r.dimensions.areaFloor.toFixed(1)} m??` : null,
                             hauteur: r.dimensions?.height
                                 ? `${r.dimensions.height.toFixed(2)} m` : null,
                             largeur: r.dimensions?.width
@@ -2352,7 +2425,7 @@
                             profondeur: r.dimensions?.depth
                                 ? `${r.dimensions.depth.toFixed(2)} m` : null,
                             volume: r.dimensions?.volume
-                                ? `${r.dimensions.volume.toFixed(1)} m³` : null
+                                ? `${r.dimensions.volume.toFixed(1)} m??` : null
                         }))
                 })),
                 source: 'matterport_api',
@@ -2360,138 +2433,32 @@
             };
 
             try {
-                const { error } = await supabase
-                    .from('clients')
-                    .update({
+                const data = await adminFetch('/.netlify/functions/admin-save-client', {
+                    clientId: currentClient.id,
+                    fields: {
                         matterport_model_id: modelId,
                         matterport_url: `https://my.matterport.com/show/?m=${modelId}`,
-                        matterport_data: matterportData,
-                        updated_at: new Date().toISOString()
-                    })
-                    .eq('id', currentClient.id);
+                        matterport_data: matterportData
+                    }
+                });
 
-                if (error) throw error;
+                currentClient = {
+                    ...data.client,
+                    status: normalizeDashboardStatus(data.client.status)
+                };
+                dashboardClients = dashboardClients.map(client =>
+                    client.id === currentClient.id ? currentClient : client
+                );
 
-                // Mettre à jour l'objet client local
-                currentClient.matterport_model_id = modelId;
-                currentClient.matterport_url = `https://my.matterport.com/show/?m=${modelId}`;
-                currentClient.matterport_data = matterportData;
-
-                showSuccessMessage('Données Matterport enregistrées pour ce client');
+                showSuccessMessage('Donnees Matterport enregistrees pour ce client');
             } catch (err) {
                 console.error('Save matterport error:', err);
                 showErrorMessage('Erreur sauvegarde Matterport: ' + err.message);
             }
         }
 
-        function renderMatterportData(mpData) {
-            // Panoramas tab
-            const panoramasGrid = document.getElementById('panoramasGrid');
-            if (mpData.locations && mpData.locations.length > 0) {
-                panoramasGrid.innerHTML = mpData.locations.map((loc, idx) => {
-                    const pano = loc.panos && loc.panos[0];
-                    const skyboxChildren = pano?.skybox?.children || [];
-                    // Skybox children are 6 cube faces, take the first as thumbnail
-                    const thumbUrl = skyboxChildren.length > 0 ? skyboxChildren[0] : '';
-                    const pos = loc.position || {};
-                    return `
-                        <div class="mp-pano-card" onclick="viewPanorama(${idx})">
-                            ${thumbUrl
-                                ? `<img src="${thumbUrl}" alt="Panorama ${idx + 1}" loading="lazy">`
-                                : `<div style="height:140px; display:flex; align-items:center; justify-content:center; color:var(--muted);">Aperçu non disponible</div>`
-                            }
-                            <div class="mp-pano-info">
-                                <strong>Point ${idx + 1}</strong><br>
-                                Position : x=${pos.x?.toFixed(1) || '-'}, y=${pos.y?.toFixed(1) || '-'}, z=${pos.z?.toFixed(1) || '-'}
-                            </div>
-                        </div>
-                    `;
-                }).join('');
-                document.getElementById('btnDownloadPanos').style.display = 'inline-block';
-            } else {
-                panoramasGrid.innerHTML = '<p style="color: var(--muted); padding: 20px;">Aucune panoramique récupérée</p>';
-            }
-
-            // Dimensions tab
-            renderDimensionsTable(mpData);
-
-            // Floorplans tab
-            const floorplansGrid = document.getElementById('floorplansGrid');
-            if (mpData.floorplans && mpData.floorplans.length > 0) {
-                floorplansGrid.innerHTML = mpData.floorplans.map(fp => `
-                    <div class="mp-floorplan-card">
-                        <img src="${fp.url}" alt="Plan ${fp.floor?.label || ''}" loading="lazy">
-                        <h4>${fp.floor?.label || 'Plan d\'étage'}</h4>
-                        <p style="font-size: 12px; color: var(--muted);">
-                            ${fp.width}×${fp.height}px • ${fp.format || 'image'}
-                        </p>
-                    </div>
-                `).join('');
-            } else {
-                floorplansGrid.innerHTML = '<p style="color: var(--muted); padding: 20px;">Aucun plan d\'étage disponible (peut nécessiter un abonnement supérieur)</p>';
-            }
-        }
-
-        function renderDimensionsTable(mpData) {
-            const container = document.getElementById('dimensionsData');
-            let html = '';
-
-            // Global dimensions
-            if (mpData.dimensions) {
-                const d = mpData.dimensions;
-                html += `
-                    <div style="margin-bottom: 20px; padding: 16px; background: var(--bg); border-radius: 8px;">
-                        <h4 style="margin-bottom: 8px;">Dimensions globales</h4>
-                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 12px; font-size: 13px;">
-                            ${d.areaFloor ? `<div><strong>Surface sol</strong><br>${d.areaFloor.toFixed(1)} m²</div>` : ''}
-                            ${d.areaFloorIndoor ? `<div><strong>Surface intérieure</strong><br>${d.areaFloorIndoor.toFixed(1)} m²</div>` : ''}
-                            ${d.areaWall ? `<div><strong>Surface murs</strong><br>${d.areaWall.toFixed(1)} m²</div>` : ''}
-                            ${d.areaCeiling ? `<div><strong>Surface plafond</strong><br>${d.areaCeiling.toFixed(1)} m²</div>` : ''}
-                            ${d.volume ? `<div><strong>Volume</strong><br>${d.volume.toFixed(1)} m³</div>` : ''}
-                        </div>
-                    </div>
-                `;
-            }
-
-            // Rooms table
-            if (mpData.rooms && mpData.rooms.length > 0) {
-                html += `
-                    <table class="mp-dim-table">
-                        <thead>
-                            <tr>
-                                <th>Pièce</th>
-                                <th>Surface</th>
-                                <th>Hauteur</th>
-                                <th>Largeur</th>
-                                <th>Profondeur</th>
-                                <th>Volume</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            ${mpData.rooms.map(room => {
-                                const d = room.dimensions || {};
-                                return `
-                                    <tr>
-                                        <td><strong>${room.label || 'Sans nom'}</strong></td>
-                                        <td>${d.areaFloor ? d.areaFloor.toFixed(1) + ' m²' : '-'}</td>
-                                        <td>${d.height ? d.height.toFixed(2) + ' m' : '-'}</td>
-                                        <td>${d.width ? d.width.toFixed(2) + ' m' : '-'}</td>
-                                        <td>${d.depth ? d.depth.toFixed(2) + ' m' : '-'}</td>
-                                        <td>${d.volume ? d.volume.toFixed(1) + ' m³' : '-'}</td>
-                                    </tr>
-                                `;
-                            }).join('')}
-                        </tbody>
-                    </table>
-                `;
-                document.getElementById('btnExportCsv').style.display = 'inline-block';
-            }
-
-            container.innerHTML = html || '<p style="color: var(--muted); padding: 20px;">Aucune donnée dimensionnelle disponible</p>';
-        }
-
         function renderMatterportDataFromDb(matterportData) {
-            // Afficher les données stockées en DB (format du script import-matterport.js)
+            // Afficher les donnÃ©es stockÃ©es en DB (format du script import-matterport.js)
             if (!matterportData) return;
 
             const container = document.getElementById('dimensionsData');
@@ -2500,11 +2467,11 @@
             if (matterportData.surface_totale) {
                 html += `
                     <div style="margin-bottom: 20px; padding: 16px; background: var(--bg); border-radius: 8px;">
-                        <h4 style="margin-bottom: 8px;">${matterportData.titre_scan || 'Données du scan'}</h4>
+                        <h4 style="margin-bottom: 8px;">${matterportData.titre_scan || 'DonnÃ©es du scan'}</h4>
                         <div style="font-size: 14px;"><strong>Surface totale :</strong> ${matterportData.surface_totale}</div>
                         <div style="font-size: 11px; color: var(--muted); margin-top: 4px;">
                             Source : ${matterportData.source === 'matterport_api' ? 'API Matterport' : 'Import CSV'}
-                            ${matterportData.synced_at ? ' • Sync : ' + new Date(matterportData.synced_at).toLocaleString('fr-FR') : ''}
+                            ${matterportData.synced_at ? ' â€¢ Sync : ' + new Date(matterportData.synced_at).toLocaleString('fr-FR') : ''}
                         </div>
                     </div>
                 `;
@@ -2517,7 +2484,7 @@
                         html += `
                             <table class="mp-dim-table">
                                 <thead>
-                                    <tr><th>Pièce</th><th>Surface</th><th>Hauteur</th><th>Largeur</th><th>Profondeur</th><th>Volume</th></tr>
+                                    <tr><th>PiÃ¨ce</th><th>Surface</th><th>Hauteur</th><th>Largeur</th><th>Profondeur</th><th>Volume</th></tr>
                                 </thead>
                                 <tbody>
                                     ${niveau.pieces.map(p => `
@@ -2567,7 +2534,7 @@
             const mpData = currentClient ? matterportCache[currentClient.id] : null;
             const dbData = currentClient?.matterport_data;
 
-            let csvContent = 'Pièce;Surface (m²);Hauteur (m);Largeur (m);Profondeur (m);Volume (m³)\n';
+            let csvContent = 'PiÃ¨ce;Surface (mÂ²);Hauteur (m);Largeur (m);Profondeur (m);Volume (mÂ³)\n';
 
             if (mpData && mpData.rooms) {
                 mpData.rooms.forEach(room => {
@@ -2590,23 +2557,23 @@
             link.click();
             URL.revokeObjectURL(link.href);
 
-            showSuccessMessage('CSV exporté');
+            showSuccessMessage('CSV exportÃ©');
         }
 
         async function downloadAllPanoramas() {
             const mpData = currentClient ? matterportCache[currentClient.id] : null;
             if (!mpData || !mpData.locations) return;
 
-            showMpSyncStatus('Préparation du téléchargement des panoramiques...', 'loading');
+            showMpSyncStatus('PrÃ©paration du tÃ©lÃ©chargement des panoramiques...', 'loading');
 
             // Ouvrir chaque image panoramique dans un nouvel onglet
-            // (le téléchargement batch nécessiterait un backend)
+            // (le tÃ©lÃ©chargement batch nÃ©cessiterait un backend)
             let count = 0;
             mpData.locations.forEach((loc, idx) => {
                 const pano = loc.panos && loc.panos[0];
                 const children = pano?.skybox?.children || [];
                 if (children.length > 0) {
-                    // Ouvrir la première face du skybox
+                    // Ouvrir la premiÃ¨re face du skybox
                     window.open(children[0], `_pano_${idx}`);
                     count++;
                 }
@@ -2617,20 +2584,27 @@
         }
 
         // ========== INITIALIZATION ==========
-        window.addEventListener('load', () => {
-            const stored = {
-                url: sessionStorage.getItem('sb_url'),
-                key: sessionStorage.getItem('sb_key'),
-                secret: sessionStorage.getItem('admin_secret')
-            };
+        window.addEventListener('load', async () => {
+            configureAuthScreen();
 
-            if (stored.url && stored.key && stored.secret) {
-                document.getElementById('supabaseUrl').value = stored.url;
-                document.getElementById('supabaseKey').value = stored.key;
-                document.getElementById('adminSecret').value = stored.secret;
-                authForm.dispatchEvent(new Event('submit'));
+            const storedToken = sessionStorage.getItem('admin_session_token');
+            const storedLogin = sessionStorage.getItem('admin_login');
+
+            if (storedLogin) {
+                adminLoginInput.value = storedLogin;
+            }
+
+            if (storedToken) {
+                adminSessionToken = storedToken;
+                showAuthenticatedDashboard();
+                try {
+                    await loadDashboard();
+                } catch (err) {
+                    resetAdminSession();
+                }
             }
         });
     </script>
 </body>
 </html>
+
