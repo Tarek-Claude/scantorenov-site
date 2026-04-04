@@ -31,25 +31,35 @@ function sha256Hex(value) {
   return crypto.createHash('sha256').update(String(value || ''), 'utf8').digest('hex');
 }
 
+function normalizeAdminLogin(value) {
+  return String(value || '').trim().toLowerCase();
+}
+
 function getConfiguredAdminLogin() {
   return (process.env.ADMIN_LOGIN || process.env.ADMIN_USERNAME || '').trim();
 }
 
 function verifyConfiguredPassword(password) {
   const plainPassword = process.env.ADMIN_PASSWORD;
-  if (plainPassword) {
-    return safeEqual(password, plainPassword);
-  }
-
   const hash = (process.env.ADMIN_PASSWORD_SHA256 || process.env.ADMIN_PASSWORD_HASH || '')
     .trim()
     .toLowerCase();
-  if (!hash) {
+
+  const verifiers = [];
+  if (plainPassword) {
+    verifiers.push(() => safeEqual(password, plainPassword));
+  }
+
+  if (hash) {
+    const expectedHash = hash.startsWith('sha256:') ? hash.slice('sha256:'.length) : hash;
+    verifiers.push(() => safeEqual(sha256Hex(password), expectedHash));
+  }
+
+  if (verifiers.length === 0) {
     return false;
   }
 
-  const expectedHash = hash.startsWith('sha256:') ? hash.slice('sha256:'.length) : hash;
-  return safeEqual(sha256Hex(password), expectedHash);
+  return verifiers.some((verify) => verify());
 }
 
 function hasConfiguredAdminCredentials() {
@@ -129,7 +139,7 @@ function verifyAdminSessionToken(token) {
   }
 
   const configuredLogin = getConfiguredAdminLogin();
-  if (!configuredLogin || !safeEqual(payload.sub, configuredLogin)) {
+  if (!configuredLogin || normalizeAdminLogin(payload.sub) !== normalizeAdminLogin(configuredLogin)) {
     return null;
   }
 
@@ -142,7 +152,7 @@ function verifyAdminCredentials(login, password) {
     return false;
   }
 
-  return safeEqual(String(login || '').trim(), configuredLogin)
+  return normalizeAdminLogin(login) === normalizeAdminLogin(configuredLogin)
     && verifyConfiguredPassword(password);
 }
 

@@ -1562,7 +1562,6 @@
 
                 adminSessionToken = data.token;
                 sessionStorage.setItem('admin_session_token', data.token);
-                sessionStorage.setItem('admin_login', login);
 
                 showAuthenticatedDashboard();
                 adminPasswordInput.value = '';
@@ -2588,11 +2587,6 @@
             configureAuthScreen();
 
             const storedToken = sessionStorage.getItem('admin_session_token');
-            const storedLogin = sessionStorage.getItem('admin_login');
-
-            if (storedLogin) {
-                adminLoginInput.value = storedLogin;
-            }
 
             if (storedToken) {
                 adminSessionToken = storedToken;
