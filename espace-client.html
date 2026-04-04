@@ -657,6 +657,41 @@
       background: rgba(231,76,60,0.06); color: #c0392b;
     }
 
+    /* ── Brief Marcel ── */
+    .brief-form { display: grid; gap: 16px; margin-top: 16px; }
+    .brief-field { display: flex; flex-direction: column; gap: 6px; }
+    .brief-label { font-size: 0.82rem; font-weight: 600; letter-spacing: 0.03em; color: var(--text); }
+    .brief-hint { font-weight: 400; color: var(--muted); }
+    .brief-input {
+      padding: 12px 14px; border: 1px solid var(--border); border-radius: 8px;
+      background: #fff; color: var(--text); font-size: 0.9rem; font-family: 'Inter', sans-serif;
+      resize: vertical; min-height: 70px; transition: border-color 0.2s;
+    }
+    .brief-input:focus { outline: none; border-color: var(--green); }
+    .brief-input.valid { border-color: #2ecc71; }
+    .brief-counter { font-size: 0.75rem; color: var(--muted); text-align: right; }
+    .brief-counter.ok { color: #2ecc71; font-weight: 600; }
+    .brief-status { font-size: 0.82rem; color: var(--muted); padding: 8px 0; text-align: center; }
+    .brief-status.ready { color: var(--green); font-weight: 600; }
+
+    /* ── Vrai/Faux Step 4 ── */
+    .vf-question { margin-bottom: 20px; padding: 16px; background: rgba(0,0,0,0.02); border-radius: 8px; border: 1px solid var(--border); }
+    .vf-question p { font-size: 0.92rem; margin-bottom: 10px; font-style: italic; }
+    .vf-btns { display: flex; gap: 10px; }
+    .vf-btn {
+      flex: 1; padding: 10px; border: 1px solid var(--border); border-radius: 6px;
+      background: #fff; cursor: pointer; font-size: 0.85rem; font-weight: 600;
+      transition: all 0.2s;
+    }
+    .vf-btn:hover:not(:disabled) { border-color: var(--green); color: var(--green); }
+    .vf-btn.correct { background: #e8f5e9; border-color: #2e7d32; color: #2e7d32; }
+    .vf-btn.wrong { background: #ffebee; border-color: #c62828; color: #c62828; }
+    .vf-btn:disabled { cursor: default; }
+    .vf-explanation { font-size: 0.8rem; margin-top: 8px; padding: 6px 10px; border-radius: 4px; }
+    .vf-explanation.ok { background: #e8f5e9; color: #2e7d32; }
+    .vf-explanation.ko { background: #ffebee; color: #c62828; }
+    .vf-score { text-align: center; padding: 12px; font-weight: 600; font-size: 0.95rem; margin-top: 8px; }
+
     /* ── Boutons navigation stepper ── */
     .stepper-footer {
       display: flex; justify-content: space-between; align-items: center;
@@ -2176,108 +2211,119 @@
         <!-- Panneaux de contenu -->
         <div class="stepper-panels">
 
-          <!-- ══════════ &#201;tape 1 : Qui sommes-nous ══════════ -->
+          <!-- ══════════ Étape 1 : Crédibilité Reno'Island ══════════ -->
           <div class="stepper-panel active" data-panel="0">
-            <h4>Reno&#8217;Island &#8212; Le bureau d&#8217;&#233;tudes derri&#232;re Scantorenov</h4>
-            <p>Scantorenov est un service d&#233;velopp&#233; par <strong>Reno&#8217;Island</strong>, bureau d&#8217;&#233;tudes sp&#233;cialis&#233; en ma&#238;trise d&#8217;&#339;uvre de r&#233;novation.</p>
+            <h4>Reno'Island — Le bureau d'études derrière ScantoRenov</h4>
+            <p>ScantoRenov est un service développé par <strong>Reno'Island</strong>. Nous combinons scan 3D de précision, intelligence artificielle et expertise humaine pour transformer votre projet de rénovation en avant-projet structuré.</p>
             <div class="step-highlight">
-              Notre approche combine la capture 3D de votre bien (scan Matterport), l&#8217;intelligence artificielle et l&#8217;expertise humaine d&#8217;un chef de projet d&#233;di&#233; pour vous accompagner de A &#224; Z.
+              Notre process : scan Matterport de votre bien → analyse par Marcel (IA Anthropic) → visuels d'inspiration → synthèse avant-projet. Un point de départ solide, pas une promesse floue.
             </div>
             <ul>
-              <li>Un jumeau num&#233;rique pr&#233;cis de votre bien, accessible 24h/24</li>
-              <li>Un assistant IA (Marcel) pour explorer les possibilit&#233;s de r&#233;novation</li>
-              <li>Un chef de projet exp&#233;riment&#233; pour piloter la mise en &#339;uvre</li>
-              <li>Un suivi transparent de chaque &#233;tape, de l&#8217;&#233;tude &#224; la r&#233;ception des travaux</li>
+              <li><strong>Matterport</strong> — Scan 3D millimétrique, utilisé sur +11M de propriétés mondiales</li>
+              <li><strong>Marcel (Anthropic Claude)</strong> — IA de nouvelle génération, analyse contextuelle de votre espace</li>
+              <li><strong>Process ScantoRenov</strong> — Scan + analyse + visuels + avant-projet : un pipeline complet</li>
+              <li><strong>Transparence totale</strong> — Nous vous disons ce que l'IA peut et ne peut pas faire</li>
             </ul>
-            <!-- TODO: Remplacer le faux lecteur vidéo par une vraie vidéo de présentation Reno'Island -->
+
             <div class="step-action" id="action0">
-              <div class="step-action-label" id="actionLabel0">Regardez la vid&#233;o de pr&#233;sentation pour continuer</div>
-              <div class="mock-video" id="mockVideo">
-                <div class="mock-video-screen" id="mockVideoScreen">
-                  <span class="play-icon" id="videoPlayBtn" onclick="mockVideoStart()">&#9654;&#65039;</span>
-                  <span class="video-msg" id="videoMsg" style="display:none">Lecture en cours...</span>
-                </div>
-                <div class="mock-video-bar">
-                  <div class="mock-video-bar-fill" id="videoBarFill"></div>
-                </div>
-                <div class="mock-video-controls">
-                  <span id="videoTime">0:00 / 0:08</span>
-                  <button class="mock-video-skip" onclick="mockVideoSkip()" title="Dev : simuler la fin">&#9654;&#9654; Simuler fin</button>
-                </div>
+              <div class="step-action-label" id="actionLabel0">Répondez à cette question pour continuer</div>
+              <div class="mock-quiz-question" style="margin-bottom:16px;">
+                Les visuels générés par Marcel permettent de…
               </div>
+              <div class="mock-quiz-options" id="quizOptions0">
+                <button class="mock-quiz-btn" data-answer="wrong" onclick="stepQcm(0, 'wrong', this)">Remplacer les plans d'architecte directement</button>
+                <button class="mock-quiz-btn" data-answer="correct" onclick="stepQcm(0, 'correct', this)">Explorer visuellement les possibilités de votre bien, comme point de départ</button>
+                <button class="mock-quiz-btn" data-answer="wrong" onclick="stepQcm(0, 'wrong', this)">Garantir un rendu final conforme à la réalité</button>
+                <button class="mock-quiz-btn" data-answer="wrong" onclick="stepQcm(0, 'wrong', this)">Générer automatiquement un devis de travaux</button>
+              </div>
+              <div class="mock-quiz-feedback" id="quizFeedback0"></div>
             </div>
           </div>
 
-          <!-- ══════════ &#201;tape 2 : Visite virtuelle ══════════ -->
+          <!-- ══════════ Étape 2 : Navigation Matterport ══════════ -->
           <div class="stepper-panel" data-panel="1">
-            <h4>Votre visite virtuelle Matterport</h4>
-            <p>Apr&#232;s le scan de votre bien, vous disposerez d&#8217;un <strong>jumeau num&#233;rique interactif</strong>. Voici comment l&#8217;exploiter au mieux :</p>
-            <ul>
-              <li><strong>Naviguer librement</strong> &#8212; D&#233;placez-vous dans chaque pi&#232;ce comme si vous y &#233;tiez</li>
-              <li><strong>Prendre des mesures</strong> &#8212; V&#233;rifiez distances et surfaces &#224; tout moment</li>
-              <li><strong>Capturer des vues</strong> &#8212; Faites des captures d&#8217;&#233;cran pour Marcel</li>
-              <li><strong>Vue plan</strong> &#8212; Basculez en vue &#171; Dollhouse &#187; ou &#171; Floor Plan &#187;</li>
-            </ul>
+            <h4>Votre bien en 3D — pas un modèle générique</h4>
+            <p>Avant que Marcel analyse votre projet, il doit connaître votre bien. La visite Matterport est le point de départ : c'est votre espace réel, mesuré avec précision.</p>
             <div class="step-highlight">
-              Plus vous explorez votre visite virtuelle en amont, plus vos &#233;changes seront productifs.
+              Vous naviguez dans votre bien comme si vous y étiez — depuis n'importe où, à n'importe quelle heure.
             </div>
-            <!-- TODO: Remplacer les faux hotspots par un mini-parcours dans l'iframe Matterport -->
+            <ul>
+              <li><strong>Navigation libre</strong> — Cliquez sur le sol pour vous déplacer de pièce en pièce</li>
+              <li><strong>Vue panoramique</strong> — Maintenez et faites glisser pour pivoter la vue</li>
+              <li><strong>Vue Dollhouse</strong> — Visualisez l'ensemble du bien en 3D depuis l'extérieur</li>
+              <li><strong>Les captures, c'est nous</strong> — ScantoRenov génère les captures pour Marcel. Besoin d'un angle supplémentaire ? Appelez-nous, traitement sous 24h.</li>
+            </ul>
+
             <div class="step-action" id="action1">
-              <div class="step-action-label" id="actionLabel1">Cliquez sur les 3 points d&#8217;int&#233;r&#234;t dans l&#8217;ordre pour continuer</div>
-              <div class="mock-hotspot-zone" id="hotspotZone">
-                <div class="mock-hotspot" style="top:30px;left:15%" data-hs="1" onclick="mockHotspotClick(this, 1)">1</div>
-                <div class="mock-hotspot" style="top:80px;left:55%" data-hs="2" onclick="mockHotspotClick(this, 2)">2</div>
-                <div class="mock-hotspot" style="top:130px;left:78%" data-hs="3" onclick="mockHotspotClick(this, 3)">3</div>
+              <div class="step-action-label" id="actionLabel1">Répondez à cette question pour continuer</div>
+              <div class="mock-quiz-question" style="margin-bottom:16px;">
+                Si vous souhaitez qu'on capture un angle spécifique de votre bien, vous devez…
               </div>
-              <div class="mock-hotspot-counter" id="hotspotCounter">0 / 3 points d&#233;couverts</div>
+              <div class="mock-quiz-options" id="quizOptions1">
+                <button class="mock-quiz-btn" data-answer="wrong" onclick="stepQcm(1, 'wrong', this)">Faire une capture d'écran vous-même depuis la visite Matterport</button>
+                <button class="mock-quiz-btn" data-answer="wrong" onclick="stepQcm(1, 'wrong', this)">Envoyer un email avec vos instructions</button>
+                <button class="mock-quiz-btn" data-answer="correct" onclick="stepQcm(1, 'correct', this)">Nous appeler — nous traitons votre demande sous 24h</button>
+                <button class="mock-quiz-btn" data-answer="wrong" onclick="stepQcm(1, 'wrong', this)">Attendre votre rendez-vous pour en parler</button>
+              </div>
+              <div class="mock-quiz-feedback" id="quizFeedback1"></div>
             </div>
           </div>
 
-          <!-- ══════════ &#201;tape 3 : Marcel ══════════ -->
+          <!-- ══════════ Étape 3 : Parler à Marcel ══════════ -->
           <div class="stepper-panel" data-panel="2">
-            <h4>Travailler avec Marcel, votre assistant IA</h4>
-            <p>Marcel est l&#8217;assistant intelligent int&#233;gr&#233; &#224; votre espace. Il conna&#238;t votre bien et vous aide en phase avant-projet.</p>
-            <ul>
-              <li><strong>Posez des questions pr&#233;cises</strong> &#8212; &#171; Peut-on ouvrir la cuisine sur le salon ? &#187;</li>
-              <li><strong>D&#233;crivez vos envies</strong> &#8212; Style, ambiance, contraintes, budget&#8230;</li>
-              <li><strong>Proc&#233;dez par &#233;tapes</strong> &#8212; Une pi&#232;ce ou un sujet &#224; la fois</li>
-              <li><strong>Demandez des alternatives</strong> &#8212; Plusieurs sc&#233;narios pour un m&#234;me espace</li>
-            </ul>
+            <h4>Marcel est aussi bon que ce que vous lui dites</h4>
+            <p>Marcel analyse votre espace et génère des visuels d'inspiration. Mais sa qualité d'output dépend directement de la qualité de votre description. Un brief précis donne des résultats exploitables.</p>
             <div class="step-highlight">
-              Marcel est un outil puissant, mais il reste un assistant. Ses suggestions sont des pistes de r&#233;flexion que votre chef de projet validera.
+              Structure d'un bon brief : <strong>Contexte</strong> (quelle pièce, quel état) + <strong>Vision</strong> (quelle ambiance) + <strong>Contraintes</strong> (budget, copropriété) + <strong>Priorité</strong> (ce qui est non négociable).
             </div>
-            <!-- TODO: Remplacer par un vrai échange test avec Marcel via l'API -->
+            <ul>
+              <li><strong>Brief faible</strong> — « Je veux que mon salon soit plus beau. » → résultats génériques</li>
+              <li><strong>Brief fort</strong> — « Salon 28m², sombre, parquet abîmé. Ambiance scandinave, budget 12 000€. Parquet en priorité. » → résultats ciblés</li>
+            </ul>
+
             <div class="step-action" id="action2">
-              <div class="step-action-label" id="actionLabel2">Essayez : &#233;crivez une question que vous poseriez &#224; Marcel (min. 20 caract&#232;res)</div>
-              <div class="mock-chat">
-                <textarea class="mock-chat-input" id="mockChatInput" placeholder="Ex : Peut-on agrandir la salle de bain en supprimant la cloison avec le couloir ?" oninput="mockChatCheck()"></textarea>
-                <div class="mock-chat-counter" id="mockChatCounter">0 / 20 caract&#232;res minimum</div>
+              <div class="step-action-label" id="actionLabel2">Rédigez votre brief de projet — il sera sauvegardé pour Marcel</div>
+              <div class="brief-form" id="briefForm">
+                <div class="brief-field">
+                  <label class="brief-label">Contexte <span class="brief-hint">(quelle pièce, superficie, état actuel)</span></label>
+                  <textarea class="brief-input" id="briefContexte" placeholder="Ex : Cuisine de 12m², années 80, carrelage beige, peu de rangements" oninput="checkBrief()"></textarea>
+                  <div class="brief-counter" id="counterContexte">0 mots</div>
+                </div>
+                <div class="brief-field">
+                  <label class="brief-label">Vision <span class="brief-hint">(ambiance, style, ce que vous souhaitez)</span></label>
+                  <textarea class="brief-input" id="briefVision" placeholder="Ex : Cuisine ouverte sur le séjour, ambiance bois naturel, îlot central si possible" oninput="checkBrief()"></textarea>
+                  <div class="brief-counter" id="counterVision">0 mots</div>
+                </div>
+                <div class="brief-field">
+                  <label class="brief-label">Contraintes <span class="brief-hint">(budget, copropriété, délais, occupation)</span></label>
+                  <textarea class="brief-input" id="briefContraintes" placeholder="Ex : Budget 8 000€, immeuble en copropriété, pas de travaux structurels" oninput="checkBrief()"></textarea>
+                  <div class="brief-counter" id="counterContraintes">0 mots</div>
+                </div>
+                <div class="brief-field">
+                  <label class="brief-label">Priorité <span class="brief-hint">(ce qui est non négociable vs. optionnel)</span></label>
+                  <textarea class="brief-input" id="briefPriorite" placeholder="Ex : Maximiser le rangement en priorité, le design est secondaire" oninput="checkBrief()"></textarea>
+                  <div class="brief-counter" id="counterPriorite">0 mots</div>
+                </div>
+                <div class="brief-status" id="briefStatus">Remplissez les 4 champs (minimum 10 mots chacun)</div>
               </div>
             </div>
           </div>
 
-          <!-- ══════════ &#201;tape 4 : Visuels IA ══════════ -->
+          <!-- ══════════ Étape 4 : Limites des visuels IA ══════════ -->
           <div class="stepper-panel" data-panel="3">
-            <h4>G&#233;n&#233;rer des visuels de r&#233;novation</h4>
-            <p>Vous pourrez g&#233;n&#233;rer des <strong>visuels d&#8217;ambiance</strong> pour visualiser le potentiel de votre r&#233;novation.</p>
-            <ul>
-              <li><strong>Ce sont des inspirations</strong> &#8212; Direction esth&#233;tique, pas un plan technique</li>
-              <li><strong>Soyez descriptif</strong> &#8212; &#171; Cuisine ouverte, style scandinave, bois clair &#187;</li>
-              <li><strong>It&#233;rez</strong> &#8212; G&#233;n&#233;rez, ajustez, reg&#233;n&#233;rez</li>
-              <li><strong>Acceptez les limites</strong> &#8212; L&#8217;IA s&#8217;inspire de votre pi&#232;ce, elle ne la reproduit pas</li>
-            </ul>
+            <h4>Marcel est puissant. Pas omniscient.</h4>
+            <p>Avant de rencontrer Marcel, une étape essentielle : comprendre exactement ce que l'IA peut produire — et ce qu'elle ne peut pas faire. Un client bien informé sur les limites est un client qui ne sera pas déçu.</p>
             <div class="step-highlight">
-              L&#8217;IA g&#233;n&#233;rative est un outil formidable mais imparfait. Les visuels servent de base de discussion avec votre chef de projet.
+              Les visuels Marcel sont des <strong>inspirations calibrées sur votre espace réel</strong>. Ce ne sont pas des plans d'exécution, ni des devis, ni des garanties de faisabilité.
             </div>
-            <!-- TODO: Remplacer par un quiz plus complet ou une interaction visuelle -->
+
             <div class="step-action" id="action3">
-              <div class="step-action-label" id="actionLabel3">R&#233;pondez &#224; cette question pour continuer</div>
-              <div class="mock-quiz-question">L&#8217;IA g&#233;n&#233;rative peut-elle reproduire votre pi&#232;ce &#224; l&#8217;identique dans un visuel ?</div>
-              <div class="mock-quiz-options">
-                <button class="mock-quiz-btn" onclick="mockQuizAnswer('oui', this)">Oui, parfaitement</button>
-                <button class="mock-quiz-btn" onclick="mockQuizAnswer('non', this)">Non, elle s&#8217;en inspire</button>
+              <div class="step-action-label" id="actionLabel3">Répondez aux 5 questions — 4 bonnes réponses minimum pour continuer</div>
+              <div id="vfContainer">
+                <!-- Les 5 questions sont générées par JS (initVF) -->
               </div>
-              <div class="mock-quiz-feedback" id="quizFeedback"></div>
+              <div class="vf-score" id="vfScore" style="display:none"></div>
+              <div class="mock-quiz-feedback" id="quizFeedback3"></div>
             </div>
           </div>
 
@@ -3572,6 +3618,7 @@ function initStepper() {
   // Les étapes déjà validées sont considérées déverrouillées
   state.validated.forEach(function(idx) { stepUnlocked[idx] = true; });
   renderStepper();
+  initVF();
 }
 
 function renderStepper() {
@@ -3691,133 +3738,219 @@ function stepperPrev() {
 }
 
 /* ══════════════════════════════════════════════
-   ACTIONS MOCK — à remplacer par les vraies
+   ACTIONS PARCOURS PÉDAGOGIQUE
    ══════════════════════════════════════════════ */
 
-/* ── Étape 1 : Faux lecteur vidéo ── */
-// TODO: Remplacer par un vrai player vidéo (YouTube/Vimeo) avec événement onended
-var mockVideoTimer = null;
-var mockVideoProgress = 0;
-var MOCK_VIDEO_DURATION = 8; // secondes
-
-function mockVideoStart() {
-  var playBtn = document.getElementById('videoPlayBtn');
-  var msg = document.getElementById('videoMsg');
-  if (playBtn) playBtn.classList.add('hidden');
-  if (msg) msg.style.display = '';
-
-  mockVideoProgress = 0;
-  if (mockVideoTimer) clearInterval(mockVideoTimer);
-
-  mockVideoTimer = setInterval(function() {
-    mockVideoProgress += 0.25;
-    var pct = Math.min((mockVideoProgress / MOCK_VIDEO_DURATION) * 100, 100);
-    var bar = document.getElementById('videoBarFill');
-    var time = document.getElementById('videoTime');
-    if (bar) bar.style.width = pct + '%';
-    if (time) time.textContent = '0:0' + Math.floor(mockVideoProgress) + ' / 0:0' + MOCK_VIDEO_DURATION;
-
-    if (mockVideoProgress >= MOCK_VIDEO_DURATION) {
-      clearInterval(mockVideoTimer);
-      mockVideoComplete();
-    }
-  }, 250);
-}
-
-function mockVideoSkip() {
-  // Bouton dev pour accélérer le test
-  if (mockVideoTimer) clearInterval(mockVideoTimer);
-  var bar = document.getElementById('videoBarFill');
-  var time = document.getElementById('videoTime');
-  if (bar) bar.style.width = '100%';
-  if (time) time.textContent = '0:0' + MOCK_VIDEO_DURATION + ' / 0:0' + MOCK_VIDEO_DURATION;
-  var playBtn = document.getElementById('videoPlayBtn');
-  var msg = document.getElementById('videoMsg');
-  if (playBtn) playBtn.classList.add('hidden');
-  if (msg) msg.style.display = '';
-  mockVideoComplete();
-}
-
-function mockVideoComplete() {
-  var msg = document.getElementById('videoMsg');
-  if (msg) msg.textContent = '✓ Vidéo terminée';
-  unlockStep(0);
-}
-
-/* ── Étape 2 : Hotspots à cliquer ── */
-// TODO: Remplacer par un mini-parcours interactif dans l'iframe Matterport SDK
-var hotspotClicked = 0;
-var hotspotNext = 1;
-
-function mockHotspotClick(el, num) {
-  // L'utilisateur doit cliquer dans l'ordre 1, 2, 3
-  if (num !== hotspotNext) return;
-
-  el.classList.add('clicked');
-  hotspotClicked++;
-  hotspotNext++;
-
-  var counter = document.getElementById('hotspotCounter');
-  if (counter) counter.textContent = hotspotClicked + ' / 3 points découverts';
-
-  if (hotspotClicked >= 3) {
-    unlockStep(1);
-  }
-}
-
-/* ── Étape 3 : Message texte à écrire ── */
-// TODO: Remplacer par un vrai échange test avec Marcel via l'API Anthropic
-var MOCK_CHAT_MIN = 20;
-
-function mockChatCheck() {
-  var input = document.getElementById('mockChatInput');
-  var counter = document.getElementById('mockChatCounter');
-  if (!input || !counter) return;
-
-  var len = input.value.trim().length;
-  counter.textContent = len + ' / ' + MOCK_CHAT_MIN + ' caractères minimum';
-
-  if (len >= MOCK_CHAT_MIN) {
-    counter.classList.add('ready');
-    counter.textContent = '✓ ' + len + ' caractères — c\'est suffisant !';
-    unlockStep(2);
-  } else {
-    counter.classList.remove('ready');
-  }
-}
-
-/* ── Étape 4 : Quiz ── */
-// TODO: Remplacer par un quiz plus complet ou une interaction visuelle
-function mockQuizAnswer(answer, btnEl) {
-  var feedback = document.getElementById('quizFeedback');
-  var allBtns = document.querySelectorAll('#action3 .mock-quiz-btn');
+/* ── QCM Steps 0 & 1 ── */
+function stepQcm(stepIdx, answer, btnEl) {
+  var options = document.querySelectorAll('#quizOptions' + stepIdx + ' .mock-quiz-btn');
+  var feedback = document.getElementById('quizFeedback' + stepIdx);
 
   // Désactiver tous les boutons
-  allBtns.forEach(function(b) { b.classList.add('disabled'); });
+  options.forEach(function(b) { b.disabled = true; });
 
-  if (answer === 'non') {
-    // Bonne réponse
-    btnEl.classList.add('correct');
+  if (answer === 'correct') {
+    btnEl.style.background = '#e8f5e9';
+    btnEl.style.borderColor = '#2e7d32';
+    btnEl.style.color = '#2e7d32';
     if (feedback) {
-      feedback.className = 'mock-quiz-feedback show correct';
-      feedback.textContent = '✓ Exactement ! L\'IA s\'inspire de votre espace mais ne le reproduit pas fidèlement. Les visuels sont des pistes d\'inspiration.';
+      feedback.textContent = '✓ Parfait — vous avez compris l\'essentiel. Étape suivante débloquée.';
+      feedback.style.color = '#2e7d32';
     }
-    unlockStep(3);
+    unlockStep(stepIdx);
   } else {
-    // Mauvaise réponse
-    btnEl.classList.add('wrong');
+    btnEl.style.background = '#ffebee';
+    btnEl.style.borderColor = '#c62828';
+    btnEl.style.color = '#c62828';
     if (feedback) {
-      feedback.className = 'mock-quiz-feedback show wrong';
-      feedback.textContent = '✗ Pas tout à fait. L\'IA ne peut pas encore reproduire une pièce à l\'identique. Réessayez !';
+      feedback.innerHTML = '✗ Pas tout à fait. <button onclick="resetQcm(' + stepIdx + ')" style="margin-left:8px;padding:4px 10px;cursor:pointer;border:1px solid #aaa;border-radius:4px;background:#fff;font-size:0.8rem;">Réessayer</button>';
+      feedback.style.color = '#c62828';
     }
-    // Réactiver après 2 secondes pour réessayer
-    setTimeout(function() {
-      allBtns.forEach(function(b) {
-        b.classList.remove('disabled', 'wrong', 'correct');
-      });
-      if (feedback) feedback.className = 'mock-quiz-feedback';
-    }, 2000);
   }
+}
+
+function resetQcm(stepIdx) {
+  var options = document.querySelectorAll('#quizOptions' + stepIdx + ' .mock-quiz-btn');
+  var feedback = document.getElementById('quizFeedback' + stepIdx);
+  options.forEach(function(b) {
+    b.disabled = false;
+    b.style.background = '';
+    b.style.borderColor = '';
+    b.style.color = '';
+  });
+  if (feedback) { feedback.textContent = ''; }
+}
+
+/* ── Brief Step 2 ── */
+function countWords(str) {
+  return str.trim().split(/\s+/).filter(function(w) { return w.length > 0; }).length;
+}
+
+function checkBrief() {
+  var fields = [
+    { id: 'briefContexte', counterId: 'counterContexte' },
+    { id: 'briefVision',   counterId: 'counterVision' },
+    { id: 'briefContraintes', counterId: 'counterContraintes' },
+    { id: 'briefPriorite', counterId: 'counterPriorite' }
+  ];
+  var allOk = true;
+
+  fields.forEach(function(f) {
+    var el = document.getElementById(f.id);
+    var counter = document.getElementById(f.counterId);
+    if (!el || !counter) return;
+    var words = countWords(el.value);
+    counter.textContent = words + ' mot' + (words > 1 ? 's' : '');
+    if (words >= 10) {
+      counter.classList.add('ok');
+      el.classList.add('valid');
+    } else {
+      counter.classList.remove('ok');
+      el.classList.remove('valid');
+      allOk = false;
+    }
+  });
+
+  var statusEl = document.getElementById('briefStatus');
+  if (allOk) {
+    if (statusEl) {
+      statusEl.textContent = '✓ Brief complet — votre description a été sauvegardée pour Marcel.';
+      statusEl.classList.add('ready');
+    }
+    // Sauvegarder le brief dans localStorage
+    var brief = {
+      contexte:    document.getElementById('briefContexte').value,
+      vision:      document.getElementById('briefVision').value,
+      contraintes: document.getElementById('briefContraintes').value,
+      priorite:    document.getElementById('briefPriorite').value,
+      savedAt:     new Date().toISOString()
+    };
+    localStorage.setItem('scantorenov_brief', JSON.stringify(brief));
+    unlockStep(2);
+  } else {
+    if (statusEl) {
+      statusEl.textContent = 'Remplissez les 4 champs (minimum 10 mots chacun)';
+      statusEl.classList.remove('ready');
+    }
+    stepUnlocked[2] = false;
+    renderStepper();
+  }
+}
+
+/* ── Vrai/Faux Step 3 ── */
+var VF_QUESTIONS = [
+  {
+    q: '« Marcel peut remplacer mon architecte. »',
+    correct: 'FAUX',
+    explication: 'Marcel vous aide à préparer votre vision. L\'architecte reste nécessaire pour l\'exécution des travaux.'
+  },
+  {
+    q: '« Les visuels sont générés à partir de mon vrai bien, pas d\'un modèle générique. »',
+    correct: 'VRAI',
+    explication: 'Oui : Marcel travaille à partir des captures réelles de votre espace Matterport.'
+  },
+  {
+    q: '« Je peux montrer les visuels Marcel à des artisans pour obtenir un devis. »',
+    correct: 'VRAI',
+    explication: 'Absolument. Ce sont des visuels de référence concrets que vous pouvez partager avec des professionnels.'
+  },
+  {
+    q: '« Marcel voit les canalisations et la structure portante dans mes murs. »',
+    correct: 'FAUX',
+    explication: 'Marcel travaille uniquement à partir des surfaces visibles capturées par Matterport.'
+  },
+  {
+    q: '« Les visuels générés garantissent le résultat final des travaux. »',
+    correct: 'FAUX',
+    explication: 'Ce sont des visuels d\'inspiration, pas des rendus architecturaux certifiés. C\'est un point de départ, pas une fin.'
+  }
+];
+
+var vfAnswers = [];
+
+function initVF() {
+  var container = document.getElementById('vfContainer');
+  if (!container) return;
+  vfAnswers = [];
+  container.innerHTML = '';
+  VF_QUESTIONS.forEach(function(item, i) {
+    var div = document.createElement('div');
+    div.className = 'vf-question';
+    div.id = 'vfQ' + i;
+    div.innerHTML =
+      '<p>' + item.q + '</p>' +
+      '<div class="vf-btns">' +
+        '<button class="vf-btn" onclick="handleVF(' + i + ', \'VRAI\', this)">VRAI</button>' +
+        '<button class="vf-btn" onclick="handleVF(' + i + ', \'FAUX\', this)">FAUX</button>' +
+      '</div>' +
+      '<div class="vf-explanation" id="vfExp' + i + '" style="display:none"></div>';
+    container.appendChild(div);
+  });
+}
+
+function handleVF(idx, answer, btnEl) {
+  var item = VF_QUESTIONS[idx];
+  var qDiv = document.getElementById('vfQ' + idx);
+  var expDiv = document.getElementById('vfExp' + idx);
+  var btns = qDiv.querySelectorAll('.vf-btn');
+
+  btns.forEach(function(b) { b.disabled = true; });
+
+  var isCorrect = (answer === item.correct);
+  vfAnswers[idx] = isCorrect;
+
+  btnEl.classList.add(isCorrect ? 'correct' : 'wrong');
+  // Montrer la bonne réponse si mauvaise réponse
+  if (!isCorrect) {
+    btns.forEach(function(b) {
+      if (b.textContent === item.correct) b.classList.add('correct');
+    });
+  }
+
+  if (expDiv) {
+    expDiv.textContent = item.explication;
+    expDiv.className = 'vf-explanation ' + (isCorrect ? 'ok' : 'ko');
+    expDiv.style.display = 'block';
+  }
+
+  // Vérifier si toutes les questions ont été répondues
+  var answered = vfAnswers.filter(function(v) { return v !== undefined; }).length;
+  if (answered === VF_QUESTIONS.length) {
+    var score = vfAnswers.filter(Boolean).length;
+    var scoreEl = document.getElementById('vfScore');
+    var feedback = document.getElementById('quizFeedback3');
+
+    if (scoreEl) {
+      scoreEl.style.display = 'block';
+      scoreEl.textContent = 'Score : ' + score + ' / ' + VF_QUESTIONS.length;
+      scoreEl.style.color = (score >= 4) ? '#2e7d32' : '#c62828';
+    }
+
+    if (score >= 4) {
+      if (feedback) {
+        feedback.textContent = score === 5
+          ? '✓ Parfait — vous maîtrisez les fondamentaux. Le rendez-vous est maintenant accessible.'
+          : '✓ Très bien — ' + score + '/5. Quelques nuances à retenir, mais vous êtes prêt.';
+        feedback.style.color = '#2e7d32';
+      }
+      unlockStep(3);
+    } else {
+      if (feedback) {
+        feedback.innerHTML = '✗ ' + score + '/5 — Relisez les explications ci-dessus et <button onclick="retryVF()" style="margin-left:8px;padding:4px 10px;cursor:pointer;border:1px solid #aaa;border-radius:4px;background:#fff;font-size:0.8rem;">Réessayer</button>';
+        feedback.style.color = '#c62828';
+      }
+    }
+  }
+}
+
+function retryVF() {
+  var feedback = document.getElementById('quizFeedback3');
+  var scoreEl = document.getElementById('vfScore');
+  if (feedback) feedback.textContent = '';
+  if (scoreEl) { scoreEl.style.display = 'none'; scoreEl.textContent = ''; }
+  stepUnlocked[3] = false;
+  initVF();
+  renderStepper();
 }
 
 /* ══════════════════════════════════════════════
