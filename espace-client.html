@@ -3038,14 +3038,28 @@ async function findOrCreateClientRecord(user, meta, appMeta) {
   var token = await ensureIdentityAccessToken();
   if (!token) return null;
 
-  var response = await fetch('/.netlify/functions/resolve-client', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'Authorization': 'Bearer ' + token
+  async function executeResolveRequest(accessToken) {
+    var response = await fetch('/.netlify/functions/resolve-client', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer ' + accessToken
+      }
+    });
+    var data = await readJsonResponse(response);
+    return { response: response, data: data };
+  }
+
+  var result = await executeResolveRequest(token);
+  if (result.response.status === 401) {
+    var refreshedToken = await ensureIdentityAccessToken(true);
+    if (refreshedToken && refreshedToken !== token) {
+      result = await executeResolveRequest(refreshedToken);
     }
-  });
-  var data = await readJsonResponse(response);
+  }
+
+  var response = result.response;
+  var data = result.data;
 
   if (!response.ok) {
     throw new Error(data && data.error ? data.error : 'Impossible de résoudre le dossier client');
@@ -3813,15 +3827,29 @@ async function fetchClientAppointments() {
     throw new Error('Session client manquante');
   }
 
-  var response = await fetch('/.netlify/functions/get-client-appointments', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'Authorization': 'Bearer ' + token
-    },
-    body: JSON.stringify({ clientId: currentClientId })
-  });
-  var payload = await readJsonResponse(response);
+  async function executeAppointmentsRequest(accessToken) {
+    var response = await fetch('/.netlify/functions/get-client-appointments', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer ' + accessToken
+      },
+      body: JSON.stringify({ clientId: currentClientId })
+    });
+    var payload = await readJsonResponse(response);
+    return { response: response, payload: payload };
+  }
+
+  var result = await executeAppointmentsRequest(token);
+  if (result.response.status === 401) {
+    var refreshedToken = await ensureIdentityAccessToken(true);
+    if (refreshedToken && refreshedToken !== token) {
+      result = await executeAppointmentsRequest(refreshedToken);
+    }
+  }
+
+  var response = result.response;
+  var payload = result.payload;
 
   if (!response.ok) {
     throw new Error(payload && payload.error ? payload.error : 'Impossible de charger les rendez-vous');
@@ -5461,10 +5489,67 @@ function getIdentityAccessToken() {
   }
 }
 
+function readStoredIdentitySession() {
+  try {
+    return JSON.parse(localStorage.getItem('gotrue.user') || 'null');
+  } catch (error) {
+    return null;
+  }
+}
+
+function isIdentityTokenFresh(sessionData) {
+  if (!sessionData || !sessionData.token) return false;
+  if (!sessionData.token.access_token) return false;
+  if (!sessionData.token.expires_at) return true;
+  return Number(sessionData.token.expires_at) > Date.now() + 60000;
+}
+
+async function refreshIdentityAccessToken(sessionData) {
+  if (!sessionData || !sessionData.token || !sessionData.token.refresh_token) {
+    return null;
+  }
+
+  try {
+    var tokenResponse = await fetch(IDENTITY_API + '/token', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: 'grant_type=refresh_token&refresh_token=' + encodeURIComponent(sessionData.token.refresh_token)
+    });
+    var tokenData = await readJsonResponse(tokenResponse);
+    if (!tokenResponse.ok || !tokenData.access_token) {
+      return null;
+    }
+
+    sessionData.token = {
+      access_token: tokenData.access_token,
+      token_type: tokenData.token_type,
+      expires_in: tokenData.expires_in,
+      refresh_token: tokenData.refresh_token || sessionData.token.refresh_token,
+      expires_at: Date.now() + tokenData.expires_in * 1000
+    };
+    localStorage.setItem('gotrue.user', JSON.stringify(sessionData));
+    if (currentUser) {
+      currentUser.token = sessionData.token;
+    }
+    return sessionData.token.access_token;
+  } catch (error) {
+    console.warn('refreshIdentityAccessToken error:', error);
+    return null;
+  }
+}
+
 async function ensureIdentityAccessToken(forceRefresh) {
+  var storedSession = readStoredIdentitySession();
   var cached = getIdentityAccessToken();
-  if (cached) {
+  if (!forceRefresh && cached && isIdentityTokenFresh(currentUser || storedSession)) {
     return cached;
+  }
+
+  if (storedSession) {
+    var refreshedFromStorage = await refreshIdentityAccessToken(storedSession);
+    if (refreshedFromStorage) {
+      return refreshedFromStorage;
+    }
   }
 
   var identityUser = currentUser;
