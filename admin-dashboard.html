@@ -2463,7 +2463,6 @@
         }
 
         // ========== MATTERPORT API INTEGRATION (Pro Account) ==========
-        const MATTERPORT_API_URL = 'https://api.matterport.com/api/models/graph';
 
         function switchMpTab(tabName) {
             document.querySelectorAll('.mp-tab').forEach(t => t.classList.remove('active'));
@@ -2488,175 +2487,6 @@
         function hideMpSyncStatus() {
             document.getElementById('matterportSyncStatus').style.display = 'none';
         }
-
-        async function matterportGraphQL(query, variables, token) {
-            const response = await fetch(MATTERPORT_API_URL, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`
-                },
-                body: JSON.stringify({ query, variables })
-            });
-
-            if (!response.ok) {
-                const errText = await response.text();
-                throw new Error(`API Matterport (${response.status}): ${errText}`);
-            }
-
-            const result = await response.json();
-            if (result.errors) {
-                throw new Error(`GraphQL: ${result.errors.map(e => e.message).join(', ')}`);
-            }
-            return result.data;
-        }
-
-        async function fetchMatterportData() {
-            const modelId = document.getElementById('matterportModelId').value.trim();
-            const tokenId = document.getElementById('matterportTokenId').value.trim();
-            const tokenSecret = document.getElementById('matterportTokenSecret').value.trim();
-
-            if (!modelId || !tokenId || !tokenSecret) {
-                showErrorMessage('ID du modèle et Token API requis');
-                return;
-            }
-
-            // Stocker le token en session pour ne pas le ressaisir
-            sessionStorage.setItem('mp_api_token', token);
-
-            showMpSyncStatus('Connexion à Matterport...', 'loading');
-
-            try {
-                // 1. Récupérer les panoramiques + embed URL
-                showMpSyncStatus('Récupération des panoramiques et données du modèle...', 'loading');
-                const sweepData = await matterportGraphQL(`
-                    fragment panoFragment on PanoramicImageLocation {
-                        id
-                        skybox(resolution: "2k") {
-                            id
-                            status
-                            format
-                            children
-                        }
-                    }
-                    query getSweeps($modelId: ID!) {
-                        model(id: $modelId) {
-                            id
-                            name
-                            description
-                            locations {
-                                id
-                                position { x y z }
-                                floor { id }
-                                room { id }
-                                panos { ...panoFragment }
-                            }
-                        }
-                    }
-                `, { modelId }, token);
-
-                // 2. Récupérer les dimensions
-                showMpSyncStatus('Récupération des dimensions des pièces...', 'loading');
-                const dimData = await matterportGraphQL(`
-                    fragment dimensions on Dimension {
-                        areaCeiling
-                        areaFloor
-                        areaFloorIndoor
-                        areaWall
-                        volume
-                        depth
-                        height
-                        width
-                        units
-                    }
-                    query getDimensions($modelId: ID!) {
-                        model(id: $modelId) {
-                            name
-                            dimensions { ...dimensions }
-                            floors {
-                                label
-                                dimensions(units: metric) { ...dimensions }
-                            }
-                            rooms {
-                                id
-                                label
-                                tags
-                                dimensions { ...dimensions }
-                            }
-                        }
-                    }
-                `, { modelId }, token);
-
-                // 3. Récupérer les plans d'étage
-                showMpSyncStatus('Récupération des plans d\'étage...', 'loading');
-                let floorData = null;
-                try {
-                    floorData = await matterportGraphQL(`
-                        query getFloorplans($modelId: ID!) {
-                            model(id: $modelId) {
-                                assets {
-                                    floorplans(provider: "matterport", flags: [photogramy]) {
-                                        floor { label sequence }
-                                        format
-                                        flags
-                                        url
-                                        origin { x y }
-                                        width
-                                        height
-                                        resolution
-                                    }
-                                }
-                            }
-                        }
-                    `, { modelId }, token);
-                } catch (e) {
-                    console.warn('Floorplans non disponibles:', e.message);
-                }
-
-                // Assembler les données
-                const mpData = {
-                    modelId,
-                    modelName: sweepData.model?.name || '',
-                    description: sweepData.model?.description || '',
-                    locations: sweepData.model?.locations || [],
-                    dimensions: dimData.model?.dimensions || null,
-                    floors: dimData.model?.floors || [],
-                    rooms: dimData.model?.rooms || [],
-                    floorplans: floorData?.model?.assets?.floorplans || []
-                };
-
-                // Mettre en cache
-                if (currentClient) {
-                    matterportCache[currentClient.id] = mpData;
-                }
-
-                // Afficher
-                document.getElementById('matterportTabs').style.display = 'block';
-                renderMatterportData(mpData);
-
-                // Mettre à jour l'iframe viewer
-                document.getElementById('matterportIframe').src =
-                    `https://my.matterport.com/show/?m=${modelId}`;
-
-                // Sauvegarder le model ID et l'URL en base
-                if (currentClient) {
-                    await saveMatterportToClient(modelId, mpData);
-                }
-
-                showMpSyncStatus(
-                    `Synchronisation reussie - ${mpData.locations.length} panoramiques, ` +
-                    `${mpData.rooms.length} pièces, ${mpData.floorplans.length} plans récupérés`,
-                    'success'
-                );
-
-                setTimeout(hideMpSyncStatus, 6000);
-
-            } catch (err) {
-                console.error('Matterport API error:', err);
-                showMpSyncStatus(`Erreur : ${err.message}`, 'error');
-            }
-        }
-
         async function saveMatterportToClient(modelId, mpData) {
             if (!currentClient) return;
 
@@ -2712,56 +2542,6 @@
                 showErrorMessage('Erreur de sauvegarde Matterport : ' + err.message);
             }
         }
-
-        async function fetchMatterportData() {
-            const modelId = document.getElementById('matterportModelId').value.trim();
-            const tokenId = document.getElementById('matterportTokenId').value.trim();
-            const tokenSecret = document.getElementById('matterportTokenSecret').value.trim();
-
-            if (!modelId || !tokenId || !tokenSecret) {
-                showErrorMessage('ID du modèle et Token API requis');
-                return;
-            }
-
-            sessionStorage.setItem('mp_api_token', token);
-            showMpSyncStatus('Connexion à Matterport via le serveur...', 'loading');
-
-            try {
-                const syncData = await adminFetch('/.netlify/functions/admin-sync-matterport', {
-                    modelId: modelId,
-                    token: token
-                });
-                const mpData = syncData && syncData.matterport ? syncData.matterport : null;
-
-                if (!mpData) {
-                    throw new Error('Aucune donnée Matterport retournée.');
-                }
-
-                if (currentClient) {
-                    matterportCache[currentClient.id] = mpData;
-                }
-
-                document.getElementById('matterportTabs').style.display = 'block';
-                renderMatterportData(mpData);
-                document.getElementById('matterportIframe').src =
-                    `https://my.matterport.com/show/?m=${modelId}`;
-
-                if (currentClient) {
-                    await saveMatterportToClient(modelId, mpData);
-                }
-
-                showMpSyncStatus(
-                    `Synchronisation reussie - ${mpData.locations.length} panoramiques, ` +
-                    `${mpData.rooms.length} pieces, ${mpData.floorplans.length} plans recuperes`,
-                    'success'
-                );
-                setTimeout(hideMpSyncStatus, 6000);
-            } catch (err) {
-                console.error('Matterport sync error:', err);
-                showMpSyncStatus(`Erreur : ${err.message}`, 'error');
-            }
-        }
-
         async function fetchMatterportData() {
             const modelId = document.getElementById('matterportModelId').value.trim();
             const tokenId = document.getElementById('matterportTokenId').value.trim();
@@ -2962,4 +2742,5 @@
     </script>
 </body>
 </html>
+
 
