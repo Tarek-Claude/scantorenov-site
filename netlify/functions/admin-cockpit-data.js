@@ -1,6 +1,7 @@
 const { createClient } = require('@supabase/supabase-js');
 const { authorizeAdminRequest } = require('./_admin-session');
 const { enrichClientProgress } = require('./_admin-client-progress');
+const { safeReconcileClientTasks } = require('./_cockpit-engine');
 
 const headers = {
   'Access-Control-Allow-Origin': '*',
@@ -14,6 +15,10 @@ function getSupabaseAdmin() {
     process.env.SUPABASE_URL,
     process.env.SUPABASE_SERVICE_KEY
   );
+}
+
+function isMissingTableError(error) {
+  return error && (error.code === '42P01' || error.code === 'PGRST205');
 }
 
 exports.handler = async function handler(event) {
@@ -58,7 +63,7 @@ exports.handler = async function handler(event) {
     if (clientError) {
       throw new Error(`Lecture clients: ${clientError.message}`);
     }
-    if (taskError && taskError.code !== '42P01' && taskError.code !== 'PGRST205') {
+    if (taskError && !isMissingTableError(taskError)) {
       throw new Error(`Lecture taches: ${taskError.message}`);
     }
 
@@ -71,7 +76,7 @@ exports.handler = async function handler(event) {
         .select('client_id,type,status,scheduled_at')
         .in('client_id', clientIds);
 
-      if (appointmentError && appointmentError.code !== '42P01' && appointmentError.code !== 'PGRST205') {
+      if (appointmentError && !isMissingTableError(appointmentError)) {
         throw new Error(`Lecture rendez-vous: ${appointmentError.message}`);
       }
 
@@ -87,13 +92,37 @@ exports.handler = async function handler(event) {
       enrichClientProgress(client, appointmentsByClientId.get(client.id) || [])
     );
 
+    let activeTasks = tasks || [];
+    if (!taskError) {
+      for (const client of enrichedClients) {
+        await safeReconcileClientTasks({
+          supabase,
+          client,
+        });
+      }
+
+      const { data: refreshedTasks, error: refreshedTaskError } = await supabase
+        .from('admin_tasks')
+        .select('id,client_id,task_type,title,description,status,priority,due_date,screen_target')
+        .in('status', ['open', 'awaiting_validation', 'waiting_client', 'blocked'])
+        .order('priority', { ascending: false })
+        .order('due_date', { ascending: true, nullsFirst: false })
+        .limit(100);
+
+      if (refreshedTaskError && !isMissingTableError(refreshedTaskError)) {
+        throw new Error(`Rafraichissement taches: ${refreshedTaskError.message}`);
+      }
+
+      activeTasks = refreshedTasks || [];
+    }
+
     return {
       statusCode: 200,
       headers,
       body: JSON.stringify({
         success: true,
         clients: enrichedClients,
-        tasks: tasks || [],
+        tasks: activeTasks,
       }),
     };
   } catch (error) {

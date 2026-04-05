@@ -1,6 +1,7 @@
 const { createClient } = require('@supabase/supabase-js');
 const { authorizeAdminRequest } = require('./_admin-session');
 const { enrichClientProgress } = require('./_admin-client-progress');
+const { safeReconcileClientTasks } = require('./_cockpit-engine');
 
 const headers = {
   'Access-Control-Allow-Origin': '*',
@@ -14,6 +15,10 @@ function getSupabaseAdmin() {
     process.env.SUPABASE_URL,
     process.env.SUPABASE_SERVICE_KEY
   );
+}
+
+function isMissingTableError(error) {
+  return error && (error.code === '42P01' || error.code === 'PGRST205');
 }
 
 exports.handler = async function handler(event) {
@@ -89,10 +94,10 @@ exports.handler = async function handler(event) {
     if (clientError) {
       throw new Error(`Lecture client: ${clientError.message}`);
     }
-    if (taskError && taskError.code !== '42P01' && taskError.code !== 'PGRST205') {
+    if (taskError && !isMissingTableError(taskError)) {
       throw new Error(`Lecture taches: ${taskError.message}`);
     }
-    if (projectNotesError && projectNotesError.code !== '42P01' && projectNotesError.code !== 'PGRST205') {
+    if (projectNotesError && !isMissingTableError(projectNotesError)) {
       throw new Error(`Lecture notes projet: ${projectNotesError.message}`);
     }
 
@@ -101,11 +106,33 @@ exports.handler = async function handler(event) {
       .select('id,client_id,type,status,scheduled_at,duration_minutes,location,notes')
       .eq('client_id', body.clientId);
 
-    if (appointmentError && appointmentError.code !== '42P01' && appointmentError.code !== 'PGRST205') {
+    if (appointmentError && !isMissingTableError(appointmentError)) {
       throw new Error(`Lecture rendez-vous: ${appointmentError.message}`);
     }
 
     const enrichedClient = enrichClientProgress(client, appointments || []);
+    let activeTasks = tasks || [];
+
+    if (!taskError) {
+      await safeReconcileClientTasks({
+        supabase,
+        client: enrichedClient,
+      });
+
+      const { data: refreshedTasks, error: refreshedTaskError } = await supabase
+        .from('admin_tasks')
+        .select('*')
+        .eq('client_id', body.clientId)
+        .in('status', ['open', 'awaiting_validation', 'waiting_client', 'blocked'])
+        .order('priority', { ascending: false })
+        .order('due_date', { ascending: true, nullsFirst: false });
+
+      if (refreshedTaskError && !isMissingTableError(refreshedTaskError)) {
+        throw new Error(`Rafraichissement taches: ${refreshedTaskError.message}`);
+      }
+
+      activeTasks = refreshedTasks || [];
+    }
 
     return {
       statusCode: 200,
@@ -115,7 +142,7 @@ exports.handler = async function handler(event) {
         client: enrichedClient,
         appointments: appointments || [],
         projectNotes: projectNotes || [],
-        tasks: tasks || [],
+        tasks: activeTasks,
       }),
     };
   } catch (error) {
