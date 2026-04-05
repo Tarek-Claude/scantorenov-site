@@ -60,7 +60,11 @@ exports.handler = async function handler(event) {
   const supabase = getSupabaseAdmin();
 
   try {
-    const [{ data: client, error: clientError }, { data: tasks, error: taskError }] = await Promise.all([
+    const [
+      { data: client, error: clientError },
+      { data: tasks, error: taskError },
+      { data: projectNotes, error: projectNotesError }
+    ] = await Promise.all([
       supabase
         .from('clients')
         .select('*')
@@ -73,6 +77,13 @@ exports.handler = async function handler(event) {
         .in('status', ['open', 'awaiting_validation', 'waiting_client', 'blocked'])
         .order('priority', { ascending: false })
         .order('due_date', { ascending: true, nullsFirst: false }),
+      supabase
+        .from('project_notes')
+        .select('id,type,summary,needs,confirmed_budget,confirmed_surface,constraints,internal_notes,created_at')
+        .eq('client_id', body.clientId)
+        .in('type', ['client_brief', 'phone_summary', 'scan_observation'])
+        .order('created_at', { ascending: false })
+        .limit(6),
     ]);
 
     if (clientError) {
@@ -80,6 +91,9 @@ exports.handler = async function handler(event) {
     }
     if (taskError && taskError.code !== '42P01' && taskError.code !== 'PGRST205') {
       throw new Error(`Lecture taches: ${taskError.message}`);
+    }
+    if (projectNotesError && projectNotesError.code !== '42P01' && projectNotesError.code !== 'PGRST205') {
+      throw new Error(`Lecture notes projet: ${projectNotesError.message}`);
     }
 
     const { data: appointments, error: appointmentError } = await supabase
@@ -100,6 +114,7 @@ exports.handler = async function handler(event) {
         success: true,
         client: enrichedClient,
         appointments: appointments || [],
+        projectNotes: projectNotes || [],
         tasks: tasks || [],
       }),
     };

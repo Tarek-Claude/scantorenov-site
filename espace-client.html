@@ -3142,12 +3142,18 @@ async function showDashboard(user) {
     var clientRecord = await findOrCreateClientRecord(user, meta, appMeta);
     if (clientRecord) {
       applySupabaseClientRecord(clientRecord, appMeta);
+      hydrateBriefFromCache();
+      checkBrief();
     } else {
       setSlotPickerClientContext(null, "Impossible d'identifier votre dossier client.");
+      hydrateBriefFromCache();
+      checkBrief();
     }
   } catch (error) {
     console.error('showDashboard client sync error:', error);
     setSlotPickerClientContext(null, "Impossible d'identifier votre dossier client.");
+    hydrateBriefFromCache();
+    checkBrief();
   }
 
   // D'abord afficher avec les données locales/Identity
@@ -3798,6 +3804,77 @@ function countWords(str) {
   return str.trim().split(/\s+/).filter(function(w) { return w.length > 0; }).length;
 }
 
+var briefSaveTimer = null;
+var briefLastSavedSignature = '';
+
+function getBriefPayload() {
+  return {
+    contexte: document.getElementById('briefContexte').value.trim(),
+    vision: document.getElementById('briefVision').value.trim(),
+    contraintes: document.getElementById('briefContraintes').value.trim(),
+    priorite: document.getElementById('briefPriorite').value.trim()
+  };
+}
+
+function hydrateBriefFromCache() {
+  try {
+    var raw = localStorage.getItem('scantorenov_brief');
+    if (!raw) return;
+    var brief = JSON.parse(raw);
+    if (!brief || typeof brief !== 'object') return;
+
+    var mapping = {
+      briefContexte: brief.contexte || '',
+      briefVision: brief.vision || '',
+      briefContraintes: brief.contraintes || '',
+      briefPriorite: brief.priorite || ''
+    };
+
+    Object.keys(mapping).forEach(function(id) {
+      var el = document.getElementById(id);
+      if (el && !el.value.trim() && mapping[id]) {
+        el.value = mapping[id];
+      }
+    });
+  } catch (error) {
+    console.warn('hydrateBriefFromCache error:', error);
+  }
+}
+
+async function saveBriefToServer(brief) {
+  var token = getIdentityAccessToken();
+  if (!token) return;
+
+  var signature = JSON.stringify(brief);
+  if (signature === briefLastSavedSignature) return;
+
+  var response = await fetch('/.netlify/functions/save-client-brief', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': 'Bearer ' + token
+    },
+    body: JSON.stringify(brief)
+  });
+  var data = await readJsonResponse(response);
+
+  if (!response.ok) {
+    throw new Error(data && data.error ? data.error : 'Impossible de sauvegarder le brief');
+  }
+
+  briefLastSavedSignature = signature;
+}
+
+function scheduleBriefSave(brief) {
+  if (briefSaveTimer) clearTimeout(briefSaveTimer);
+
+  briefSaveTimer = setTimeout(function() {
+    saveBriefToServer(brief).catch(function(error) {
+      console.warn('saveBriefToServer error:', error);
+    });
+  }, 600);
+}
+
 function checkBrief() {
   var fields = [
     { id: 'briefContexte', counterId: 'counterContexte' },
@@ -3830,14 +3907,11 @@ function checkBrief() {
       statusEl.classList.add('ready');
     }
     // Sauvegarder le brief dans localStorage
-    var brief = {
-      contexte:    document.getElementById('briefContexte').value,
-      vision:      document.getElementById('briefVision').value,
-      contraintes: document.getElementById('briefContraintes').value,
-      priorite:    document.getElementById('briefPriorite').value,
-      savedAt:     new Date().toISOString()
-    };
+    var brief = Object.assign(getBriefPayload(), {
+      savedAt: new Date().toISOString()
+    });
     localStorage.setItem('scantorenov_brief', JSON.stringify(brief));
+    scheduleBriefSave(getBriefPayload());
     unlockStep(2);
   } else {
     if (statusEl) {

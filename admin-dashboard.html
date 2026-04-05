@@ -1474,6 +1474,8 @@
         let currentClient = null;
         let adminSessionToken = null;
         let chatHistory = [];
+        let chatHistoryClientId = null;
+        let currentClientProjectNotes = [];
         let matterportCache = {}; // Cache des données Matterport par client
 
         let currentClientTasks = [];
@@ -1530,6 +1532,8 @@
             adminSessionToken = null;
             currentClient = null;
             chatHistory = [];
+            chatHistoryClientId = null;
+            currentClientProjectNotes = [];
             currentClientTasks = [];
             currentClientAppointments = [];
             dashboardClients = [];
@@ -1748,11 +1752,15 @@
             try {
                 const data = await adminFetch('/.netlify/functions/admin-client-detail', { clientId });
                 if (data.client) {
+                    if (chatHistoryClientId !== data.client.id) {
+                        clearMarcelChat();
+                    }
                     currentClient = {
                         ...data.client,
                         status: normalizeDashboardStatus(data.client.status)
                     };
                     currentClientAppointments = data.appointments || [];
+                    currentClientProjectNotes = data.projectNotes || [];
                     dashboardClients = dashboardClients.map(client =>
                         client.id === currentClient.id ? currentClient : client
                     );
@@ -1761,6 +1769,7 @@
                     autocomplete.classList.remove('show');
                     emptyState.style.display = 'none';
                     clientProfile.classList.add('active');
+                    await bootstrapMarcelPanel();
                     await syncCockpitTasks(currentClient.id);
                     await loadClientTasks(currentClient.id, data.tasks || []);
                 }
@@ -1976,6 +1985,7 @@
                     const data = await adminFetch('/.netlify/functions/admin-client-detail', { clientId });
                     tasks = data.tasks || [];
                     currentClientAppointments = data.appointments || [];
+                    currentClientProjectNotes = data.projectNotes || [];
                     if (data.client) {
                         currentClient = {
                             ...data.client,
@@ -2048,6 +2058,9 @@
         // ========== MARCEL CHAT ==========
         function openMarcelChat() {
             document.getElementById('chatPanel').scrollIntoView({ behavior: 'smooth' });
+            if (currentClient && shouldShowMarcelForStatus(currentClient.status) && !chatHistory.length) {
+                bootstrapMarcelPanel();
+            }
         }
 
         document.getElementById('chatSend')?.addEventListener('click', sendChatMessage);
@@ -2062,6 +2075,8 @@
 
             // Add to chat
             addChatMessage('admin', message);
+            chatHistory.push({ role: 'user', content: message });
+            chatHistoryClientId = currentClient.id;
             input.value = '';
 
             // Call API
@@ -2073,18 +2088,24 @@
                         'Authorization': `Bearer ${adminSessionToken}`
                     },
                     body: JSON.stringify({
-                        message,
-                        clientId: currentClient.id,
-                        role: 'admin'
+                        messages: chatHistory,
+                        email: currentClient.email || null,
+                        propertyData: getMatterportContextData(currentClient)
                     })
                 });
 
                 const data = await response.json();
-                if (data.reply) {
-                    addChatMessage('marcel', data.reply);
+                if (!response.ok) {
+                    throw new Error(data.error || 'Chat indisponible');
+                }
+
+                if (data.content) {
+                    addChatMessage('marcel', data.content);
+                    chatHistory.push({ role: 'assistant', content: data.content });
                 }
             } catch (err) {
                 console.error('Chat error:', err);
+                addChatMessage('marcel', "Je rencontre un probleme technique. Reessayez dans un instant.");
             }
         }
 
@@ -2092,9 +2113,139 @@
             const messagesEl = document.getElementById('chatMessages');
             const msgEl = document.createElement('div');
             msgEl.className = `chat-message ${role}`;
-            msgEl.innerHTML = `<div class="chat-bubble">${escapeHtml(text)}</div>`;
+            msgEl.innerHTML = `<div class="chat-bubble">${escapeHtml(text).replace(/\n/g, '<br>')}</div>`;
             messagesEl.appendChild(msgEl);
             messagesEl.scrollTop = messagesEl.scrollHeight;
+        }
+
+        function clearMarcelChat() {
+            chatHistory = [];
+            chatHistoryClientId = currentClient ? currentClient.id : null;
+            const messagesEl = document.getElementById('chatMessages');
+            if (messagesEl) {
+                messagesEl.innerHTML = '';
+            }
+            const input = document.getElementById('chatInput');
+            if (input) {
+                input.value = '';
+                input.disabled = false;
+            }
+        }
+
+        function shouldShowMarcelForStatus(status) {
+            return ['call_requested', 'scan_completed', 'analysis_ready'].includes(normalizeDashboardStatus(status));
+        }
+
+        function getMatterportContextData(client) {
+            if (!client || typeof client !== 'object') return null;
+            return client.matterport_data || matterportCache[client.id] || null;
+        }
+
+        function getLatestProjectNote(type) {
+            return (currentClientProjectNotes || []).find(note => note && note.type === type) || null;
+        }
+
+        function buildMarcelBootstrapPrompt(client) {
+            const displayName = getClientDisplayName(client);
+            const appointment = getPrimaryPhoneAppointment(currentClientAppointments);
+            const clientBrief = getLatestProjectNote('client_brief');
+            const phoneSummary = getLatestProjectNote('phone_summary');
+            const scanObservation = getLatestProjectNote('scan_observation');
+            const projectDescription = client.demande || client.project_details || 'Aucune description detaillee disponible.';
+            const matterportData = getMatterportContextData(client);
+            const parts = [
+                "Tu t'adresses a l'operateur interne ScantoRenov.",
+                `Prepare une premiere synthese interne courte et exploitable pour le dossier de ${displayName}.`,
+                "Structure ta reponse en 3 blocs :",
+                "1. Ce que l'on sait deja du projet",
+                "2. Points de vigilance ou informations manquantes",
+                "3. Prochaine meilleure action a mener dans le cockpit",
+                '',
+                `Client: ${displayName}`,
+                `Email: ${client.email || '-'}`,
+                `Statut pipeline: ${getStatusLabel(client.status)}`,
+                `Type de bien: ${client.type_bien || '-'}`,
+                `Adresse: ${client.adresse || '-'}`,
+                `Budget: ${client.budget || '-'}`,
+                `Echeance: ${client.echeance || '-'}`,
+                `Demande initiale: ${projectDescription}`
+            ];
+
+            if (appointment) {
+                parts.push(`Rendez-vous telephonique actif: ${formatAppointmentDateTime(appointment.scheduled_at)} (${appointment.status || 'requested'})`);
+            }
+
+            if (clientBrief) {
+                parts.push(`Brief pedagogique client: ${clientBrief.summary || clientBrief.internal_notes || '-'}`);
+            }
+
+            if (phoneSummary) {
+                parts.push(`Synthese d'appel disponible: ${phoneSummary.summary || phoneSummary.internal_notes || '-'}`);
+            }
+
+            if (scanObservation) {
+                parts.push(`Observations de visite: ${scanObservation.summary || scanObservation.internal_notes || '-'}`);
+            }
+
+            if (matterportData) {
+                parts.push(`Donnees Matterport: ${JSON.stringify(matterportData, null, 2)}`);
+            }
+
+            parts.push('', "Reste concis, oriente action, et parle a l'operateur interne.");
+            return parts.join('\n');
+        }
+
+        async function bootstrapMarcelPanel() {
+            if (!currentClient || !shouldShowMarcelForStatus(currentClient.status)) return;
+            if (chatHistory.length && chatHistoryClientId === currentClient.id) return;
+
+            clearMarcelChat();
+            chatHistoryClientId = currentClient.id;
+
+            const messagesEl = document.getElementById('chatMessages');
+            if (messagesEl) {
+                messagesEl.innerHTML = '<div class="chat-message marcel"><div class="chat-bubble">Marcel prepare une synthese du dossier...</div></div>';
+            }
+
+            const introPrompt = buildMarcelBootstrapPrompt(currentClient);
+
+            try {
+                const response = await fetch('/.netlify/functions/chat', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${adminSessionToken}`
+                    },
+                    body: JSON.stringify({
+                        messages: [{ role: 'user', content: introPrompt }],
+                        email: currentClient.email || null,
+                        propertyData: getMatterportContextData(currentClient)
+                    })
+                });
+
+                const data = await response.json();
+                if (!response.ok) {
+                    throw new Error(data.error || 'Initialisation Marcel impossible');
+                }
+
+                if (messagesEl) {
+                    messagesEl.innerHTML = '';
+                }
+
+                const reply = data.content || "Je n'ai pas encore pu produire de synthese exploitable.";
+                addChatMessage('marcel', reply);
+                chatHistory = [
+                    { role: 'user', content: introPrompt },
+                    { role: 'assistant', content: reply }
+                ];
+            } catch (err) {
+                console.error('Marcel bootstrap error:', err);
+                if (messagesEl) {
+                    messagesEl.innerHTML = '';
+                }
+                addChatMessage('marcel', "Je n'ai pas reussi a charger la synthese initiale du dossier.");
+                chatHistory = [];
+            }
         }
 
         // ========== ACTIONS ==========
@@ -2257,6 +2408,10 @@
                 dashboardClients = dashboardClients.map(client =>
                     client.id === currentClient.id ? currentClient : client
                 );
+                if (shouldShowMarcelForStatus(currentClient.status)) {
+                    clearMarcelChat();
+                    await bootstrapMarcelPanel();
+                }
                 renderClientProfile(currentClient);
                 await syncCockpitTasks(currentClient.id);
                 await loadClientTasks(currentClient.id);
