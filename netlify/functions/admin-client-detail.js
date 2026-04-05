@@ -1,5 +1,6 @@
 const { createClient } = require('@supabase/supabase-js');
 const { authorizeAdminRequest } = require('./_admin-session');
+const { enrichClientProgress } = require('./_admin-client-progress');
 
 const headers = {
   'Access-Control-Allow-Origin': '*',
@@ -81,12 +82,23 @@ exports.handler = async function handler(event) {
       throw new Error(`Lecture taches: ${taskError.message}`);
     }
 
+    const { data: appointments, error: appointmentError } = await supabase
+      .from('appointments')
+      .select('client_id,type,status,scheduled_at')
+      .eq('client_id', body.clientId);
+
+    if (appointmentError && appointmentError.code !== '42P01' && appointmentError.code !== 'PGRST205') {
+      throw new Error(`Lecture rendez-vous: ${appointmentError.message}`);
+    }
+
+    const enrichedClient = enrichClientProgress(client, appointments || []);
+
     return {
       statusCode: 200,
       headers,
       body: JSON.stringify({
         success: true,
-        client,
+        client: enrichedClient,
         tasks: tasks || [],
       }),
     };

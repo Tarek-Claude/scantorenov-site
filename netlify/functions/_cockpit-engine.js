@@ -3,6 +3,7 @@ const {
   getTaskTypeDefinition,
   normalizeClientStatus,
 } = require('./_cockpit-config');
+const { enrichClientProgress } = require('./_admin-client-progress');
 
 function addDays(baseDate, numberOfDays) {
   const date = baseDate ? new Date(baseDate) : new Date();
@@ -193,7 +194,18 @@ async function fetchClientByReference(supabase, options = {}) {
   if (error) {
     throw new Error(`Lecture client cockpit: ${error.message}`);
   }
-  return data || null;
+  if (!data) return null;
+
+  const { data: appointments, error: appointmentError } = await supabase
+    .from('appointments')
+    .select('client_id,type,status,scheduled_at')
+    .eq('client_id', data.id);
+
+  if (appointmentError && appointmentError.code !== '42P01' && appointmentError.code !== 'PGRST205') {
+    throw new Error(`Lecture rendez-vous cockpit: ${appointmentError.message}`);
+  }
+
+  return enrichClientProgress(data, appointments || []);
 }
 
 async function listActiveTasks(supabase, clientId) {
@@ -308,9 +320,22 @@ async function reconcileClientTasks(options = {}) {
     throw new Error('Supabase requis');
   }
 
-  const client = providedClient || await fetchClientByReference(supabase, { clientId, email });
+  let client = providedClient || await fetchClientByReference(supabase, { clientId, email });
   if (!client) {
     return { skipped: true, reason: 'client_not_found' };
+  }
+
+  if (providedClient && providedClient.id) {
+    const { data: appointments, error: appointmentError } = await supabase
+      .from('appointments')
+      .select('client_id,type,status,scheduled_at')
+      .eq('client_id', providedClient.id);
+
+    if (appointmentError && appointmentError.code !== '42P01' && appointmentError.code !== 'PGRST205') {
+      throw new Error(`Lecture rendez-vous cockpit: ${appointmentError.message}`);
+    }
+
+    client = enrichClientProgress(providedClient, appointments || []);
   }
 
   const expectedTasks = getExpectedTasksForClient(client).filter(Boolean);

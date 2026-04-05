@@ -1425,12 +1425,21 @@
 
         function normalizeDashboardStatus(status) {
             if (!status) return 'contact_submitted';
-            return STATUS_ALIASES[status] || status;
+            const normalized = STATUS_ALIASES[status] || status;
+            return PIPELINE_STATUSES.includes(normalized) || ['abandoned', 'paused'].includes(normalized)
+                ? normalized
+                : 'contact_submitted';
         }
 
         function getStatusLabel(status) {
             const normalized = normalizeDashboardStatus(status);
             return STATUS_LABELS[normalized] || normalized;
+        }
+
+        function getClientDisplayName(client) {
+            if (!client || typeof client !== 'object') return 'Client sans nom';
+            const fullName = [client.prenom, client.nom].filter(Boolean).join(' ').trim();
+            return fullName || client.nom || client.prenom || client.email || 'Client sans nom';
         }
 
         // ========== STATE ==========
@@ -1685,7 +1694,7 @@
             if (results.length > 0) {
                 autocomplete.innerHTML = results.map(client => `
                     <div class="autocomplete-item" onclick="selectClient('${client.id}')">
-                        <div class="autocomplete-item-main">${client.prenom || ''} ${client.nom || ''}</div>
+                        <div class="autocomplete-item-main">${getClientDisplayName(client)}</div>
                         <div class="autocomplete-item-info">${client.email} ? ${client.type_bien || 'N/A'}</div>
                     </div>
                 `).join('');
@@ -1733,7 +1742,7 @@
         // ========== CLIENT PROFILE RENDERING ==========
         function renderClientProfile(client) {
             // Header
-            document.getElementById('clientName').textContent = `${client.prenom} ${client.nom}`;
+            document.getElementById('clientName').textContent = getClientDisplayName(client);
             document.getElementById('clientEmail').textContent = client.email;
             document.getElementById('clientPhone').textContent = client.telephone || '-';
             document.getElementById('clientTypeBien').textContent = client.type_bien || '-';
