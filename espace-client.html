@@ -3035,7 +3035,7 @@ function applySupabaseClientRecord(sb, appMeta) {
 }
 
 async function findOrCreateClientRecord(user, meta, appMeta) {
-  var token = getIdentityAccessToken();
+  var token = await ensureIdentityAccessToken();
   if (!token) return null;
 
   var response = await fetch('/.netlify/functions/resolve-client', {
@@ -3125,6 +3125,7 @@ async function handleAuthLoginSubmit(event) {
 
 async function showDashboard(user) {
   currentUser = user;
+  await ensureIdentityAccessToken();
   document.getElementById('authGuard').style.display = 'none';
   document.getElementById('dashNav').style.display = '';
   document.getElementById('dashboard').classList.add('visible');
@@ -3529,7 +3530,7 @@ async function confirmAppointment(appointmentId) {
 
   try {
     const confirmHeaders = { 'Content-Type': 'application/json' };
-    const identityToken = getIdentityAccessToken();
+    const identityToken = await ensureIdentityAccessToken();
     if (identityToken) confirmHeaders['Authorization'] = 'Bearer ' + identityToken;
 
     const response = await fetch('/.netlify/functions/confirm-appointment', {
@@ -3575,7 +3576,7 @@ async function cancelAppointment(appointmentId) {
 
   try {
     const cancelHeaders = { 'Content-Type': 'application/json' };
-    const cancelToken = getIdentityAccessToken();
+    const cancelToken = await ensureIdentityAccessToken();
     if (cancelToken) cancelHeaders['Authorization'] = 'Bearer ' + cancelToken;
 
     const response = await fetch('/.netlify/functions/confirm-appointment', {
@@ -3807,7 +3808,7 @@ function countWords(str) {
 async function fetchClientAppointments() {
   if (!currentClientId) return [];
 
-  var token = getIdentityAccessToken();
+  var token = await ensureIdentityAccessToken();
   if (!token) {
     throw new Error('Session client manquante');
   }
@@ -3881,7 +3882,7 @@ function hydrateBriefFromCache() {
 }
 
 async function saveBriefToServer(brief) {
-  var token = getIdentityAccessToken();
+  var token = await ensureIdentityAccessToken();
   if (!token) return;
 
   var signature = JSON.stringify(brief);
@@ -5460,6 +5461,34 @@ function getIdentityAccessToken() {
   }
 }
 
+async function ensureIdentityAccessToken(forceRefresh) {
+  var cached = getIdentityAccessToken();
+  if (cached) {
+    return cached;
+  }
+
+  var identityUser = currentUser;
+  if (!identityUser && netlifyIdentity && typeof netlifyIdentity.currentUser === 'function') {
+    identityUser = netlifyIdentity.currentUser();
+  }
+
+  if (!identityUser || typeof identityUser.jwt !== 'function') {
+    return null;
+  }
+
+  try {
+    var jwt = await identityUser.jwt(!!forceRefresh);
+    if (!jwt) return null;
+    if (!currentUser) currentUser = identityUser;
+    currentUser.token = currentUser.token || {};
+    currentUser.token.access_token = jwt;
+    return jwt;
+  } catch (error) {
+    console.warn('ensureIdentityAccessToken error:', error);
+    return null;
+  }
+}
+
 var BOOKING_TIME_ZONE = 'Europe/Paris';
 var slotPickers = {};
 var bookingFormatterCache = {};
@@ -6170,7 +6199,7 @@ async function submitPhoneAppointment(slot) {
   }
 
   var scheduledAt = buildParisDateTime(slot.date, slot.time).toISOString();
-  var token = getIdentityAccessToken();
+  var token = await ensureIdentityAccessToken();
   var response = await fetch('/.netlify/functions/book-appointment', {
     method: 'POST',
     headers: {
@@ -6206,7 +6235,7 @@ async function bookScanAppointment(slot) {
 
   var scheduledAt = buildParisDateTime(slot.date, slot.time).toISOString();
   var eventTitle = formatNativeSlotLabel('scan_3d', slot.time);
-  var token = getIdentityAccessToken();
+  var token = await ensureIdentityAccessToken();
   var response = await fetch('/.netlify/functions/book-scan', {
     method: 'POST',
     headers: {
@@ -6259,7 +6288,7 @@ async function initiateScanPayment() {
   if (errEl) errEl.style.display = 'none';
 
   try {
-    var token = getIdentityAccessToken();
+    var token = await ensureIdentityAccessToken();
     var resp = await fetch('/.netlify/functions/create-checkout', {
       method: 'POST',
       headers: {
