@@ -2707,6 +2707,54 @@
             }
         }
 
+        async function fetchMatterportData() {
+            const modelId = document.getElementById('matterportModelId').value.trim();
+            const token = document.getElementById('matterportApiToken').value.trim();
+
+            if (!modelId || !token) {
+                showErrorMessage('ID du modèle et Token API requis');
+                return;
+            }
+
+            sessionStorage.setItem('mp_api_token', token);
+            showMpSyncStatus('Connexion à Matterport via le serveur...', 'loading');
+
+            try {
+                const syncData = await adminFetch('/.netlify/functions/admin-sync-matterport', {
+                    modelId: modelId,
+                    token: token
+                });
+                const mpData = syncData && syncData.matterport ? syncData.matterport : null;
+
+                if (!mpData) {
+                    throw new Error('Aucune donnée Matterport retournée.');
+                }
+
+                if (currentClient) {
+                    matterportCache[currentClient.id] = mpData;
+                }
+
+                document.getElementById('matterportTabs').style.display = 'block';
+                renderMatterportData(mpData);
+                document.getElementById('matterportIframe').src =
+                    `https://my.matterport.com/show/?m=${modelId}`;
+
+                if (currentClient) {
+                    await saveMatterportToClient(modelId, mpData);
+                }
+
+                showMpSyncStatus(
+                    `Synchronisation reussie - ${mpData.locations.length} panoramiques, ` +
+                    `${mpData.rooms.length} pieces, ${mpData.floorplans.length} plans recuperes`,
+                    'success'
+                );
+                setTimeout(hideMpSyncStatus, 6000);
+            } catch (err) {
+                console.error('Matterport sync error:', err);
+                showMpSyncStatus(`Erreur : ${err.message}`, 'error');
+            }
+        }
+
         function renderMatterportDataFromDb(matterportData) {
             // Afficher les données stockées en DB (format du script import-matterport.js)
             if (!matterportData) return;
