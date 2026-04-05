@@ -1238,7 +1238,7 @@
                         <div style="padding: 20px;">
                             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
                                 <h3 style="margin: 0;">Visite 3D Matterport</h3>
-                                <div style="display: flex; gap: 8px;">
+                                <div style="display: flex; gap: 8px; flex-wrap: wrap;">
                                     <button class="action-button" onclick="fetchMatterportData()" id="btnFetchMatterport" style="font-size: 12px; padding: 8px 14px;">
                                         Synchroniser depuis Matterport
                                     </button>
@@ -1249,14 +1249,15 @@
                             <div id="matterportIdInput" style="margin-bottom: 16px; padding: 16px; background: var(--bg); border-radius: 8px;">
                                 <label style="font-size: 13px; font-weight: 600; display: block; margin-bottom: 8px;">ID du modèle Matterport</label>
                                 <div style="display: flex; gap: 8px;">
-                                    <input type="text" id="matterportModelId" placeholder="Ex: SxQL3iGyoDo" style="flex: 1;">
-                                    <input type="password" id="matterportApiToken" placeholder="Token API Matterport" style="flex: 1;">
+                                    <input type="text" id="matterportModelId" placeholder="Ex: SxQL3iGyoDo" style="flex: 1; min-width: 220px;">
+                                    <input type="text" id="matterportTokenId" placeholder="Matterport Token ID" style="flex: 1; min-width: 220px;">
+                                    <input type="password" id="matterportTokenSecret" placeholder="Matterport Token Secret" style="flex: 1; min-width: 220px;">
                                     <button class="action-button" onclick="fetchMatterportData()" style="white-space: nowrap; font-size: 12px; padding: 8px 14px;">
                                         Récupérer
                                     </button>
                                 </div>
                                 <p style="font-size: 11px; color: var(--muted); margin-top: 6px;">
-                                    Token API : Dashboard Matterport &rarr; Developers &rarr; API Token
+                                    Matterport Model API : utilisez le couple Token ID + Token Secret depuis Dashboard Matterport &rarr; Developers &rarr; API Token.
                                 </p>
                             </div>
 
@@ -1815,9 +1816,13 @@
             }
 
             // Récupérer le token stocké en session
-            const storedToken = sessionStorage.getItem('mp_api_token');
-            if (storedToken) {
-                document.getElementById('matterportApiToken').value = storedToken;
+            const storedTokenId = sessionStorage.getItem('mp_token_id');
+            const storedTokenSecret = sessionStorage.getItem('mp_token_secret');
+            if (storedTokenId) {
+                document.getElementById('matterportTokenId').value = storedTokenId;
+            }
+            if (storedTokenSecret) {
+                document.getElementById('matterportTokenSecret').value = storedTokenSecret;
             }
 
             // Afficher la visite 3D si on a l'iframe ou l'URL
@@ -2508,9 +2513,10 @@
 
         async function fetchMatterportData() {
             const modelId = document.getElementById('matterportModelId').value.trim();
-            const token = document.getElementById('matterportApiToken').value.trim();
+            const tokenId = document.getElementById('matterportTokenId').value.trim();
+            const tokenSecret = document.getElementById('matterportTokenSecret').value.trim();
 
-            if (!modelId || !token) {
+            if (!modelId || !tokenId || !tokenSecret) {
                 showErrorMessage('ID du modèle et Token API requis');
                 return;
             }
@@ -2709,9 +2715,10 @@
 
         async function fetchMatterportData() {
             const modelId = document.getElementById('matterportModelId').value.trim();
-            const token = document.getElementById('matterportApiToken').value.trim();
+            const tokenId = document.getElementById('matterportTokenId').value.trim();
+            const tokenSecret = document.getElementById('matterportTokenSecret').value.trim();
 
-            if (!modelId || !token) {
+            if (!modelId || !tokenId || !tokenSecret) {
                 showErrorMessage('ID du modèle et Token API requis');
                 return;
             }
@@ -2728,6 +2735,57 @@
 
                 if (!mpData) {
                     throw new Error('Aucune donnée Matterport retournée.');
+                }
+
+                if (currentClient) {
+                    matterportCache[currentClient.id] = mpData;
+                }
+
+                document.getElementById('matterportTabs').style.display = 'block';
+                renderMatterportData(mpData);
+                document.getElementById('matterportIframe').src =
+                    `https://my.matterport.com/show/?m=${modelId}`;
+
+                if (currentClient) {
+                    await saveMatterportToClient(modelId, mpData);
+                }
+
+                showMpSyncStatus(
+                    `Synchronisation reussie - ${mpData.locations.length} panoramiques, ` +
+                    `${mpData.rooms.length} pieces, ${mpData.floorplans.length} plans recuperes`,
+                    'success'
+                );
+                setTimeout(hideMpSyncStatus, 6000);
+            } catch (err) {
+                console.error('Matterport sync error:', err);
+                showMpSyncStatus(`Erreur : ${err.message}`, 'error');
+            }
+        }
+
+        async function fetchMatterportData() {
+            const modelId = document.getElementById('matterportModelId').value.trim();
+            const tokenId = document.getElementById('matterportTokenId').value.trim();
+            const tokenSecret = document.getElementById('matterportTokenSecret').value.trim();
+
+            if (!modelId || !tokenId || !tokenSecret) {
+                showErrorMessage('ID du modele, Token ID et Token Secret requis');
+                return;
+            }
+
+            sessionStorage.setItem('mp_token_id', tokenId);
+            sessionStorage.setItem('mp_token_secret', tokenSecret);
+            showMpSyncStatus('Connexion a Matterport via le serveur...', 'loading');
+
+            try {
+                const syncData = await adminFetch('/.netlify/functions/admin-sync-matterport', {
+                    modelId: modelId,
+                    tokenId: tokenId,
+                    tokenSecret: tokenSecret
+                });
+                const mpData = syncData && syncData.matterport ? syncData.matterport : null;
+
+                if (!mpData) {
+                    throw new Error('Aucune donnee Matterport retournee.');
                 }
 
                 if (currentClient) {

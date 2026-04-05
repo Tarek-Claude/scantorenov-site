@@ -9,7 +9,24 @@ const headers = {
 
 const MATTERPORT_API_URL = 'https://api.matterport.com/api/models/graph';
 
-async function matterportGraphQL(query, variables, token) {
+function buildMatterportAuthHeader({ tokenId, tokenSecret, accessToken }) {
+  const normalizedTokenId = String(tokenId || '').trim();
+  const normalizedTokenSecret = String(tokenSecret || '').trim();
+  const normalizedAccessToken = String(accessToken || '').trim();
+
+  if (normalizedTokenId && normalizedTokenSecret) {
+    const basicValue = Buffer.from(`${normalizedTokenId}:${normalizedTokenSecret}`, 'utf8').toString('base64');
+    return `Basic ${basicValue}`;
+  }
+
+  if (normalizedAccessToken) {
+    return `Bearer ${normalizedAccessToken}`;
+  }
+
+  throw new Error('Identifiants Matterport requis');
+}
+
+async function matterportGraphQL(query, variables, authHeader) {
   let response;
 
   try {
@@ -17,7 +34,7 @@ async function matterportGraphQL(query, variables, token) {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        Authorization: `Bearer ${token}`,
+        Authorization: authHeader,
       },
       body: JSON.stringify({ query, variables }),
     });
@@ -38,7 +55,7 @@ async function matterportGraphQL(query, variables, token) {
   return result.data;
 }
 
-async function fetchMatterportModel(modelId, token) {
+async function fetchMatterportModel(modelId, authHeader) {
   const sweepData = await matterportGraphQL(`
     fragment panoFragment on PanoramicImageLocation {
       id
@@ -63,7 +80,7 @@ async function fetchMatterportModel(modelId, token) {
         }
       }
     }
-  `, { modelId }, token);
+  `, { modelId }, authHeader);
 
   const dimData = await matterportGraphQL(`
     fragment dimensions on Dimension {
@@ -93,7 +110,7 @@ async function fetchMatterportModel(modelId, token) {
         }
       }
     }
-  `, { modelId }, token);
+  `, { modelId }, authHeader);
 
   let floorData = null;
   try {
@@ -114,7 +131,7 @@ async function fetchMatterportModel(modelId, token) {
           }
         }
       }
-    `, { modelId }, token);
+    `, { modelId }, authHeader);
   } catch (error) {
     console.warn('[admin-sync-matterport] floorplans unavailable:', error.message);
   }
@@ -165,7 +182,9 @@ exports.handler = async function handler(event) {
   }
 
   const modelId = String(body.modelId || '').trim();
-  const token = String(body.token || process.env.MATTERPORT_API_TOKEN || '').trim();
+  const tokenId = String(body.tokenId || process.env.MATTERPORT_TOKEN_ID || '').trim();
+  const tokenSecret = String(body.tokenSecret || process.env.MATTERPORT_TOKEN_SECRET || '').trim();
+  const accessToken = String(body.token || process.env.MATTERPORT_API_TOKEN || '').trim();
 
   if (!modelId) {
     return {
@@ -175,16 +194,17 @@ exports.handler = async function handler(event) {
     };
   }
 
-  if (!token) {
+  if (!(tokenId && tokenSecret) && !accessToken) {
     return {
       statusCode: 400,
       headers,
-      body: JSON.stringify({ error: 'Token API Matterport requis' }),
+      body: JSON.stringify({ error: 'Token ID + Token Secret Matterport requis (ou access token OAuth).' }),
     };
   }
 
   try {
-    const matterport = await fetchMatterportModel(modelId, token);
+    const authHeader = buildMatterportAuthHeader({ tokenId, tokenSecret, accessToken });
+    const matterport = await fetchMatterportModel(modelId, authHeader);
     return {
       statusCode: 200,
       headers,
