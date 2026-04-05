@@ -3237,6 +3237,7 @@ function checkLocalStorage() {
           throw new Error('Token invalide');
         })
         .then(function(userData) {
+          userData.token = stored.token;
           showDashboard(userData);
         })
         .catch(function() {
@@ -5553,7 +5554,7 @@ async function ensureIdentityAccessToken(forceRefresh) {
   }
 
   var identityUser = currentUser;
-  if (!identityUser && netlifyIdentity && typeof netlifyIdentity.currentUser === 'function') {
+  if ((!identityUser || typeof identityUser.jwt !== 'function') && netlifyIdentity && typeof netlifyIdentity.currentUser === 'function') {
     identityUser = netlifyIdentity.currentUser();
   }
 
