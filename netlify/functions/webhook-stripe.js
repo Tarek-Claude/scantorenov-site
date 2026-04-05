@@ -1,87 +1,192 @@
 const { createClient } = require('@supabase/supabase-js');
-const Stripe = require('stripe');
+const {
+  APPOINTMENT_RULES,
+  findConflict,
+  isSlotBookable,
+} = require('./_appointment-utils');
 const { upsertClientPipeline } = require('./_client-pipeline');
+const { runScanConfirmation } = require('./confirm-scan');
+const {
+  getStripeClient,
+  getStripeWebhookSecret,
+  isConfigError,
+} = require('./_stripe-config');
 
-const supabase = createClient(
-  process.env.SUPABASE_URL,
-  process.env.SUPABASE_SERVICE_KEY
-);
+function getSupabaseAdmin() {
+  return createClient(
+    process.env.SUPABASE_URL,
+    process.env.SUPABASE_SERVICE_KEY
+  );
+}
 
-const stripe = Stripe(process.env.STRIPE_SECRET_KEY);
-const SITE_URL = process.env.URL || 'http://localhost:8888';
+function normalizeString(value, fallback = '') {
+  if (typeof value !== 'string') return fallback;
+  const trimmed = value.trim();
+  return trimmed || fallback;
+}
 
-exports.handler = async (event) => {
-  if (event.httpMethod !== 'POST') {
-    return { statusCode: 405, body: 'Method not allowed' };
+function parseScheduledAt(value) {
+  const scheduledAt = new Date(value);
+  if (Number.isNaN(scheduledAt.getTime())) {
+    return null;
   }
 
-  const signature = event.headers['stripe-signature'] || event.headers['Stripe-Signature'];
-  let stripeEvent;
+  return scheduledAt;
+}
 
-  try {
-    stripeEvent = stripe.webhooks.constructEvent(
-      event.body,
-      signature,
-      process.env.STRIPE_WEBHOOK_SECRET
-    );
-  } catch (err) {
-    console.error('Stripe webhook signature invalide:', err.message);
-    return { statusCode: 400, body: `Webhook error: ${err.message}` };
+function parseDurationMinutes(value) {
+  const numeric = Number(value);
+  if (Number.isFinite(numeric) && numeric > 0) {
+    return numeric;
   }
 
-  if (stripeEvent.type === 'checkout.session.completed') {
-    const session = stripeEvent.data.object;
+  return APPOINTMENT_RULES.scan_3d.durationMinutes;
+}
 
-    // Idempotence : vérifier si ce session.id a déjà été traité
-    const { data: existingPayment } = await supabase
+async function syncPaymentRecord(supabase, session, clientId, productType) {
+  const timestamp = new Date().toISOString();
+  const amountCents = Number.isInteger(session.amount_total) ? session.amount_total : 0;
+  const currency = typeof session.currency === 'string' && session.currency
+    ? session.currency.toLowerCase()
+    : 'eur';
+
+  const { data: existingRows, error: existingError } = await supabase
+    .from('payments')
+    .select('id, status')
+    .eq('stripe_session_id', session.id)
+    .limit(1);
+
+  if (existingError) {
+    throw new Error(`Supabase lecture payment: ${existingError.message}`);
+  }
+
+  const existingPayment = Array.isArray(existingRows) && existingRows.length > 0
+    ? existingRows[0]
+    : null;
+
+  const payload = {
+    client_id: clientId,
+    stripe_session_id: session.id,
+    stripe_payment_intent: session.payment_intent,
+    type: productType || 'scan_3d',
+    amount_cents: amountCents,
+    currency,
+    status: 'completed',
+    description: `Stripe Checkout ${session.id}`,
+    paid_at: timestamp
+  };
+
+  if (existingPayment) {
+    const { error: updateError } = await supabase
       .from('payments')
-      .select('id, status')
-      .eq('stripe_session_id', session.id)
-      .eq('status', 'completed')
-      .maybeSingle();
+      .update(payload)
+      .eq('id', existingPayment.id);
 
-    if (existingPayment) {
-      console.log(`webhook-stripe: session ${session.id} déjà traitée, ignorée (idempotence)`);
-      return { statusCode: 200, body: JSON.stringify({ received: true, duplicate: true }) };
+    if (updateError) {
+      throw new Error(`Supabase update payment: ${updateError.message}`);
+    }
+  } else {
+    const { error: insertError } = await supabase
+      .from('payments')
+      .insert([payload]);
+
+    if (insertError) {
+      throw new Error(`Supabase insert payment: ${insertError.message}`);
+    }
+  }
+
+  return {
+    existed: !!existingPayment,
+    alreadyCompleted: !!(existingPayment && existingPayment.status === 'completed')
+  };
+}
+
+async function findExistingScanAppointment(supabase, clientId, scheduledAtIso) {
+  const { data, error } = await supabase
+    .from('appointments')
+    .select('id, client_id, type, status, scheduled_at, duration_minutes, location')
+    .eq('client_id', clientId)
+    .eq('type', 'scan_3d')
+    .eq('scheduled_at', scheduledAtIso)
+    .order('created_at', { ascending: false });
+
+  if (error) {
+    throw new Error(`Supabase lecture appointment: ${error.message}`);
+  }
+
+  return (data || []).find((appointment) => appointment && appointment.status !== 'cancelled') || null;
+}
+
+async function ensureConfirmedScanAppointment(supabase, session, clientId) {
+  const metadata = session.metadata || {};
+  const scheduledAt = normalizeString(metadata.scheduled_at);
+  const requestedStart = parseScheduledAt(scheduledAt);
+  const durationMinutes = parseDurationMinutes(metadata.duration_minutes);
+  const location = normalizeString(metadata.location);
+  const eventTitle = normalizeString(metadata.event_title, 'Scan 3D Matterport');
+
+  if (!requestedStart || !isSlotBookable('scan_3d', requestedStart)) {
+    throw new Error('webhook-stripe: creneau scan invalide dans les metadata Stripe');
+  }
+
+  const scheduledAtIso = requestedStart.toISOString();
+  const existingAppointment = await findExistingScanAppointment(supabase, clientId, scheduledAtIso);
+
+  if (existingAppointment) {
+    const { error: updateError } = await supabase
+      .from('appointments')
+      .update({
+        status: 'confirmed',
+        duration_minutes: durationMinutes,
+        location: location || existingAppointment.location || '',
+        notes: `Paiement Stripe confirme via session ${session.id}. ${eventTitle}`,
+        updated_at: new Date().toISOString()
+      })
+      .eq('id', existingAppointment.id);
+
+    if (updateError) {
+      throw new Error(`Supabase confirmation appointment: ${updateError.message}`);
     }
 
-    await handleCheckoutCompleted(session);
+    return existingAppointment.id;
   }
 
-  return { statusCode: 200, body: JSON.stringify({ received: true }) };
-};
-
-async function handleCheckoutCompleted(session) {
-  const metadata = session.metadata || {};
-  const clientId = metadata.client_id;
-  const appointmentId = metadata.appointment_id;
-
-  if (!clientId || !appointmentId) {
-    console.error('webhook-stripe: metadata manquante (client_id, appointment_id)');
-    return;
+  const conflict = await findConflict(supabase, requestedStart, durationMinutes);
+  if (conflict) {
+    throw new Error(`Creneau scan deja reserve (${conflict.id})`);
   }
 
-  console.log(`Paiement confirmé - client: ${clientId}, RDV: ${appointmentId}`);
-
-  await supabase
-    .from('payments')
-    .update({
-      status: 'completed',
-      stripe_payment_intent: session.payment_intent,
-      paid_at: new Date().toISOString()
-    })
-    .eq('stripe_session_id', session.id);
-
-  await supabase
+  const { data: insertedAppointment, error: insertError } = await supabase
     .from('appointments')
-    .update({ status: 'confirmed', updated_at: new Date().toISOString() })
-    .eq('id', appointmentId);
+    .insert([{
+      client_id: clientId,
+      type: 'scan_3d',
+      status: 'confirmed',
+      scheduled_at: scheduledAtIso,
+      duration_minutes: durationMinutes,
+      location,
+      notes: `Paiement Stripe confirme via session ${session.id}. ${eventTitle}`,
+    }])
+    .select('id')
+    .single();
 
-  const { data: client } = await supabase
+  if (insertError || !insertedAppointment) {
+    throw new Error(`Supabase insert appointment: ${insertError ? insertError.message : 'insert failed'}`);
+  }
+
+  return insertedAppointment.id;
+}
+
+async function updatePipelineStatus(supabase, clientId) {
+  const { data: client, error } = await supabase
     .from('clients')
     .select('email')
     .eq('id', clientId)
     .maybeSingle();
+
+  if (error) {
+    throw new Error(`Supabase lecture client: ${error.message}`);
+  }
 
   if (client && client.email) {
     try {
@@ -94,21 +199,85 @@ async function handleCheckoutCompleted(session) {
       console.warn('webhook-stripe pipeline update failed:', pipelineError.message);
     }
   }
+}
 
-  try {
-    const response = await fetch(`${SITE_URL}/.netlify/functions/confirm-scan`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'x-admin-secret': process.env.ADMIN_SECRET
-      },
-      body: JSON.stringify({ clientId, appointmentId })
-    });
+async function handleCheckoutCompleted(session) {
+  const metadata = session.metadata || {};
+  const clientId = metadata.client_id;
+  const productType = metadata.product_type || 'scan_3d';
 
-    if (!response.ok) {
-      console.error('confirm-scan call failed:', await response.text());
+  if (!clientId) {
+    console.error('webhook-stripe: metadata manquante (client_id)');
+    return;
+  }
+
+  const supabase = getSupabaseAdmin();
+  const paymentSync = await syncPaymentRecord(supabase, session, clientId, productType);
+  if (productType === 'virtual_tour') {
+    if (paymentSync.alreadyCompleted) {
+      console.log(`webhook-stripe: acces visite ${session.id} deja complete, reprise idempotente`);
+    } else {
+      console.log(`Paiement visite confirme - client: ${clientId}`);
     }
-  } catch (err) {
-    console.error('Erreur déclenchement confirm-scan:', err.message);
+    return;
+  }
+
+  const appointmentId = await ensureConfirmedScanAppointment(supabase, session, clientId);
+
+  if (paymentSync.alreadyCompleted) {
+    console.log(`webhook-stripe: session ${session.id} deja completee, reprise des effets secondaires`);
+  } else {
+    console.log(`Paiement confirme - client: ${clientId}, RDV: ${appointmentId}`);
+  }
+
+  await updatePipelineStatus(supabase, clientId);
+
+  const confirmationResult = await runScanConfirmation({
+    clientId,
+    appointmentId,
+    logger: console
+  });
+
+  if (!confirmationResult.success) {
+    console.warn('webhook-stripe confirmation incomplete:', confirmationResult);
+    const error = new Error('Confirmation scan incomplete apres paiement Stripe');
+    error.statusCode = confirmationResult.statusCode || 500;
+    throw error;
   }
 }
+
+exports.handler = async (event) => {
+  if (event.httpMethod !== 'POST') {
+    return { statusCode: 405, body: 'Method not allowed' };
+  }
+
+  const signature = event.headers['stripe-signature'] || event.headers['Stripe-Signature'];
+  if (!signature) {
+    return { statusCode: 400, body: JSON.stringify({ error: 'Missing stripe-signature header' }) };
+  }
+
+  let stripeEvent;
+
+  try {
+    const stripe = getStripeClient();
+    stripeEvent = stripe.webhooks.constructEvent(
+      event.body,
+      signature,
+      getStripeWebhookSecret()
+    );
+  } catch (err) {
+    if (isConfigError(err)) {
+      console.error('Stripe webhook config invalide:', err.message);
+      return { statusCode: err.statusCode || 500, body: JSON.stringify({ error: err.message }) };
+    }
+
+    console.error('Stripe webhook signature invalide:', err.message);
+    return { statusCode: 400, body: `Webhook error: ${err.message}` };
+  }
+
+  if (stripeEvent.type === 'checkout.session.completed') {
+    await handleCheckoutCompleted(stripeEvent.data.object);
+  }
+
+  return { statusCode: 200, body: JSON.stringify({ received: true }) };
+};

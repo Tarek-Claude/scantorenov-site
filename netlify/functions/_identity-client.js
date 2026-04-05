@@ -1,11 +1,14 @@
 const { createClient } = require('@supabase/supabase-js');
 const { upsertClientPipeline } = require('./_client-pipeline');
 const { enrichClientProgress } = require('./_admin-client-progress');
+const { buildPaymentAccessSummary, fetchClientPayments } = require('./_payment-access');
 
-const supabase = createClient(
-  process.env.SUPABASE_URL,
-  process.env.SUPABASE_SERVICE_KEY
-);
+function getSupabaseAdmin() {
+  return createClient(
+    process.env.SUPABASE_URL,
+    process.env.SUPABASE_SERVICE_KEY
+  );
+}
 
 function normalizeEmail(email) {
   return typeof email === 'string' ? email.trim().toLowerCase() : '';
@@ -29,7 +32,7 @@ function isMissingTableError(error) {
 async function fetchClientAppointments(clientId) {
   if (!clientId) return [];
 
-  const { data, error } = await supabase
+  const { data, error } = await getSupabaseAdmin()
     .from('appointments')
     .select('id,client_id,type,status,scheduled_at,duration_minutes,location,notes,created_at')
     .eq('client_id', clientId)
@@ -44,13 +47,24 @@ async function fetchClientAppointments(clientId) {
 
 async function attachClientProgress(client) {
   if (!client || typeof client !== 'object') {
-    return { client, appointments: [] };
+    return { client, appointments: [], payments: [] };
   }
 
-  const appointments = await fetchClientAppointments(client.id);
+  const supabase = getSupabaseAdmin();
+  const [appointments, payments] = await Promise.all([
+    fetchClientAppointments(client.id),
+    fetchClientPayments(supabase, client.id),
+  ]);
+  const paymentAccess = buildPaymentAccessSummary(payments, client);
+
   return {
-    client: enrichClientProgress(client, appointments),
+    client: {
+      ...enrichClientProgress(client, appointments),
+      payment_access: paymentAccess,
+      virtual_tour_unlocked: paymentAccess.virtualTourUnlocked,
+    },
     appointments,
+    payments,
   };
 }
 
@@ -59,7 +73,7 @@ async function findClientByRequestedId(requestedClientId) {
     return null;
   }
 
-  const { data, error } = await supabase
+  const { data, error } = await getSupabaseAdmin()
     .from('clients')
     .select('*')
     .eq('id', requestedClientId)
@@ -73,7 +87,7 @@ async function findClientByRequestedId(requestedClientId) {
 }
 
 async function findExactClientByEmail(normalizedEmail) {
-  const { data, error } = await supabase
+  const { data, error } = await getSupabaseAdmin()
     .from('clients')
     .select('*')
     .eq('email', normalizedEmail)
@@ -87,7 +101,7 @@ async function findExactClientByEmail(normalizedEmail) {
 }
 
 async function findClientsByEmailFallback(normalizedEmail) {
-  const { data, error } = await supabase
+  const { data, error } = await getSupabaseAdmin()
     .from('clients')
     .select('*')
     .ilike('email', normalizedEmail)
@@ -137,6 +151,7 @@ async function resolveIdentityClient(options = {}) {
     return {
       client: progress.client,
       appointments: progress.appointments,
+      payments: progress.payments,
       identityUser,
       normalizedEmail,
       matchedBy: 'requested_id',
@@ -180,6 +195,7 @@ async function resolveIdentityClient(options = {}) {
   return {
     client: progress.client,
     appointments: progress.appointments,
+    payments: progress.payments,
     identityUser,
     normalizedEmail,
     matchedBy: 'identity_email',

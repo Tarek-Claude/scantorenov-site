@@ -98,11 +98,11 @@ function getExpectedTasksForClient(client) {
 
     case 'scan_scheduled':
       return [
-        buildExpectedTask('scan_payment_followup', {
-          status: 'waiting_client',
-          description: `Suivre le paiement du scan et la bonne tenue du rendez-vous pour ${displayName}.`,
-          due_date: addDays(client && client.updated_at, 2),
-          proof_required: 'Paiement confirme',
+        buildExpectedTask('scan_booking_followup', {
+          status: 'awaiting_validation',
+          description: `Valider ou refuser le creneau scan demande par ${displayName}.`,
+          due_date: addDays(client && client.updated_at, 1),
+          proof_required: 'Creneau valide ou refuse',
         }),
       ];
 

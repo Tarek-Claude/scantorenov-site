@@ -1,4 +1,5 @@
 const { getStatusRank, normalizeClientStatus } = require('./_cockpit-config');
+const { isPromoPendingValidationAppointment } = require('./_promo-config');
 
 const STATUS_MIN_PORTAL_PHASE = Object.freeze({
   contact_submitted: 3,
@@ -7,7 +8,7 @@ const STATUS_MIN_PORTAL_PHASE = Object.freeze({
   call_requested: 3,
   call_done: 4,
   scan_scheduled: 4,
-  scan_payment_completed: 4,
+  scan_payment_completed: 5,
   scan_completed: 5,
   analysis_ready: 5,
   avant_projet_ready: 6,
@@ -115,6 +116,15 @@ function isPhoneAppointmentDone(appointment) {
   return appointment.status === 'confirmed' && isPastAppointment(appointment);
 }
 
+function isPaidScanAppointment(appointment) {
+  if (!appointment || appointment.type !== 'scan_3d') return false;
+  return ['confirmed', 'completed'].includes(appointment.status);
+}
+
+function isPendingScanValidationAppointment(appointment) {
+  return isPromoPendingValidationAppointment(appointment);
+}
+
 function deriveStatusFromAppointments(appointments, currentStatus) {
   let derivedStatus = currentStatus || null;
 
@@ -126,8 +136,11 @@ function deriveStatusFromAppointments(appointments, currentStatus) {
   const hasPhoneAppointment = appointments.some(
     (appointment) => isActiveAppointment(appointment) && appointment.type === 'phone_call'
   );
-  const hasScanAppointment = appointments.some(
-    (appointment) => isActiveAppointment(appointment) && appointment.type === 'scan_3d'
+  const hasPendingScanValidation = appointments.some(
+    (appointment) => isActiveAppointment(appointment) && isPendingScanValidationAppointment(appointment)
+  );
+  const hasPaidScanAppointment = appointments.some(
+    (appointment) => isActiveAppointment(appointment) && isPaidScanAppointment(appointment)
   );
 
   if (hasCompletedPhoneAppointment) {
@@ -136,7 +149,9 @@ function deriveStatusFromAppointments(appointments, currentStatus) {
     derivedStatus = chooseFarthestStatus(derivedStatus, 'call_requested');
   }
 
-  if (hasScanAppointment) {
+  if (hasPaidScanAppointment) {
+    derivedStatus = chooseFarthestStatus(derivedStatus, 'scan_payment_completed');
+  } else if (hasPendingScanValidation) {
     derivedStatus = chooseFarthestStatus(derivedStatus, 'scan_scheduled');
   }
 

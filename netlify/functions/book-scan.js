@@ -1,12 +1,13 @@
 const { createClient } = require('@supabase/supabase-js');
-const { upsertClientPipeline } = require('./_client-pipeline');
 const { APPOINTMENT_RULES, findConflict, isSlotBookable } = require('./_appointment-utils');
 const { resolveIdentityClient } = require('./_identity-client');
 
-const supabase = createClient(
-  process.env.SUPABASE_URL,
-  process.env.SUPABASE_SERVICE_KEY
-);
+function getSupabaseAdmin() {
+  return createClient(
+    process.env.SUPABASE_URL,
+    process.env.SUPABASE_SERVICE_KEY
+  );
+}
 
 const headers = {
   'Access-Control-Allow-Origin': '*',
@@ -88,7 +89,7 @@ exports.handler = async (event, context) => {
     const client = resolution.client;
     const clientId = client.id;
 
-    if (client.status !== 'call_done') {
+    if (!['call_done', 'scan_scheduled'].includes(client.status)) {
       return {
         statusCode: 400,
         headers,
@@ -96,7 +97,7 @@ exports.handler = async (event, context) => {
       };
     }
 
-    const conflict = await findConflict(supabase, requestedStart, durationMinutes);
+    const conflict = await findConflict(getSupabaseAdmin(), requestedStart, durationMinutes);
     if (conflict) {
       return {
         statusCode: 409,
@@ -105,47 +106,24 @@ exports.handler = async (event, context) => {
       };
     }
 
-    const { data: appt, error: apptError } = await supabase
-      .from('appointments')
-      .insert([
-        {
-          client_id: clientId,
-          type: 'scan_3d',
-          status: 'requested',
-          scheduled_at: requestedStart.toISOString(),
-          duration_minutes: durationMinutes,
-          location: location || client.adresse || '',
-          notes: `Reserve via espace client. Creneau: ${eventTitle || 'Scan 3D Matterport'}`,
-        },
-      ])
-      .select()
-      .single();
-
-    if (apptError || !appt) {
-      console.error('Erreur INSERT appointment:', apptError);
-      return {
-        statusCode: 500,
-        headers,
-        body: JSON.stringify({ error: apptError ? apptError.message : 'Insert failed' }),
-      };
-    }
-
-    try {
-      await upsertClientPipeline({
-        email: client.email,
-        status: 'scan_scheduled',
-        strict: true,
-      });
-    } catch (updateError) {
-      console.warn('book-scan client status update failed:', updateError.message);
-    }
-
-    console.log(`RDV scan cree : ${appt.id} pour client ${clientId}`);
+    console.log(`Creneau scan valide pour paiement: ${requestedStart.toISOString()} / client ${clientId}`);
 
     return {
       statusCode: 200,
       headers,
-      body: JSON.stringify({ success: true, appointmentId: appt.id, appointment: appt }),
+      body: JSON.stringify({
+        success: true,
+        appointmentId: null,
+        appointment: null,
+        pendingSelection: {
+          clientId,
+          type: 'scan_3d',
+          scheduledAt: requestedStart.toISOString(),
+          durationMinutes,
+          location: location || client.adresse || '',
+          eventTitle: eventTitle || 'Scan 3D Matterport',
+        },
+      }),
     };
   } catch (err) {
     const statusCode = err && err.statusCode ? err.statusCode : 500;

@@ -8,6 +8,18 @@ const headers = {
   'Content-Type': 'application/json',
 };
 
+function shouldExposeToClient(appointment) {
+  if (!appointment || typeof appointment !== 'object') {
+    return false;
+  }
+
+  if (appointment.type !== 'scan_3d') {
+    return true;
+  }
+
+  return ['confirmed', 'completed'].includes(appointment.status);
+}
+
 exports.handler = async (event, context) => {
   if (event.httpMethod === 'OPTIONS') {
     return { statusCode: 200, headers, body: '' };
@@ -48,7 +60,7 @@ exports.handler = async (event, context) => {
       body: JSON.stringify({
         success: true,
         clientId: resolution.client.id,
-        appointments: data || [],
+        appointments: (data || []).filter(shouldExposeToClient),
       }),
     };
   } catch (error) {

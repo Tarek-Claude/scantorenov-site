@@ -2439,7 +2439,7 @@
     </div>
 
     <!-- ═══════════  PAIEMENT SCAN 3D (D-3)  ═══════════ -->
-    <div class="phase-section" id="scanPaymentSection" data-pipeline-status="scan_scheduled"
+    <div class="phase-section" id="scanPaymentSection" data-pipeline-status="manual_only"
          style="display:none;margin-top:24px;padding:24px;border:1px solid #E8E8E8;border-radius:12px;background:#FBFAF7;">
       <h3 style="color:#2D5F3E;margin:0 0 16px 0;">Valider votre réservation</h3>
       <p style="font-size:0.9rem;color:#5A5A5A;margin:0 0 20px 0;">
@@ -2464,11 +2464,41 @@
         💳  VALIDER ET PAYER 180 €
       </button>
 
+      <div style="margin-top:18px;padding-top:18px;border-top:1px solid #E8E8E8;">
+        <label for="scanPromoCodeInput" style="display:block;font-size:0.82rem;font-weight:600;color:#2D5F3E;margin-bottom:8px;">
+          Vous disposez d'un code promotionnel ?
+        </label>
+        <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;">
+          <input id="scanPromoCodeInput" type="text" placeholder="Saisir votre code promo"
+                 style="flex:1;min-width:220px;padding:12px 14px;border:1px solid #D9D9D9;border-radius:6px;font-size:0.92rem;">
+          <button id="applyPromoBtn" onclick="applyScanPromoCode()"
+                  style="background:#F5F9F6;color:#2D5F3E;border:1px solid #2D5F3E;cursor:pointer;
+                         padding:12px 18px;border-radius:6px;font-size:0.9rem;font-weight:600;">
+            APPLIQUER LE CODE
+          </button>
+        </div>
+        <p style="font-size:0.82rem;color:#7A7A7A;margin:10px 0 0 0;">
+          Le code promo dispense du paiement en ligne, mais le crÃ©neau reste soumis Ã  validation par notre Ã©quipe.
+        </p>
+      </div>
+
       <p id="paymentError" style="display:none;color:#C62828;font-size:0.85rem;
          text-align:center;margin-top:12px;"></p>
     </div>
 
     <!-- ═══════════  PHASE 4 : CONFIRMATION DATE SCAN  ═══════════ -->
+    <div class="phase-section" id="scanValidationPendingSection" data-pipeline-status="scan_scheduled"
+         data-min-phase="4" data-max-phase="4"
+         style="display:none;margin-top:24px;padding:24px;border:1px solid #E8E8E8;border-radius:12px;background:#FBFAF7;">
+      <h3 style="color:#2D5F3E;margin:0 0 12px 0;">Demande de scan transmise</h3>
+      <p style="font-size:0.92rem;color:#5A5A5A;margin:0 0 10px 0;">
+        Votre crÃ©neau a bien Ã©tÃ© transmis Ã  notre Ã©quipe. Il ne sera confirmÃ© qu'aprÃ¨s validation interne du rendez-vous.
+      </p>
+      <p style="font-size:0.85rem;color:#7A7A7A;margin:0;">
+        Tant que cette validation n'est pas faite, aucun rendez-vous scan n'apparaÃ®tra dans votre planning.
+      </p>
+    </div>
+
     <div class="phase-section" id="phaseScanDate" data-min-phase="4" data-max-phase="4">
 
       <!-- Reformulation du projet apres entretien -->
@@ -2668,18 +2698,34 @@
         <div class="activation-notice-title">Activez votre espace pour d&#233;bloquer l&#8217;ensemble des fonctionnalit&#233;s</div>
       </div>
       <div class="activation-notice-text">
-        <p>L&#8217;acc&#232;s &#224; votre <strong>visite virtuelle 3D</strong>, &#224; l&#8217;assistant <strong>Marcel</strong>, aux <strong>simulations visuelles</strong> et &#224; la <strong>transmission de votre avant-projet</strong> sera pleinement op&#233;rationnel apr&#232;s r&#232;glement de la prestation de scan 3D.</p>
-        <p>Le paiement s&#8217;effectue en toute s&#233;curit&#233;, directement depuis cet espace, via notre module de paiement en ligne. Une fois le r&#232;glement confirm&#233;, l&#8217;int&#233;gralit&#233; de vos outils sera activ&#233;e instantan&#233;ment.</p>
+        <p>L&#8217;acc&#232;s &#224; votre <strong>visite virtuelle 3D</strong>, &#224; l&#8217;assistant <strong>Marcel</strong>, aux <strong>simulations visuelles</strong> et &#224; la <strong>transmission de votre avant-projet</strong> sera pleinement op&#233;rationnel apr&#232;s r&#232;glement de l&#8217;acc&#232;s visite virtuelle.</p>
+        <p>Le paiement de <strong>120 &#8364; TTC</strong> s&#8217;effectue en toute s&#233;curit&#233;, directement depuis cet espace. Une fois le r&#232;glement confirm&#233;, l&#8217;int&#233;gralit&#233; de vos outils sera activ&#233;e.</p>
       </div>
-      <button class="activation-notice-cta" disabled>
-        &#x1F512; R&#233;gler ma prestation
+      <button class="activation-notice-cta" id="visitPayNowBtn" onclick="initiateVisitPayment()">
+        &#x1F512; Payer 120 &#8364; TTC
       </button>
-      <span class="activation-notice-badge">Bient&#244;t disponible</span>
+      <div style="margin-top:16px;padding-top:16px;border-top:1px solid rgba(42,42,42,0.08);">
+        <label for="visitPromoCodeInput" style="display:block;font-size:0.82rem;font-weight:600;color:#2D5F3E;margin-bottom:8px;">
+          Vous disposez d'un code promotionnel ?
+        </label>
+        <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;">
+          <input id="visitPromoCodeInput" type="text" placeholder="Saisir votre code promo"
+                 style="flex:1;min-width:220px;padding:12px 14px;border:1px solid #D9D9D9;border-radius:6px;font-size:0.92rem;">
+          <button id="applyVisitPromoBtn" type="button"
+                  onclick="applyVisitPromoCode()"
+                  style="background:#F5F9F6;color:#2D5F3E;border:1px solid #2D5F3E;cursor:pointer;
+                         padding:12px 18px;border-radius:6px;font-size:0.9rem;font-weight:600;">
+            APPLIQUER LE CODE
+          </button>
+        </div>
+      </div>
+      <p id="visitPaymentError" style="display:none;color:#C62828;font-size:0.85rem;text-align:center;margin-top:12px;"></p>
+      <span class="activation-notice-badge">Activation requise</span>
     </div>
   </section>
 
   <!-- ═══════════  2. VISITE VIRTUELLE MATTERPORT (Phase 5+)  ═══════════ -->
-  <div class="section-block phase-section" data-min-phase="5">
+  <div class="section-block phase-section" data-min-phase="5" data-virtual-tour-locked="true">
     <div class="section-label">Jumeau num&#233;rique</div>
     <h2 class="section-title">Votre visite virtuelle 3D</h2>
     <p class="section-desc">Explorez le jumeau num&#233;rique de votre bien. Naviguez librement dans chaque pi&#232;ce, prenez des mesures et projetez vos id&#233;es.</p>
@@ -2700,7 +2746,7 @@
   </div>
 
   <!-- ═══════════  2a. ESPACE DE TRAVAIL VISUEL (Phase 5)  ═══════════ -->
-  <div class="section-block phase-section" data-min-phase="5" data-max-phase="5">
+  <div class="section-block phase-section" data-min-phase="5" data-max-phase="5" data-virtual-tour-locked="true">
     <div class="workspace-visual" id="workspaceVisual">
 
       <!-- ── 1. SÉLECTION DE L'EXPERT (lecture seule) ── -->
@@ -2775,7 +2821,7 @@
   </div>
 
   <!-- ═══════════  2b. DONNÉES DU BIEN (Phase 5+)  ═══════════ -->
-  <div class="section-block phase-section" data-min-phase="5">
+  <div class="section-block phase-section" data-min-phase="5" data-virtual-tour-locked="true">
     <div class="section-label">Caract&#233;ristiques</div>
     <h2 class="section-title">Donn&#233;es de votre bien</h2>
     <p class="section-desc">Informations extraites automatiquement depuis le scan 3D de votre bien.</p>
@@ -2803,7 +2849,7 @@
   </div>
 
   <!-- ═══════════  3. MARCEL — ASSISTANT IA (Phase 5, desactive Phase 6+)  ═══════════ -->
-  <div class="section-block phase-section" data-min-phase="5" data-max-phase="5">
+  <div class="section-block phase-section" data-min-phase="5" data-max-phase="5" data-virtual-tour-locked="true">
     <div class="section-label">Assistant IA</div>
     <h2 class="section-title">Discutez avec Marcel</h2>
     <p class="section-desc">Confiez vos id&#233;es, vos envies et vos doutes. Marcel vous aide &#224; fa&#231;onner un avant-projet fid&#232;le &#224; votre vision.</p>
@@ -2832,7 +2878,7 @@
   </div>
 
   <!-- ═══════════  4. RESULTATS SIMULATIONS (Phase 5)  ═══════════ -->
-  <div class="section-block phase-section" id="simulationsSection" data-min-phase="5" data-max-phase="5" style="display:none">
+  <div class="section-block phase-section" id="simulationsSection" data-min-phase="5" data-max-phase="5" data-virtual-tour-locked="true" style="display:none">
     <div class="section-label">Simulations</div>
     <h2 class="section-title">Vos r&#233;sultats de simulation</h2>
 
@@ -2877,7 +2923,7 @@
   </div>
 
   <!-- ═══════════  5. SYNTHESE AVANT-PROJET (Phase 5)  ═══════════ -->
-  <div class="section-block phase-section" data-min-phase="5" data-max-phase="5">
+  <div class="section-block phase-section" data-min-phase="5" data-max-phase="5" data-virtual-tour-locked="true">
     <div class="section-label">Avant-projet</div>
     <h2 class="section-title">Synth&#232;se et transmission</h2>
     <p class="section-desc">Lorsque votre avant-projet est pr&#234;t, transmettez-le &#224; notre &#233;quipe. Un chef de projet d&#233;di&#233; prendra le relais.</p>
@@ -2948,6 +2994,7 @@ var currentPhase = 3;
 var currentClientId = null;
 var currentPipelineStatus = 'contact_submitted';
 var clientProject = {};
+window.__virtualTourUnlocked = false;
 var bookingClientMessage = 'Connectez-vous pour rÃ©server un crÃ©neau.';
 
 window.__pipelineRank = {
@@ -3027,6 +3074,23 @@ function resolvePortalPhaseValue(value, status) {
   return window.__pipelinePortalPhase[normalizedStatus] || null;
 }
 
+function hasVirtualTourAccess() {
+  return !!window.__virtualTourUnlocked;
+}
+
+function applyVirtualTourAccessState(phase) {
+  var locked = phase >= 5 && !hasVirtualTourAccess();
+  var activationNotice = document.getElementById('activationNotice');
+  if (activationNotice) {
+    activationNotice.hidden = !locked;
+  }
+
+  var gatedSections = document.querySelectorAll('[data-virtual-tour-locked="true"]');
+  gatedSections.forEach(function(section) {
+    section.hidden = locked;
+  });
+}
+
 function setAuthLoginFeedback(message, isError) {
   var feedback = document.getElementById('authLoginFeedback');
   if (!feedback) return;
@@ -3062,6 +3126,11 @@ function applySupabaseClientRecord(sb, appMeta) {
   if (!sb) return;
 
   setSlotPickerClientContext(sb.id, '');
+  window.__virtualTourUnlocked = !!(
+    sb.virtual_tour_unlocked === true
+    || (sb.payment_access && sb.payment_access.virtualTourUnlocked === true)
+    || sb.marcel_enabled === true
+  );
   clientProject = {
     nom: sb.nom || clientProject.nom,
     adresse: sb.adresse || clientProject.adresse,
@@ -3083,6 +3152,7 @@ function applySupabaseClientRecord(sb, appMeta) {
   if (sb.moe) appMeta.moe = sb.moe;
   if (sb.moe_accepted) appMeta.moe_accepted = sb.moe_accepted;
   if (sb.chantier) appMeta.chantier = sb.chantier;
+  appMeta.virtual_tour_unlocked = window.__virtualTourUnlocked;
   renderPhase(currentPhase, clientProject, appMeta);
 }
 
@@ -3247,6 +3317,7 @@ function applyDashboardData(user, meta, appMeta) {
   // Charger la phase et les donnees projet
   currentPipelineStatus = normalizePipelineStatus(appMeta.status || currentPipelineStatus || 'contact_submitted');
   currentPhase = resolvePortalPhaseValue(appMeta.phase, currentPipelineStatus) || 3;
+  window.__virtualTourUnlocked = !!(appMeta.virtual_tour_unlocked === true || appMeta.marcel_enabled === true);
   clientProject = appMeta.project || {};
 
   // Rendre la phase
@@ -3255,6 +3326,7 @@ function applyDashboardData(user, meta, appMeta) {
 
 function showLogin() {
   currentUser = null;
+  window.__virtualTourUnlocked = false;
   setSlotPickerClientContext(null, 'Connectez-vous pour reserver un creneau.');
   setAuthLoginFeedback('', false);
   document.getElementById('authGuard').style.display = '';
@@ -3385,15 +3457,17 @@ function renderPhase(phase, project, appMeta) {
     }
   });
 
+  applyVirtualTourAccessState(phase);
+
   // 3. Rendre les sections specifiques a la phase
   if (phase >= 3) renderPhase3(project);
   if (phase === 4) renderPhase4(appMeta);
-  if (phase === 5) {
+  if (phase === 5 && hasVirtualTourAccess()) {
     initMatterportSection();
     initMarcelWelcome();
     initWorkspaceVisual();
   }
-  if (phase >= 6) initMatterportSection(); // Visite 3D reste visible sans Marcel
+  if (phase >= 6 && hasVirtualTourAccess()) initMatterportSection(); // Visite 3D reste visible sans Marcel
   if (phase === 6) renderPhase6(appMeta);
   if (phase === 7) renderPhase7(appMeta);
   if (phase === 8) {
@@ -3412,8 +3486,14 @@ function renderPhase(phase, project, appMeta) {
 
   if (currentPipelineStatus === 'call_done') {
     loadScanDurationHint();
+    if (window.__pendingScanSlot && window.__pendingScanSlot.startTime) {
+      applyScanSlotDisplay(window.__pendingScanSlot);
+      revealScanPaymentSection();
+    } else {
+      resetScanBookingDisplay();
+    }
   } else if (currentPipelineStatus === 'scan_scheduled') {
-    hydratePendingScanAppointment();
+    resetScanBookingDisplay();
   } else {
     resetScanBookingDisplay();
   }
@@ -3512,8 +3592,13 @@ function renderAppointmentsTable(appointments) {
   const table = document.getElementById('appointmentsTable');
   const tbody = document.getElementById('appointmentsTableBody');
   const noMsg = document.getElementById('noAppointmentsMsg');
+  const visibleAppointments = (appointments || []).filter(function(appt) {
+    if (!appt || typeof appt !== 'object') return false;
+    if (appt.type !== 'scan_3d') return true;
+    return ['confirmed', 'completed'].includes(appt.status);
+  });
 
-  if (!appointments || appointments.length === 0) {
+  if (!visibleAppointments.length) {
     // Afficher le message "Aucun rendez-vous"
     if (table) table.style.display = 'none';
     if (noMsg) noMsg.style.display = '';
@@ -3522,7 +3607,7 @@ function renderAppointmentsTable(appointments) {
 
   // Remplir le tableau
   tbody.innerHTML = '';
-  appointments.forEach(function(appt) {
+  visibleAppointments.forEach(function(appt) {
     const row = document.createElement('tr');
 
     // Parser la date ISO
@@ -3540,21 +3625,18 @@ function renderAppointmentsTable(appointments) {
     }[appt.status] || appt.status;
 
     // Type label
-    const typeLabel = appt.type === 'phone_call' ? 'Appel téléphonique' : appt.type;
+    const typeLabel = appt.type === 'phone_call'
+      ? 'Appel téléphonique'
+      : appt.type === 'scan_3d'
+        ? 'Scan 3D Matterport'
+        : appt.type;
 
     // Durée
     const duration = appt.duration_minutes ? appt.duration_minutes + ' min' : '—';
 
     // Boutons d'action
     let actions = '';
-    if (appt.status === 'requested') {
-      actions = `
-        <div class="appointment-actions">
-          <button class="appointment-btn confirm-btn" onclick="confirmAppointment('${appt.id}')">Confirmer</button>
-          <button class="appointment-btn cancel-btn" onclick="cancelAppointment('${appt.id}')">Annuler</button>
-        </div>
-      `;
-    } else if (appt.status === 'confirmed') {
+    if (appt.type === 'phone_call' && (appt.status === 'requested' || appt.status === 'confirmed')) {
       actions = `
         <div class="appointment-actions">
           <button class="appointment-btn cancel-btn" onclick="cancelAppointment('${appt.id}')">Annuler</button>
@@ -4193,6 +4275,8 @@ function saveUserCaptures(captures) {
 
 /* ── Initialisation de l'espace visuel ── */
 function initWorkspaceVisual() {
+  if (!hasVirtualTourAccess()) return;
+
   // 1. Charger les photos expert depuis Supabase
   loadExpertPhotos();
   // 2. Charger les captures utilisateur depuis localStorage
@@ -4786,6 +4870,8 @@ function checkEnableTransmission() {
 
 /* ── Marcel — message d'accueil personnalisé basé sur le projet client ── */
 function initMarcelWelcome() {
+  if (!hasVirtualTourAccess()) return;
+
   var user = currentUser;
   if (!user) return;
 
@@ -5212,6 +5298,17 @@ function useFallbackData() {
 }
 
 function initMatterportSection() {
+  var frameEl = document.getElementById('matterportFrame');
+  var pendingEl = document.getElementById('matterportPending');
+  var dataSection = document.getElementById('propertyDataContainer');
+
+  if (!hasVirtualTourAccess()) {
+    if (frameEl) frameEl.style.display = 'none';
+    if (pendingEl) pendingEl.style.display = 'none';
+    if (dataSection) dataSection.style.display = 'none';
+    return;
+  }
+
   var user = currentUser;
   var meta = (user && user.app_metadata) || (user && user.user_metadata) || {};
 
@@ -5219,10 +5316,7 @@ function initMatterportSection() {
   var iframeSrc = meta.matterport_iframe || null;
   var modelId = meta.matterport_id || null;
 
-  var frameEl = document.getElementById('matterportFrame');
-  var pendingEl = document.getElementById('matterportPending');
   var iframeEl = document.getElementById('matterportIframe');
-  var dataSection = document.getElementById('propertyDataContainer');
 
   if (iframeSrc || modelId) {
     // Visite disponible → afficher l'iframe avec la clé SDK
@@ -5913,6 +6007,7 @@ function createSlotPicker(containerId, options) {
     var selectedSlot = getSelectedSlot();
     var summaryHtml = '';
     if (selectedSlot) {
+      var confirmLabel = options.confirmLabel || 'Confirmer ce créneau';
       summaryHtml =
         '<div class="slot-picker-summary">Créneau sélectionné : ' + selectedDateLabel +
           (options.type === 'scan_3d'
@@ -5920,7 +6015,7 @@ function createSlotPicker(containerId, options) {
             : ' à ' + formatNativeSlotLabel(options.type, selectedSlot.time)) +
         '</div>' +
         '<button type="button" class="slot-picker-confirm" data-slot-confirm="true"' + (state.submitting ? ' disabled' : '') + '>' +
-          (state.submitting ? 'Réservation en cours...' : '✓ Confirmer ce rendez-vous') +
+          (state.submitting ? 'Réservation en cours...' : '✓ ' + confirmLabel) +
         '</button>';
     }
 
@@ -6140,23 +6235,16 @@ async function handlePhoneAppointmentBooked(appointment) {
 async function handleScanAppointmentBooked(appointment) {
   if (!appointment || !appointment.scheduledAt) return;
 
-  window.__pendingScanAppointmentId = appointment.appointmentId || null;
+  window.__pendingScanAppointmentId = null;
   window.__pendingScanSlot = {
     startTime: appointment.scheduledAt,
     eventTitle: appointment.eventTitle || formatNativeSlotLabel('scan_3d', appointment.time || '')
   };
-  currentPipelineStatus = 'scan_scheduled';
   applyScanSlotDisplay({
     startTime: appointment.scheduledAt,
     eventTitle: window.__pendingScanSlot.eventTitle
   });
   revealScanPaymentSection();
-  try {
-    await checkAppointmentStatus();
-    if (currentPhase >= 3) await loadAppointments();
-  } catch (error) {
-    console.warn('handleScanAppointmentBooked follow-up error:', error);
-  }
 
   var paySection = document.getElementById('scanPaymentSection');
   if (paySection) {
@@ -6199,7 +6287,7 @@ function initSlotPickers() {
       heading: 'Sélectionnez votre demi-journée',
       description: 'Deux passages sont proposés par jour pour planifier votre scan 3D.',
       slotsSubtitle: 'Deux créneaux par jour : matin (8h-12h) ou après-midi (14h-18h).',
-      confirmLabel: 'Confirmer ce créneau',
+      confirmLabel: 'Valider ce créneau',
       clientId: currentClientId,
       clientMessage: bookingClientMessage,
       onConfirm: bookScanAppointment,
@@ -6221,6 +6309,10 @@ function resetScanBookingDisplay() {
   var container = document.getElementById('scanBookingCalendarContainer');
   var slotSelected = document.getElementById('scanSlotSelected');
   var slotDetails = document.getElementById('scanSlotDetails');
+  var payBtn = document.getElementById('payNowBtn');
+  var promoBtn = document.getElementById('applyPromoBtn');
+  var promoInput = document.getElementById('scanPromoCodeInput');
+  var paymentError = document.getElementById('paymentError');
 
   if (info) info.style.display = 'none';
   if (text) text.textContent = 'Durée estimée à confirmer lors de la prise de RDV';
@@ -6231,6 +6323,22 @@ function resetScanBookingDisplay() {
   }
   if (slotSelected) slotSelected.style.display = 'none';
   if (slotDetails) slotDetails.innerHTML = '';
+  if (payBtn) {
+    payBtn.disabled = false;
+    payBtn.textContent = 'ðŸ’³  VALIDER ET PAYER 180 â‚¬';
+  }
+  if (promoBtn) {
+    promoBtn.disabled = false;
+    promoBtn.textContent = 'APPLIQUER LE CODE';
+  }
+  if (promoInput) promoInput.value = '';
+  if (paymentError) {
+    paymentError.textContent = '';
+    paymentError.style.display = 'none';
+  }
+  window.__pendingScanAppointmentId = null;
+  window.__pendingScanSlot = null;
+  hideScanPaymentSection();
   if (slotPickers.scan) slotPickers.scan.reset();
 }
 
@@ -6265,41 +6373,16 @@ async function loadScanDurationHint() {
 function revealScanPaymentSection() {
   var paymentSection = document.getElementById('scanPaymentSection');
   if (paymentSection) {
+    paymentSection.classList.add('phase-visible');
     paymentSection.style.display = 'block';
   }
 }
 
-async function hydratePendingScanAppointment() {
-  if (!supabaseClient || !currentClientId) return null;
-
-  try {
-    var result = await supabaseClient
-      .from('appointments')
-      .select('id, type, status, scheduled_at')
-      .eq('client_id', currentClientId)
-      .eq('type', 'scan_3d')
-      .in('status', ['requested', 'scheduled'])
-      .order('created_at', { ascending: false })
-      .limit(1)
-      .single();
-
-    if (result.error || !result.data) return null;
-
-    var slotLabel = formatNativeSlotLabel('scan_3d', formatParisTime(result.data.scheduled_at));
-    window.__pendingScanAppointmentId = result.data.id;
-    window.__pendingScanSlot = {
-      startTime: result.data.scheduled_at,
-      eventTitle: slotLabel
-    };
-    applyScanSlotDisplay({
-      startTime: result.data.scheduled_at,
-      eventTitle: slotLabel
-    });
-    revealScanPaymentSection();
-    return result.data;
-  } catch (error) {
-    console.warn('hydratePendingScanAppointment error:', error);
-    return null;
+function hideScanPaymentSection() {
+  var paymentSection = document.getElementById('scanPaymentSection');
+  if (paymentSection) {
+    paymentSection.classList.remove('phase-visible');
+    paymentSection.style.display = 'none';
   }
 }
 
@@ -6394,10 +6477,10 @@ async function bookScanAppointment(slot) {
     throw createBookingError(response.status, data);
   }
 
-  console.log('✅ RDV scan enregistré:', data.appointmentId);
+  console.log('✅ Créneau scan validé pour paiement:', scheduledAt);
   return {
-    appointmentId: data.appointmentId || (data.appointment && data.appointment.id) || null,
-    appointment: data.appointment || null,
+    appointmentId: null,
+    appointment: null,
     scheduledAt: scheduledAt,
     date: slot.date,
     time: slot.time,
@@ -6410,13 +6493,12 @@ async function initiateScanPayment() {
   var btn = document.getElementById('payNowBtn');
   var errEl = document.getElementById('paymentError');
 
-  if (!currentClientId || !window.__pendingScanAppointmentId) {
-    var hydrated = await hydratePendingScanAppointment();
-    if (!hydrated && errEl) {
-      errEl.textContent = 'Erreur : RDV ou identifiant client manquant.';
+  if (!currentClientId || !window.__pendingScanSlot || !window.__pendingScanSlot.startTime) {
+    if (errEl) {
+      errEl.textContent = 'Erreur : veuillez d abord sélectionner un créneau.';
       errEl.style.display = 'block';
-      return;
     }
+    return;
   }
 
   if (!btn) return;
@@ -6435,7 +6517,10 @@ async function initiateScanPayment() {
       },
       body: JSON.stringify({
         clientId: currentClientId,
-        appointmentId: window.__pendingScanAppointmentId,
+        scheduledAt: window.__pendingScanSlot.startTime,
+        durationMinutes: bookingRules.scan_3d.durationMinutes,
+        location: clientProject && clientProject.adresse ? clientProject.adresse : '',
+        eventTitle: window.__pendingScanSlot.eventTitle || 'Scan 3D Matterport',
         productType: 'scan_3d'
       })
     });
@@ -6457,70 +6542,268 @@ async function initiateScanPayment() {
   }
 }
 
-function showPaymentSuccessBanner() {
+async function refreshResolvedClientRecord() {
+  if (!currentUser) return;
+
+  var meta = currentUser.user_metadata || {};
+  var appMeta = currentUser.app_metadata || {};
+  var clientRecord = await findOrCreateClientRecord(currentUser, meta, appMeta);
+  if (!clientRecord) return;
+
+  applySupabaseClientRecord(clientRecord, appMeta);
+  if (currentPhase >= 3) {
+    await loadAppointments();
+  }
+}
+
+async function applyScanPromoCode() {
+  var payBtn = document.getElementById('payNowBtn');
+  var promoBtn = document.getElementById('applyPromoBtn');
+  var promoInput = document.getElementById('scanPromoCodeInput');
+  var errEl = document.getElementById('paymentError');
+  var promoCode = promoInput ? promoInput.value.trim() : '';
+
+  if (!currentClientId || !window.__pendingScanSlot || !window.__pendingScanSlot.startTime) {
+    if (errEl) {
+      errEl.textContent = 'Erreur : veuillez d abord sÃ©lectionner un crÃ©neau.';
+      errEl.style.display = 'block';
+    }
+    return;
+  }
+
+  if (!promoCode) {
+    if (errEl) {
+      errEl.textContent = 'Merci de saisir un code promotionnel.';
+      errEl.style.display = 'block';
+    }
+    return;
+  }
+
+  if (payBtn) payBtn.disabled = true;
+  if (promoBtn) {
+    promoBtn.disabled = true;
+    promoBtn.textContent = 'Validation en cours...';
+  }
+  if (errEl) errEl.style.display = 'none';
+
+  try {
+    var token = await ensureIdentityAccessToken();
+    var response = await fetch('/.netlify/functions/apply-promo-bypass', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': token ? 'Bearer ' + token : ''
+      },
+      body: JSON.stringify({
+        clientId: currentClientId,
+        scheduledAt: window.__pendingScanSlot.startTime,
+        durationMinutes: bookingRules.scan_3d.durationMinutes,
+        location: clientProject && clientProject.adresse ? clientProject.adresse : '',
+        eventTitle: window.__pendingScanSlot.eventTitle || 'Scan 3D Matterport',
+        productType: 'scan_3d',
+        promoCode: promoCode
+      })
+    });
+    var data = await readJsonResponse(response);
+
+    if (!response.ok) {
+      throw new Error(data.error || 'Erreur lors de l application du code promotionnel');
+    }
+
+    window.__pendingScanAppointmentId = data.appointmentId || null;
+    window.__pendingScanSlot = null;
+    hideScanPaymentSection();
+    if (promoInput) promoInput.value = '';
+
+    await refreshResolvedClientRecord();
+    showPromoValidationBanner();
+  } catch (err) {
+    console.error('applyScanPromoCode error:', err);
+    if (payBtn) payBtn.disabled = false;
+    if (promoBtn) {
+      promoBtn.disabled = false;
+      promoBtn.textContent = 'APPLIQUER LE CODE';
+    }
+    if (errEl) {
+      errEl.textContent = 'Erreur : ' + err.message;
+      errEl.style.display = 'block';
+    }
+  }
+}
+
+function showPromoValidationBanner() {
   var banner = document.createElement('div');
   banner.style.cssText =
     'position:fixed;top:16px;left:50%;transform:translateX(-50%);' +
     'background:#2D5F3E;color:#fff;padding:16px 28px;border-radius:8px;' +
     'font-size:0.95rem;font-weight:500;z-index:9999;box-shadow:0 4px 20px rgba(0,0,0,0.15);';
-  banner.textContent = '✅ Paiement confirmé — votre RDV scan est validé !';
+  banner.textContent = 'Code promo pris en compte : votre demande de scan attend maintenant la validation de notre Ã©quipe.';
   document.body.appendChild(banner);
   setTimeout(function() { banner.remove(); }, 6000);
 }
 
-function showPaymentCancelledBanner() {
+async function initiateVisitPayment() {
+  var btn = document.getElementById('visitPayNowBtn');
+  var promoBtn = document.getElementById('applyVisitPromoBtn');
+  var errEl = document.getElementById('visitPaymentError');
+
+  if (!currentClientId) {
+    if (errEl) {
+      errEl.textContent = 'Erreur : dossier client introuvable.';
+      errEl.style.display = 'block';
+    }
+    return;
+  }
+
+  if (btn) {
+    btn.disabled = true;
+    btn.textContent = 'Redirection en cours...';
+  }
+  if (promoBtn) promoBtn.disabled = true;
+  if (errEl) {
+    errEl.textContent = '';
+    errEl.style.display = 'none';
+  }
+
+  try {
+    var token = await ensureIdentityAccessToken();
+    var response = await fetch('/.netlify/functions/create-checkout', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': token ? 'Bearer ' + token : ''
+      },
+      body: JSON.stringify({
+        clientId: currentClientId,
+        productType: 'virtual_tour'
+      })
+    });
+    var data = await readJsonResponse(response);
+
+    if (!response.ok || !data.checkoutUrl) {
+      throw new Error(data.error || 'Erreur lors de la creation du paiement');
+    }
+
+    window.location.href = data.checkoutUrl;
+  } catch (err) {
+    console.error('initiateVisitPayment error:', err);
+    if (btn) {
+      btn.disabled = false;
+      btn.textContent = 'Payer 120 EUR TTC';
+    }
+    if (promoBtn) promoBtn.disabled = false;
+    if (errEl) {
+      errEl.textContent = 'Erreur : ' + err.message;
+      errEl.style.display = 'block';
+    }
+  }
+}
+
+async function applyVisitPromoCode() {
+  var btn = document.getElementById('visitPayNowBtn');
+  var promoBtn = document.getElementById('applyVisitPromoBtn');
+  var promoInput = document.getElementById('visitPromoCodeInput');
+  var errEl = document.getElementById('visitPaymentError');
+  var promoCode = promoInput ? promoInput.value.trim() : '';
+
+  if (!currentClientId) {
+    if (errEl) {
+      errEl.textContent = 'Erreur : dossier client introuvable.';
+      errEl.style.display = 'block';
+    }
+    return;
+  }
+
+  if (!promoCode) {
+    if (errEl) {
+      errEl.textContent = 'Merci de saisir un code promotionnel.';
+      errEl.style.display = 'block';
+    }
+    return;
+  }
+
+  if (btn) btn.disabled = true;
+  if (promoBtn) {
+    promoBtn.disabled = true;
+    promoBtn.textContent = 'Validation en cours...';
+  }
+  if (errEl) {
+    errEl.textContent = '';
+    errEl.style.display = 'none';
+  }
+
+  try {
+    var token = await ensureIdentityAccessToken();
+    var response = await fetch('/.netlify/functions/apply-promo-bypass', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': token ? 'Bearer ' + token : ''
+      },
+      body: JSON.stringify({
+        clientId: currentClientId,
+        productType: 'virtual_tour',
+        promoCode: promoCode
+      })
+    });
+    var data = await readJsonResponse(response);
+
+    if (!response.ok) {
+      throw new Error(data.error || 'Erreur lors de l application du code promotionnel');
+    }
+
+    if (promoInput) promoInput.value = '';
+    await refreshResolvedClientRecord();
+    showVisitPromoBanner();
+  } catch (err) {
+    console.error('applyVisitPromoCode error:', err);
+    if (btn) btn.disabled = false;
+    if (promoBtn) {
+      promoBtn.disabled = false;
+      promoBtn.textContent = 'APPLIQUER LE CODE';
+    }
+    if (errEl) {
+      errEl.textContent = 'Erreur : ' + err.message;
+      errEl.style.display = 'block';
+    }
+  }
+}
+
+function showVisitPromoBanner() {
+  var banner = document.createElement('div');
+  banner.style.cssText =
+    'position:fixed;top:16px;left:50%;transform:translateX(-50%);' +
+    'background:#2D5F3E;color:#fff;padding:16px 28px;border-radius:8px;' +
+    'font-size:0.95rem;font-weight:500;z-index:9999;box-shadow:0 4px 20px rgba(0,0,0,0.15);';
+  banner.textContent = 'Code promo pris en compte : votre acces visite virtuelle est maintenant active.';
+  document.body.appendChild(banner);
+  setTimeout(function() { banner.remove(); }, 6000);
+}
+
+function showPaymentSuccessBanner(productType) {
+  var banner = document.createElement('div');
+  banner.style.cssText =
+    'position:fixed;top:16px;left:50%;transform:translateX(-50%);' +
+    'background:#2D5F3E;color:#fff;padding:16px 28px;border-radius:8px;' +
+    'font-size:0.95rem;font-weight:500;z-index:9999;box-shadow:0 4px 20px rgba(0,0,0,0.15);';
+  banner.textContent = productType === 'virtual_tour'
+    ? 'Paiement confirme - votre acces visite virtuelle est active.'
+    : 'Paiement confirme - votre RDV scan est valide.';
+  document.body.appendChild(banner);
+  setTimeout(function() { banner.remove(); }, 6000);
+}
+
+function showPaymentCancelledBanner(productType) {
   var banner = document.createElement('div');
   banner.style.cssText =
     'position:fixed;top:16px;left:50%;transform:translateX(-50%);' +
     'background:#C62828;color:#fff;padding:16px 28px;border-radius:8px;' +
     'font-size:0.95rem;font-weight:500;z-index:9999;box-shadow:0 4px 20px rgba(0,0,0,0.15);';
-  banner.textContent = 'Paiement annulé — votre créneau n\'est pas encore confirmé.';
+  banner.textContent = productType === 'virtual_tour'
+    ? 'Paiement annule - votre acces visite virtuelle reste verrouille.'
+    : 'Paiement annule - votre creneau n est pas encore confirme.';
   document.body.appendChild(banner);
   setTimeout(function() { banner.remove(); }, 5000);
-}
-
-async function checkAppointmentStatus() {
-  try {
-    if (!currentUser || !currentClientId) return;
-
-    const { data, error } = await supabaseClient
-      .from('appointments')
-      .select('*')
-      .eq('client_id', currentClientId)
-      .order('created_at', { ascending: false })
-      .limit(1);
-
-    if (error) {
-      console.warn('Error fetching appointment:', error);
-      return;
-    }
-
-    if (!data || data.length === 0) return;
-
-    var appointment = data[0];
-    if (appointment.status === 'cancelled') return;
-
-    if (appointment.type === 'scan_3d' && currentPipelineStatus === 'scan_scheduled') {
-      var slotLabel = formatNativeSlotLabel('scan_3d', formatParisTime(appointment.scheduled_at));
-      window.__pendingScanAppointmentId = appointment.id;
-      window.__pendingScanSlot = {
-        startTime: appointment.scheduled_at,
-        eventTitle: slotLabel
-      };
-      applyScanSlotDisplay({
-        startTime: appointment.scheduled_at,
-        eventTitle: slotLabel
-      });
-      revealScanPaymentSection();
-      return;
-    }
-
-    if (appointment.type === 'phone_call' && currentPipelineStatus === 'call_requested') {
-      renderPhoneAppointmentStatus(appointment.scheduled_at);
-    }
-  } catch (error) {
-    console.error('Error checking appointment:', error);
-  }
 }
 
 async function checkAppointmentStatus() {
@@ -6530,31 +6813,17 @@ async function checkAppointmentStatus() {
     var appointments = await fetchClientAppointments();
     if (!appointments || appointments.length === 0) return;
 
-    var appointment = appointments
+    var phoneAppointment = appointments
       .slice()
+      .filter(function(appointment) {
+        return appointment && appointment.type === 'phone_call' && appointment.status !== 'cancelled';
+      })
       .sort(function(left, right) {
         return new Date(right.created_at || right.scheduled_at) - new Date(left.created_at || left.scheduled_at);
       })[0];
 
-    if (!appointment || appointment.status === 'cancelled') return;
-
-    if (appointment.type === 'scan_3d' && currentPipelineStatus === 'scan_scheduled') {
-      var slotLabel = formatNativeSlotLabel('scan_3d', formatParisTime(appointment.scheduled_at));
-      window.__pendingScanAppointmentId = appointment.id;
-      window.__pendingScanSlot = {
-        startTime: appointment.scheduled_at,
-        eventTitle: slotLabel
-      };
-      applyScanSlotDisplay({
-        startTime: appointment.scheduled_at,
-        eventTitle: slotLabel
-      });
-      revealScanPaymentSection();
-      return;
-    }
-
-    if (appointment.type === 'phone_call' && currentPipelineStatus === 'call_requested') {
-      renderPhoneAppointmentStatus(appointment.scheduled_at);
+    if (phoneAppointment && currentPipelineStatus === 'call_requested') {
+      renderPhoneAppointmentStatus(phoneAppointment.scheduled_at);
     }
   } catch (error) {
     console.error('Error checking appointment:', error);
@@ -6582,17 +6851,31 @@ document.addEventListener('DOMContentLoaded', function() {
   setTimeout(checkAppointmentStatus, 500);
 });
 
+window.addEventListener('pageshow', function(event) {
+  if (!event.persisted) return;
+  if (currentPipelineStatus !== 'call_done') return;
+  resetScanBookingDisplay();
+});
+
 (function checkPaymentReturn() {
   var params = new URLSearchParams(window.location.search);
   var paymentStatus = params.get('payment');
+  var productType = params.get('product') || 'scan_3d';
   if (!paymentStatus) return;
 
   window.history.replaceState({}, '', '/espace-client.html');
 
   if (paymentStatus === 'success') {
-    showPaymentSuccessBanner();
+    if (productType === 'scan_3d') {
+      window.__pendingScanAppointmentId = null;
+      window.__pendingScanSlot = null;
+    }
+    showPaymentSuccessBanner(productType);
   } else if (paymentStatus === 'cancelled') {
-    showPaymentCancelledBanner();
+    if (productType === 'scan_3d') {
+      resetScanBookingDisplay();
+    }
+    showPaymentCancelledBanner(productType);
   }
 })();
 

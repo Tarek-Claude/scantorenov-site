@@ -39,7 +39,7 @@ const CLIENT_STATUS_LABELS = Object.freeze({
   onboarding_completed: 'Onboarding termine',
   call_requested: 'RDV telephone demande',
   call_done: 'Appel realise',
-  scan_scheduled: 'Scan programme',
+  scan_scheduled: 'Validation scan en attente',
   scan_payment_completed: 'Paiement scan recu',
   scan_completed: 'Scan realise',
   analysis_ready: 'Analyse prete',

@@ -40,5 +40,15 @@
 [context.production.environment]
   NODE_VERSION = "18"
   SUPABASE_URL = "https://qvovfabwzyfhmkaluzss.supabase.co"
-  # SUPABASE_SERVICE_KEY et RESEND_API_KEY → à définir dans le dashboard Netlify
+  # Variables à définir dans le dashboard Netlify:
+  # SUPABASE_SERVICE_KEY
+  # RESEND_API_KEY
+  # ADMIN_SECRET
+  # STRIPE_SECRET_KEY (sk_...)
+  # STRIPE_PRICE_SCAN_ID (price_...)
+  # STRIPE_WEBHOOK_SECRET (whsec_...)
+  # PROMO_SCAN_BYPASS_CODES (liste separee par virgules / retours ligne)
+  # PROMO_BYPASS_CODES (optionnel, codes globaux reutilisables)
+  # PROMO_VISIT_BYPASS_CODES (optionnel, reserve au paiement visite virtuelle)
+  # Optionnel: SITE_URL, EMAIL_FROM, ADMIN_NOTIFICATION_EMAIL
   # Site settings → Environment variables (NE PAS mettre les clés ici)

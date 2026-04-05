@@ -6,13 +6,16 @@ const { upsertClientPipeline } = require('./_client-pipeline');
 
 const SITE_URL = 'https://scantorenov.com';
 
-// Service key pour bypasser RLS et lire les donnees client
-const supabase = createClient(
-  process.env.SUPABASE_URL,
-  process.env.SUPABASE_SERVICE_KEY
-);
+function getSupabaseAdmin() {
+  return createClient(
+    process.env.SUPABASE_URL,
+    process.env.SUPABASE_SERVICE_KEY
+  );
+}
 
-const resend = new Resend(process.env.RESEND_API_KEY);
+function getResendClient() {
+  return new Resend(process.env.RESEND_API_KEY);
+}
 
 /* Helpers */
 
@@ -34,6 +37,7 @@ function formatTimeFR(isoString) {
 function typeLabelFR(type) {
   const map = {
     phone_call: 'Appel telephonique',
+    scan_3d: 'Scan 3D Matterport',
     video: 'Visioconference',
     on_site: 'Visite sur site'
   };
@@ -168,6 +172,51 @@ function isPastDate(value) {
   return Number.isFinite(timestamp) && timestamp <= Date.now();
 }
 
+async function updateClientPipelineAfterAppointmentAction({ action, appointment, clientEmail }) {
+  if (!clientEmail || !appointment) return null;
+
+  if (action === 'confirm' && appointment.type === 'phone_call') {
+    const shouldAdvanceToCallDone = isPastDate(appointment.scheduled_at);
+    const pipelineStatus = shouldAdvanceToCallDone ? 'call_done' : 'call_requested';
+    const nextPhase = shouldAdvanceToCallDone ? 4 : 3;
+
+    return upsertClientPipeline({
+      email: clientEmail,
+      fields: {
+        phase: nextPhase,
+        call_scheduled_at: appointment.scheduled_at,
+      },
+      status: pipelineStatus,
+      strict: true,
+    });
+  }
+
+  if (action === 'confirm' && appointment.type === 'scan_3d') {
+    return upsertClientPipeline({
+      email: clientEmail,
+      fields: {
+        phase: 5,
+        scan_date_confirmed: appointment.scheduled_at,
+      },
+      status: 'scan_payment_completed',
+      strict: true,
+    });
+  }
+
+  if (action === 'cancel' && appointment.type === 'scan_3d') {
+    return upsertClientPipeline({
+      email: clientEmail,
+      fields: {
+        phase: 4,
+      },
+      status: 'call_done',
+      strict: true,
+    });
+  }
+
+  return null;
+}
+
 exports.handler = async (event, context) => {
   const headers = {
     'Access-Control-Allow-Origin': '*',
@@ -196,6 +245,8 @@ exports.handler = async (event, context) => {
       };
     }
 
+    const supabase = getSupabaseAdmin();
+    const resend = getResendClient();
     const body = JSON.parse(event.body || '{}');
     const { appointmentId, action, clientId: requestedClientId } = body;
 
@@ -235,6 +286,48 @@ exports.handler = async (event, context) => {
       };
     }
 
+    const { data: existingAppointment, error: existingAppointmentError } = await supabase
+      .from('appointments')
+      .select('id, client_id, type, status, scheduled_at, duration_minutes, location')
+      .eq('id', appointmentId)
+      .eq('client_id', resolvedClientId)
+      .maybeSingle();
+
+    if (existingAppointmentError) {
+      console.error('Supabase read error:', existingAppointmentError);
+      return {
+        statusCode: 400,
+        headers,
+        body: JSON.stringify({ error: 'Failed to load appointment', details: existingAppointmentError.message }),
+      };
+    }
+
+    if (!existingAppointment) {
+      return {
+        statusCode: 404,
+        headers,
+        body: JSON.stringify({ error: 'Appointment not found or unauthorized access' }),
+      };
+    }
+
+    if (!isAdminCall) {
+      if (action === 'confirm') {
+        return {
+          statusCode: 403,
+          headers,
+          body: JSON.stringify({ error: 'La confirmation est reservee a ScantoRenov' }),
+        };
+      }
+
+      if (existingAppointment.type !== 'phone_call') {
+        return {
+          statusCode: 403,
+          headers,
+          body: JSON.stringify({ error: 'Seul un rendez-vous telephonique peut etre annule depuis l espace client' }),
+        };
+      }
+    }
+
     const { data: apptData, error: updateError } = await supabase
       .from('appointments')
       .update({ status: newStatus, updated_at: new Date().toISOString() })
@@ -248,14 +341,6 @@ exports.handler = async (event, context) => {
         statusCode: 400,
         headers,
         body: JSON.stringify({ error: 'Failed to update appointment status', details: updateError.message }),
-      };
-    }
-
-    if (!apptData || apptData.length === 0) {
-      return {
-        statusCode: 404,
-        headers,
-        body: JSON.stringify({ error: 'Appointment not found or unauthorized access' }),
       };
     }
 
@@ -297,25 +382,34 @@ exports.handler = async (event, context) => {
       type: appt.type,
     };
 
-    if (action === 'confirm') {
+    if (
+      action === 'confirm'
+      || (
+        action === 'cancel'
+        && isAdminCall
+        && appt.type === 'scan_3d'
+        && existingAppointment.status === 'requested'
+      )
+    ) {
       try {
-        const shouldAdvanceToCallDone = appt.type === 'phone_call' && isPastDate(appt.scheduled_at);
-        const pipelineStatus = shouldAdvanceToCallDone ? 'call_done' : 'call_requested';
-        const nextPhase = shouldAdvanceToCallDone ? 4 : 3;
-        const reconciliation = await upsertClientPipeline({
-          email: clientEmail,
-          fields: {
-            phase: nextPhase,
-            call_scheduled_at: appt.scheduled_at,
-          },
-          status: pipelineStatus,
-          strict: true,
+        const reconciliation = await updateClientPipelineAfterAppointmentAction({
+          action,
+          appointment: appt,
+          clientEmail,
         });
 
         if (reconciliation && reconciliation.data) {
           clientData = reconciliation.data;
         }
-        console.log(`B-4d: client ${resolvedClientId} pipeline -> ${pipelineStatus}, phase=${nextPhase}, call_scheduled_at=${appt.scheduled_at}`);
+        if (appt.type === 'phone_call') {
+          const pipelineStatus = isPastDate(appt.scheduled_at) ? 'call_done' : 'call_requested';
+          const nextPhase = isPastDate(appt.scheduled_at) ? 4 : 3;
+          console.log(`B-4d: client ${resolvedClientId} pipeline -> ${pipelineStatus}, phase=${nextPhase}, call_scheduled_at=${appt.scheduled_at}`);
+        } else if (appt.type === 'scan_3d' && action === 'confirm') {
+          console.log(`B-4d: client ${resolvedClientId} pipeline -> scan_payment_completed, phase=5`);
+        } else if (appt.type === 'scan_3d' && action === 'cancel') {
+          console.log(`B-4d: client ${resolvedClientId} pipeline -> call_done, phase=4`);
+        }
       } catch (pipelineErr) {
         console.warn('B-4d pipeline exception (non-blocking):', pipelineErr.message);
       }

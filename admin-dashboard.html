@@ -1369,7 +1369,7 @@
             'onboarding_completed': 'Profil complété',
             'call_requested': 'RDV tel demandé',
             'call_done': 'Appel réalisé',
-            'scan_scheduled': 'Scan programmé',
+            'scan_scheduled': 'Validation scan en attente',
             'scan_payment_completed': 'Paiement scan',
             'scan_completed': 'Scan réalisé',
             'analysis_ready': 'Analyse prête',
@@ -1404,7 +1404,7 @@
             'onboarding_completed': 'Onboarding terminé',
             'call_requested': 'RDV tél demandé',
             'call_done': 'Appel réalisé',
-            'scan_scheduled': 'Scan programmé',
+            'scan_scheduled': 'Validation scan en attente',
             'scan_payment_completed': 'Paiement scan',
             'scan_completed': 'Scan réalisé',
             'analysis_ready': 'Analyse prête',
@@ -1455,6 +1455,18 @@
         function getPrimaryPhoneAppointment(appointments) {
             return (appointments || [])
                 .filter(appointment => appointment && appointment.type === 'phone_call' && appointment.status !== 'cancelled')
+                .sort((left, right) => new Date(left.scheduled_at) - new Date(right.scheduled_at))[0] || null;
+        }
+
+        function isPromoPendingScanAppointment(appointment) {
+            if (!appointment || appointment.type !== 'scan_3d') return false;
+            if (appointment.status !== 'requested') return false;
+            return String(appointment.notes || '').indexOf('[PROMO_PENDING_VALIDATION]') !== -1;
+        }
+
+        function getPrimaryPendingScanAppointment(appointments) {
+            return (appointments || [])
+                .filter(isPromoPendingScanAppointment)
                 .sort((left, right) => new Date(left.scheduled_at) - new Date(right.scheduled_at))[0] || null;
         }
 
@@ -1692,7 +1704,7 @@
 
             const pending = clients?.filter(c => {
                 const status = normalizeDashboardStatus(c.status);
-                return ['call_requested', 'scan_scheduled', 'scan_completed', 'analysis_ready'].includes(status);
+                return ['call_requested', 'scan_scheduled', 'scan_payment_completed', 'scan_completed', 'analysis_ready'].includes(status);
             }) || [];
 
             if (pending.length === 0) {
@@ -1889,6 +1901,7 @@
         function renderActionPanel(client, status) {
             const panel = document.getElementById('actionPanel');
             const phoneAppointment = getPrimaryPhoneAppointment(currentClientAppointments);
+            const pendingScanAppointment = getPrimaryPendingScanAppointment(currentClientAppointments);
             let html = '';
 
             if (status === 'call_requested') {
@@ -1928,15 +1941,20 @@
             } else if (status === 'call_done') {
                 html = `
                     <h3>Invitation scan 3D</h3>
-                    <p class="action-panel-description">Invitez le client à programmer son scan 3D.</p>
+                    <p class="action-panel-description">Invitez le client à choisir puis régler son créneau de scan 3D depuis son espace.</p>
                     <button class="action-button" onclick="inviteScan()">Envoyer invitation</button>
                 `;
                 document.getElementById('chatPanel').style.display = 'none';
             } else if (status === 'scan_scheduled') {
                 html = `
-                    <h3>Confirmer le scan</h3>
-                    <p class="action-panel-description">Confirmez la programmation du scan avec le client.</p>
-                    <button class="action-button" onclick="confirmScan()">Scan confirmé</button>
+                    <h3>Paiement en attente</h3>
+                    <p class="action-panel-description">Le scan n'est plus confirmé manuellement ici. Il ne doit apparaître qu'après paiement Stripe côté client.</p>
+                `;
+                document.getElementById('chatPanel').style.display = 'none';
+            } else if (status === 'scan_payment_completed') {
+                html = `
+                    <h3>Paiement reçu</h3>
+                    <p class="action-panel-description">Le créneau scan est confirmé automatiquement. Vous pouvez maintenant préparer la visite et la logistique.</p>
                 `;
                 document.getElementById('chatPanel').style.display = 'none';
             } else if (status === 'scan_completed') {
@@ -2057,6 +2075,232 @@
                 await loadDashboard();
             } catch (err) {
                 showErrorMessage('Erreur lors de la validation du rendez-vous: ' + err.message);
+            }
+        }
+
+        function renderActionPanel(client, status) {
+            const panel = document.getElementById('actionPanel');
+            const phoneAppointment = getPrimaryPhoneAppointment(currentClientAppointments);
+            const pendingScanAppointment = getPrimaryPendingScanAppointment(currentClientAppointments);
+            let html = '';
+
+            if (status === 'call_requested') {
+                if (phoneAppointment) {
+                    const validateButton = phoneAppointment.status !== 'confirmed'
+                        ? `<button class="action-button" onclick="confirmPhoneAppointment()">Valider le rendez-vous</button>`
+                        : '';
+                    html = `
+                        <h3>Rendez-vous tÃ©lÃ©phonique demandÃ©</h3>
+                        <p class="action-panel-description">VÃ©rifiez le crÃ©neau demandÃ©, puis validez-le pour confirmer le rendez-vous avec le client.</p>
+                        <div class="task-card" style="margin-bottom: 16px;">
+                            <div class="task-card-header">
+                                <div class="task-card-title">Rendez-vous tÃ©lÃ©phonique</div>
+                                <div class="task-state-badge">${getAppointmentStatusLabel(phoneAppointment.status)}</div>
+                            </div>
+                            <div class="task-card-desc">${formatAppointmentDateTime(phoneAppointment.scheduled_at)}</div>
+                            <div class="task-meta">
+                                <span>${phoneAppointment.duration_minutes || 30} min</span>
+                                <span>${phoneAppointment.location || 'phone'}</span>
+                            </div>
+                        </div>
+                        <div style="display:flex;gap:12px;flex-wrap:wrap;">
+                            ${validateButton}
+                            <button class="action-button" onclick="openMarcelChat()">Ouvrir Marcel</button>
+                        </div>
+                    `;
+                    document.getElementById('chatPanel').style.display = 'flex';
+                    panel.innerHTML = html;
+                    return;
+                }
+                html = `
+                    <h3>SynthÃ¨se d'appel tÃ©lÃ©phonique</h3>
+                    <p class="action-panel-description">Prenez note de la conversation tÃ©lÃ©phonique avec le client.</p>
+                    <button class="action-button" onclick="openMarcelChat()">Ouvrir Marcel</button>
+                `;
+                document.getElementById('chatPanel').style.display = 'flex';
+            } else if (status === 'call_done') {
+                html = `
+                    <h3>Invitation scan 3D</h3>
+                    <p class="action-panel-description">Invitez le client Ã  choisir puis rÃ©gler son crÃ©neau de scan 3D depuis son espace.</p>
+                    <button class="action-button" onclick="inviteScan()">Envoyer invitation</button>
+                `;
+                document.getElementById('chatPanel').style.display = 'none';
+            } else if (status === 'scan_scheduled') {
+                if (pendingScanAppointment) {
+                    html = `
+                        <h3>Validation du rendez-vous scan</h3>
+                        <p class="action-panel-description">Ce crÃ©neau a Ã©tÃ© demandÃ© via un code promo. Le paiement est contournÃ©, mais votre validation interne reste nÃ©cessaire.</p>
+                        <div class="task-card" style="margin-bottom: 16px;">
+                            <div class="task-card-header">
+                                <div class="task-card-title">Scan 3D Matterport</div>
+                                <div class="task-state-badge">${getAppointmentStatusLabel(pendingScanAppointment.status)}</div>
+                            </div>
+                            <div class="task-card-desc">${formatAppointmentDateTime(pendingScanAppointment.scheduled_at)}</div>
+                            <div class="task-meta">
+                                <span>${pendingScanAppointment.duration_minutes || 240} min</span>
+                                <span>${pendingScanAppointment.location || 'Adresse non renseignee'}</span>
+                            </div>
+                        </div>
+                        <div style="display:flex;gap:12px;flex-wrap:wrap;">
+                            <button class="action-button" onclick="confirmScan()">Valider le rendez-vous</button>
+                            <button class="action-button" onclick="cancelScanRequest()" style="background-color:#C62828;">Refuser ce creneau</button>
+                        </div>
+                    `;
+                } else {
+                    html = `
+                        <h3>Validation scan en attente</h3>
+                        <p class="action-panel-description">Le dossier attend une validation interne du scan. Aucun paiement Stripe supplÃ©mentaire n'est attendu ici.</p>
+                    `;
+                }
+                document.getElementById('chatPanel').style.display = 'none';
+            } else if (status === 'scan_payment_completed') {
+                html = `
+                    <h3>Paiement reÃ§u</h3>
+                    <p class="action-panel-description">Le crÃ©neau scan est confirmÃ© automatiquement. Vous pouvez maintenant prÃ©parer la visite et la logistique.</p>
+                `;
+                document.getElementById('chatPanel').style.display = 'none';
+            } else if (status === 'scan_completed') {
+                html = `
+                    <h3>Fichiers du scan</h3>
+                    <p class="action-panel-description">TÃ©lÃ©chargez les fichiers et donnÃ©es du scan 3D.</p>
+                    <button class="action-button" onclick="openMarcelChat()">Discuter avec Marcel</button>
+                `;
+                document.getElementById('chatPanel').style.display = 'flex';
+                document.getElementById('filesSection').style.display = 'block';
+            } else if (status === 'analysis_ready') {
+                html = `
+                    <h3>GÃ©nÃ©rer l'avant-projet</h3>
+                    <p class="action-panel-description">PrÃ©parez et validez l'avant-projet avec Marcel.</p>
+                    <button class="action-button" onclick="openMarcelChat()">Discuter avec Marcel</button>
+                    <button class="action-button" onclick="generateAvantProjet()" style="background-color: #4CAF50;">GÃ©nÃ©rer avant-projet</button>
+                `;
+                document.getElementById('chatPanel').style.display = 'flex';
+            } else if (status === 'avant_projet_ready') {
+                html = `
+                    <h3>Avant-projet finalisÃ©</h3>
+                    <p class="action-panel-description">L'avant-projet est prÃªt. Proposez l'accompagnement.</p>
+                    <button class="action-button" onclick="proposeAccompaniment()">Proposer accompagnement</button>
+                `;
+                document.getElementById('chatPanel').style.display = 'none';
+            } else {
+                html = `
+                    <h3>Etape suivante</h3>
+                    <p class="action-panel-description">Aucune action requise pour le moment.</p>
+                `;
+                document.getElementById('chatPanel').style.display = 'none';
+            }
+
+            panel.innerHTML = html;
+        }
+
+        async function loadClientTasks(clientId, prefetchedTasks) {
+            try {
+                let tasks = prefetchedTasks;
+                if (!Array.isArray(tasks)) {
+                    const data = await adminFetch('/.netlify/functions/admin-client-detail', { clientId });
+                    tasks = data.tasks || [];
+                    currentClientAppointments = data.appointments || [];
+                    currentClientProjectNotes = data.projectNotes || [];
+                    if (data.client) {
+                        currentClient = {
+                            ...data.client,
+                            status: normalizeDashboardStatus(data.client.status)
+                        };
+                    }
+                }
+
+                currentClientTasks = tasks || [];
+                const shouldKeepActionPanel =
+                    currentClient
+                    && (
+                        currentClient.status === 'call_requested'
+                        || (
+                            currentClient.status === 'scan_scheduled'
+                            && !!getPrimaryPendingScanAppointment(currentClientAppointments)
+                        )
+                    );
+
+                if (shouldKeepActionPanel) {
+                    renderActionPanel(currentClient, currentClient.status);
+                    return;
+                }
+
+                if (!currentClientTasks.length) {
+                    if (currentClient) {
+                        renderActionPanel(currentClient, currentClient.status);
+                    }
+                    return;
+                }
+
+                const primaryTask = currentClientTasks[0];
+                const taskCards = currentClientTasks.map(task => `
+                    <div class="task-card">
+                        <div class="task-card-header">
+                            <div class="task-card-title">${task.title}</div>
+                            <div class="task-state-badge">${TASK_STATE_LABELS[task.status] || task.status}</div>
+                        </div>
+                        <div class="task-card-desc">${task.description || "Aucune description dÃ©taillÃ©e pour le moment."}</div>
+                        <div class="task-meta">
+                            <span>PrioritÃ© ${task.priority || 0}</span>
+                            <span>${task.screen_target || 'client_overview'}</span>
+                            ${task.due_date ? `<span>Ã‰chÃ©ance ${formatShortDate(task.due_date)}</span>` : ""}
+                        </div>
+                    </div>
+                `).join('');
+
+                document.getElementById('actionPanel').innerHTML = `
+                    <h3>Action attendue maintenant</h3>
+                    <p class="action-panel-description">${primaryTask.title}</p>
+                    <div class="task-list">${taskCards}</div>
+                `;
+            } catch (err) {
+                console.warn('Client tasks unavailable:', err.message);
+            }
+        }
+
+        async function confirmScan() {
+            if (!currentClient) return;
+
+            const pendingScanAppointment = getPrimaryPendingScanAppointment(currentClientAppointments);
+            if (!pendingScanAppointment) {
+                showErrorMessage('Aucun rendez-vous scan en attente de validation.');
+                return;
+            }
+
+            try {
+                await adminFetch('/.netlify/functions/confirm-appointment', {
+                    appointmentId: pendingScanAppointment.id,
+                    action: 'confirm',
+                    clientId: currentClient.id
+                });
+                showSuccessMessage('Rendez-vous scan validÃ©.');
+                await selectClientById(currentClient.id);
+                await loadDashboard();
+            } catch (err) {
+                showErrorMessage('Erreur lors de la validation du scan: ' + err.message);
+            }
+        }
+
+        async function cancelScanRequest() {
+            if (!currentClient) return;
+
+            const pendingScanAppointment = getPrimaryPendingScanAppointment(currentClientAppointments);
+            if (!pendingScanAppointment) {
+                showErrorMessage('Aucun rendez-vous scan en attente Ã  refuser.');
+                return;
+            }
+
+            try {
+                await adminFetch('/.netlify/functions/confirm-appointment', {
+                    appointmentId: pendingScanAppointment.id,
+                    action: 'cancel',
+                    clientId: currentClient.id
+                });
+                showSuccessMessage('Demande de scan refusÃ©e.');
+                await selectClientById(currentClient.id);
+                await loadDashboard();
+            } catch (err) {
+                showErrorMessage('Erreur lors du refus du scan: ' + err.message);
             }
         }
 
@@ -2268,8 +2512,6 @@
 
                 if (response.ok) {
                     showSuccessMessage('Invitation envoyée');
-                    // Update status
-                    await updateClientStatus('scan_scheduled');
                 } else {
                     showErrorMessage('Erreur lors de l\'envoi');
                 }
@@ -2279,12 +2521,29 @@
         }
 
         async function confirmScan() {
+            showErrorMessage('La confirmation manuelle du scan a été retirée. Le créneau est confirmé automatiquement après paiement Stripe.');
+        }
+
+        async function confirmScan() {
             if (!currentClient) return;
+
+            const pendingScanAppointment = getPrimaryPendingScanAppointment(currentClientAppointments);
+            if (!pendingScanAppointment) {
+                showErrorMessage('Aucun rendez-vous scan en attente de validation.');
+                return;
+            }
+
             try {
-                await updateClientStatus('scan_completed');
-                showSuccessMessage('Scan confirmé');
+                await adminFetch('/.netlify/functions/confirm-appointment', {
+                    appointmentId: pendingScanAppointment.id,
+                    action: 'confirm',
+                    clientId: currentClient.id
+                });
+                showSuccessMessage('Rendez-vous scan validÃ©.');
+                await selectClientById(currentClient.id);
+                await loadDashboard();
             } catch (err) {
-                showErrorMessage('Erreur: ' + err.message);
+                showErrorMessage('Erreur lors de la validation du scan: ' + err.message);
             }
         }
 

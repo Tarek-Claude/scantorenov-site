@@ -1,4 +1,5 @@
 const TIME_ZONE = 'Europe/Paris';
+const { isPromoPendingValidationAppointment } = require('./_promo-config');
 
 const APPOINTMENT_RULES = {
   phone_call: {
@@ -279,6 +280,15 @@ function appointmentsOverlap(startA, durationMinutesA, startB, durationMinutesB)
 
 function findConflictInList(appointments, requestedStart, requestedDurationMinutes) {
   for (const appointment of appointments || []) {
+    if (
+      appointment
+      && appointment.type === 'scan_3d'
+      && !['confirmed', 'completed'].includes(appointment.status)
+      && !isPromoPendingValidationAppointment(appointment)
+    ) {
+      continue;
+    }
+
     const existingStart = new Date(appointment.scheduled_at || appointment.scheduledAt);
     if (Number.isNaN(existingStart.getTime())) {
       continue;
@@ -305,7 +315,7 @@ async function findConflict(supabase, requestedStart, requestedDurationMinutes, 
 
   let query = supabase
     .from('appointments')
-    .select('id, scheduled_at, duration_minutes, type, status')
+    .select('id, scheduled_at, duration_minutes, type, status, notes')
     .neq('status', 'cancelled')
     .gte('scheduled_at', rangeStart)
     .lt('scheduled_at', rangeEnd)
