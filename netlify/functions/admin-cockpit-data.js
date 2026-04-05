@@ -57,7 +57,7 @@ exports.handler = async function handler(event) {
     if (clientError) {
       throw new Error(`Lecture clients: ${clientError.message}`);
     }
-    if (taskError && taskError.code !== '42P01') {
+    if (taskError && taskError.code !== '42P01' && taskError.code !== 'PGRST205') {
       throw new Error(`Lecture taches: ${taskError.message}`);
     }
 
