@@ -3416,8 +3416,8 @@ function renderPhase3(project) {
    B-4a: CONFIRMED APPOINTMENTS — Charger et afficher RDV
    ═══════════════════════════════════════════════════════ */
 async function loadAppointments() {
-  if (!supabaseClient || !currentClientId) {
-    console.warn('loadAppointments: supabaseClient ou clientId non disponible');
+  if (!currentClientId) {
+    console.warn('loadAppointments: clientId non disponible');
     return;
   }
 
@@ -3802,6 +3802,45 @@ function resetQcm(stepIdx) {
 /* ── Brief Step 2 ── */
 function countWords(str) {
   return str.trim().split(/\s+/).filter(function(w) { return w.length > 0; }).length;
+}
+
+async function fetchClientAppointments() {
+  if (!currentClientId) return [];
+
+  var token = getIdentityAccessToken();
+  if (!token) {
+    throw new Error('Session client manquante');
+  }
+
+  var response = await fetch('/.netlify/functions/get-client-appointments', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': 'Bearer ' + token
+    },
+    body: JSON.stringify({ clientId: currentClientId })
+  });
+  var payload = await readJsonResponse(response);
+
+  if (!response.ok) {
+    throw new Error(payload && payload.error ? payload.error : 'Impossible de charger les rendez-vous');
+  }
+
+  return payload.appointments || [];
+}
+
+async function loadAppointments() {
+  if (!currentClientId) {
+    console.warn('loadAppointments: clientId non disponible');
+    return;
+  }
+
+  try {
+    var appointments = await fetchClientAppointments();
+    renderAppointmentsTable(appointments || []);
+  } catch (err) {
+    console.error('loadAppointments exception:', err);
+  }
 }
 
 var briefSaveTimer = null;
@@ -6293,6 +6332,44 @@ async function checkAppointmentStatus() {
 
     var appointment = data[0];
     if (appointment.status === 'cancelled') return;
+
+    if (appointment.type === 'scan_3d' && currentPipelineStatus === 'scan_scheduled') {
+      var slotLabel = formatNativeSlotLabel('scan_3d', formatParisTime(appointment.scheduled_at));
+      window.__pendingScanAppointmentId = appointment.id;
+      window.__pendingScanSlot = {
+        startTime: appointment.scheduled_at,
+        eventTitle: slotLabel
+      };
+      applyScanSlotDisplay({
+        startTime: appointment.scheduled_at,
+        eventTitle: slotLabel
+      });
+      revealScanPaymentSection();
+      return;
+    }
+
+    if (appointment.type === 'phone_call' && currentPipelineStatus === 'call_requested') {
+      renderPhoneAppointmentStatus(appointment.scheduled_at);
+    }
+  } catch (error) {
+    console.error('Error checking appointment:', error);
+  }
+}
+
+async function checkAppointmentStatus() {
+  try {
+    if (!currentUser || !currentClientId) return;
+
+    var appointments = await fetchClientAppointments();
+    if (!appointments || appointments.length === 0) return;
+
+    var appointment = appointments
+      .slice()
+      .sort(function(left, right) {
+        return new Date(right.created_at || right.scheduled_at) - new Date(left.created_at || left.scheduled_at);
+      })[0];
+
+    if (!appointment || appointment.status === 'cancelled') return;
 
     if (appointment.type === 'scan_3d' && currentPipelineStatus === 'scan_scheduled') {
       var slotLabel = formatNativeSlotLabel('scan_3d', formatParisTime(appointment.scheduled_at));

@@ -1,8 +1,8 @@
 const { createClient } = require('@supabase/supabase-js');
 const { Resend } = require('resend');
-const { expandStatusVariants } = require('./_cockpit-config');
 const { resolveIdentityClient } = require('./_identity-client');
 const { authorizeAdminRequest } = require('./_admin-session');
+const { upsertClientPipeline } = require('./_client-pipeline');
 
 const SITE_URL = 'https://scantorenov.com';
 
@@ -163,6 +163,11 @@ function buildAdminEmailHtml({ action, prenom, nom, email, scheduledAt, duration
   `;
 }
 
+function isPastDate(value) {
+  const timestamp = new Date(value).getTime();
+  return Number.isFinite(timestamp) && timestamp <= Date.now();
+}
+
 exports.handler = async (event, context) => {
   const headers = {
     'Access-Control-Allow-Origin': '*',
@@ -294,21 +299,23 @@ exports.handler = async (event, context) => {
 
     if (action === 'confirm') {
       try {
-        const { error: pipelineError } = await supabase
-          .from('clients')
-          .update({
-            status: 'call_requested',
+        const shouldAdvanceToCallDone = appt.type === 'phone_call' && isPastDate(appt.scheduled_at);
+        const pipelineStatus = shouldAdvanceToCallDone ? 'call_done' : 'call_requested';
+        const nextPhase = shouldAdvanceToCallDone ? 4 : 3;
+        const reconciliation = await upsertClientPipeline({
+          email: clientEmail,
+          fields: {
+            phase: nextPhase,
             call_scheduled_at: appt.scheduled_at,
-            updated_at: new Date().toISOString(),
-          })
-          .eq('id', resolvedClientId)
-          .in('status', expandStatusVariants(['contact_submitted', 'identity_created', 'onboarding_completed', 'call_requested']));
+          },
+          status: pipelineStatus,
+          strict: true,
+        });
 
-        if (pipelineError) {
-          console.warn('B-4d pipeline update failed (non-blocking):', pipelineError.message);
-        } else {
-          console.log(`B-4d: client ${resolvedClientId} pipeline -> call_requested, call_scheduled_at=${appt.scheduled_at}`);
+        if (reconciliation && reconciliation.data) {
+          clientData = reconciliation.data;
         }
+        console.log(`B-4d: client ${resolvedClientId} pipeline -> ${pipelineStatus}, phase=${nextPhase}, call_scheduled_at=${appt.scheduled_at}`);
       } catch (pipelineErr) {
         console.warn('B-4d pipeline exception (non-blocking):', pipelineErr.message);
       }

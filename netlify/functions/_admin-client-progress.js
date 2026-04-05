@@ -75,6 +75,18 @@ function isActiveAppointment(appointment) {
   return appointment.status !== 'cancelled';
 }
 
+function isPastAppointment(appointment) {
+  if (!appointment || !appointment.scheduled_at) return false;
+  const value = new Date(appointment.scheduled_at).getTime();
+  return Number.isFinite(value) && value <= Date.now();
+}
+
+function isPhoneAppointmentDone(appointment) {
+  if (!appointment || appointment.type !== 'phone_call') return false;
+  if (appointment.status === 'completed') return true;
+  return appointment.status === 'confirmed' && isPastAppointment(appointment);
+}
+
 function deriveStatusFromAppointments(appointments, currentStatus) {
   let derivedStatus = currentStatus || null;
 
@@ -82,6 +94,7 @@ function deriveStatusFromAppointments(appointments, currentStatus) {
     return derivedStatus;
   }
 
+  const hasCompletedPhoneAppointment = appointments.some(isPhoneAppointmentDone);
   const hasPhoneAppointment = appointments.some(
     (appointment) => isActiveAppointment(appointment) && appointment.type === 'phone_call'
   );
@@ -89,7 +102,9 @@ function deriveStatusFromAppointments(appointments, currentStatus) {
     (appointment) => isActiveAppointment(appointment) && appointment.type === 'scan_3d'
   );
 
-  if (hasPhoneAppointment) {
+  if (hasCompletedPhoneAppointment) {
+    derivedStatus = chooseFarthestStatus(derivedStatus, 'call_done');
+  } else if (hasPhoneAppointment) {
     derivedStatus = chooseFarthestStatus(derivedStatus, 'call_requested');
   }
 
@@ -118,5 +133,7 @@ function enrichClientProgress(client, appointments) {
 }
 
 module.exports = {
+  chooseFarthestStatus,
+  deriveStatusFromAppointments,
   enrichClientProgress,
 };
