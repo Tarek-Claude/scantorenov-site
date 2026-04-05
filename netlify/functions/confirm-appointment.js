@@ -2,6 +2,7 @@ const { createClient } = require('@supabase/supabase-js');
 const { Resend } = require('resend');
 const { expandStatusVariants } = require('./_cockpit-config');
 const { resolveIdentityClient } = require('./_identity-client');
+const { authorizeAdminRequest } = require('./_admin-session');
 
 const SITE_URL = 'https://scantorenov.com';
 
@@ -166,7 +167,7 @@ exports.handler = async (event, context) => {
   const headers = {
     'Access-Control-Allow-Origin': '*',
     'Access-Control-Allow-Methods': 'POST, OPTIONS',
-    'Access-Control-Allow-Headers': 'Content-Type, Authorization, x-admin-secret',
+    'Access-Control-Allow-Headers': 'Content-Type, Authorization, x-admin-secret, x-admin-session',
     'Content-Type': 'application/json',
   };
 
@@ -179,8 +180,7 @@ exports.handler = async (event, context) => {
   }
 
   try {
-    const adminSecret = event.headers['x-admin-secret'];
-    const isAdminCall = !!(adminSecret && adminSecret === process.env.ADMIN_SECRET);
+    const isAdminCall = authorizeAdminRequest(event).authorized;
 
     if (!isAdminCall && !(context && context.clientContext && context.clientContext.user)) {
       console.warn('confirm-appointment: access denied - no admin secret and no identity user');

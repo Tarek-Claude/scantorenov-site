@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
@@ -1116,20 +1116,20 @@
     <div class="auth-screen" id="authScreen">
         <div class="auth-card">
             <h1>Admin</h1>
-            <p>Connectez-vous pour accÃ©der au tableau de bord</p>
+            <p>Connectez-vous pour accéder au tableau de bord</p>
             <div class="auth-error" id="authError"></div>
             <form class="auth-form" id="authForm">
                 <div class="form-group">
-                    <label for="supabaseUrl">Supabase URL</label>
-                    <input type="text" id="supabaseUrl" placeholder="https://..." required>
+                    <label for="supabaseUrl">Identifiant admin</label>
+                    <input type="text" id="supabaseUrl" placeholder="Votre identifiant" required>
                 </div>
                 <div class="form-group">
-                    <label for="supabaseKey">Service Key</label>
-                    <input type="password" id="supabaseKey" placeholder="eyJ..." required>
+                    <label for="supabaseKey">Mot de passe</label>
+                    <input type="password" id="supabaseKey" placeholder="Votre mot de passe" required>
                 </div>
-                <div class="form-group">
-                    <label for="adminSecret">Admin Secret</label>
-                    <input type="password" id="adminSecret" placeholder="Votre clÃ© admin" required>
+                <div class="form-group" style="display: none;">
+                    <label for="adminSecret">Secret admin legacy</label>
+                    <input type="password" id="adminSecret" placeholder="Secret admin" autocomplete="off">
                 </div>
                 <button type="submit" class="auth-submit">Connexion</button>
             </form>
@@ -1142,7 +1142,7 @@
         <div class="dashboard-header">
             <h1>Poste de pilotage interne</h1>
             <div class="header-actions">
-                <button class="logout-btn" id="logoutBtn">DÃ©connexion</button>
+                <button class="logout-btn" id="logoutBtn">Déconnexion</button>
             </div>
         </div>
 
@@ -1174,7 +1174,7 @@
             <div class="dashboard-main">
                 <!-- SEARCH BOX -->
                 <div class="search-box">
-                    <input type="text" class="search-input" id="searchInput" placeholder="Tapez 3 lettres du nom, prenom ou email du client...">
+                    <input type="text" class="search-input" id="searchInput" placeholder="Tapez 3 lettres du nom, prénom ou email du client...">
                     <div class="autocomplete-dropdown" id="autocomplete"></div>
                 </div>
 
@@ -1191,7 +1191,7 @@
                                 <h2 id="clientName">-</h2>
                                 <div class="profile-header-contact">
                                     <div>Email: <strong id="clientEmail">-</strong></div>
-                                    <div>TÃ©l: <strong id="clientPhone">-</strong></div>
+                                    <div>Tél: <strong id="clientPhone">-</strong></div>
                                 </div>
                             </div>
                             <div id="clientStatusBadge"></div>
@@ -1214,7 +1214,7 @@
                                 <div class="detail-value" id="clientBudget">-</div>
                             </div>
                             <div class="detail-item">
-                                <div class="detail-label">Ã‰chÃ©ance</div>
+                                <div class="detail-label">Échéance</div>
                                 <div class="detail-value" id="clientEcheance">-</div>
                             </div>
                         </div>
@@ -1247,12 +1247,12 @@
 
                             <!-- Matterport Model ID Input -->
                             <div id="matterportIdInput" style="margin-bottom: 16px; padding: 16px; background: var(--bg); border-radius: 8px;">
-                                <label style="font-size: 13px; font-weight: 600; display: block; margin-bottom: 8px;">ID du modÃ¨le Matterport</label>
+                                <label style="font-size: 13px; font-weight: 600; display: block; margin-bottom: 8px;">ID du modèle Matterport</label>
                                 <div style="display: flex; gap: 8px;">
                                     <input type="text" id="matterportModelId" placeholder="Ex: SxQL3iGyoDo" style="flex: 1;">
                                     <input type="password" id="matterportApiToken" placeholder="Token API Matterport" style="flex: 1;">
                                     <button class="action-button" onclick="fetchMatterportData()" style="white-space: nowrap; font-size: 12px; padding: 8px 14px;">
-                                        RÃ©cupÃ©rer
+                                        Récupérer
                                     </button>
                                 </div>
                                 <p style="font-size: 11px; color: var(--muted); margin-top: 6px;">
@@ -1281,7 +1281,7 @@
                                 <div class="mp-tab-content" id="mpTabPanoramas">
                                     <div id="panoramasGrid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 12px;"></div>
                                     <button class="action-button" id="btnDownloadPanos" onclick="downloadAllPanoramas()" style="margin-top: 16px; font-size: 12px; padding: 8px 14px; display: none;">
-                                        TÃ©lÃ©charger toutes les panoramiques
+                                        Télécharger toutes les panoramiques
                                     </button>
                                 </div>
 
@@ -1328,7 +1328,7 @@
                                 <input type="file" id="csvInput" accept=".csv">
                             </div>
                             <div class="file-input-group">
-                                <label>iframe Matterport (ou ID modÃ¨le ci-dessus)</label>
+                                <label>iframe Matterport (ou ID modèle ci-dessus)</label>
                                 <textarea id="matterportIframeInput" placeholder="Collez le code iframe ou utilisez la synchronisation automatique..."></textarea>
                             </div>
                         </div>
@@ -1340,7 +1340,7 @@
 
                 <!-- EMPTY STATE -->
                 <div class="empty-state" id="emptyState">
-                    <p>SÃ©lectionnez un client pour voir les dÃ©tails</p>
+                    <p>Sélectionnez un client pour voir les détails</p>
                 </div>
             </div>
         </div>
@@ -1364,15 +1364,15 @@
 
         const STATUS_LABELS = {
             'new_lead': 'Nouveau contact',
-            'account_created': 'Compte crÃ©Ã©',
-            'onboarding_completed': 'Profil complÃ©tÃ©',
-            'call_requested': 'RDV tel demandÃ©',
-            'call_done': 'Appel rÃ©alisÃ©',
-            'scan_scheduled': 'Scan programmÃ©',
+            'account_created': 'Compte créé',
+            'onboarding_completed': 'Profil complété',
+            'call_requested': 'RDV tel demandé',
+            'call_done': 'Appel réalisé',
+            'scan_scheduled': 'Scan programmé',
             'scan_payment_completed': 'Paiement scan',
-            'scan_completed': 'Scan rÃ©alisÃ©',
-            'analysis_ready': 'Analyse prÃªte',
-            'avant_projet_ready': 'Avant-projet prÃªt',
+            'scan_completed': 'Scan réalisé',
+            'analysis_ready': 'Analyse prête',
+            'avant_projet_ready': 'Avant-projet prêt',
             'accompaniment_subscribed': 'Accompagnement'
         };
 
@@ -1399,18 +1399,18 @@
 
         Object.assign(STATUS_LABELS, {
             'contact_submitted': 'Contact soumis',
-            'identity_created': 'Compte cree',
-            'onboarding_completed': 'Onboarding termine',
-            'call_requested': 'RDV tel demande',
-            'call_done': 'Appel realise',
-            'scan_scheduled': 'Scan programme',
+            'identity_created': 'Compte créé',
+            'onboarding_completed': 'Onboarding terminé',
+            'call_requested': 'RDV tél demandé',
+            'call_done': 'Appel réalisé',
+            'scan_scheduled': 'Scan programmé',
             'scan_payment_completed': 'Paiement scan',
-            'scan_completed': 'Scan realise',
-            'analysis_ready': 'Analyse prete',
-            'avant_projet_ready': 'Avant-projet pret',
+            'scan_completed': 'Scan réalisé',
+            'analysis_ready': 'Analyse prête',
+            'avant_projet_ready': 'Avant-projet prêt',
             'avant_projet_transmitted': 'Avant-projet transmis',
             'accompaniment_subscribed': 'Accompagnement',
-            'abandoned': 'Abandonne',
+            'abandoned': 'Abandonné',
             'paused': 'En pause'
         });
 
@@ -1418,9 +1418,9 @@
             'open': 'A faire',
             'awaiting_validation': 'A valider',
             'waiting_client': 'En attente client',
-            'blocked': 'Bloque',
-            'done': 'Termine',
-            'cancelled': 'Annule'
+            'blocked': 'Bloqué',
+            'done': 'Terminé',
+            'cancelled': 'Annulé'
         };
 
         function normalizeDashboardStatus(status) {
@@ -1442,13 +1442,42 @@
             return fullName || client.nom || client.prenom || client.email || 'Client sans nom';
         }
 
+        function getAppointmentStatusLabel(status) {
+            return {
+                requested: 'Demande',
+                confirmed: 'Confirmé',
+                completed: 'Réalisé',
+                cancelled: 'Annulé'
+            }[status] || status || 'Inconnu';
+        }
+
+        function getPrimaryPhoneAppointment(appointments) {
+            return (appointments || [])
+                .filter(appointment => appointment && appointment.type === 'phone_call' && appointment.status !== 'cancelled')
+                .sort((left, right) => new Date(left.scheduled_at) - new Date(right.scheduled_at))[0] || null;
+        }
+
+        function formatAppointmentDateTime(value) {
+            const date = new Date(value);
+            if (Number.isNaN(date.getTime())) return 'Date invalide';
+            return date.toLocaleString('fr-FR', {
+                weekday: 'long',
+                day: '2-digit',
+                month: 'long',
+                year: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+        }
+
         // ========== STATE ==========
         let currentClient = null;
         let adminSessionToken = null;
         let chatHistory = [];
-        let matterportCache = {}; // Cache des donnÃ©es Matterport par client
+        let matterportCache = {}; // Cache des données Matterport par client
 
         let currentClientTasks = [];
+        let currentClientAppointments = [];
         let dashboardClients = [];
         let dashboardTasks = [];
 
@@ -1502,6 +1531,7 @@
             currentClient = null;
             chatHistory = [];
             currentClientTasks = [];
+            currentClientAppointments = [];
             dashboardClients = [];
             dashboardTasks = [];
             sessionStorage.removeItem('admin_session_token');
@@ -1534,7 +1564,7 @@
             if (response.status === 401) {
                 resetAdminSession();
                 authForm.reset();
-                showAuthError('Session admin expiree. Reconnectez-vous.');
+                showAuthError('Session admin expirée. Reconnectez-vous.');
                 throw new Error(data.error || 'Unauthorized');
             }
 
@@ -1623,7 +1653,7 @@
                 </div>
                 <div class="stat-box">
                     <div class="stat-number">${openTasks}</div>
-                    <div class="stat-label">Taches a faire</div>
+                    <div class="stat-label">Tâches à faire</div>
                 </div>
                 <div class="stat-box">
                     <div class="stat-number">${waitingTasks}</div>
@@ -1631,7 +1661,7 @@
                 </div>
                 <div class="stat-box">
                     <div class="stat-number">${blockedTasks}</div>
-                    <div class="stat-label">Bloquees</div>
+                    <div class="stat-label">Bloquées</div>
                 </div>
             `;
         }
@@ -1643,12 +1673,12 @@
             if (tasks && tasks.length > 0) {
                 pendingList.innerHTML = tasks.map(task => {
                     const client = clientsById.get(task.client_id);
-                    const clientName = client ? `${client.prenom || ''} ${client.nom || ''}`.trim() || client.email : 'Client';
+                    const clientName = client ? getClientDisplayName(client) : 'Client';
                     const stateLabel = TASK_STATE_LABELS[task.status] || task.status;
                     return `
                         <div class="pending-item" onclick="selectClientById('${task.client_id}')">
                             <div class="pending-item-name">${clientName}</div>
-                            <div class="pending-item-action">${task.title} â€¢ ${stateLabel}</div>
+                            <div class="pending-item-action">${task.title} - ${stateLabel}</div>
                         </div>
                     `;
                 }).join('');
@@ -1667,7 +1697,7 @@
 
             pendingList.innerHTML = pending.map(client => `
                 <div class="pending-item" onclick="selectClientById('${client.id}')">
-                    <div class="pending-item-name">${client.prenom} ${client.nom}</div>
+                    <div class="pending-item-name">${getClientDisplayName(client)}</div>
                     <div class="pending-item-action">${getStatusLabel(client.status)}</div>
                 </div>
             `).join('');
@@ -1695,7 +1725,7 @@
                 autocomplete.innerHTML = results.map(client => `
                     <div class="autocomplete-item" onclick="selectClient('${client.id}')">
                         <div class="autocomplete-item-main">${getClientDisplayName(client)}</div>
-                        <div class="autocomplete-item-info">${client.email} ? ${client.type_bien || 'N/A'}</div>
+                        <div class="autocomplete-item-info">${client.email} - ${client.type_bien || "N/A"}</div>
                     </div>
                 `).join('');
                 autocomplete.classList.add('show');
@@ -1722,6 +1752,7 @@
                         ...data.client,
                         status: normalizeDashboardStatus(data.client.status)
                     };
+                    currentClientAppointments = data.appointments || [];
                     dashboardClients = dashboardClients.map(client =>
                         client.id === currentClient.id ? currentClient : client
                     );
@@ -1747,9 +1778,9 @@
             document.getElementById('clientPhone').textContent = client.telephone || '-';
             document.getElementById('clientTypeBien').textContent = client.type_bien || '-';
             document.getElementById('clientAdresse').textContent = client.adresse || '-';
-            document.getElementById('clientSurface').textContent = client.surface ? `${client.surface} mÂ²` : '-';
-            document.getElementById('clientBudget').textContent = client.budget ? `${client.budget.toLocaleString('fr-FR')} â‚¬` : '-';
-            document.getElementById('clientEcheance').textContent = client.echeance || '-';
+            document.getElementById('clientSurface').textContent = client.surface ? `${client.surface} m²` : '-';
+            document.getElementById('clientBudget').textContent = client.budget ? `${client.budget.toLocaleString('fr-FR')} EUR` : '-';
+            document.getElementById('clientEcheance').textContent = client.echeance || "-";
 
             // Status badge
             const status = normalizeDashboardStatus(client.status);
@@ -1764,17 +1795,17 @@
             // Action panel
             renderActionPanel(client, status);
 
-            // Matterport â€” toujours visible pour permettre la saisie du model ID
+            // Matterport toujours visible pour permettre la saisie du model ID
             document.getElementById('matterportSection').style.display = 'block';
 
-            // PrÃ©-remplir le model ID si existant
+            // Pré-remplir le model ID si existant
             if (client.matterport_model_id) {
                 document.getElementById('matterportModelId').value = client.matterport_model_id;
             } else {
                 document.getElementById('matterportModelId').value = '';
             }
 
-            // RÃ©cupÃ©rer le token stockÃ© en session
+            // Récupérer le token stocké en session
             const storedToken = sessionStorage.getItem('mp_api_token');
             if (storedToken) {
                 document.getElementById('matterportApiToken').value = storedToken;
@@ -1791,7 +1822,7 @@
                     document.getElementById('matterportIframe').src =
                         `https://my.matterport.com/show/?m=${client.matterport_model_id}`;
                 }
-                // Si on a des donnÃ©es Matterport en cache, les afficher
+                // Si on a des données Matterport en cache, les afficher
                 if (matterportCache[client.id]) {
                     renderMatterportData(matterportCache[client.id]);
                 }
@@ -1799,7 +1830,7 @@
                 document.getElementById('matterportTabs').style.display = 'none';
             }
 
-            // Si on a dÃ©jÃ  des matterport_data (du CSV importÃ©), les afficher dans l'onglet dimensions
+            // Si on a déjà des matterport_data (du CSV importé), les afficher dans l'onglet dimensions
             if (client.matterport_data) {
                 renderMatterportDataFromDb(client.matterport_data);
             }
@@ -1826,7 +1857,7 @@
                 html += `
                     <div class="timeline-step">
                         <div class="timeline-step-circle ${circleClass}">
-                            ${isCompleted ? 'âœ“' : ''}
+                            ${isCompleted ? "&#10003;" : ""}
                         </div>
                         <div class="timeline-step-label ${labelClass}">${getStatusLabel(status)}</div>
                     </div>
@@ -1843,19 +1874,47 @@
 
         function renderActionPanel(client, status) {
             const panel = document.getElementById('actionPanel');
+            const phoneAppointment = getPrimaryPhoneAppointment(currentClientAppointments);
             let html = '';
 
             if (status === 'call_requested') {
+                if (phoneAppointment) {
+                    const validateButton = phoneAppointment.status !== 'confirmed'
+                        ? `<button class="action-button" onclick="confirmPhoneAppointment()">Valider le rendez-vous</button>`
+                        : '';
+                    html = `
+                        <h3>Rendez-vous téléphonique demandé</h3>
+                        <p class="action-panel-description">Vérifiez le créneau demandé, puis validez-le pour confirmer le rendez-vous avec le client.</p>
+                        <div class="task-card" style="margin-bottom: 16px;">
+                            <div class="task-card-header">
+                                <div class="task-card-title">Rendez-vous téléphonique</div>
+                                <div class="task-state-badge">${getAppointmentStatusLabel(phoneAppointment.status)}</div>
+                            </div>
+                            <div class="task-card-desc">${formatAppointmentDateTime(phoneAppointment.scheduled_at)}</div>
+                            <div class="task-meta">
+                                <span>${phoneAppointment.duration_minutes || 30} min</span>
+                                <span>${phoneAppointment.location || 'phone'}</span>
+                            </div>
+                        </div>
+                        <div style="display:flex;gap:12px;flex-wrap:wrap;">
+                            ${validateButton}
+                            <button class="action-button" onclick="openMarcelChat()">Ouvrir Marcel</button>
+                        </div>
+                    `;
+                    document.getElementById('chatPanel').style.display = 'flex';
+                    panel.innerHTML = html;
+                    return;
+                }
                 html = `
-                    <h3>SynthÃ¨se d'appel tÃ©lÃ©phonique</h3>
-                    <p class="action-panel-description">Prenez note de la conversation tÃ©lÃ©phonique avec le client.</p>
+                    <h3>Synthèse d'appel téléphonique</h3>
+                    <p class="action-panel-description">Prenez note de la conversation téléphonique avec le client.</p>
                     <button class="action-button" onclick="openMarcelChat()">Ouvrir Marcel</button>
                 `;
                 document.getElementById('chatPanel').style.display = 'flex';
             } else if (status === 'call_done') {
                 html = `
                     <h3>Invitation scan 3D</h3>
-                    <p class="action-panel-description">Invitez le client Ã  programmer son scan 3D.</p>
+                    <p class="action-panel-description">Invitez le client à programmer son scan 3D.</p>
                     <button class="action-button" onclick="inviteScan()">Envoyer invitation</button>
                 `;
                 document.getElementById('chatPanel').style.display = 'none';
@@ -1863,35 +1922,35 @@
                 html = `
                     <h3>Confirmer le scan</h3>
                     <p class="action-panel-description">Confirmez la programmation du scan avec le client.</p>
-                    <button class="action-button" onclick="confirmScan()">Scan confirmÃ©</button>
+                    <button class="action-button" onclick="confirmScan()">Scan confirmé</button>
                 `;
                 document.getElementById('chatPanel').style.display = 'none';
             } else if (status === 'scan_completed') {
                 html = `
                     <h3>Fichiers du scan</h3>
-                    <p class="action-panel-description">TÃ©lÃ©chargez les fichiers et donnÃ©es du scan 3D.</p>
+                    <p class="action-panel-description">Téléchargez les fichiers et données du scan 3D.</p>
                     <button class="action-button" onclick="openMarcelChat()">Discuter avec Marcel</button>
                 `;
                 document.getElementById('chatPanel').style.display = 'flex';
                 document.getElementById('filesSection').style.display = 'block';
             } else if (status === 'analysis_ready') {
                 html = `
-                    <h3>GÃ©nÃ©rer l'avant-projet</h3>
-                    <p class="action-panel-description">PrÃ©parez et validez l'avant-projet avec Marcel.</p>
+                    <h3>Générer l'avant-projet</h3>
+                    <p class="action-panel-description">Préparez et validez l'avant-projet avec Marcel.</p>
                     <button class="action-button" onclick="openMarcelChat()">Discuter avec Marcel</button>
-                    <button class="action-button" onclick="generateAvantProjet()" style="background-color: #4CAF50;">GÃ©nÃ©rer avant-projet</button>
+                    <button class="action-button" onclick="generateAvantProjet()" style="background-color: #4CAF50;">Générer avant-projet</button>
                 `;
                 document.getElementById('chatPanel').style.display = 'flex';
             } else if (status === 'avant_projet_ready') {
                 html = `
-                    <h3>Avant-projet finalisÃ©</h3>
-                    <p class="action-panel-description">L'avant-projet est prÃªt. Proposez l'accompagnement.</p>
+                    <h3>Avant-projet finalisé</h3>
+                    <p class="action-panel-description">L'avant-projet est prêt. Proposez l'accompagnement.</p>
                     <button class="action-button" onclick="proposeAccompaniment()">Proposer accompagnement</button>
                 `;
                 document.getElementById('chatPanel').style.display = 'none';
             } else {
                 html = `
-                    <h3>Ã‰tape suivante</h3>
+                    <h3>Etape suivante</h3>
                     <p class="action-panel-description">Aucune action requise pour le moment.</p>
                 `;
                 document.getElementById('chatPanel').style.display = 'none';
@@ -1916,6 +1975,7 @@
                 if (!Array.isArray(tasks)) {
                     const data = await adminFetch('/.netlify/functions/admin-client-detail', { clientId });
                     tasks = data.tasks || [];
+                    currentClientAppointments = data.appointments || [];
                     if (data.client) {
                         currentClient = {
                             ...data.client,
@@ -1925,6 +1985,10 @@
                 }
 
                 currentClientTasks = tasks || [];
+                if (currentClient && currentClient.status === 'call_requested') {
+                    renderActionPanel(currentClient, currentClient.status);
+                    return;
+                }
                 if (!currentClientTasks.length) {
                     if (currentClient) {
                         renderActionPanel(currentClient, currentClient.status);
@@ -1939,11 +2003,11 @@
                             <div class="task-card-title">${task.title}</div>
                             <div class="task-state-badge">${TASK_STATE_LABELS[task.status] || task.status}</div>
                         </div>
-                        <div class="task-card-desc">${task.description || 'Aucune description detaillee pour le moment.'}</div>
+                        <div class="task-card-desc">${task.description || "Aucune description détaillée pour le moment."}</div>
                         <div class="task-meta">
-                            <span>Priorite ${task.priority || 0}</span>
+                            <span>Priorité ${task.priority || 0}</span>
                             <span>${task.screen_target || 'client_overview'}</span>
-                            ${task.due_date ? `<span>Echeance ${formatShortDate(task.due_date)}</span>` : ''}
+                            ${task.due_date ? `<span>Échéance ${formatShortDate(task.due_date)}</span>` : ""}
                         </div>
                     </div>
                 `).join('');
@@ -1955,6 +2019,29 @@
                 `;
             } catch (err) {
                 console.warn('Client tasks unavailable:', err.message);
+            }
+        }
+
+        async function confirmPhoneAppointment() {
+            if (!currentClient) return;
+
+            const phoneAppointment = getPrimaryPhoneAppointment(currentClientAppointments);
+            if (!phoneAppointment) {
+                showErrorMessage('Aucun rendez-vous téléphonique actif à valider.');
+                return;
+            }
+
+            try {
+                await adminFetch('/.netlify/functions/confirm-appointment', {
+                    appointmentId: phoneAppointment.id,
+                    action: 'confirm',
+                    clientId: currentClient.id
+                });
+                showSuccessMessage('Rendez-vous téléphonique confirmé.');
+                await selectClientById(currentClient.id);
+                await loadDashboard();
+            } catch (err) {
+                showErrorMessage('Erreur lors de la validation du rendez-vous: ' + err.message);
             }
         }
 
@@ -2024,7 +2111,7 @@
                 });
 
                 if (response.ok) {
-                    showSuccessMessage('Invitation envoyÃ©e');
+                    showSuccessMessage('Invitation envoyée');
                     // Update status
                     await updateClientStatus('scan_scheduled');
                 } else {
@@ -2039,7 +2126,7 @@
             if (!currentClient) return;
             try {
                 await updateClientStatus('scan_completed');
-                showSuccessMessage('Scan confirmÃ©');
+                showSuccessMessage('Scan confirmé');
             } catch (err) {
                 showErrorMessage('Erreur: ' + err.message);
             }
@@ -2049,7 +2136,7 @@
             if (!currentClient) return;
             try {
                 await updateClientStatus('avant_projet_ready');
-                showSuccessMessage('Avant-projet gÃ©nÃ©rÃ©');
+                showSuccessMessage('Avant-projet généré');
             } catch (err) {
                 showErrorMessage('Erreur: ' + err.message);
             }
@@ -2059,7 +2146,7 @@
             if (!currentClient) return;
             try {
                 await updateClientStatus('accompaniment_subscribed');
-                showSuccessMessage('Accompagnement proposÃ©');
+                showSuccessMessage('Accompagnement proposé');
             } catch (err) {
                 showErrorMessage('Erreur: ' + err.message);
             }
@@ -2140,13 +2227,13 @@
                 });
 
                 if (response.ok) {
-                    showSuccessMessage('Fichiers tÃ©lÃ©chargÃ©s');
+                    showSuccessMessage('Fichiers téléchargés');
                     photosInput.value = '';
                     plansInput.value = '';
                     csvInput.value = '';
                     matterportInput.value = '';
                 } else {
-                    showErrorMessage('Erreur lors du tÃ©lÃ©chargement');
+                    showErrorMessage('Erreur lors du téléchargement');
                 }
             } catch (err) {
                 showErrorMessage('Erreur: ' + err.message);
@@ -2269,18 +2356,18 @@
             const token = document.getElementById('matterportApiToken').value.trim();
 
             if (!modelId || !token) {
-                showErrorMessage('ID du modÃ¨le et Token API requis');
+                showErrorMessage('ID du modèle et Token API requis');
                 return;
             }
 
             // Stocker le token en session pour ne pas le ressaisir
             sessionStorage.setItem('mp_api_token', token);
 
-            showMpSyncStatus('Connexion Ã  Matterport...', 'loading');
+            showMpSyncStatus('Connexion à Matterport...', 'loading');
 
             try {
-                // 1. RÃ©cupÃ©rer les panoramiques + embed URL
-                showMpSyncStatus('RÃ©cupÃ©ration des panoramiques et donnÃ©es du modÃ¨le...', 'loading');
+                // 1. Récupérer les panoramiques + embed URL
+                showMpSyncStatus('Récupération des panoramiques et données du modèle...', 'loading');
                 const sweepData = await matterportGraphQL(`
                     fragment panoFragment on PanoramicImageLocation {
                         id
@@ -2307,8 +2394,8 @@
                     }
                 `, { modelId }, token);
 
-                // 2. RÃ©cupÃ©rer les dimensions
-                showMpSyncStatus('RÃ©cupÃ©ration des dimensions des piÃ¨ces...', 'loading');
+                // 2. Récupérer les dimensions
+                showMpSyncStatus('Récupération des dimensions des pièces...', 'loading');
                 const dimData = await matterportGraphQL(`
                     fragment dimensions on Dimension {
                         areaCeiling
@@ -2339,8 +2426,8 @@
                     }
                 `, { modelId }, token);
 
-                // 3. RÃ©cupÃ©rer les plans d'Ã©tage
-                showMpSyncStatus('RÃ©cupÃ©ration des plans d\'Ã©tage...', 'loading');
+                // 3. Récupérer les plans d'étage
+                showMpSyncStatus('Récupération des plans d\'étage...', 'loading');
                 let floorData = null;
                 try {
                     floorData = await matterportGraphQL(`
@@ -2365,7 +2452,7 @@
                     console.warn('Floorplans non disponibles:', e.message);
                 }
 
-                // Assembler les donnÃ©es
+                // Assembler les données
                 const mpData = {
                     modelId,
                     modelName: sweepData.model?.name || '',
@@ -2386,7 +2473,7 @@
                 document.getElementById('matterportTabs').style.display = 'block';
                 renderMatterportData(mpData);
 
-                // Mettre Ã  jour l'iframe viewer
+                // Mettre à jour l'iframe viewer
                 document.getElementById('matterportIframe').src =
                     `https://my.matterport.com/show/?m=${modelId}`;
 
@@ -2396,8 +2483,8 @@
                 }
 
                 showMpSyncStatus(
-                    `Synchronisation rÃ©ussie â€” ${mpData.locations.length} panoramiques, ` +
-                    `${mpData.rooms.length} piÃ¨ces, ${mpData.floorplans.length} plans rÃ©cupÃ©rÃ©s`,
+                    `Synchronisation reussie - ${mpData.locations.length} panoramiques, ` +
+                    `${mpData.rooms.length} pièces, ${mpData.floorplans.length} plans récupérés`,
                     'success'
                 );
 
@@ -2414,18 +2501,18 @@
 
             const matterportData = {
                 surface_totale: mpData.dimensions?.areaFloor
-                    ? `${mpData.dimensions.areaFloor.toFixed(1)} m??` : null,
+                    ? `${mpData.dimensions.areaFloor.toFixed(1)} m2` : null,
                 titre_scan: mpData.modelName || 'Scan 3D',
                 niveaux: mpData.floors.map(floor => ({
                     nom: floor.label || 'Niveau',
                     surface: floor.dimensions?.areaFloor
-                        ? `${floor.dimensions.areaFloor.toFixed(1)} m??` : null,
+                        ? `${floor.dimensions.areaFloor.toFixed(1)} m2` : null,
                     pieces: mpData.rooms
                         .filter(r => true)
                         .map(r => ({
-                            nom: r.label || 'Pi??ce',
+                            nom: r.label || "Piece",
                             surface: r.dimensions?.areaFloor
-                                ? `${r.dimensions.areaFloor.toFixed(1)} m??` : null,
+                                ? `${r.dimensions.areaFloor.toFixed(1)} m2` : null,
                             hauteur: r.dimensions?.height
                                 ? `${r.dimensions.height.toFixed(2)} m` : null,
                             largeur: r.dimensions?.width
@@ -2433,7 +2520,7 @@
                             profondeur: r.dimensions?.depth
                                 ? `${r.dimensions.depth.toFixed(2)} m` : null,
                             volume: r.dimensions?.volume
-                                ? `${r.dimensions.volume.toFixed(1)} m??` : null
+                                ? `${r.dimensions.volume.toFixed(1)} m3` : null
                         }))
                 })),
                 source: 'matterport_api',
@@ -2458,15 +2545,15 @@
                     client.id === currentClient.id ? currentClient : client
                 );
 
-                showSuccessMessage('Donnees Matterport enregistrees pour ce client');
+                showSuccessMessage('Données Matterport enregistrées pour ce client');
             } catch (err) {
                 console.error('Save matterport error:', err);
-                showErrorMessage('Erreur sauvegarde Matterport: ' + err.message);
+                showErrorMessage('Erreur de sauvegarde Matterport : ' + err.message);
             }
         }
 
         function renderMatterportDataFromDb(matterportData) {
-            // Afficher les donnÃ©es stockÃ©es en DB (format du script import-matterport.js)
+            // Afficher les données stockées en DB (format du script import-matterport.js)
             if (!matterportData) return;
 
             const container = document.getElementById('dimensionsData');
@@ -2475,11 +2562,11 @@
             if (matterportData.surface_totale) {
                 html += `
                     <div style="margin-bottom: 20px; padding: 16px; background: var(--bg); border-radius: 8px;">
-                        <h4 style="margin-bottom: 8px;">${matterportData.titre_scan || 'DonnÃ©es du scan'}</h4>
+                        <h4 style="margin-bottom: 8px;">${matterportData.titre_scan || 'Données du scan'}</h4>
                         <div style="font-size: 14px;"><strong>Surface totale :</strong> ${matterportData.surface_totale}</div>
                         <div style="font-size: 11px; color: var(--muted); margin-top: 4px;">
                             Source : ${matterportData.source === 'matterport_api' ? 'API Matterport' : 'Import CSV'}
-                            ${matterportData.synced_at ? ' â€¢ Sync : ' + new Date(matterportData.synced_at).toLocaleString('fr-FR') : ''}
+                            ${matterportData.synced_at ? " - Sync : " + new Date(matterportData.synced_at).toLocaleString('fr-FR') : ""}
                         </div>
                     </div>
                 `;
@@ -2492,7 +2579,7 @@
                         html += `
                             <table class="mp-dim-table">
                                 <thead>
-                                    <tr><th>PiÃ¨ce</th><th>Surface</th><th>Hauteur</th><th>Largeur</th><th>Profondeur</th><th>Volume</th></tr>
+                                    <tr><th>Pièce</th><th>Surface</th><th>Hauteur</th><th>Largeur</th><th>Profondeur</th><th>Volume</th></tr>
                                 </thead>
                                 <tbody>
                                     ${niveau.pieces.map(p => `
@@ -2542,7 +2629,7 @@
             const mpData = currentClient ? matterportCache[currentClient.id] : null;
             const dbData = currentClient?.matterport_data;
 
-            let csvContent = 'PiÃ¨ce;Surface (mÂ²);Hauteur (m);Largeur (m);Profondeur (m);Volume (mÂ³)\n';
+            let csvContent = 'Pièce;Surface (m²);Hauteur (m);Largeur (m);Profondeur (m);Volume (m³)\n';
 
             if (mpData && mpData.rooms) {
                 mpData.rooms.forEach(room => {
@@ -2560,28 +2647,28 @@
             const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
             const link = document.createElement('a');
             link.href = URL.createObjectURL(blob);
-            const clientName = currentClient ? `${currentClient.prenom}_${currentClient.nom}` : 'export';
+            const clientName = currentClient ? `${(currentClient.prenom || 'client')}_${currentClient.nom || 'sans-nom'}` : 'export';
             link.download = `dimensions_${clientName}_${new Date().toISOString().slice(0,10)}.csv`;
             link.click();
             URL.revokeObjectURL(link.href);
 
-            showSuccessMessage('CSV exportÃ©');
+            showSuccessMessage('CSV exporté');
         }
 
         async function downloadAllPanoramas() {
             const mpData = currentClient ? matterportCache[currentClient.id] : null;
             if (!mpData || !mpData.locations) return;
 
-            showMpSyncStatus('PrÃ©paration du tÃ©lÃ©chargement des panoramiques...', 'loading');
+            showMpSyncStatus('Préparation du téléchargement des panoramiques...', 'loading');
 
             // Ouvrir chaque image panoramique dans un nouvel onglet
-            // (le tÃ©lÃ©chargement batch nÃ©cessiterait un backend)
+            // (le téléchargement batch nécessiterait un backend)
             let count = 0;
             mpData.locations.forEach((loc, idx) => {
                 const pano = loc.panos && loc.panos[0];
                 const children = pano?.skybox?.children || [];
                 if (children.length > 0) {
-                    // Ouvrir la premiÃ¨re face du skybox
+                    // Ouvrir la première face du skybox
                     window.open(children[0], `_pano_${idx}`);
                     count++;
                 }

@@ -84,7 +84,7 @@ exports.handler = async function handler(event) {
 
     const { data: appointments, error: appointmentError } = await supabase
       .from('appointments')
-      .select('client_id,type,status,scheduled_at')
+      .select('id,client_id,type,status,scheduled_at,duration_minutes,location,notes')
       .eq('client_id', body.clientId);
 
     if (appointmentError && appointmentError.code !== '42P01' && appointmentError.code !== 'PGRST205') {
@@ -99,6 +99,7 @@ exports.handler = async function handler(event) {
       body: JSON.stringify({
         success: true,
         client: enrichedClient,
+        appointments: appointments || [],
         tasks: tasks || [],
       }),
     };
