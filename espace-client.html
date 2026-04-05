@@ -2968,12 +2968,63 @@ window.__pipelineRank = {
   avant_project_transmitted: 10
 };
 
+window.__pipelinePortalPhase = {
+  contact_submitted: 3,
+  identity_created: 3,
+  onboarding_completed: 3,
+  call_requested: 3,
+  call_done: 4,
+  scan_scheduled: 5,
+  scan_payment_completed: 5,
+  scan_completed: 5,
+  analysis_ready: 6,
+  avant_projet_ready: 6,
+  avant_projet_transmitted: 7,
+  accompaniment_subscribed: 8
+};
+
+window.__legacyPortalPhase = {
+  prospect: 3,
+  qualification: 3,
+  scan: 5,
+  analyse: 6,
+  analysis: 6,
+  avant_projet: 6,
+  avantprojet: 6,
+  accompagnement: 8,
+  moe: 8,
+  chantier: 8
+};
+
 function normalizePipelineStatus(status) {
   if (!status) return 'contact_submitted';
   if (status === 'new_lead') return 'contact_submitted';
   if (status === 'account_created') return 'identity_created';
   if (status === 'avant_project_transmitted') return 'avant_projet_transmitted';
   return status;
+}
+
+function resolvePortalPhaseValue(value, status) {
+  if (typeof value === 'number' && Number.isFinite(value)) {
+    return value;
+  }
+
+  if (typeof value === 'string') {
+    var trimmed = value.trim();
+    if (trimmed) {
+      var numericPhase = Number(trimmed);
+      if (Number.isFinite(numericPhase)) {
+        return numericPhase;
+      }
+      var legacyPhase = window.__legacyPortalPhase[trimmed.toLowerCase()];
+      if (legacyPhase) {
+        return legacyPhase;
+      }
+    }
+  }
+
+  var normalizedStatus = normalizePipelineStatus(status || '');
+  return window.__pipelinePortalPhase[normalizedStatus] || null;
 }
 
 function setAuthLoginFeedback(message, isError) {
@@ -3023,7 +3074,8 @@ function applySupabaseClientRecord(sb, appMeta) {
     matterport_data: sb.matterport_data || clientProject.matterport_data
   };
   currentPipelineStatus = normalizePipelineStatus(sb.status || 'contact_submitted');
-  if (sb.phase && sb.phase > currentPhase) currentPhase = sb.phase;
+  var sbPhase = resolvePortalPhaseValue(sb.portal_phase != null ? sb.portal_phase : sb.phase, currentPipelineStatus);
+  if (sbPhase && sbPhase > currentPhase) currentPhase = sbPhase;
   if (sb.matterport_model_id) appMeta.matterport_id = sb.matterport_model_id;
   if (sb.matterport_iframe) appMeta.matterport_iframe = sb.matterport_iframe;
   if (sb.matterport_data) appMeta.matterport_data = sb.matterport_data;
@@ -3193,9 +3245,9 @@ function applyDashboardData(user, meta, appMeta) {
   if (endNameEl) endNameEl.textContent = firstName;
 
   // Charger la phase et les donnees projet
-  currentPhase = appMeta.phase || 3;
-  clientProject = appMeta.project || {};
   currentPipelineStatus = normalizePipelineStatus(appMeta.status || currentPipelineStatus || 'contact_submitted');
+  currentPhase = resolvePortalPhaseValue(appMeta.phase, currentPipelineStatus) || 3;
+  clientProject = appMeta.project || {};
 
   // Rendre la phase
   renderPhase(currentPhase, clientProject, appMeta);

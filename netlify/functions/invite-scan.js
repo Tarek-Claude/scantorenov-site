@@ -1,6 +1,7 @@
 const { createClient } = require('@supabase/supabase-js');
 const { Resend } = require('resend');
 const { authorizeAdminRequest } = require('./_admin-session');
+const { enrichClientProgress } = require('./_admin-client-progress');
 
 const SITE_URL = 'https://scantorenov.com';
 
@@ -27,6 +28,10 @@ function getScanDurationLabel(phoneNote) {
   }
 
   return 'Durée estimée : entre 1h et 2h selon la superficie du bien';
+}
+
+function isMissingTableError(error) {
+  return error && (error.code === '42P01' || error.code === 'PGRST205');
 }
 
 async function sendInvitationEmail(client, scanDuration) {
@@ -153,18 +158,29 @@ exports.handler = async (event) => {
       };
     }
 
-    if (client.status !== 'call_done') {
+    const { data: appointments, error: appointmentsError } = await supabase
+      .from('appointments')
+      .select('id,client_id,type,status,scheduled_at,duration_minutes,location,notes,created_at')
+      .eq('client_id', client.id);
+
+    if (appointmentsError && !isMissingTableError(appointmentsError)) {
+      throw new Error(`Lecture rendez-vous: ${appointmentsError.message}`);
+    }
+
+    const effectiveClient = enrichClientProgress(client, appointments || []);
+
+    if (effectiveClient.status !== 'call_done') {
       return {
         statusCode: 400,
         headers,
-        body: JSON.stringify({ error: `Statut invalide : ${client.status} (attendu: call_done)` }),
+        body: JSON.stringify({ error: `Statut invalide : ${effectiveClient.status} (attendu: call_done)` }),
       };
     }
 
     const { data: phoneNote } = await supabase
       .from('project_notes')
       .select('confirmed_surface, internal_notes')
-      .eq('client_id', client.id)
+      .eq('client_id', effectiveClient.id)
       .eq('type', 'phone_summary')
       .order('created_at', { ascending: false })
       .limit(1)
@@ -172,7 +188,7 @@ exports.handler = async (event) => {
 
     const scanDuration = getScanDurationLabel(phoneNote);
 
-    await sendInvitationEmail(client, scanDuration);
+    await sendInvitationEmail(effectiveClient, scanDuration);
 
     return {
       statusCode: 200,

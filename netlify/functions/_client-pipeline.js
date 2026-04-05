@@ -20,6 +20,23 @@ function hasValue(value) {
   return value !== undefined && value !== null;
 }
 
+function isMissingStatusColumnError(error) {
+  if (!error) return false;
+  const code = String(error.code || '').toUpperCase();
+  const details = [error.message, error.details, error.hint]
+    .filter(Boolean)
+    .join(' ')
+    .toLowerCase();
+
+  if (code === 'PGRST204' || code === '42703') {
+    return true;
+  }
+
+  return details.includes('status')
+    && details.includes('column')
+    && details.includes('clients');
+}
+
 function chooseFarthestStatus(currentStatus, nextStatus) {
   const normalizedCurrent = normalizeClientStatus(currentStatus);
   const normalizedNext = normalizeClientStatus(nextStatus);
@@ -134,7 +151,9 @@ async function upsertClientPipeline(options) {
   }
 
   const existingClient = await fetchExistingClient(supabase, normalizedEmail);
-  const currentStatus = existingClient && existingClient.status ? normalizeClientStatus(existingClient.status) : null;
+  const currentStatus = normalizeClientStatus(existingClient && existingClient.status)
+    || inferPipelineStatus(existingClient || {}, null)
+    || null;
 
   const clientData = {
     email: normalizedEmail,
@@ -158,17 +177,40 @@ async function upsertClientPipeline(options) {
     clientData.status = nextStatus;
   }
 
-  const { data, error } = await supabase
+  let persistedPayload = { ...clientData };
+  let persistedStatus = Object.prototype.hasOwnProperty.call(persistedPayload, 'status');
+  let { data, error } = await supabase
     .from('clients')
-    .upsert(clientData, { onConflict: 'email' })
+    .upsert(persistedPayload, { onConflict: 'email' })
     .select()
     .maybeSingle();
+
+  if (error && persistedStatus && isMissingStatusColumnError(error)) {
+    console.warn('[client-pipeline] clients.status absent du schema, retry sans persistance du statut');
+    persistedPayload = { ...clientData };
+    delete persistedPayload.status;
+    persistedStatus = false;
+    const retryResult = await supabase
+      .from('clients')
+      .upsert(persistedPayload, { onConflict: 'email' })
+      .select()
+      .maybeSingle();
+    data = retryResult.data;
+    error = retryResult.error;
+  }
 
   if (error) {
     throw new Error(`Supabase ecriture: ${error.message}`);
   }
 
-  const reconciledClient = data || { ...(existingClient || {}), ...clientData };
+  const reconciledClient = data || { ...(existingClient || {}), ...persistedPayload };
+  if (nextStatus) {
+    reconciledClient.status = nextStatus;
+  }
+  reconciledClient.recorded_status = persistedStatus
+    ? nextStatus || null
+    : normalizeClientStatus(existingClient && existingClient.status) || null;
+
   await safeReconcileClientTasks({
     supabase,
     client: reconciledClient,
@@ -178,6 +220,7 @@ async function upsertClientPipeline(options) {
     skipped: false,
     data: reconciledClient,
     status: nextStatus || null,
+    persistedStatus,
   };
 }
 

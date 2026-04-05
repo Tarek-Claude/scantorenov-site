@@ -1,5 +1,6 @@
 const { createClient } = require('@supabase/supabase-js');
 const { upsertClientPipeline } = require('./_client-pipeline');
+const { enrichClientProgress } = require('./_admin-client-progress');
 
 const supabase = createClient(
   process.env.SUPABASE_URL,
@@ -19,6 +20,38 @@ function createResolutionError(statusCode, message) {
   const error = new Error(message);
   error.statusCode = statusCode;
   return error;
+}
+
+function isMissingTableError(error) {
+  return error && (error.code === '42P01' || error.code === 'PGRST205');
+}
+
+async function fetchClientAppointments(clientId) {
+  if (!clientId) return [];
+
+  const { data, error } = await supabase
+    .from('appointments')
+    .select('id,client_id,type,status,scheduled_at,duration_minutes,location,notes,created_at')
+    .eq('client_id', clientId)
+    .order('scheduled_at', { ascending: true });
+
+  if (error && !isMissingTableError(error)) {
+    throw new Error(`Supabase lecture rendez-vous: ${error.message}`);
+  }
+
+  return Array.isArray(data) ? data : [];
+}
+
+async function attachClientProgress(client) {
+  if (!client || typeof client !== 'object') {
+    return { client, appointments: [] };
+  }
+
+  const appointments = await fetchClientAppointments(client.id);
+  return {
+    client: enrichClientProgress(client, appointments),
+    appointments,
+  };
 }
 
 async function findClientByRequestedId(requestedClientId) {
@@ -100,8 +133,10 @@ async function resolveIdentityClient(options = {}) {
 
   const requestedClient = await findClientByRequestedId(requestedClientId);
   if (requestedClient && normalizeEmail(requestedClient.email) === normalizedEmail) {
+    const progress = await attachClientProgress(requestedClient);
     return {
-      client: requestedClient,
+      client: progress.client,
+      appointments: progress.appointments,
       identityUser,
       normalizedEmail,
       matchedBy: 'requested_id',
@@ -129,6 +164,8 @@ async function resolveIdentityClient(options = {}) {
     throw createResolutionError(404, 'Client introuvable');
   }
 
+  const progress = await attachClientProgress(resolvedClient);
+
   const requestedClientIdMismatch = !!(
     requestedClientId &&
     (!requestedClient || resolvedClient.id !== requestedClientId)
@@ -141,7 +178,8 @@ async function resolveIdentityClient(options = {}) {
   }
 
   return {
-    client: resolvedClient,
+    client: progress.client,
+    appointments: progress.appointments,
     identityUser,
     normalizedEmail,
     matchedBy: 'identity_email',

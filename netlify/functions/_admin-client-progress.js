@@ -1,5 +1,33 @@
 const { getStatusRank, normalizeClientStatus } = require('./_cockpit-config');
 
+const STATUS_MIN_PORTAL_PHASE = Object.freeze({
+  contact_submitted: 3,
+  identity_created: 3,
+  onboarding_completed: 3,
+  call_requested: 3,
+  call_done: 4,
+  scan_scheduled: 4,
+  scan_payment_completed: 4,
+  scan_completed: 5,
+  analysis_ready: 5,
+  avant_projet_ready: 6,
+  avant_projet_transmitted: 7,
+  accompaniment_subscribed: 7,
+});
+
+const LEGACY_PHASE_LABELS = Object.freeze({
+  prospect: 3,
+  qualification: 3,
+  scan: 4,
+  analyse: 5,
+  analysis: 5,
+  avant_projet: 6,
+  avantprojet: 6,
+  accompagnement: 7,
+  moe: 7,
+  chantier: 8,
+});
+
 function hasValue(value) {
   if (Array.isArray(value)) return value.length > 0;
   if (typeof value === 'string') return value.trim().length > 0;
@@ -132,8 +160,32 @@ function enrichClientProgress(client, appointments) {
   };
 }
 
+function getNumericPhaseValue(value) {
+  if (typeof value === 'number' && Number.isFinite(value)) return value;
+  if (typeof value === 'string') {
+    const trimmed = value.trim();
+    if (!trimmed) return null;
+    const asNumber = Number(trimmed);
+    if (Number.isFinite(asNumber)) return asNumber;
+    return LEGACY_PHASE_LABELS[trimmed.toLowerCase()] || null;
+  }
+  return null;
+}
+
+function derivePortalPhase(client, effectiveStatus) {
+  const legacyPhase = getNumericPhaseValue(client && client.phase);
+  const minimumPhase = STATUS_MIN_PORTAL_PHASE[normalizeClientStatus(effectiveStatus)] || 3;
+
+  if (legacyPhase && Number.isFinite(legacyPhase)) {
+    return Math.max(legacyPhase, minimumPhase);
+  }
+
+  return minimumPhase;
+}
+
 module.exports = {
   chooseFarthestStatus,
   deriveStatusFromAppointments,
+  derivePortalPhase,
   enrichClientProgress,
 };

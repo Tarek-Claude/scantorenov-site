@@ -1257,7 +1257,7 @@
                                     </button>
                                 </div>
                                 <p style="font-size: 11px; color: var(--muted); margin-top: 6px;">
-                                    Matterport Model API : utilisez le couple Token ID + Token Secret depuis Dashboard Matterport &rarr; Developers &rarr; API Token.
+                                    Matterport Model API : utilisez le couple Token ID + Token Secret depuis Dashboard Matterport &rarr; Developers &rarr; API Token, ou laissez ces champs vides pour utiliser les identifiants serveur s'ils sont configur&eacute;s.
                                 </p>
                             </div>
 
@@ -2767,21 +2767,25 @@
             const tokenId = document.getElementById('matterportTokenId').value.trim();
             const tokenSecret = document.getElementById('matterportTokenSecret').value.trim();
 
-            if (!modelId || !tokenId || !tokenSecret) {
-                showErrorMessage('ID du modele, Token ID et Token Secret requis');
+            if (!modelId) {
+                showErrorMessage('ID du modele Matterport requis');
                 return;
             }
 
-            sessionStorage.setItem('mp_token_id', tokenId);
-            sessionStorage.setItem('mp_token_secret', tokenSecret);
+            if (tokenId && tokenSecret) {
+                sessionStorage.setItem('mp_token_id', tokenId);
+                sessionStorage.setItem('mp_token_secret', tokenSecret);
+            }
             showMpSyncStatus('Connexion a Matterport via le serveur...', 'loading');
 
             try {
-                const syncData = await adminFetch('/.netlify/functions/admin-sync-matterport', {
-                    modelId: modelId,
-                    tokenId: tokenId,
-                    tokenSecret: tokenSecret
-                });
+                const payload = { modelId: modelId };
+                if (tokenId && tokenSecret) {
+                    payload.tokenId = tokenId;
+                    payload.tokenSecret = tokenSecret;
+                }
+
+                const syncData = await adminFetch('/.netlify/functions/admin-sync-matterport', payload);
                 const mpData = syncData && syncData.matterport ? syncData.matterport : null;
 
                 if (!mpData) {
