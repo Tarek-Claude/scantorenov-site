@@ -810,6 +810,55 @@
             white-space: nowrap;
         }
 
+        .call-summary-form {
+            margin-top: 16px;
+            padding: 18px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            background: var(--bg);
+        }
+
+        .call-summary-form h4 {
+            font-size: 15px;
+            margin-bottom: 6px;
+        }
+
+        .call-summary-form-note {
+            font-size: 12px;
+            color: var(--muted);
+            margin-bottom: 14px;
+        }
+
+        .call-summary-grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 12px;
+        }
+
+        .call-summary-field-full {
+            grid-column: 1 / -1;
+        }
+
+        .call-summary-field label {
+            display: block;
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--text);
+            margin-bottom: 6px;
+        }
+
+        .call-summary-field textarea {
+            min-height: 96px;
+            resize: vertical;
+        }
+
+        .call-summary-actions {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            margin-top: 16px;
+        }
+
         /* MARCEL CHAT */
         .chat-panel {
             background: var(--card);
@@ -1139,6 +1188,10 @@
 
             .chat-panel {
                 height: 400px;
+            }
+
+            .call-summary-grid {
+                grid-template-columns: 1fr;
             }
 
             .matterport-viewer {
@@ -1734,6 +1787,9 @@
         let currentClientPayments = [];
         let dashboardClients = [];
         let dashboardTasks = [];
+        let phoneSummaryDraftClientId = null;
+        let phoneSummaryDraft = null;
+        let phoneSummaryFormOpen = false;
 
         // ========== DOM ELEMENTS ==========
         const authScreen = document.getElementById('authScreen');
@@ -2371,7 +2427,6 @@
                         </div>
                         <div style="display:flex;gap:12px;flex-wrap:wrap;">
                             ${validateButton}
-                            <button class="action-button" onclick="openMarcelChat()">Ouvrir Marcel</button>
                         </div>
                     `;
                     document.getElementById('chatPanel').style.display = 'flex';
@@ -2381,7 +2436,6 @@
                 html = `
                     <h3>Synthèse d'appel téléphonique</h3>
                     <p class="action-panel-description">Prenez note de la conversation téléphonique avec le client.</p>
-                    <button class="action-button" onclick="openMarcelChat()">Ouvrir Marcel</button>
                 `;
                 document.getElementById('chatPanel').style.display = 'flex';
             } else if (status === 'call_done') {
@@ -2552,7 +2606,6 @@
                         </div>
                         <div style="display:flex;gap:12px;flex-wrap:wrap;">
                             ${validateButton}
-                            <button class="action-button" onclick="openMarcelChat()">Ouvrir Marcel</button>
                         </div>
                     `;
                     document.getElementById('chatPanel').style.display = 'flex';
@@ -2562,7 +2615,6 @@
                 html = `
                     <h3>SynthÃ¨se d'appel tÃ©lÃ©phonique</h3>
                     <p class="action-panel-description">Prenez note de la conversation tÃ©lÃ©phonique avec le client.</p>
-                    <button class="action-button" onclick="openMarcelChat()">Ouvrir Marcel</button>
                 `;
                 document.getElementById('chatPanel').style.display = 'flex';
             } else if (status === 'call_done') {
@@ -2647,12 +2699,16 @@
             const pendingScanAppointment = getPrimaryPendingScanAppointment(currentClientAppointments);
             const activeScanAppointment = getPrimaryActiveScanAppointment(currentClientAppointments);
             const scanActuallyPaid = isCurrentScanActuallyPaid();
+            const phoneSummarySection = renderPhoneSummaryFormSection(client, status, phoneAppointment);
             let html = '';
 
             if (status === 'call_requested') {
                 if (phoneAppointment) {
                     const validateButton = phoneAppointment.status !== 'confirmed'
                         ? `<button class="action-button" onclick="confirmPhoneAppointment()">Valider le rendez-vous</button>`
+                        : '';
+                    const actionButtons = validateButton
+                        ? `<div style="display:flex;gap:12px;flex-wrap:wrap;">${validateButton}</div>`
                         : '';
                     html = `
                         <h3>Rendez-vous telephonique demande</h3>
@@ -2668,10 +2724,8 @@
                                 <span>${phoneAppointment.location || 'phone'}</span>
                             </div>
                         </div>
-                        <div style="display:flex;gap:12px;flex-wrap:wrap;">
-                            ${validateButton}
-                            <button class="action-button" onclick="openMarcelChat()">Ouvrir Marcel</button>
-                        </div>
+                        ${actionButtons}
+                        ${phoneSummarySection}
                     `;
                     if (chatPanel) chatPanel.style.display = 'flex';
                     panel.innerHTML = html;
@@ -2680,12 +2734,13 @@
                 html = `
                     <h3>Synthese d'appel telephonique</h3>
                     <p class="action-panel-description">Prenez note de la conversation telephonique avec le client.</p>
-                    <button class="action-button" onclick="openMarcelChat()">Ouvrir Marcel</button>
+                    ${phoneSummarySection}
                 `;
             } else if (status === 'call_done') {
                 html = `
                     <h3>Invitation scan 3D</h3>
-                    <p class="action-panel-description">Invitez le client a choisir puis regler son creneau de scan 3D depuis son espace.</p>
+                    <p class="action-panel-description">Finalisez d'abord la synthese d'appel si besoin, puis invitez le client a choisir et regler son creneau de scan 3D depuis son espace.</p>
+                    ${phoneSummarySection}
                     <button class="action-button" onclick="inviteScan()">Envoyer invitation</button>
                 `;
             } else if (status === 'scan_scheduled') {
@@ -3038,6 +3093,206 @@
             return (currentClientProjectNotes || []).find(note => note && note.type === type) || null;
         }
 
+        function createEmptyPhoneSummaryDraft() {
+            return {
+                summary: '',
+                needs: '',
+                confirmedSurface: '',
+                confirmedBudget: '',
+                constraints: '',
+                vigilance: '',
+                nextStep: ''
+            };
+        }
+
+        function parsePhoneSummaryInternalNotes(note) {
+            if (!note || !note.internal_notes) {
+                return {};
+            }
+
+            if (typeof note.internal_notes === 'object') {
+                return note.internal_notes;
+            }
+
+            if (typeof note.internal_notes !== 'string') {
+                return {};
+            }
+
+            try {
+                return JSON.parse(note.internal_notes);
+            } catch (error) {
+                return {};
+            }
+        }
+
+        function buildPhoneSummaryDraftFromNote(note) {
+            const payload = parsePhoneSummaryInternalNotes(note);
+            const needsList = Array.isArray(note && note.needs)
+                ? note.needs
+                : Array.isArray(payload.needs)
+                    ? payload.needs
+                    : [];
+
+            return {
+                summary: note && note.summary ? note.summary : (payload.summary || ''),
+                needs: needsList.join('\n'),
+                confirmedSurface: note && note.confirmed_surface ? note.confirmed_surface : (payload.confirmedSurface || ''),
+                confirmedBudget: note && note.confirmed_budget ? note.confirmed_budget : (payload.confirmedBudget || ''),
+                constraints: note && note.constraints ? note.constraints : (payload.constraints || ''),
+                vigilance: payload.vigilance || '',
+                nextStep: payload.nextStep || ''
+            };
+        }
+
+        function ensurePhoneSummaryDraft(client) {
+            if (!client || !client.id) {
+                phoneSummaryDraftClientId = null;
+                phoneSummaryDraft = createEmptyPhoneSummaryDraft();
+                phoneSummaryFormOpen = false;
+                return;
+            }
+
+            if (phoneSummaryDraftClientId === client.id && phoneSummaryDraft) {
+                return;
+            }
+
+            phoneSummaryDraftClientId = client.id;
+            phoneSummaryDraft = buildPhoneSummaryDraftFromNote(getLatestProjectNote('phone_summary'));
+            phoneSummaryFormOpen = false;
+        }
+
+        function updatePhoneSummaryDraftField(field, value) {
+            if (!phoneSummaryDraft) {
+                phoneSummaryDraft = createEmptyPhoneSummaryDraft();
+            }
+
+            phoneSummaryDraft[field] = typeof value === 'string' ? value : '';
+        }
+
+        function hasConfirmedPhoneAppointment(appointment) {
+            return !!(appointment && appointment.type === 'phone_call' && appointment.status === 'confirmed');
+        }
+
+        function canOpenPhoneSummaryForm(status, appointment) {
+            const normalizedStatus = normalizeDashboardStatus(status);
+            return normalizedStatus === 'call_done' || hasConfirmedPhoneAppointment(appointment);
+        }
+
+        function togglePhoneSummaryForm(forceOpen) {
+            if (!currentClient) return;
+            ensurePhoneSummaryDraft(currentClient);
+            phoneSummaryFormOpen = typeof forceOpen === 'boolean' ? forceOpen : !phoneSummaryFormOpen;
+            renderActionPanel(currentClient, getDashboardEffectiveStatus(currentClient));
+        }
+
+        function upsertProjectNoteInMemory(note) {
+            if (!note || !note.type) return;
+
+            currentClientProjectNotes = [
+                note,
+                ...(currentClientProjectNotes || []).filter((existingNote) => existingNote && existingNote.type !== note.type)
+            ];
+        }
+
+        function buildPhoneSummaryContextForMarcel(note) {
+            if (!note) {
+                return '';
+            }
+
+            const payload = parsePhoneSummaryInternalNotes(note);
+            const parts = [];
+            const needs = Array.isArray(note.needs) ? note.needs.filter(Boolean) : [];
+
+            if (note.summary || payload.summary) {
+                parts.push(`Resume de l'appel: ${note.summary || payload.summary}`);
+            }
+            if (needs.length) {
+                parts.push(`Besoins et priorites du client: ${needs.join(', ')}`);
+            }
+            if (note.confirmed_surface || payload.confirmedSurface) {
+                parts.push(`Surface confirmee: ${note.confirmed_surface || payload.confirmedSurface}`);
+            }
+            if (note.confirmed_budget || payload.confirmedBudget) {
+                parts.push(`Budget confirme: ${note.confirmed_budget || payload.confirmedBudget}`);
+            }
+            if (note.constraints || payload.constraints) {
+                parts.push(`Contraintes: ${note.constraints || payload.constraints}`);
+            }
+            if (payload.vigilance) {
+                parts.push(`Points de vigilance: ${payload.vigilance}`);
+            }
+            if (payload.nextStep) {
+                parts.push(`Prochaine etape recommandee: ${payload.nextStep}`);
+            }
+
+            return parts.join('\n');
+        }
+
+        function renderPhoneSummaryFormSection(client, status, phoneAppointment) {
+            if (!canOpenPhoneSummaryForm(status, phoneAppointment)) {
+                return '';
+            }
+
+            ensurePhoneSummaryDraft(client);
+            const latestPhoneSummary = getLatestProjectNote('phone_summary');
+            const toggleLabel = phoneSummaryFormOpen ? 'Masquer le formulaire d appel' : 'Ouvrir le formulaire d appel';
+            const savedNote = latestPhoneSummary && latestPhoneSummary.created_at
+                ? `Derniere synthese enregistree le ${formatShortDate(latestPhoneSummary.created_at)}.`
+                : 'Le formulaire enregistre la synthese d appel dans le dossier et la transmet ensuite a Marcel.';
+
+            if (!phoneSummaryFormOpen) {
+                return `
+                    <div style="display:flex;gap:12px;flex-wrap:wrap;margin-top:12px;">
+                        <button class="action-button" onclick="togglePhoneSummaryForm(true)">${toggleLabel}</button>
+                    </div>
+                `;
+            }
+
+            return `
+                <div style="display:flex;gap:12px;flex-wrap:wrap;margin-top:12px;">
+                    <button class="action-button" onclick="togglePhoneSummaryForm(false)">${toggleLabel}</button>
+                </div>
+                <div class="call-summary-form">
+                    <h4>Formulaire d appel</h4>
+                    <div class="call-summary-form-note">${savedNote}</div>
+                    <div class="call-summary-grid">
+                        <div class="call-summary-field call-summary-field-full">
+                            <label for="phoneSummarySummary">Resume de l echange</label>
+                            <textarea id="phoneSummarySummary" oninput="updatePhoneSummaryDraftField('summary', this.value)">${escapeHtml(phoneSummaryDraft.summary || '')}</textarea>
+                        </div>
+                        <div class="call-summary-field call-summary-field-full">
+                            <label for="phoneSummaryNeeds">Besoins et priorites du client</label>
+                            <textarea id="phoneSummaryNeeds" oninput="updatePhoneSummaryDraftField('needs', this.value)">${escapeHtml(phoneSummaryDraft.needs || '')}</textarea>
+                        </div>
+                        <div class="call-summary-field">
+                            <label for="phoneSummarySurface">Surface confirmee</label>
+                            <input type="text" id="phoneSummarySurface" value="${escapeHtml(phoneSummaryDraft.confirmedSurface || '')}" oninput="updatePhoneSummaryDraftField('confirmedSurface', this.value)">
+                        </div>
+                        <div class="call-summary-field">
+                            <label for="phoneSummaryBudget">Budget confirme</label>
+                            <input type="text" id="phoneSummaryBudget" value="${escapeHtml(phoneSummaryDraft.confirmedBudget || '')}" oninput="updatePhoneSummaryDraftField('confirmedBudget', this.value)">
+                        </div>
+                        <div class="call-summary-field call-summary-field-full">
+                            <label for="phoneSummaryConstraints">Contraintes formulees</label>
+                            <textarea id="phoneSummaryConstraints" oninput="updatePhoneSummaryDraftField('constraints', this.value)">${escapeHtml(phoneSummaryDraft.constraints || '')}</textarea>
+                        </div>
+                        <div class="call-summary-field call-summary-field-full">
+                            <label for="phoneSummaryVigilance">Points de vigilance internes</label>
+                            <textarea id="phoneSummaryVigilance" oninput="updatePhoneSummaryDraftField('vigilance', this.value)">${escapeHtml(phoneSummaryDraft.vigilance || '')}</textarea>
+                        </div>
+                        <div class="call-summary-field call-summary-field-full">
+                            <label for="phoneSummaryNextStep">Prochaine etape recommandee</label>
+                            <textarea id="phoneSummaryNextStep" oninput="updatePhoneSummaryDraftField('nextStep', this.value)">${escapeHtml(phoneSummaryDraft.nextStep || '')}</textarea>
+                        </div>
+                    </div>
+                    <div class="call-summary-actions">
+                        <button class="action-button" onclick="savePhoneSummaryForm()">Enregistrer le formulaire</button>
+                        <button class="action-button" onclick="sendPhoneSummaryToMarcel()" style="background-color:#3F6E52;">Envoyer le formulaire a Marcel</button>
+                    </div>
+                </div>
+            `;
+        }
+
         function buildMarcelBootstrapPrompt(client) {
             const displayName = getClientDisplayName(client);
             const appointment = getPrimaryPhoneAppointment(currentClientAppointments);
@@ -3073,7 +3328,7 @@
             }
 
             if (phoneSummary) {
-                parts.push(`Synthese d'appel disponible: ${phoneSummary.summary || phoneSummary.internal_notes || '-'}`);
+                parts.push(`Synthese d'appel disponible:\n${buildPhoneSummaryContextForMarcel(phoneSummary) || phoneSummary.summary || phoneSummary.internal_notes || '-'}`);
             }
 
             if (scanObservation) {
@@ -3086,6 +3341,51 @@
 
             parts.push('', "Reste concis, oriente action, et parle a l'operateur interne.");
             return parts.join('\n');
+        }
+
+        async function savePhoneSummaryForm() {
+            if (!currentClient) {
+                throw new Error('Aucun client selectionne.');
+            }
+
+            ensurePhoneSummaryDraft(currentClient);
+
+            if (!phoneSummaryDraft.summary || !phoneSummaryDraft.summary.trim()) {
+                throw new Error('Le resume de l echange est requis.');
+            }
+
+            const data = await adminFetch('/.netlify/functions/save-phone-summary', {
+                clientId: currentClient.id,
+                summary: phoneSummaryDraft.summary,
+                needs: phoneSummaryDraft.needs,
+                confirmedSurface: phoneSummaryDraft.confirmedSurface,
+                confirmedBudget: phoneSummaryDraft.confirmedBudget,
+                constraints: phoneSummaryDraft.constraints,
+                vigilance: phoneSummaryDraft.vigilance,
+                nextStep: phoneSummaryDraft.nextStep
+            });
+
+            if (data && data.note) {
+                upsertProjectNoteInMemory(data.note);
+                phoneSummaryDraft = buildPhoneSummaryDraftFromNote(data.note);
+            }
+
+            renderActionPanel(currentClient, getDashboardEffectiveStatus(currentClient));
+            return data;
+        }
+
+        async function sendPhoneSummaryToMarcel() {
+            if (!currentClient) return;
+
+            try {
+                await savePhoneSummaryForm();
+                clearMarcelChat();
+                await bootstrapMarcelPanel();
+                document.getElementById('chatPanel').scrollIntoView({ behavior: 'smooth' });
+                showSuccessMessage('Formulaire d appel enregistre et transmis a Marcel.');
+            } catch (err) {
+                showErrorMessage(err.message || 'Impossible d envoyer le formulaire a Marcel.');
+            }
         }
 
         async function bootstrapMarcelPanel() {
