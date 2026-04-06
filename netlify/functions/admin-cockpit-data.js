@@ -75,7 +75,7 @@ exports.handler = async function handler(event) {
     if (clientIds.length > 0) {
       const { data: appointments, error: appointmentError } = await supabase
         .from('appointments')
-        .select('client_id,type,status,scheduled_at')
+        .select('client_id,type,status,scheduled_at,notes')
         .in('client_id', clientIds);
 
       if (appointmentError && !isMissingTableError(appointmentError)) {

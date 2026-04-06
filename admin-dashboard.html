@@ -2278,111 +2278,6 @@
             }
         }
 
-        function renderStatusControlPanel(client, currentStatus) {
-            const panel = document.getElementById('statusControlPanel');
-            if (!panel) return;
-
-            const currentIndex = PIPELINE_STATUSES.indexOf(currentStatus);
-            const recordedStatus = normalizeDashboardStatus(client && client.recorded_status);
-            const statuses = currentIndex >= 0
-                ? PIPELINE_STATUSES.slice(0, currentIndex + 1).reverse()
-                : [currentStatus];
-            const cards = statuses.map((status) => {
-                const index = PIPELINE_STATUSES.indexOf(status);
-                const isCurrent = index === currentIndex;
-                const buttonLabel = isCurrent ? 'Etape actuelle' : 'Revenir ici';
-                const buttonClass = isCurrent ? 'status-control-button current' : 'status-control-button';
-                const disabled = isCurrent ? 'disabled' : '';
-                const cardClass = isCurrent ? 'status-control-card current' : 'status-control-card';
-
-                return `
-                    <div class="${cardClass}">
-                        <div class="status-control-step">Etape ${index + 1}</div>
-                        <div class="status-control-title">${getStatusLabel(status)}</div>
-                        <div class="status-control-help">${getStatusControlHelp(status)}</div>
-                        <button class="${buttonClass}" ${disabled} onclick="rewindClientToStatus('${status}')">
-                            ${buttonLabel}
-                        </button>
-                    </div>
-                `;
-            }).join('');
-
-            const mismatchWarning = recordedStatus && recordedStatus !== currentStatus
-                ? `
-                    <div class="status-control-warning">
-                        Le statut enregistre en base est <strong>${getStatusLabel(recordedStatus)}</strong>,
-                        mais le cockpit retient <strong>${getStatusLabel(currentStatus)}</strong> a partir des rendez-vous,
-                        paiements et livrables reels du dossier. Le retour arriere s'appuie sur cet etat effectif.
-                    </div>
-                `
-                : '';
-
-            panel.innerHTML = `
-                <div class="status-control-header">
-                    <div>
-                        <h3>Retour arrière administrateur</h3>
-                        <p>Quand vous rembobinez le dossier, le système annule aussi les rendez-vous, paiements et champs dérivés qui forceraient le client à rester sur une étape trop avancée.</p>
-                    </div>
-                    <div class="status-control-note">Étape actuelle: ${getStatusLabel(currentStatus)}</div>
-                </div>
-                ${mismatchWarning}
-                <div class="status-control-grid">${cards}</div>
-            `;
-        }
-
-        function renderStatusControlPanel(client, currentStatus) {
-            const panel = document.getElementById('statusControlPanel');
-            if (!panel) return;
-
-            const currentIndex = PIPELINE_STATUSES.indexOf(currentStatus);
-            const recordedStatus = normalizeDashboardStatus(client && client.recorded_status);
-            const statuses = currentIndex >= 0
-                ? PIPELINE_STATUSES.slice(0, currentIndex + 1).reverse()
-                : [currentStatus];
-
-            const cards = statuses.map((status) => {
-                const index = PIPELINE_STATUSES.indexOf(status);
-                const isCurrent = index === currentIndex;
-                const buttonLabel = isCurrent ? 'Etape actuelle' : 'Revenir ici';
-                const buttonClass = isCurrent ? 'status-control-button current' : 'status-control-button';
-                const disabled = isCurrent ? 'disabled' : '';
-                const cardClass = isCurrent ? 'status-control-card current' : 'status-control-card';
-
-                return `
-                    <div class="${cardClass}">
-                        <div class="status-control-step">Etape ${index + 1}</div>
-                        <div class="status-control-title">${getStatusLabel(status)}</div>
-                        <div class="status-control-help">${getStatusControlHelp(status)}</div>
-                        <button class="${buttonClass}" ${disabled} onclick="rewindClientToStatus('${status}')">
-                            ${buttonLabel}
-                        </button>
-                    </div>
-                `;
-            }).join('');
-
-            const mismatchWarning = recordedStatus && recordedStatus !== currentStatus
-                ? `
-                    <div class="status-control-warning">
-                        Le statut enregistre en base est <strong>${getStatusLabel(recordedStatus)}</strong>,
-                        mais le cockpit retient <strong>${getStatusLabel(currentStatus)}</strong> a partir des rendez-vous,
-                        paiements et livrables reels du dossier. Le retour arriere s'appuie sur cet etat effectif.
-                    </div>
-                `
-                : '';
-
-            panel.innerHTML = `
-                <div class="status-control-header">
-                    <div>
-                        <h3>Retour arriere administrateur</h3>
-                        <p>Le retour arriere ne propose que les etapes deja atteintes. Quand vous rembobinez le dossier, le systeme annule aussi les rendez-vous, paiements et champs derives qui forceraient le client a rester trop loin dans le parcours.</p>
-                    </div>
-                    <div class="status-control-note">Etape actuelle: ${getStatusLabel(currentStatus)}</div>
-                </div>
-                ${mismatchWarning}
-                <div class="status-control-grid">${cards}</div>
-            `;
-        }
-
         function getReachedDashboardStatuses(client, currentStatus) {
             const effectiveStatus = normalizeDashboardStatus(currentStatus || getDashboardEffectiveStatus(client));
             const currentIndex = PIPELINE_STATUSES.indexOf(effectiveStatus);
@@ -2443,97 +2338,6 @@
                 ${mismatchWarning}
                 <div class="status-control-grid">${cards}</div>
             `;
-        }
-
-        function renderActionPanel(client, status) {
-            const panel = document.getElementById('actionPanel');
-            const phoneAppointment = getPrimaryPhoneAppointment(currentClientAppointments);
-            const pendingScanAppointment = getPrimaryPendingScanAppointment(currentClientAppointments);
-            let html = '';
-
-            if (status === 'call_requested') {
-                if (phoneAppointment) {
-                    const validateButton = phoneAppointment.status !== 'confirmed'
-                        ? `<button class="action-button" onclick="confirmPhoneAppointment()">Valider le rendez-vous</button>`
-                        : '';
-                    html = `
-                        <h3>Rendez-vous téléphonique demandé</h3>
-                        <p class="action-panel-description">Vérifiez le créneau demandé, puis validez-le pour confirmer le rendez-vous avec le client.</p>
-                        <div class="task-card" style="margin-bottom: 16px;">
-                            <div class="task-card-header">
-                                <div class="task-card-title">Rendez-vous téléphonique</div>
-                                <div class="task-state-badge">${getAppointmentStatusLabel(phoneAppointment.status)}</div>
-                            </div>
-                            <div class="task-card-desc">${formatAppointmentDateTime(phoneAppointment.scheduled_at)}</div>
-                            <div class="task-meta">
-                                <span>${phoneAppointment.duration_minutes || 30} min</span>
-                                <span>${phoneAppointment.location || 'phone'}</span>
-                            </div>
-                        </div>
-                        <div style="display:flex;gap:12px;flex-wrap:wrap;">
-                            ${validateButton}
-                        </div>
-                    `;
-                    document.getElementById('chatPanel').style.display = 'flex';
-                    panel.innerHTML = html;
-                    return;
-                }
-                html = `
-                    <h3>Synthèse d'appel téléphonique</h3>
-                    <p class="action-panel-description">Prenez note de la conversation téléphonique avec le client.</p>
-                `;
-                document.getElementById('chatPanel').style.display = 'flex';
-            } else if (status === 'call_done') {
-                html = `
-                    <h3>Invitation scan 3D</h3>
-                    <p class="action-panel-description">Invitez le client à choisir puis régler son créneau de scan 3D depuis son espace.</p>
-                    <button class="action-button" onclick="inviteScan()">Envoyer invitation</button>
-                `;
-                document.getElementById('chatPanel').style.display = 'none';
-            } else if (status === 'scan_scheduled') {
-                html = `
-                    <h3>Paiement en attente</h3>
-                    <p class="action-panel-description">Le scan n'est plus confirmé manuellement ici. Il ne doit apparaître qu'après paiement Stripe côté client.</p>
-                `;
-                document.getElementById('chatPanel').style.display = 'none';
-            } else if (status === 'scan_payment_completed') {
-                html = `
-                    <h3>Paiement reçu</h3>
-                    <p class="action-panel-description">Le créneau scan est confirmé automatiquement. Vous pouvez maintenant préparer la visite et la logistique.</p>
-                `;
-                document.getElementById('chatPanel').style.display = 'none';
-            } else if (status === 'scan_completed') {
-                html = `
-                    <h3>Fichiers du scan</h3>
-                    <p class="action-panel-description">Téléchargez les fichiers et données du scan 3D.</p>
-                    <button class="action-button" onclick="openMarcelChat()">Discuter avec Marcel</button>
-                `;
-                document.getElementById('chatPanel').style.display = 'flex';
-                document.getElementById('filesSection').style.display = 'block';
-            } else if (status === 'analysis_ready') {
-                html = `
-                    <h3>Générer l'avant-projet</h3>
-                    <p class="action-panel-description">Préparez et validez l'avant-projet avec Marcel.</p>
-                    <button class="action-button" onclick="openMarcelChat()">Discuter avec Marcel</button>
-                    <button class="action-button" onclick="generateAvantProjet()" style="background-color: #4CAF50;">Générer avant-projet</button>
-                `;
-                document.getElementById('chatPanel').style.display = 'flex';
-            } else if (status === 'avant_projet_ready') {
-                html = `
-                    <h3>Avant-projet finalisé</h3>
-                    <p class="action-panel-description">L'avant-projet est prêt. Proposez l'accompagnement.</p>
-                    <button class="action-button" onclick="proposeAccompaniment()">Proposer accompagnement</button>
-                `;
-                document.getElementById('chatPanel').style.display = 'none';
-            } else {
-                html = `
-                    <h3>Etape suivante</h3>
-                    <p class="action-panel-description">Aucune action requise pour le moment.</p>
-                `;
-                document.getElementById('chatPanel').style.display = 'none';
-            }
-
-            panel.innerHTML = html;
         }
 
         async function syncCockpitTasks(clientId) {
@@ -2622,119 +2426,6 @@
             } catch (err) {
                 showErrorMessage('Erreur lors de la validation du rendez-vous: ' + err.message);
             }
-        }
-
-        function renderActionPanel(client, status) {
-            const panel = document.getElementById('actionPanel');
-            const phoneAppointment = getPrimaryPhoneAppointment(currentClientAppointments);
-            const pendingScanAppointment = getPrimaryPendingScanAppointment(currentClientAppointments);
-            let html = '';
-
-            if (status === 'call_requested') {
-                if (phoneAppointment) {
-                    const validateButton = phoneAppointment.status !== 'confirmed'
-                        ? `<button class="action-button" onclick="confirmPhoneAppointment()">Valider le rendez-vous</button>`
-                        : '';
-                    html = `
-                        <h3>Rendez-vous tÃ©lÃ©phonique demandÃ©</h3>
-                        <p class="action-panel-description">VÃ©rifiez le crÃ©neau demandÃ©, puis validez-le pour confirmer le rendez-vous avec le client.</p>
-                        <div class="task-card" style="margin-bottom: 16px;">
-                            <div class="task-card-header">
-                                <div class="task-card-title">Rendez-vous tÃ©lÃ©phonique</div>
-                                <div class="task-state-badge">${getAppointmentStatusLabel(phoneAppointment.status)}</div>
-                            </div>
-                            <div class="task-card-desc">${formatAppointmentDateTime(phoneAppointment.scheduled_at)}</div>
-                            <div class="task-meta">
-                                <span>${phoneAppointment.duration_minutes || 30} min</span>
-                                <span>${phoneAppointment.location || 'phone'}</span>
-                            </div>
-                        </div>
-                        <div style="display:flex;gap:12px;flex-wrap:wrap;">
-                            ${validateButton}
-                        </div>
-                    `;
-                    document.getElementById('chatPanel').style.display = 'flex';
-                    panel.innerHTML = html;
-                    return;
-                }
-                html = `
-                    <h3>SynthÃ¨se d'appel tÃ©lÃ©phonique</h3>
-                    <p class="action-panel-description">Prenez note de la conversation tÃ©lÃ©phonique avec le client.</p>
-                `;
-                document.getElementById('chatPanel').style.display = 'flex';
-            } else if (status === 'call_done') {
-                html = `
-                    <h3>Invitation scan 3D</h3>
-                    <p class="action-panel-description">Invitez le client Ã  choisir puis rÃ©gler son crÃ©neau de scan 3D depuis son espace.</p>
-                    <button class="action-button" onclick="inviteScan()">Envoyer invitation</button>
-                `;
-                document.getElementById('chatPanel').style.display = 'none';
-            } else if (status === 'scan_scheduled') {
-                if (pendingScanAppointment) {
-                    html = `
-                        <h3>Validation du rendez-vous scan</h3>
-                        <p class="action-panel-description">Ce crÃ©neau a Ã©tÃ© demandÃ© via un code promo. Le paiement est contournÃ©, mais votre validation interne reste nÃ©cessaire.</p>
-                        <div class="task-card" style="margin-bottom: 16px;">
-                            <div class="task-card-header">
-                                <div class="task-card-title">Scan 3D Matterport</div>
-                                <div class="task-state-badge">${getAppointmentStatusLabel(pendingScanAppointment.status)}</div>
-                            </div>
-                            <div class="task-card-desc">${formatAppointmentDateTime(pendingScanAppointment.scheduled_at)}</div>
-                            <div class="task-meta">
-                                <span>${pendingScanAppointment.duration_minutes || 240} min</span>
-                                <span>${pendingScanAppointment.location || 'Adresse non renseignee'}</span>
-                            </div>
-                        </div>
-                        <div style="display:flex;gap:12px;flex-wrap:wrap;">
-                            <button class="action-button" onclick="confirmScan()">Valider le rendez-vous</button>
-                            <button class="action-button" onclick="cancelScanRequest()" style="background-color:#C62828;">Refuser ce creneau</button>
-                        </div>
-                    `;
-                } else {
-                    html = `
-                        <h3>Validation scan en attente</h3>
-                        <p class="action-panel-description">Le dossier attend une validation interne du scan. Aucun paiement Stripe supplÃ©mentaire n'est attendu ici.</p>
-                    `;
-                }
-                document.getElementById('chatPanel').style.display = 'none';
-            } else if (status === 'scan_payment_completed') {
-                html = `
-                    <h3>Paiement reÃ§u</h3>
-                    <p class="action-panel-description">Le crÃ©neau scan est confirmÃ© automatiquement. Vous pouvez maintenant prÃ©parer la visite et la logistique.</p>
-                `;
-                document.getElementById('chatPanel').style.display = 'none';
-            } else if (status === 'scan_completed') {
-                html = `
-                    <h3>Fichiers du scan</h3>
-                    <p class="action-panel-description">TÃ©lÃ©chargez les fichiers et donnÃ©es du scan 3D.</p>
-                    <button class="action-button" onclick="openMarcelChat()">Discuter avec Marcel</button>
-                `;
-                document.getElementById('chatPanel').style.display = 'flex';
-                document.getElementById('filesSection').style.display = 'block';
-            } else if (status === 'analysis_ready') {
-                html = `
-                    <h3>GÃ©nÃ©rer l'avant-projet</h3>
-                    <p class="action-panel-description">PrÃ©parez et validez l'avant-projet avec Marcel.</p>
-                    <button class="action-button" onclick="openMarcelChat()">Discuter avec Marcel</button>
-                    <button class="action-button" onclick="generateAvantProjet()" style="background-color: #4CAF50;">GÃ©nÃ©rer avant-projet</button>
-                `;
-                document.getElementById('chatPanel').style.display = 'flex';
-            } else if (status === 'avant_projet_ready') {
-                html = `
-                    <h3>Avant-projet finalisÃ©</h3>
-                    <p class="action-panel-description">L'avant-projet est prÃªt. Proposez l'accompagnement.</p>
-                    <button class="action-button" onclick="proposeAccompaniment()">Proposer accompagnement</button>
-                `;
-                document.getElementById('chatPanel').style.display = 'none';
-            } else {
-                html = `
-                    <h3>Etape suivante</h3>
-                    <p class="action-panel-description">Aucune action requise pour le moment.</p>
-                `;
-                document.getElementById('chatPanel').style.display = 'none';
-            }
-
-            panel.innerHTML = html;
         }
 
         function renderActionPanel(client, status) {
@@ -2967,51 +2658,6 @@
             }
         }
 
-        async function confirmScan() {
-            if (!currentClient) return;
-
-            const pendingScanAppointment = getPrimaryPendingScanAppointment(currentClientAppointments);
-            if (!pendingScanAppointment) {
-                showErrorMessage('Aucun rendez-vous scan en attente de validation.');
-                return;
-            }
-
-            try {
-                await adminFetch('/.netlify/functions/confirm-appointment', {
-                    appointmentId: pendingScanAppointment.id,
-                    action: 'confirm',
-                    clientId: currentClient.id
-                });
-                showSuccessMessage('Rendez-vous scan validÃ©.');
-                await selectClientById(currentClient.id);
-                await loadDashboard();
-            } catch (err) {
-                showErrorMessage('Erreur lors de la validation du scan: ' + err.message);
-            }
-        }
-
-        async function cancelScanRequest() {
-            if (!currentClient) return;
-
-            const pendingScanAppointment = getPrimaryPendingScanAppointment(currentClientAppointments);
-            if (!pendingScanAppointment) {
-                showErrorMessage('Aucun rendez-vous scan en attente Ã  refuser.');
-                return;
-            }
-
-            try {
-                await adminFetch('/.netlify/functions/confirm-appointment', {
-                    appointmentId: pendingScanAppointment.id,
-                    action: 'cancel',
-                    clientId: currentClient.id
-                });
-                showSuccessMessage('Demande de scan refusÃ©e.');
-                await selectClientById(currentClient.id);
-                await loadDashboard();
-            } catch (err) {
-                showErrorMessage('Erreur lors du refus du scan: ' + err.message);
-            }
-        }
 
         async function cancelScanRequest() {
             if (!currentClient) return;
@@ -3028,6 +2674,10 @@
                     });
                     showSuccessMessage('Demande de scan refusée.');
                 } else if (activeScanAppointment && !isCurrentScanActuallyPaid()) {
+                    const confirmed = window.confirm(
+                        'Annuler ce créneau scan non encaissé ?\n\nLe dossier reviendra à l\'étape après l\'appel. Cette action est irréversible.'
+                    );
+                    if (!confirmed) return;
                     await adminFetch('/.netlify/functions/admin-rewind-client-stage', {
                         clientId: currentClient.id,
                         targetStatus: 'call_done'
@@ -3509,9 +3159,6 @@
             }
         }
 
-        async function confirmScan() {
-            showErrorMessage('La confirmation manuelle du scan a été retirée. Le créneau est confirmé automatiquement après paiement Stripe.');
-        }
 
         async function confirmScan() {
             if (!currentClient) return;
@@ -3697,98 +3344,6 @@
             return parts.length ? ` Nettoyage appliqué: ${parts.join(', ')}.` : '';
         }
 
-        async function rewindClientToStatus(targetStatus) {
-            if (!currentClient) return;
-
-            const currentStatus = normalizeDashboardStatus(currentClient.status);
-            const currentIndex = PIPELINE_STATUSES.indexOf(currentStatus);
-            const targetIndex = PIPELINE_STATUSES.indexOf(targetStatus);
-
-            if (targetIndex === -1 || currentIndex === -1 || targetIndex >= currentIndex) {
-                return;
-            }
-
-            const confirmed = window.confirm(
-                `Revenir le dossier de "${getStatusLabel(currentStatus)}" à "${getStatusLabel(targetStatus)}" ?\n\n`
-                + 'Les rendez-vous, paiements et contenus des étapes suivantes seront neutralisés si nécessaire pour éviter que le dossier reparte immédiatement vers l avant.'
-            );
-            if (!confirmed) {
-                return;
-            }
-
-            try {
-                const data = await adminFetch('/.netlify/functions/admin-rewind-client-stage', {
-                    clientId: currentClient.id,
-                    targetStatus
-                });
-
-                currentClient = {
-                    ...data.client,
-                    status: normalizeDashboardStatus(data.client.status)
-                };
-                dashboardClients = dashboardClients.map(client =>
-                    client.id === currentClient.id ? currentClient : client
-                );
-
-                clearMarcelChat();
-                renderClientProfile(currentClient);
-                await syncCockpitTasks(currentClient.id);
-                await loadClientTasks(currentClient.id);
-                await loadDashboard();
-
-                showSuccessMessage(`Dossier replacé sur "${getStatusLabel(targetStatus)}".${buildRewindSummary(data.cleanup)}`);
-            } catch (err) {
-                console.error('Rewind error:', err);
-                showErrorMessage(err.message || 'Impossible de revenir à cette étape.');
-            }
-        }
-
-        async function rewindClientToStatus(targetStatus) {
-            if (!currentClient) return;
-
-            const currentStatus = getDashboardEffectiveStatus(currentClient);
-            const currentIndex = PIPELINE_STATUSES.indexOf(currentStatus);
-            const targetIndex = PIPELINE_STATUSES.indexOf(targetStatus);
-
-            if (targetIndex === -1 || currentIndex === -1 || targetIndex >= currentIndex) {
-                showErrorMessage('Choisissez une etape anterieure reellement atteinte par le dossier.');
-                return;
-            }
-
-            const confirmed = window.confirm(
-                `Revenir le dossier de "${getStatusLabel(currentStatus)}" a "${getStatusLabel(targetStatus)}" ?\n\n`
-                + 'Les rendez-vous, paiements et contenus des etapes suivantes seront neutralises si necessaire pour eviter que le dossier reparte immediatement vers l avant.'
-            );
-            if (!confirmed) {
-                return;
-            }
-
-            try {
-                const data = await adminFetch('/.netlify/functions/admin-rewind-client-stage', {
-                    clientId: currentClient.id,
-                    targetStatus
-                });
-
-                currentClient = {
-                    ...data.client,
-                    status: normalizeDashboardStatus(data.client.status)
-                };
-                dashboardClients = dashboardClients.map(client =>
-                    client.id === currentClient.id ? currentClient : client
-                );
-
-                clearMarcelChat();
-                renderClientProfile(currentClient);
-                await syncCockpitTasks(currentClient.id);
-                await loadClientTasks(currentClient.id);
-                await loadDashboard();
-
-                showSuccessMessage(`Dossier replace sur "${getStatusLabel(targetStatus)}".${buildRewindSummary(data.cleanup)}`);
-            } catch (err) {
-                console.error('Rewind error:', err);
-                showErrorMessage(err.message || 'Impossible de revenir a cette etape.');
-            }
-        }
 
         async function rewindClientToStatus(targetStatus) {
             if (!currentClient) return;
