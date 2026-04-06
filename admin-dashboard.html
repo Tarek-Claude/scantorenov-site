@@ -6,20 +6,65 @@
     <title>Admin Dashboard - ScantoRenov</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Cormorant+Garamond:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400&family=DM+Sans:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
     <style>
         :root {
-            --green: #2D5F3E;
-            --bg: #F5F2ED;
+            --bg: #F5F0E8;
+            --bg-warm: #EBE3D7;
+            --mid: #E2D9CC;
             --card: #FFFFFF;
-            --text: #2A2A2A;
-            --muted: #8A8A8A;
-            --border: rgba(42, 42, 42, 0.1);
-            --success: #4CAF50;
-            --warning: #FF9800;
-            --error: #F44336;
-            --info: #2196F3;
+            --card-alt: #FBF8F4;
+
+            --green: #1B4332;
+            --green-hover: #2D5F3E;
+            --green-light: rgba(27,67,50,0.08);
+
+            --terracotta: #B5634B;
+            --terracotta-light: rgba(181,99,75,0.10);
+
+            --teal: #17555C;
+            --teal-light: rgba(23,85,92,0.08);
+
+            --text: #1A1A1A;
+            --text-soft: #4A4A4A;
+            --muted: #787878;
+            --border: rgba(26, 26, 26, 0.12);
+            --border-strong: rgba(26, 26, 26, 0.22);
+
+            --success: #2E7D4F;
+            --warning: #D4860A;
+            --error: #C23C2E;
+            --info: #17555C;
+
+            --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.04);
+            --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.05);
+            --shadow: 0 4px 20px rgba(0, 0, 0, 0.07);
+            --shadow-md: 0 8px 30px rgba(0, 0, 0, 0.09);
+            --shadow-lg: 0 16px 48px rgba(0, 0, 0, 0.12);
+
+            --radius-xs: 4px;
+            --radius-sm: 8px;
+            --radius-md: 12px;
+            --radius-lg: 16px;
+            --radius-xl: 24px;
+            --radius-full: 9999px;
+
+            --font-heading: 'Cormorant Garamond', serif;
+            --font-body: 'DM Sans', 'Inter', sans-serif;
+            --font-accent: 'Space Grotesk', sans-serif;
+
+            --text-xs: 0.75rem;
+            --text-sm: 0.8125rem;
+            --text-base: 0.9375rem;
+            --text-lg: 1.125rem;
+            --text-xl: 1.375rem;
+            --text-2xl: 1.75rem;
+            --text-3xl: 2.25rem;
+            --text-4xl: 3rem;
+
+            --ease: cubic-bezier(0.4, 0, 0.2, 1);
+            --duration: 0.2s;
         }
 
         * {
@@ -34,29 +79,29 @@
         }
 
         body {
-            font-family: 'Inter', sans-serif;
+            font-family: var(--font-body);
             background-color: var(--bg);
             color: var(--text);
             line-height: 1.6;
         }
 
         h1, h2, h3, h4 {
-            font-family: 'Cormorant Garamond', serif;
+            font-family: var(--font-heading);
             font-weight: 500;
         }
 
         button {
-            font-family: 'Inter', sans-serif;
+            font-family: var(--font-body);
             cursor: pointer;
             border: none;
             border-radius: 6px;
             font-size: 14px;
             font-weight: 500;
-            transition: all 0.2s ease;
+            transition: all var(--duration) var(--ease);
         }
 
         input, textarea {
-            font-family: 'Inter', sans-serif;
+            font-family: var(--font-body);
             border: 1px solid var(--border);
             border-radius: 6px;
             padding: 10px 12px;
@@ -67,7 +112,7 @@
         input:focus, textarea:focus {
             outline: none;
             border-color: var(--green);
-            box-shadow: 0 0 0 3px rgba(45, 95, 62, 0.1);
+            box-shadow: 0 0 0 3px rgba(27,67,50,0.1);
         }
 
         /* AUTH SCREEN */
@@ -183,7 +228,7 @@
         }
 
         .logout-btn {
-            background-color: #F5F2ED;
+            background-color: var(--bg-warm);
             color: var(--text);
             padding: 8px 16px;
             font-size: 13px;
@@ -564,10 +609,10 @@
 
         @keyframes pulse {
             0%, 100% {
-                box-shadow: 0 0 0 0 rgba(45, 95, 62, 0.7);
+                box-shadow: 0 0 0 0 rgba(27,67,50,0.7);
             }
             50% {
-                box-shadow: 0 0 0 8px rgba(45, 95, 62, 0);
+                box-shadow: 0 0 0 8px rgba(27,67,50,0);
             }
         }
 
@@ -641,8 +686,8 @@
             letter-spacing: 0.04em;
             text-transform: uppercase;
             color: var(--green);
-            background: rgba(45, 95, 62, 0.08);
-            border: 1px solid rgba(45, 95, 62, 0.16);
+            background: rgba(27,67,50,0.08);
+            border: 1px solid rgba(27,67,50,0.16);
             border-radius: 999px;
             padding: 6px 10px;
             white-space: nowrap;
@@ -665,8 +710,8 @@
         }
 
         .status-control-card.current {
-            border-color: rgba(45, 95, 62, 0.3);
-            background: rgba(45, 95, 62, 0.06);
+            border-color: rgba(27,67,50,0.3);
+            background: rgba(27,67,50,0.06);
         }
 
         .status-control-step {
@@ -704,7 +749,7 @@
         }
 
         .status-control-button:hover:not(:disabled) {
-            background: rgba(45, 95, 62, 0.08);
+            background: rgba(27,67,50,0.08);
         }
 
         .status-control-button.current {
@@ -1106,7 +1151,7 @@
         }
 
         .mp-dim-table tr:hover td {
-            background: rgba(45, 95, 62, 0.04);
+            background: rgba(27,67,50,0.04);
         }
 
         .mp-floorplan-card {
@@ -1131,7 +1176,7 @@
             display: inline-block;
             width: 14px;
             height: 14px;
-            border: 2px solid rgba(45,95,62,0.3);
+            border: 2px solid rgba(27,67,50,0.3);
             border-top-color: var(--green);
             border-radius: 50%;
             animation: spin 0.8s linear infinite;
@@ -4119,5 +4164,4 @@
     </script>
 </body>
 </html>
-
 

@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>Scantorenov &#8212; Scan 3D &amp; R&#233;novation haut de gamme</title>
 <meta name="description" content="Scantorenov : scan 3D Matterport et Ma&#238;trise d&#8217;&#338;uvre d&#8217;Ex&#233;cution pour votre r&#233;novation. Exp&#233;rience immersive, &#233;coresponsable et haut de gamme." />
-<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300&family=Inter:wght@300;400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet" />
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400&family=DM+Sans:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet" />
 <style>
 *, *::before, *::after {
   box-sizing: border-box;
@@ -14,17 +14,61 @@
 }
 
 :root {
-  --bg: #F5F2ED;
+  --bg: #F5F0E8;
+  --bg-warm: #EBE3D7;
+  --mid: #E2D9CC;
   --card: #FFFFFF;
-  --green: #2D5F3E;
-  --green-hover: #3A7A50;
-  --terracotta: #C4745A;
-  --teal: #1A5F6A;
-  --muted: #8A8A8A;
-  --border: rgba(42, 42, 42, 0.1);
-  --text: #2A2A2A;
-  --text-soft: #5A5A5A;
-  --shadow: 0 2px 20px rgba(0, 0, 0, 0.06);
+  --card-alt: #FBF8F4;
+
+  --green: #1B4332;
+  --green-hover: #2D5F3E;
+  --green-light: rgba(27,67,50,0.08);
+
+  --terracotta: #B5634B;
+  --terracotta-light: rgba(181,99,75,0.10);
+
+  --teal: #17555C;
+  --teal-light: rgba(23,85,92,0.08);
+
+  --text: #1A1A1A;
+  --text-soft: #4A4A4A;
+  --muted: #787878;
+  --border: rgba(26, 26, 26, 0.12);
+  --border-strong: rgba(26, 26, 26, 0.22);
+
+  --success: #2E7D4F;
+  --warning: #D4860A;
+  --error: #C23C2E;
+  --info: #17555C;
+
+  --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.04);
+  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.05);
+  --shadow: 0 4px 20px rgba(0, 0, 0, 0.07);
+  --shadow-md: 0 8px 30px rgba(0, 0, 0, 0.09);
+  --shadow-lg: 0 16px 48px rgba(0, 0, 0, 0.12);
+
+  --radius-xs: 4px;
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-xl: 24px;
+  --radius-full: 9999px;
+
+  --font-heading: 'Cormorant Garamond', serif;
+  --font-body: 'DM Sans', 'Inter', sans-serif;
+  --font-accent: 'Space Grotesk', sans-serif;
+
+  --text-xs: 0.75rem;
+  --text-sm: 0.8125rem;
+  --text-base: 0.9375rem;
+  --text-lg: 1.125rem;
+  --text-xl: 1.375rem;
+  --text-2xl: 1.75rem;
+  --text-3xl: 2.25rem;
+  --text-4xl: 3rem;
+
+  --ease: cubic-bezier(0.4, 0, 0.2, 1);
+  --duration: 0.2s;
 }
 
 html {
@@ -32,7 +76,7 @@ html {
 }
 
 body {
-  font-family: 'Inter', sans-serif;
+  font-family: var(--font-body);
   background: var(--bg);
   color: var(--text);
   line-height: 1.7;
@@ -67,7 +111,7 @@ nav {
   }
 
 .logo-text {
-  font-family: 'Space Grotesk', sans-serif;
+  font-family: var(--font-accent);
   font-size: 1.25rem;
   font-weight: 700;
   color: var(--text);
@@ -124,14 +168,14 @@ nav {
   padding: 120px 24px 80px;
   position: relative;
   overflow: hidden;
-  background: linear-gradient(180deg, #F5F2ED 0%, #EDE8E0 50%, #F5F2ED 100%);
+  background: linear-gradient(180deg, var(--bg) 0%, var(--mid) 50%, var(--bg) 100%);
 }
 
 .hero::before {
   content: '';
   position: absolute;
   inset: 0;
-  background: radial-gradient(ellipse 60% 50% at 50% 40%, rgba(45, 95, 62, 0.04) 0%, transparent 70%);
+  background: radial-gradient(ellipse 60% 50% at 50% 40%, rgba(27,67,50,0.04) 0%, transparent 70%);
 }
 
 .hero-logo {
@@ -142,7 +186,7 @@ nav {
 }
 
 .hero-baseline {
-  font-family: 'Cormorant Garamond', serif;
+  font-family: var(--font-heading);
   font-size: 1.1rem;
   font-weight: 300;
   font-style: italic;
@@ -153,7 +197,7 @@ nav {
 }
 
 .hero h1 {
-  font-family: 'Cormorant Garamond', serif;
+  font-family: var(--font-heading);
   font-size: clamp(2rem, 4.5vw, 3.4rem);
   font-weight: 300;
   line-height: 1.2;
@@ -207,7 +251,7 @@ section {
 }
 
 section h2 {
-  font-family: 'Cormorant Garamond', serif;
+  font-family: var(--font-heading);
   font-size: 2.2rem;
   font-weight: 300;
   margin-bottom: 20px;
@@ -248,7 +292,7 @@ section .section-intro {
 }
 
 .ac-title {
-  font-family: 'Space Grotesk', sans-serif;
+  font-family: var(--font-accent);
   font-size: 1rem;
   font-weight: 600;
   margin-bottom: 12px;
@@ -273,7 +317,7 @@ section .section-intro {
 }
 
 .forfait-price {
-  font-family: 'Space Grotesk', sans-serif;
+  font-family: var(--font-accent);
   font-size: 2.8rem;
   font-weight: 700;
   color: var(--green);
@@ -347,7 +391,7 @@ section .section-intro {
 }
 
 .sc-title {
-  font-family: 'Space Grotesk', sans-serif;
+  font-family: var(--font-accent);
   font-size: 1rem;
   font-weight: 600;
   margin-bottom: 12px;
@@ -362,7 +406,7 @@ section .section-intro {
 
 .matterport-section {
   padding: 80px 24px;
-  background: #EDE8E0;
+  background: var(--mid);
   border-top: 1px solid var(--border);
 }
 
@@ -373,7 +417,7 @@ section .section-intro {
 }
 
 .matterport-header h2 {
-  font-family: 'Cormorant Garamond', serif;
+  font-family: var(--font-heading);
   font-size: 2rem;
   font-weight: 300;
   margin-bottom: 12px;
@@ -427,7 +471,7 @@ section .section-intro {
 }
 
 .contact-phrase {
-  font-family: 'Cormorant Garamond', serif;
+  font-family: var(--font-heading);
   font-size: 0.9rem; font-weight: 400;
   color: var(--text); line-height: 2.8;
   margin: 0; padding: 0;
@@ -436,7 +480,7 @@ section .section-intro {
   transition: border-color 0.3s;
 }
 .contact-phrase:nth-child(odd) {
-  border-left-color: rgba(45,95,62,0.2);
+  border-left-color: rgba(27,67,50,0.2);
 }
 
 /* Colonne droite du contact-grid : espacement des champs */
@@ -502,7 +546,7 @@ section .section-intro {
   border-radius: 8px;
   padding: 13px 16px;
   color: var(--text);
-  font-family: 'Inter', sans-serif;
+  font-family: var(--font-body);
   font-size: 0.88rem;
   outline: none;
   transition: border-color 0.2s;
@@ -581,7 +625,7 @@ section .section-intro {
   margin-bottom: 8px;
 }
 .form-group-label {
-  font-family: 'Space Grotesk', sans-serif;
+  font-family: var(--font-accent);
   font-size: 0.72rem; font-weight: 700;
   letter-spacing: 0.12em; text-transform: uppercase;
   color: var(--green); margin-bottom: 10px;
@@ -618,14 +662,14 @@ section .section-intro {
 }
 .form-tag:hover {
   border-color: var(--green); color: var(--text);
-  background: rgba(45,95,62,0.03);
+  background: rgba(27,67,50,0.03);
   transform: translateY(-1px);
-  box-shadow: 0 3px 12px rgba(45,95,62,0.08);
+  box-shadow: 0 3px 12px rgba(27,67,50,0.08);
 }
 .form-tag.active {
   border-color: var(--green); color: var(--green);
-  background: rgba(45,95,62,0.08); font-weight: 600;
-  box-shadow: 0 2px 10px rgba(45,95,62,0.12);
+  background: rgba(27,67,50,0.08); font-weight: 600;
+  box-shadow: 0 2px 10px rgba(27,67,50,0.12);
 }
 .form-tag .tag-icon {
   font-size: 1rem; line-height: 1;
