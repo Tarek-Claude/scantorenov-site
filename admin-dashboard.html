@@ -2169,8 +2169,8 @@
             // Action panel
             renderActionPanel(client, status);
 
-            // Matterport visible uniquement a partir de scan_completed
-            const matterportFromStatus = ['scan_completed', 'analysis_ready', 'avant_projet_ready', 'avant_projet_transmitted', 'accompaniment_subscribed'];
+            // Matterport visible a partir de scan_payment_completed (admin saisit l'ID apres la visite)
+            const matterportFromStatus = ['scan_payment_completed', 'scan_completed', 'analysis_ready', 'avant_projet_ready', 'avant_projet_transmitted', 'accompaniment_subscribed'];
             document.getElementById('matterportSection').style.display = matterportFromStatus.includes(status) ? 'block' : 'none';
 
             // Pré-remplir le model ID si existant
@@ -2552,9 +2552,12 @@
                         </div>
                     `;
                 } else {
+                    const scanObsSection = renderScanObservationFormSection(client, status);
                     html = `
-                        <h3>Paiement recu</h3>
-                        <p class="action-panel-description">Le creneau scan est confirme automatiquement. Vous pouvez maintenant preparer la visite et la logistique.</p>
+                        <h3>Paiement recu — visite a planifier</h3>
+                        <p class="action-panel-description">Le creneau scan est confirme. Preparez la visite, puis saisissez l ID Matterport ci-dessous apres le scan pour synchroniser les donnees et avancer le dossier.</p>
+                        ${scanObsSection}
+                        ${phoneSummarySection}
                     `;
                 }
             } else if (status === 'scan_completed') {
@@ -3099,8 +3102,8 @@
         function canOpenScanObservationForm(status) {
             const normalizedStatus = normalizeDashboardStatus(status);
             const statusIdx = PIPELINE_STATUSES.indexOf(normalizedStatus);
-            const scanCompletedIdx = PIPELINE_STATUSES.indexOf('scan_completed');
-            return scanCompletedIdx >= 0 && statusIdx >= scanCompletedIdx;
+            const scanPaymentIdx = PIPELINE_STATUSES.indexOf('scan_payment_completed');
+            return scanPaymentIdx >= 0 && statusIdx >= scanPaymentIdx;
         }
 
         function createEmptyScanObservationDraft() {
