@@ -116,16 +116,22 @@ function isPhoneAppointmentDone(appointment) {
   return appointment.status === 'confirmed' && isPastAppointment(appointment);
 }
 
-function isPaidScanAppointment(appointment) {
+function isCompletedPayment(payment, type) {
+  if (!payment || typeof payment !== 'object') return false;
+  if (type && payment.type !== type) return false;
+  return payment.status === 'completed';
+}
+
+function isActiveScanAppointment(appointment) {
   if (!appointment || appointment.type !== 'scan_3d') return false;
-  return ['confirmed', 'completed'].includes(appointment.status);
+  return appointment.status !== 'cancelled';
 }
 
 function isPendingScanValidationAppointment(appointment) {
   return isPromoPendingValidationAppointment(appointment);
 }
 
-function deriveStatusFromAppointments(appointments, currentStatus) {
+function deriveStatusFromAppointments(appointments, currentStatus, payments = []) {
   let derivedStatus = currentStatus || null;
 
   if (!Array.isArray(appointments) || appointments.length === 0) {
@@ -139,8 +145,11 @@ function deriveStatusFromAppointments(appointments, currentStatus) {
   const hasPendingScanValidation = appointments.some(
     (appointment) => isActiveAppointment(appointment) && isPendingScanValidationAppointment(appointment)
   );
-  const hasPaidScanAppointment = appointments.some(
-    (appointment) => isActiveAppointment(appointment) && isPaidScanAppointment(appointment)
+  const hasAnyActiveScanAppointment = appointments.some(
+    (appointment) => isActiveAppointment(appointment) && isActiveScanAppointment(appointment)
+  );
+  const hasCompletedScanPayment = (payments || []).some(
+    (payment) => isCompletedPayment(payment, 'scan_3d')
   );
 
   if (hasCompletedPhoneAppointment) {
@@ -149,21 +158,34 @@ function deriveStatusFromAppointments(appointments, currentStatus) {
     derivedStatus = chooseFarthestStatus(derivedStatus, 'call_requested');
   }
 
-  if (hasPaidScanAppointment) {
+  const currentRank = getStatusRank(normalizeClientStatus(derivedStatus));
+  const scanPaymentRank = getStatusRank('scan_payment_completed');
+
+  if (hasPendingScanValidation) {
+    if (currentRank !== -1 && currentRank <= scanPaymentRank) {
+      derivedStatus = 'scan_scheduled';
+    } else {
+      derivedStatus = chooseFarthestStatus(derivedStatus, 'scan_scheduled');
+    }
+  } else if (hasCompletedScanPayment) {
     derivedStatus = chooseFarthestStatus(derivedStatus, 'scan_payment_completed');
-  } else if (hasPendingScanValidation) {
-    derivedStatus = chooseFarthestStatus(derivedStatus, 'scan_scheduled');
+  } else if (hasAnyActiveScanAppointment) {
+    if (currentRank !== -1 && currentRank <= scanPaymentRank) {
+      derivedStatus = 'scan_scheduled';
+    } else {
+      derivedStatus = chooseFarthestStatus(derivedStatus, 'scan_scheduled');
+    }
   }
 
   return derivedStatus;
 }
 
-function enrichClientProgress(client, appointments) {
+function enrichClientProgress(client, appointments, payments = []) {
   if (!client || typeof client !== 'object') return client;
 
   const recordedStatus = client.status || null;
   const inferredStatus = inferClientProgressStatus(client, recordedStatus);
-  const effectiveStatus = deriveStatusFromAppointments(appointments, inferredStatus || recordedStatus)
+  const effectiveStatus = deriveStatusFromAppointments(appointments, inferredStatus || recordedStatus, payments)
     || inferredStatus
     || recordedStatus
     || 'contact_submitted';

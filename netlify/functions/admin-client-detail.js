@@ -2,6 +2,7 @@ const { createClient } = require('@supabase/supabase-js');
 const { authorizeAdminRequest } = require('./_admin-session');
 const { enrichClientProgress } = require('./_admin-client-progress');
 const { safeReconcileClientTasks } = require('./_cockpit-engine');
+const { buildPaymentAccessSummary, fetchClientPayments } = require('./_payment-access');
 
 const headers = {
   'Access-Control-Allow-Origin': '*',
@@ -110,7 +111,11 @@ exports.handler = async function handler(event) {
       throw new Error(`Lecture rendez-vous: ${appointmentError.message}`);
     }
 
-    const enrichedClient = enrichClientProgress(client, appointments || []);
+    const payments = await fetchClientPayments(supabase, body.clientId);
+    const enrichedClient = {
+      ...enrichClientProgress(client, appointments || [], payments),
+      payment_access: buildPaymentAccessSummary(payments, client),
+    };
     let activeTasks = tasks || [];
 
     if (!taskError) {
@@ -141,6 +146,7 @@ exports.handler = async function handler(event) {
         success: true,
         client: enrichedClient,
         appointments: appointments || [],
+        payments,
         projectNotes: projectNotes || [],
         tasks: activeTasks,
       }),

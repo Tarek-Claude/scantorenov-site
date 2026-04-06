@@ -595,6 +595,120 @@
             background-color: var(--green);
         }
 
+        .status-control-panel {
+            background: var(--card);
+            border-radius: 8px;
+            padding: 24px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+        }
+
+        .status-control-header {
+            display: flex;
+            justify-content: space-between;
+            gap: 16px;
+            align-items: flex-start;
+            margin-bottom: 18px;
+        }
+
+        .status-control-header h3 {
+            font-size: 16px;
+            margin-bottom: 6px;
+        }
+
+        .status-control-header p {
+            font-size: 13px;
+            color: var(--muted);
+            max-width: 680px;
+        }
+
+        .status-control-note {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 11px;
+            font-weight: 600;
+            letter-spacing: 0.04em;
+            text-transform: uppercase;
+            color: var(--green);
+            background: rgba(45, 95, 62, 0.08);
+            border: 1px solid rgba(45, 95, 62, 0.16);
+            border-radius: 999px;
+            padding: 6px 10px;
+            white-space: nowrap;
+        }
+
+        .status-control-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 12px;
+        }
+
+        .status-control-card {
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 14px 16px;
+            background: var(--bg);
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .status-control-card.current {
+            border-color: rgba(45, 95, 62, 0.3);
+            background: rgba(45, 95, 62, 0.06);
+        }
+
+        .status-control-step {
+            font-size: 12px;
+            font-weight: 600;
+            letter-spacing: 0.04em;
+            text-transform: uppercase;
+            color: var(--muted);
+        }
+
+        .status-control-title {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--text);
+            line-height: 1.4;
+        }
+
+        .status-control-help {
+            font-size: 12px;
+            color: var(--muted);
+            line-height: 1.5;
+            min-height: 36px;
+        }
+
+        .status-control-button {
+            border: 1px solid var(--green);
+            background: white;
+            color: var(--green);
+            border-radius: 6px;
+            padding: 10px 12px;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .status-control-button:hover:not(:disabled) {
+            background: rgba(45, 95, 62, 0.08);
+        }
+
+        .status-control-button.current {
+            background: var(--green);
+            color: white;
+            cursor: default;
+        }
+
+        .status-control-button:disabled {
+            border-color: var(--border);
+            color: var(--muted);
+            background: white;
+            cursor: not-allowed;
+        }
+
         /* ACTION PANEL */
         .action-panel {
             background: var(--card);
@@ -1228,6 +1342,19 @@
                         </div>
                     </div>
 
+                    <div class="chat-panel" id="chatPanel">
+                        <h3>Marcel - Assistant IA</h3>
+                        <div class="chat-messages" id="chatMessages"></div>
+                        <div class="chat-input-group">
+                            <input type="text" id="chatInput" placeholder="Votre message...">
+                            <button class="chat-send" id="chatSend">Envoyer</button>
+                        </div>
+                    </div>
+
+                    <div class="status-control-panel" id="statusControlPanel">
+                        <!-- Dynamically populated -->
+                    </div>
+
                     <!-- ACTION PANEL -->
                     <div class="action-panel" id="actionPanel">
                         <!-- Dynamically populated -->
@@ -1299,16 +1426,6 @@
                                     <div id="floorplansGrid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 16px;"></div>
                                 </div>
                             </div>
-                        </div>
-                    </div>
-
-                    <!-- MARCEL CHAT (when needed) -->
-                    <div class="chat-panel" id="chatPanel" style="display: none;">
-                        <h3>Marcel - Assistant IA</h3>
-                        <div class="chat-messages" id="chatMessages"></div>
-                        <div class="chat-input-group">
-                            <input type="text" id="chatInput" placeholder="Votre message...">
-                            <button class="chat-send" id="chatSend">Envoyer</button>
                         </div>
                     </div>
 
@@ -1470,6 +1587,27 @@
                 .sort((left, right) => new Date(left.scheduled_at) - new Date(right.scheduled_at))[0] || null;
         }
 
+        function getPrimaryActiveScanAppointment(appointments) {
+            return (appointments || [])
+                .filter(appointment => appointment && appointment.type === 'scan_3d' && appointment.status !== 'cancelled')
+                .sort((left, right) => new Date(left.scheduled_at) - new Date(right.scheduled_at))[0] || null;
+        }
+
+        function hasCompletedScanPayment(payments) {
+            return (payments || []).some(payment =>
+                payment
+                && payment.type === 'scan_3d'
+                && payment.status === 'completed'
+            );
+        }
+
+        function isCurrentScanActuallyPaid() {
+            if (currentClient && currentClient.payment_access && typeof currentClient.payment_access.scanPaid === 'boolean') {
+                return currentClient.payment_access.scanPaid;
+            }
+            return hasCompletedScanPayment(currentClientPayments);
+        }
+
         function formatAppointmentDateTime(value) {
             const date = new Date(value);
             if (Number.isNaN(date.getTime())) return 'Date invalide';
@@ -1493,6 +1631,7 @@
 
         let currentClientTasks = [];
         let currentClientAppointments = [];
+        let currentClientPayments = [];
         let dashboardClients = [];
         let dashboardTasks = [];
 
@@ -1549,6 +1688,7 @@
             currentClientProjectNotes = [];
             currentClientTasks = [];
             currentClientAppointments = [];
+            currentClientPayments = [];
             dashboardClients = [];
             dashboardTasks = [];
             sessionStorage.removeItem('admin_session_token');
@@ -1773,6 +1913,7 @@
                         status: normalizeDashboardStatus(data.client.status)
                     };
                     currentClientAppointments = data.appointments || [];
+                    currentClientPayments = data.payments || [];
                     currentClientProjectNotes = data.projectNotes || [];
                     dashboardClients = dashboardClients.map(client =>
                         client.id === currentClient.id ? currentClient : client
@@ -1813,6 +1954,7 @@
 
             // Timeline
             renderTimeline(status);
+            renderStatusControlPanel(status);
 
             // Action panel
             renderActionPanel(client, status);
@@ -1896,6 +2038,74 @@
             });
 
             timelineEl.innerHTML = html;
+        }
+
+        function getStatusControlHelp(status) {
+            switch (status) {
+                case 'contact_submitted':
+                    return 'Revient au simple contact en supprimant les informations d onboarding et tous les artefacts ulterieurs.';
+                case 'identity_created':
+                    return 'Conserve le compte, mais retire les etapes d onboarding et tout ce qui suit.';
+                case 'onboarding_completed':
+                    return 'Repart juste avant la prise de rendez-vous telephonique.';
+                case 'call_requested':
+                    return 'Replace le dossier a la demande de rendez-vous telephonique.';
+                case 'call_done':
+                    return 'Retire la sequence scan/paiement pour repartir apres l appel.';
+                case 'scan_scheduled':
+                    return 'Revient a la reservation scan en attente, sans scan visible ni encaissement conserve.';
+                case 'scan_payment_completed':
+                    return 'Conserve la validation de paiement scan, mais retire les livrables ulterieurs.';
+                case 'scan_completed':
+                    return 'Conserve le scan realise, mais retire l analyse et l avant-projet.';
+                case 'analysis_ready':
+                    return 'Conserve la phase Marcel/analyse et retire uniquement l avant-projet ulterieur.';
+                case 'avant_projet_ready':
+                    return 'Revient a un avant-projet pret mais non transmis.';
+                case 'avant_projet_transmitted':
+                    return 'Revient juste apres transmission, avant accompagnement.';
+                case 'accompaniment_subscribed':
+                    return 'Etape finale actuelle du parcours.';
+                default:
+                    return 'Revenir a cette etape.';
+            }
+        }
+
+        function renderStatusControlPanel(currentStatus) {
+            const panel = document.getElementById('statusControlPanel');
+            if (!panel) return;
+
+            const currentIndex = PIPELINE_STATUSES.indexOf(currentStatus);
+            const cards = PIPELINE_STATUSES.map((status, index) => {
+                const isCurrent = index === currentIndex;
+                const isReachable = index <= currentIndex;
+                const buttonLabel = isCurrent ? 'Etape actuelle' : 'Revenir ici';
+                const buttonClass = isCurrent ? 'status-control-button current' : 'status-control-button';
+                const disabled = isCurrent || !isReachable ? 'disabled' : '';
+                const cardClass = isCurrent ? 'status-control-card current' : 'status-control-card';
+
+                return `
+                    <div class="${cardClass}">
+                        <div class="status-control-step">Etape ${index + 1}</div>
+                        <div class="status-control-title">${getStatusLabel(status)}</div>
+                        <div class="status-control-help">${getStatusControlHelp(status)}</div>
+                        <button class="${buttonClass}" ${disabled} onclick="rewindClientToStatus('${status}')">
+                            ${buttonLabel}
+                        </button>
+                    </div>
+                `;
+            }).join('');
+
+            panel.innerHTML = `
+                <div class="status-control-header">
+                    <div>
+                        <h3>Retour arrière administrateur</h3>
+                        <p>Quand vous rembobinez le dossier, le système annule aussi les rendez-vous, paiements et champs dérivés qui forceraient le client à rester sur une étape trop avancée.</p>
+                    </div>
+                    <div class="status-control-note">Étape actuelle: ${getStatusLabel(currentStatus)}</div>
+                </div>
+                <div class="status-control-grid">${cards}</div>
+            `;
         }
 
         function renderActionPanel(client, status) {
@@ -2008,6 +2218,7 @@
                     const data = await adminFetch('/.netlify/functions/admin-client-detail', { clientId });
                     tasks = data.tasks || [];
                     currentClientAppointments = data.appointments || [];
+                    currentClientPayments = data.payments || [];
                     currentClientProjectNotes = data.projectNotes || [];
                     if (data.client) {
                         currentClient = {
@@ -2193,6 +2404,159 @@
             panel.innerHTML = html;
         }
 
+        function renderActionPanel(client, status) {
+            const panel = document.getElementById('actionPanel');
+            const chatPanel = document.getElementById('chatPanel');
+            const phoneAppointment = getPrimaryPhoneAppointment(currentClientAppointments);
+            const pendingScanAppointment = getPrimaryPendingScanAppointment(currentClientAppointments);
+            const activeScanAppointment = getPrimaryActiveScanAppointment(currentClientAppointments);
+            const scanActuallyPaid = isCurrentScanActuallyPaid();
+            let html = '';
+
+            if (status === 'call_requested') {
+                if (phoneAppointment) {
+                    const validateButton = phoneAppointment.status !== 'confirmed'
+                        ? `<button class="action-button" onclick="confirmPhoneAppointment()">Valider le rendez-vous</button>`
+                        : '';
+                    html = `
+                        <h3>Rendez-vous telephonique demande</h3>
+                        <p class="action-panel-description">Verifiez le creneau demande, puis validez-le pour confirmer le rendez-vous avec le client.</p>
+                        <div class="task-card" style="margin-bottom: 16px;">
+                            <div class="task-card-header">
+                                <div class="task-card-title">Rendez-vous telephonique</div>
+                                <div class="task-state-badge">${getAppointmentStatusLabel(phoneAppointment.status)}</div>
+                            </div>
+                            <div class="task-card-desc">${formatAppointmentDateTime(phoneAppointment.scheduled_at)}</div>
+                            <div class="task-meta">
+                                <span>${phoneAppointment.duration_minutes || 30} min</span>
+                                <span>${phoneAppointment.location || 'phone'}</span>
+                            </div>
+                        </div>
+                        <div style="display:flex;gap:12px;flex-wrap:wrap;">
+                            ${validateButton}
+                            <button class="action-button" onclick="openMarcelChat()">Ouvrir Marcel</button>
+                        </div>
+                    `;
+                    if (chatPanel) chatPanel.style.display = 'flex';
+                    panel.innerHTML = html;
+                    return;
+                }
+                html = `
+                    <h3>Synthese d'appel telephonique</h3>
+                    <p class="action-panel-description">Prenez note de la conversation telephonique avec le client.</p>
+                    <button class="action-button" onclick="openMarcelChat()">Ouvrir Marcel</button>
+                `;
+            } else if (status === 'call_done') {
+                html = `
+                    <h3>Invitation scan 3D</h3>
+                    <p class="action-panel-description">Invitez le client a choisir puis regler son creneau de scan 3D depuis son espace.</p>
+                    <button class="action-button" onclick="inviteScan()">Envoyer invitation</button>
+                `;
+            } else if (status === 'scan_scheduled') {
+                if (pendingScanAppointment) {
+                    html = `
+                        <h3>Validation du rendez-vous scan</h3>
+                        <p class="action-panel-description">Ce creneau a ete demande via un code promo. Le paiement est contourne, mais votre validation interne reste necessaire.</p>
+                        <div class="task-card" style="margin-bottom: 16px;">
+                            <div class="task-card-header">
+                                <div class="task-card-title">Scan 3D Matterport</div>
+                                <div class="task-state-badge">${getAppointmentStatusLabel(pendingScanAppointment.status)}</div>
+                            </div>
+                            <div class="task-card-desc">${formatAppointmentDateTime(pendingScanAppointment.scheduled_at)}</div>
+                            <div class="task-meta">
+                                <span>${pendingScanAppointment.duration_minutes || 240} min</span>
+                                <span>${pendingScanAppointment.location || 'Adresse non renseignee'}</span>
+                            </div>
+                        </div>
+                        <div style="display:flex;gap:12px;flex-wrap:wrap;">
+                            <button class="action-button" onclick="confirmScan()">Valider le rendez-vous</button>
+                            <button class="action-button" onclick="cancelScanRequest()" style="background-color:#C62828;">Refuser ce creneau</button>
+                        </div>
+                    `;
+                } else if (activeScanAppointment && !scanActuallyPaid) {
+                    html = `
+                        <h3>Creneau scan non encaisse</h3>
+                        <p class="action-panel-description">Un rendez-vous scan existe encore dans le dossier, mais aucun paiement Stripe ni code promo valide n'a ete detecte. Vous pouvez l'annuler proprement pour revenir apres l'appel.</p>
+                        <div class="task-card" style="margin-bottom: 16px;">
+                            <div class="task-card-header">
+                                <div class="task-card-title">Scan 3D Matterport</div>
+                                <div class="task-state-badge">${getAppointmentStatusLabel(activeScanAppointment.status)}</div>
+                            </div>
+                            <div class="task-card-desc">${formatAppointmentDateTime(activeScanAppointment.scheduled_at)}</div>
+                            <div class="task-meta">
+                                <span>${activeScanAppointment.duration_minutes || 240} min</span>
+                                <span>${activeScanAppointment.location || 'Adresse non renseignee'}</span>
+                            </div>
+                        </div>
+                        <div style="display:flex;gap:12px;flex-wrap:wrap;">
+                            <button class="action-button" onclick="cancelScanRequest()" style="background-color:#C62828;">Annuler ce creneau</button>
+                            <button class="action-button" onclick="rewindClientToStatus('call_done')">Revenir apres l'appel</button>
+                        </div>
+                    `;
+                } else {
+                    html = `
+                        <h3>Validation scan en attente</h3>
+                        <p class="action-panel-description">Le dossier attend la prochaine etape autour du scan. Tant qu'aucun encaissement n'est confirme, vous pouvez revenir en arriere depuis le panneau d'etapes.</p>
+                    `;
+                }
+            } else if (status === 'scan_payment_completed') {
+                if (activeScanAppointment && !scanActuallyPaid) {
+                    html = `
+                        <h3>Scan confirme sans encaissement</h3>
+                        <p class="action-panel-description">Le dossier s'est retrouve trop loin dans le parcours alors qu'aucun paiement scan n'a ete confirme. Annulez ce creneau pour remettre le dossier dans un etat coherent.</p>
+                        <div class="task-card" style="margin-bottom: 16px;">
+                            <div class="task-card-header">
+                                <div class="task-card-title">Scan 3D Matterport</div>
+                                <div class="task-state-badge">${getAppointmentStatusLabel(activeScanAppointment.status)}</div>
+                            </div>
+                            <div class="task-card-desc">${formatAppointmentDateTime(activeScanAppointment.scheduled_at)}</div>
+                            <div class="task-meta">
+                                <span>${activeScanAppointment.duration_minutes || 240} min</span>
+                                <span>${activeScanAppointment.location || 'Adresse non renseignee'}</span>
+                            </div>
+                        </div>
+                        <div style="display:flex;gap:12px;flex-wrap:wrap;">
+                            <button class="action-button" onclick="cancelScanRequest()" style="background-color:#C62828;">Annuler ce creneau</button>
+                            <button class="action-button" onclick="rewindClientToStatus('call_done')">Reinitialiser l'etape scan</button>
+                        </div>
+                    `;
+                } else {
+                    html = `
+                        <h3>Paiement recu</h3>
+                        <p class="action-panel-description">Le creneau scan est confirme automatiquement. Vous pouvez maintenant preparer la visite et la logistique.</p>
+                    `;
+                }
+            } else if (status === 'scan_completed') {
+                html = `
+                    <h3>Fichiers du scan</h3>
+                    <p class="action-panel-description">Telechargez les fichiers et donnees du scan 3D.</p>
+                    <button class="action-button" onclick="openMarcelChat()">Discuter avec Marcel</button>
+                `;
+                document.getElementById('filesSection').style.display = 'block';
+            } else if (status === 'analysis_ready') {
+                html = `
+                    <h3>Generer l'avant-projet</h3>
+                    <p class="action-panel-description">Preparez et validez l'avant-projet avec Marcel.</p>
+                    <button class="action-button" onclick="openMarcelChat()">Discuter avec Marcel</button>
+                    <button class="action-button" onclick="generateAvantProjet()" style="background-color: #4CAF50;">Generer avant-projet</button>
+                `;
+            } else if (status === 'avant_projet_ready') {
+                html = `
+                    <h3>Avant-projet finalise</h3>
+                    <p class="action-panel-description">L'avant-projet est pret. Proposez l'accompagnement.</p>
+                    <button class="action-button" onclick="proposeAccompaniment()">Proposer accompagnement</button>
+                `;
+            } else {
+                html = `
+                    <h3>Etape suivante</h3>
+                    <p class="action-panel-description">Aucune action requise pour le moment.</p>
+                `;
+            }
+
+            if (chatPanel) chatPanel.style.display = client ? 'flex' : 'none';
+            panel.innerHTML = html;
+        }
+
         async function loadClientTasks(clientId, prefetchedTasks) {
             try {
                 let tasks = prefetchedTasks;
@@ -2200,6 +2564,7 @@
                     const data = await adminFetch('/.netlify/functions/admin-client-detail', { clientId });
                     tasks = data.tasks || [];
                     currentClientAppointments = data.appointments || [];
+                    currentClientPayments = data.payments || [];
                     currentClientProjectNotes = data.projectNotes || [];
                     if (data.client) {
                         currentClient = {
@@ -2216,7 +2581,15 @@
                         currentClient.status === 'call_requested'
                         || (
                             currentClient.status === 'scan_scheduled'
-                            && !!getPrimaryPendingScanAppointment(currentClientAppointments)
+                            && (
+                                !!getPrimaryPendingScanAppointment(currentClientAppointments)
+                                || (!!getPrimaryActiveScanAppointment(currentClientAppointments) && !isCurrentScanActuallyPaid())
+                            )
+                        )
+                        || (
+                            currentClient.status === 'scan_payment_completed'
+                            && !!getPrimaryActiveScanAppointment(currentClientAppointments)
+                            && !isCurrentScanActuallyPaid()
                         )
                     );
 
@@ -2304,6 +2677,38 @@
             }
         }
 
+        async function cancelScanRequest() {
+            if (!currentClient) return;
+
+            const pendingScanAppointment = getPrimaryPendingScanAppointment(currentClientAppointments);
+            const activeScanAppointment = getPrimaryActiveScanAppointment(currentClientAppointments);
+
+            try {
+                if (pendingScanAppointment) {
+                    await adminFetch('/.netlify/functions/confirm-appointment', {
+                        appointmentId: pendingScanAppointment.id,
+                        action: 'cancel',
+                        clientId: currentClient.id
+                    });
+                    showSuccessMessage('Demande de scan refusée.');
+                } else if (activeScanAppointment && !isCurrentScanActuallyPaid()) {
+                    await adminFetch('/.netlify/functions/admin-rewind-client-stage', {
+                        clientId: currentClient.id,
+                        targetStatus: 'call_done'
+                    });
+                    showSuccessMessage('Créneau scan non encaissé annulé. Le dossier revient après l appel.');
+                } else {
+                    showErrorMessage('Aucun rendez-vous scan non encaissé à annuler.');
+                    return;
+                }
+
+                await selectClientById(currentClient.id);
+                await loadDashboard();
+            } catch (err) {
+                showErrorMessage('Erreur lors de l annulation du scan: ' + err.message);
+            }
+        }
+
         // ========== MARCEL CHAT ==========
         function openMarcelChat() {
             document.getElementById('chatPanel').scrollIntoView({ behavior: 'smooth' });
@@ -2382,7 +2787,7 @@
         }
 
         function shouldShowMarcelForStatus(status) {
-            return ['call_requested', 'scan_completed', 'analysis_ready'].includes(normalizeDashboardStatus(status));
+            return !!normalizeDashboardStatus(status);
         }
 
         function getMatterportContextData(client) {
@@ -2683,6 +3088,74 @@
             } catch (err) {
                 console.error('Update error:', err);
                 throw err;
+            }
+        }
+
+        function buildRewindSummary(cleanup) {
+            if (!cleanup || typeof cleanup !== 'object') {
+                return '';
+            }
+
+            const parts = [];
+            if (cleanup.cancelledPhoneAppointments) {
+                parts.push(`${cleanup.cancelledPhoneAppointments} rdv téléphonique(s) annulé(s)`);
+            }
+            if (cleanup.cancelledScanAppointments) {
+                parts.push(`${cleanup.cancelledScanAppointments} rdv scan annulé(s)`);
+            }
+            if (cleanup.cancelledScanPayments) {
+                parts.push(`${cleanup.cancelledScanPayments} paiement(s) scan invalidé(s)`);
+            }
+            if (cleanup.cancelledVisitPayments) {
+                parts.push(`${cleanup.cancelledVisitPayments} paiement(s) visite invalidé(s)`);
+            }
+
+            return parts.length ? ` Nettoyage appliqué: ${parts.join(', ')}.` : '';
+        }
+
+        async function rewindClientToStatus(targetStatus) {
+            if (!currentClient) return;
+
+            const currentStatus = normalizeDashboardStatus(currentClient.status);
+            const currentIndex = PIPELINE_STATUSES.indexOf(currentStatus);
+            const targetIndex = PIPELINE_STATUSES.indexOf(targetStatus);
+
+            if (targetIndex === -1 || currentIndex === -1 || targetIndex >= currentIndex) {
+                return;
+            }
+
+            const confirmed = window.confirm(
+                `Revenir le dossier de "${getStatusLabel(currentStatus)}" à "${getStatusLabel(targetStatus)}" ?\n\n`
+                + 'Les rendez-vous, paiements et contenus des étapes suivantes seront neutralisés si nécessaire pour éviter que le dossier reparte immédiatement vers l avant.'
+            );
+            if (!confirmed) {
+                return;
+            }
+
+            try {
+                const data = await adminFetch('/.netlify/functions/admin-rewind-client-stage', {
+                    clientId: currentClient.id,
+                    targetStatus
+                });
+
+                currentClient = {
+                    ...data.client,
+                    status: normalizeDashboardStatus(data.client.status)
+                };
+                dashboardClients = dashboardClients.map(client =>
+                    client.id === currentClient.id ? currentClient : client
+                );
+
+                clearMarcelChat();
+                renderClientProfile(currentClient);
+                await syncCockpitTasks(currentClient.id);
+                await loadClientTasks(currentClient.id);
+                await loadDashboard();
+
+                showSuccessMessage(`Dossier replacé sur "${getStatusLabel(targetStatus)}".${buildRewindSummary(data.cleanup)}`);
+            } catch (err) {
+                console.error('Rewind error:', err);
+                showErrorMessage(err.message || 'Impossible de revenir à cette étape.');
             }
         }
 

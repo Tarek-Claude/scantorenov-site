@@ -2,6 +2,7 @@ const { createClient } = require('@supabase/supabase-js');
 const { authorizeAdminRequest } = require('./_admin-session');
 const { enrichClientProgress } = require('./_admin-client-progress');
 const { safeReconcileClientTasks } = require('./_cockpit-engine');
+const { buildPaymentAccessSummary } = require('./_payment-access');
 
 const headers = {
   'Access-Control-Allow-Origin': '*',
@@ -68,6 +69,7 @@ exports.handler = async function handler(event) {
     }
 
     let appointmentsByClientId = new Map();
+    let paymentsByClientId = new Map();
     const clientIds = (clients || []).map((client) => client.id).filter(Boolean);
 
     if (clientIds.length > 0) {
@@ -86,11 +88,32 @@ exports.handler = async function handler(event) {
         acc.get(clientId).push(appointment);
         return acc;
       }, new Map());
+
+      const { data: payments, error: paymentsError } = await supabase
+        .from('payments')
+        .select('client_id,type,status,amount_cents,currency,paid_at,created_at,description')
+        .in('client_id', clientIds);
+
+      if (paymentsError && !isMissingTableError(paymentsError)) {
+        throw new Error(`Lecture paiements: ${paymentsError.message}`);
+      }
+
+      paymentsByClientId = (payments || []).reduce((acc, payment) => {
+        const clientId = payment.client_id;
+        if (!acc.has(clientId)) acc.set(clientId, []);
+        acc.get(clientId).push(payment);
+        return acc;
+      }, new Map());
     }
 
-    const enrichedClients = (clients || []).map((client) =>
-      enrichClientProgress(client, appointmentsByClientId.get(client.id) || [])
-    );
+    const enrichedClients = (clients || []).map((client) => {
+      const appointments = appointmentsByClientId.get(client.id) || [];
+      const payments = paymentsByClientId.get(client.id) || [];
+      return {
+        ...enrichClientProgress(client, appointments, payments),
+        payment_access: buildPaymentAccessSummary(payments, client),
+      };
+    });
 
     let activeTasks = tasks || [];
     if (!taskError) {

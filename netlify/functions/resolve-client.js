@@ -28,7 +28,8 @@ exports.handler = async (event, context) => {
       createIfMissing: true
     });
     const appointments = Array.isArray(resolution.appointments) ? resolution.appointments : [];
-    const enrichedClient = enrichClientProgress(resolution.client, appointments);
+    const payments = Array.isArray(resolution.payments) ? resolution.payments : [];
+    const enrichedClient = enrichClientProgress(resolution.client, appointments, payments);
     const resolvedStatus = normalizeClientStatus(
       enrichedClient.status || resolution.client.status || 'identity_created'
     ) || 'identity_created';

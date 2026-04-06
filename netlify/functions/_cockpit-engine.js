@@ -4,6 +4,7 @@ const {
   normalizeClientStatus,
 } = require('./_cockpit-config');
 const { enrichClientProgress } = require('./_admin-client-progress');
+const { fetchClientPayments } = require('./_payment-access');
 
 function addDays(baseDate, numberOfDays) {
   const date = baseDate ? new Date(baseDate) : new Date();
@@ -205,7 +206,8 @@ async function fetchClientByReference(supabase, options = {}) {
     throw new Error(`Lecture rendez-vous cockpit: ${appointmentError.message}`);
   }
 
-  return enrichClientProgress(data, appointments || []);
+  const payments = await fetchClientPayments(supabase, data.id);
+  return enrichClientProgress(data, appointments || [], payments);
 }
 
 async function listActiveTasks(supabase, clientId) {
@@ -335,7 +337,8 @@ async function reconcileClientTasks(options = {}) {
       throw new Error(`Lecture rendez-vous cockpit: ${appointmentError.message}`);
     }
 
-    client = enrichClientProgress(providedClient, appointments || []);
+    const payments = await fetchClientPayments(supabase, providedClient.id);
+    client = enrichClientProgress(providedClient, appointments || [], payments);
   }
 
   const expectedTasks = getExpectedTasksForClient(client).filter(Boolean);

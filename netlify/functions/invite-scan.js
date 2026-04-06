@@ -2,6 +2,7 @@ const { createClient } = require('@supabase/supabase-js');
 const { Resend } = require('resend');
 const { authorizeAdminRequest } = require('./_admin-session');
 const { enrichClientProgress } = require('./_admin-client-progress');
+const { fetchClientPayments } = require('./_payment-access');
 
 const SITE_URL = 'https://scantorenov.com';
 
@@ -167,7 +168,8 @@ exports.handler = async (event) => {
       throw new Error(`Lecture rendez-vous: ${appointmentsError.message}`);
     }
 
-    const effectiveClient = enrichClientProgress(client, appointments || []);
+    const payments = await fetchClientPayments(supabase, client.id);
+    const effectiveClient = enrichClientProgress(client, appointments || [], payments);
 
     if (effectiveClient.status !== 'call_done') {
       return {

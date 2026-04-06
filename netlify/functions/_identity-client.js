@@ -59,7 +59,7 @@ async function attachClientProgress(client) {
 
   return {
     client: {
-      ...enrichClientProgress(client, appointments),
+      ...enrichClientProgress(client, appointments, payments),
       payment_access: paymentAccess,
       virtual_tour_unlocked: paymentAccess.virtualTourUnlocked,
     },
