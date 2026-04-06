@@ -4073,6 +4073,122 @@
             }
         }
 
+        function renderMatterportData(mpData) {
+            if (!mpData) return;
+
+            // --- Panoramas ---
+            const panoramasGrid = document.getElementById('panoramasGrid');
+            if (panoramasGrid) {
+                if (mpData.locations && mpData.locations.length > 0) {
+                    panoramasGrid.innerHTML = mpData.locations.map((loc, index) => {
+                        const hasPano = loc.panos && loc.panos.length > 0;
+                        const skyboxChildren = hasPano && loc.panos[0].skybox && loc.panos[0].skybox.children;
+                        const thumbUrl = Array.isArray(skyboxChildren) && skyboxChildren.length > 0 ? skyboxChildren[0] : null;
+                        return `
+                            <div style="background: var(--bg); border-radius: 8px; overflow: hidden; cursor: pointer;" onclick="viewPanorama(${index})">
+                                ${thumbUrl
+                                    ? `<img src="${thumbUrl}" style="width: 100%; height: 120px; object-fit: cover;" loading="lazy" onerror="this.style.display='none'">`
+                                    : `<div style="width: 100%; height: 120px; background: var(--border); display: flex; align-items: center; justify-content: center; color: var(--muted); font-size: 12px;">Pas d'aperçu</div>`
+                                }
+                                <div style="padding: 8px; font-size: 12px;">
+                                    <div style="font-weight: 600;">Point ${index + 1}</div>
+                                </div>
+                            </div>
+                        `;
+                    }).join('');
+                    document.getElementById('btnDownloadPanos').style.display = 'inline-block';
+                } else {
+                    panoramasGrid.innerHTML = '<p style="color: var(--muted); font-size: 13px;">Aucun panoramique disponible.</p>';
+                }
+            }
+
+            // --- Dimensions ---
+            const dimensionsContainer = document.getElementById('dimensionsData');
+            if (dimensionsContainer) {
+                let html = '';
+
+                if (mpData.dimensions) {
+                    const d = mpData.dimensions;
+                    html += `
+                        <div style="margin-bottom: 20px; padding: 16px; background: var(--bg); border-radius: 8px;">
+                            <h4 style="margin-bottom: 8px;">${mpData.modelName || 'Dimensions globales'}</h4>
+                            <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 8px; font-size: 13px;">
+                                ${d.areaFloor != null ? `<div><strong>Surface sol :</strong> ${d.areaFloor.toFixed(2)} m²</div>` : ''}
+                                ${d.areaFloorIndoor != null ? `<div><strong>Surface intérieure :</strong> ${d.areaFloorIndoor.toFixed(2)} m²</div>` : ''}
+                                ${d.areaWall != null ? `<div><strong>Surface murs :</strong> ${d.areaWall.toFixed(2)} m²</div>` : ''}
+                                ${d.volume != null ? `<div><strong>Volume :</strong> ${d.volume.toFixed(2)} m³</div>` : ''}
+                                ${d.height != null ? `<div><strong>Hauteur :</strong> ${d.height.toFixed(2)} m</div>` : ''}
+                            </div>
+                        </div>
+                    `;
+                }
+
+                if (mpData.floors && mpData.floors.length > 0) {
+                    html += `
+                        <h4 style="margin: 12px 0 8px;">Niveaux</h4>
+                        <table class="mp-dim-table">
+                            <thead>
+                                <tr><th>Niveau</th><th>Surface sol (m²)</th><th>Volume (m³)</th><th>Hauteur (m)</th></tr>
+                            </thead>
+                            <tbody>
+                                ${mpData.floors.map(f => `
+                                    <tr>
+                                        <td><strong>${f.label || '-'}</strong></td>
+                                        <td>${f.dimensions?.areaFloor != null ? f.dimensions.areaFloor.toFixed(2) : '-'}</td>
+                                        <td>${f.dimensions?.volume != null ? f.dimensions.volume.toFixed(2) : '-'}</td>
+                                        <td>${f.dimensions?.height != null ? f.dimensions.height.toFixed(2) : '-'}</td>
+                                    </tr>
+                                `).join('')}
+                            </tbody>
+                        </table>
+                    `;
+                }
+
+                if (mpData.rooms && mpData.rooms.length > 0) {
+                    html += `
+                        <h4 style="margin: 12px 0 8px;">Pièces</h4>
+                        <table class="mp-dim-table">
+                            <thead>
+                                <tr><th>Pièce</th><th>Surface sol (m²)</th><th>Hauteur (m)</th><th>Volume (m³)</th></tr>
+                            </thead>
+                            <tbody>
+                                ${mpData.rooms.map(r => `
+                                    <tr>
+                                        <td><strong>${r.label || r.id}</strong></td>
+                                        <td>${r.dimensions?.areaFloor != null ? r.dimensions.areaFloor.toFixed(2) : '-'}</td>
+                                        <td>${r.dimensions?.height != null ? r.dimensions.height.toFixed(2) : '-'}</td>
+                                        <td>${r.dimensions?.volume != null ? r.dimensions.volume.toFixed(2) : '-'}</td>
+                                    </tr>
+                                `).join('')}
+                            </tbody>
+                        </table>
+                    `;
+                }
+
+                if (html) {
+                    dimensionsContainer.innerHTML = html;
+                    document.getElementById('btnExportCsv').style.display = 'inline-block';
+                }
+            }
+
+            // --- Floorplans ---
+            const floorplansGrid = document.getElementById('floorplansGrid');
+            if (floorplansGrid) {
+                if (mpData.floorplans && mpData.floorplans.length > 0) {
+                    floorplansGrid.innerHTML = mpData.floorplans.map(fp => `
+                        <div style="background: var(--bg); border-radius: 8px; overflow: hidden;">
+                            <img src="${fp.url}" style="width: 100%; object-fit: contain; max-height: 400px;" loading="lazy">
+                            <div style="padding: 8px; font-size: 12px; color: var(--muted);">
+                                ${fp.floor ? (fp.floor.label || '') : ''} ${fp.format ? '· ' + fp.format : ''}
+                            </div>
+                        </div>
+                    `).join('');
+                } else {
+                    floorplansGrid.innerHTML = '<p style="color: var(--muted); font-size: 13px;">Aucun plan disponible.</p>';
+                }
+            }
+        }
+
         function viewPanorama(index) {
             if (!currentClient || !matterportCache[currentClient.id]) return;
             const loc = matterportCache[currentClient.id].locations[index];
