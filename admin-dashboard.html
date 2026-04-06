@@ -2224,8 +2224,8 @@
 
             let html = '';
             PIPELINE_STATUSES.forEach((status, idx) => {
-                const isCompleted = idx < currentIndex;
-                const isCurrent = idx === currentIndex;
+                const isCompleted = currentIndex >= 0 && idx <= currentIndex;
+                const isCurrent = currentIndex >= 0 && idx === currentIndex + 1;
                 const circleClass = isCompleted ? 'completed' : isCurrent ? 'current' : '';
                 const labelClass = isCompleted || isCurrent ? 'completed' : '';
 
@@ -2239,7 +2239,7 @@
                 `;
 
                 if (idx < PIPELINE_STATUSES.length - 1) {
-                    const connectorClass = idx < currentIndex ? 'completed' : '';
+                    const connectorClass = isCompleted ? 'completed' : '';
                     html += `<div class="timeline-connector ${connectorClass}"></div>`;
                 }
             });
@@ -3560,6 +3560,17 @@
 
                 if (currentClient) {
                     await saveMatterportToClient(modelId, mpData);
+                    const derivedStatus = normalizeDashboardStatus(getDashboardEffectiveStatus(currentClient));
+                    if (derivedStatus !== currentClient.status) {
+                        currentClient = { ...currentClient, status: derivedStatus };
+                        dashboardClients = dashboardClients.map(c =>
+                            c.id === currentClient.id ? currentClient : c
+                        );
+                    }
+                    renderClientProfile(currentClient);
+                    await syncCockpitTasks(currentClient.id);
+                    await loadClientTasks(currentClient.id);
+                    await loadDashboard();
                 }
 
                 showMpSyncStatus(
