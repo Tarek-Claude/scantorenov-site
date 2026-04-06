@@ -2327,6 +2327,10 @@
                         Le statut enregistre en base est <strong>${getStatusLabel(recordedStatus)}</strong>,
                         mais le cockpit retient <strong>${getStatusLabel(effectiveStatus)}</strong> a partir des rendez-vous,
                         paiements et livrables reels du dossier. Le retour arriere s'appuie sur cet etat effectif.
+                        <button class="action-button" style="margin-top:10px;font-size:12px;padding:6px 12px;"
+                            onclick="updateClientStatus('${effectiveStatus}')">
+                            Corriger le statut en base
+                        </button>
                     </div>
                 `
                 : '';
