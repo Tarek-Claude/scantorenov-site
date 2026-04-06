@@ -59,11 +59,105 @@ function appendAuditSuffix(text, suffix) {
   return current ? `${current}\n${suffix}` : suffix;
 }
 
+function chooseHigherStatus(currentStatus, nextStatus) {
+  const currentRank = getStatusRank(currentStatus);
+  const nextRank = getStatusRank(nextStatus);
+
+  if (nextRank === -1) return normalizeClientStatus(currentStatus) || null;
+  if (currentRank === -1) return normalizeClientStatus(nextStatus);
+
+  return nextRank >= currentRank
+    ? normalizeClientStatus(nextStatus)
+    : normalizeClientStatus(currentStatus);
+}
+
+function hasValue(value) {
+  if (Array.isArray(value)) return value.length > 0;
+  if (typeof value === 'string') return value.trim().length > 0;
+  return value !== undefined && value !== null;
+}
+
+function isPastAppointment(appointment) {
+  if (!appointment || !appointment.scheduled_at) return false;
+  const value = new Date(appointment.scheduled_at).getTime();
+  return Number.isFinite(value) && value <= Date.now();
+}
+
+function isPhoneAppointmentDone(appointment) {
+  if (!appointment || appointment.type !== 'phone_call') return false;
+  if (appointment.status === 'completed') return true;
+  return appointment.status === 'confirmed' && isPastAppointment(appointment);
+}
+
 function getEffectiveStatus(client, appointments, payments) {
   const enriched = enrichClientProgress(client, appointments || [], payments || []);
   return normalizeClientStatus(enriched && enriched.status)
     || normalizeClientStatus(client && client.status)
     || 'contact_submitted';
+}
+
+function getHighestObservedStatus(client, appointments, payments) {
+  let observedStatus = normalizeClientStatus(client && client.status) || 'contact_submitted';
+
+  const activePhoneAppointments = (appointments || []).filter(
+    (appointment) => appointment && appointment.type === 'phone_call' && appointment.status !== 'cancelled'
+  );
+  const activeScanAppointments = (appointments || []).filter(
+    (appointment) => appointment && appointment.type === 'scan_3d' && appointment.status !== 'cancelled'
+  );
+  const completedScanPayment = (payments || []).some(
+    (payment) => payment && payment.type === 'scan_3d' && payment.status === 'completed'
+  );
+  const completedVisitPayment = (payments || []).some(
+    (payment) => payment && payment.type === 'virtual_tour' && payment.status === 'completed'
+  );
+
+  if (activePhoneAppointments.length > 0) {
+    observedStatus = chooseHigherStatus(observedStatus, 'call_requested');
+  }
+
+  if (activePhoneAppointments.some(isPhoneAppointmentDone)) {
+    observedStatus = chooseHigherStatus(observedStatus, 'call_done');
+  }
+
+  if (activeScanAppointments.length > 0) {
+    observedStatus = chooseHigherStatus(observedStatus, 'scan_scheduled');
+  }
+
+  if (completedScanPayment) {
+    observedStatus = chooseHigherStatus(observedStatus, 'scan_payment_completed');
+  }
+
+  if (
+    hasValue(client && client.matterport_model_id)
+    || hasValue(client && client.matterport_url)
+    || hasValue(client && client.matterport_iframe)
+    || hasValue(client && client.matterport_data)
+  ) {
+    observedStatus = chooseHigherStatus(observedStatus, 'scan_completed');
+  }
+
+  if (
+    (client && client.marcel_enabled === true)
+    || hasValue(client && client.photos_urls)
+    || hasValue(client && client.plans_urls)
+    || completedVisitPayment
+  ) {
+    observedStatus = chooseHigherStatus(observedStatus, 'analysis_ready');
+  }
+
+  if (
+    (client && client.avant_projet_enabled === true)
+    || hasValue(client && client.proposal_url)
+  ) {
+    observedStatus = chooseHigherStatus(observedStatus, 'avant_projet_ready');
+  }
+
+  if (hasValue(client && client.avant_projet_transmitted_at)) {
+    observedStatus = chooseHigherStatus(observedStatus, 'avant_projet_transmitted');
+  }
+
+  return observedStatus;
 }
 
 function buildClientPatch(targetStatus, timestamp) {
@@ -318,7 +412,9 @@ exports.handler = async function handler(event) {
       fetchPayments(supabase, clientId),
     ]);
 
-    const currentStatus = getEffectiveStatus(client, appointments, payments);
+    const effectiveStatus = getEffectiveStatus(client, appointments, payments);
+    const observedStatus = getHighestObservedStatus(client, appointments, payments);
+    const currentStatus = chooseHigherStatus(effectiveStatus, observedStatus) || effectiveStatus;
     const currentRank = getStatusRank(currentStatus);
     const targetRank = getStatusRank(targetStatus);
 
@@ -327,7 +423,10 @@ exports.handler = async function handler(event) {
         statusCode: 409,
         headers,
         body: JSON.stringify({
-          error: `Le dossier est actuellement a l'etape "${getStatusLabel(currentStatus)}". Utilisez les actions normales pour avancer.`,
+          error: `Le dossier est actuellement a l'etape "${getStatusLabel(currentStatus)}" selon les donnees reelles. Utilisez les actions normales pour avancer.`,
+          currentStatus,
+          effectiveStatus,
+          observedStatus,
         }),
       };
     }
@@ -368,6 +467,8 @@ exports.handler = async function handler(event) {
         status: normalizeClientStatus(enrichedClient.status) || targetStatus,
         targetStatus,
         previousStatus: currentStatus,
+        effectiveStatus,
+        observedStatus,
         cleanup: {
           ...appointmentSummary,
           ...paymentSummary,

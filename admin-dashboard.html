@@ -621,6 +621,17 @@
             max-width: 680px;
         }
 
+        .status-control-warning {
+            margin-top: 14px;
+            padding: 12px 14px;
+            border-radius: 8px;
+            border: 1px solid rgba(198, 40, 40, 0.18);
+            background: rgba(198, 40, 40, 0.06);
+            color: #8B1E1E;
+            font-size: 12px;
+            line-height: 1.6;
+        }
+
         .status-control-note {
             display: inline-flex;
             align-items: center;
@@ -1601,11 +1612,100 @@
             );
         }
 
+        function hasDashboardValue(value) {
+            if (Array.isArray(value)) return value.length > 0;
+            if (typeof value === 'string') return value.trim().length > 0;
+            return value !== undefined && value !== null;
+        }
+
+        function getDashboardStatusIndex(status) {
+            return PIPELINE_STATUSES.indexOf(normalizeDashboardStatus(status));
+        }
+
+        function chooseLaterDashboardStatus(currentStatus, nextStatus) {
+            const currentIndex = getDashboardStatusIndex(currentStatus);
+            const nextIndex = getDashboardStatusIndex(nextStatus);
+
+            if (nextIndex === -1) return normalizeDashboardStatus(currentStatus);
+            if (currentIndex === -1) return normalizeDashboardStatus(nextStatus);
+
+            return nextIndex >= currentIndex
+                ? normalizeDashboardStatus(nextStatus)
+                : normalizeDashboardStatus(currentStatus);
+        }
+
+        function isPastDashboardAppointment(appointment) {
+            if (!appointment || !appointment.scheduled_at) return false;
+            const value = new Date(appointment.scheduled_at).getTime();
+            return Number.isFinite(value) && value <= Date.now();
+        }
+
+        function isDashboardPhoneAppointmentDone(appointment) {
+            if (!appointment || appointment.type !== 'phone_call') return false;
+            if (appointment.status === 'completed') return true;
+            return appointment.status === 'confirmed' && isPastDashboardAppointment(appointment);
+        }
+
         function isCurrentScanActuallyPaid() {
             if (currentClient && currentClient.payment_access && typeof currentClient.payment_access.scanPaid === 'boolean') {
                 return currentClient.payment_access.scanPaid;
             }
             return hasCompletedScanPayment(currentClientPayments);
+        }
+
+        function getDashboardEffectiveStatus(client) {
+            let status = normalizeDashboardStatus(client && (client.status || client.recorded_status));
+
+            const hasActivePhoneAppointment = (currentClientAppointments || []).some(
+                appointment => appointment && appointment.type === 'phone_call' && appointment.status !== 'cancelled'
+            );
+            const hasDonePhoneAppointment = (currentClientAppointments || []).some(isDashboardPhoneAppointmentDone);
+            const hasActiveScanAppointment = !!getPrimaryActiveScanAppointment(currentClientAppointments);
+            const hasCompletedVisitPayment = (currentClientPayments || []).some(payment =>
+                payment
+                && payment.type === 'virtual_tour'
+                && payment.status === 'completed'
+            );
+
+            if (hasActivePhoneAppointment) {
+                status = chooseLaterDashboardStatus(status, 'call_requested');
+            }
+            if (hasDonePhoneAppointment) {
+                status = chooseLaterDashboardStatus(status, 'call_done');
+            }
+            if (hasActiveScanAppointment) {
+                status = chooseLaterDashboardStatus(status, 'scan_scheduled');
+            }
+            if (isCurrentScanActuallyPaid()) {
+                status = chooseLaterDashboardStatus(status, 'scan_payment_completed');
+            }
+            if (
+                hasDashboardValue(client && client.matterport_model_id)
+                || hasDashboardValue(client && client.matterport_url)
+                || hasDashboardValue(client && client.matterport_iframe)
+                || hasDashboardValue(client && client.matterport_data)
+            ) {
+                status = chooseLaterDashboardStatus(status, 'scan_completed');
+            }
+            if (
+                (client && client.marcel_enabled === true)
+                || hasDashboardValue(client && client.photos_urls)
+                || hasDashboardValue(client && client.plans_urls)
+                || hasCompletedVisitPayment
+            ) {
+                status = chooseLaterDashboardStatus(status, 'analysis_ready');
+            }
+            if (
+                (client && client.avant_projet_enabled === true)
+                || hasDashboardValue(client && client.proposal_url)
+            ) {
+                status = chooseLaterDashboardStatus(status, 'avant_projet_ready');
+            }
+            if (hasDashboardValue(client && client.avant_projet_transmitted_at)) {
+                status = chooseLaterDashboardStatus(status, 'avant_projet_transmitted');
+            }
+
+            return status || 'contact_submitted';
         }
 
         function formatAppointmentDateTime(value) {
@@ -1722,11 +1822,17 @@
                 resetAdminSession();
                 authForm.reset();
                 showAuthError('Session admin expirée. Reconnectez-vous.');
-                throw new Error(data.error || 'Unauthorized');
+                const unauthorizedError = new Error(data.error || 'Unauthorized');
+                unauthorizedError.status = response.status;
+                unauthorizedError.data = data;
+                throw unauthorizedError;
             }
 
             if (!response.ok) {
-                throw new Error(data.error || `Erreur ${response.status}`);
+                const requestError = new Error(data.error || `Erreur ${response.status}`);
+                requestError.status = response.status;
+                requestError.data = data;
+                throw requestError;
             }
 
             return data;
@@ -1946,7 +2052,7 @@
             document.getElementById('clientEcheance').textContent = client.echeance || "-";
 
             // Status badge
-            const status = normalizeDashboardStatus(client.status);
+            const status = getDashboardEffectiveStatus(client);
             const badgeClass = `status-${status.replace(/_/g, '-')}`;
             document.getElementById('clientStatusBadge').innerHTML = `
                 <div class="status-badge ${badgeClass}">${getStatusLabel(status)}</div>
@@ -1954,7 +2060,7 @@
 
             // Timeline
             renderTimeline(status);
-            renderStatusControlPanel(status);
+            renderStatusControlPanel(client, status);
 
             // Action panel
             renderActionPanel(client, status);
@@ -2071,17 +2177,21 @@
             }
         }
 
-        function renderStatusControlPanel(currentStatus) {
+        function renderStatusControlPanel(client, currentStatus) {
             const panel = document.getElementById('statusControlPanel');
             if (!panel) return;
 
             const currentIndex = PIPELINE_STATUSES.indexOf(currentStatus);
-            const cards = PIPELINE_STATUSES.map((status, index) => {
+            const recordedStatus = normalizeDashboardStatus(client && client.recorded_status);
+            const statuses = currentIndex >= 0
+                ? PIPELINE_STATUSES.slice(0, currentIndex + 1).reverse()
+                : [currentStatus];
+            const cards = statuses.map((status) => {
+                const index = PIPELINE_STATUSES.indexOf(status);
                 const isCurrent = index === currentIndex;
-                const isReachable = index <= currentIndex;
                 const buttonLabel = isCurrent ? 'Etape actuelle' : 'Revenir ici';
                 const buttonClass = isCurrent ? 'status-control-button current' : 'status-control-button';
-                const disabled = isCurrent || !isReachable ? 'disabled' : '';
+                const disabled = isCurrent ? 'disabled' : '';
                 const cardClass = isCurrent ? 'status-control-card current' : 'status-control-card';
 
                 return `
@@ -2096,6 +2206,16 @@
                 `;
             }).join('');
 
+            const mismatchWarning = recordedStatus && recordedStatus !== currentStatus
+                ? `
+                    <div class="status-control-warning">
+                        Le statut enregistre en base est <strong>${getStatusLabel(recordedStatus)}</strong>,
+                        mais le cockpit retient <strong>${getStatusLabel(currentStatus)}</strong> a partir des rendez-vous,
+                        paiements et livrables reels du dossier. Le retour arriere s'appuie sur cet etat effectif.
+                    </div>
+                `
+                : '';
+
             panel.innerHTML = `
                 <div class="status-control-header">
                     <div>
@@ -2104,6 +2224,122 @@
                     </div>
                     <div class="status-control-note">Étape actuelle: ${getStatusLabel(currentStatus)}</div>
                 </div>
+                ${mismatchWarning}
+                <div class="status-control-grid">${cards}</div>
+            `;
+        }
+
+        function renderStatusControlPanel(client, currentStatus) {
+            const panel = document.getElementById('statusControlPanel');
+            if (!panel) return;
+
+            const currentIndex = PIPELINE_STATUSES.indexOf(currentStatus);
+            const recordedStatus = normalizeDashboardStatus(client && client.recorded_status);
+            const statuses = currentIndex >= 0
+                ? PIPELINE_STATUSES.slice(0, currentIndex + 1).reverse()
+                : [currentStatus];
+
+            const cards = statuses.map((status) => {
+                const index = PIPELINE_STATUSES.indexOf(status);
+                const isCurrent = index === currentIndex;
+                const buttonLabel = isCurrent ? 'Etape actuelle' : 'Revenir ici';
+                const buttonClass = isCurrent ? 'status-control-button current' : 'status-control-button';
+                const disabled = isCurrent ? 'disabled' : '';
+                const cardClass = isCurrent ? 'status-control-card current' : 'status-control-card';
+
+                return `
+                    <div class="${cardClass}">
+                        <div class="status-control-step">Etape ${index + 1}</div>
+                        <div class="status-control-title">${getStatusLabel(status)}</div>
+                        <div class="status-control-help">${getStatusControlHelp(status)}</div>
+                        <button class="${buttonClass}" ${disabled} onclick="rewindClientToStatus('${status}')">
+                            ${buttonLabel}
+                        </button>
+                    </div>
+                `;
+            }).join('');
+
+            const mismatchWarning = recordedStatus && recordedStatus !== currentStatus
+                ? `
+                    <div class="status-control-warning">
+                        Le statut enregistre en base est <strong>${getStatusLabel(recordedStatus)}</strong>,
+                        mais le cockpit retient <strong>${getStatusLabel(currentStatus)}</strong> a partir des rendez-vous,
+                        paiements et livrables reels du dossier. Le retour arriere s'appuie sur cet etat effectif.
+                    </div>
+                `
+                : '';
+
+            panel.innerHTML = `
+                <div class="status-control-header">
+                    <div>
+                        <h3>Retour arriere administrateur</h3>
+                        <p>Le retour arriere ne propose que les etapes deja atteintes. Quand vous rembobinez le dossier, le systeme annule aussi les rendez-vous, paiements et champs derives qui forceraient le client a rester trop loin dans le parcours.</p>
+                    </div>
+                    <div class="status-control-note">Etape actuelle: ${getStatusLabel(currentStatus)}</div>
+                </div>
+                ${mismatchWarning}
+                <div class="status-control-grid">${cards}</div>
+            `;
+        }
+
+        function getReachedDashboardStatuses(client, currentStatus) {
+            const effectiveStatus = normalizeDashboardStatus(currentStatus || getDashboardEffectiveStatus(client));
+            const currentIndex = PIPELINE_STATUSES.indexOf(effectiveStatus);
+
+            if (currentIndex === -1) {
+                return effectiveStatus ? [effectiveStatus] : [];
+            }
+
+            return PIPELINE_STATUSES.slice(0, currentIndex + 1);
+        }
+
+        function renderStatusControlPanel(client, currentStatus) {
+            const panel = document.getElementById('statusControlPanel');
+            if (!panel) return;
+
+            const effectiveStatus = normalizeDashboardStatus(currentStatus || getDashboardEffectiveStatus(client));
+            const recordedStatus = normalizeDashboardStatus(client && client.recorded_status);
+            const statuses = getReachedDashboardStatuses(client, effectiveStatus).slice().reverse();
+
+            const cards = statuses.map((status) => {
+                const index = PIPELINE_STATUSES.indexOf(status);
+                const isCurrent = status === effectiveStatus;
+                const buttonLabel = isCurrent ? 'Etape actuelle' : 'Revenir ici';
+                const buttonClass = isCurrent ? 'status-control-button current' : 'status-control-button';
+                const disabled = isCurrent ? 'disabled' : '';
+                const cardClass = isCurrent ? 'status-control-card current' : 'status-control-card';
+
+                return `
+                    <div class="${cardClass}">
+                        <div class="status-control-step">Etape ${index + 1}</div>
+                        <div class="status-control-title">${getStatusLabel(status)}</div>
+                        <div class="status-control-help">${getStatusControlHelp(status)}</div>
+                        <button class="${buttonClass}" ${disabled} onclick="rewindClientToStatus('${status}')">
+                            ${buttonLabel}
+                        </button>
+                    </div>
+                `;
+            }).join('');
+
+            const mismatchWarning = recordedStatus && recordedStatus !== effectiveStatus
+                ? `
+                    <div class="status-control-warning">
+                        Le statut enregistre en base est <strong>${getStatusLabel(recordedStatus)}</strong>,
+                        mais le cockpit retient <strong>${getStatusLabel(effectiveStatus)}</strong> a partir des rendez-vous,
+                        paiements et livrables reels du dossier. Le retour arriere s'appuie sur cet etat effectif.
+                    </div>
+                `
+                : '';
+
+            panel.innerHTML = `
+                <div class="status-control-header">
+                    <div>
+                        <h3>Retour arriere administrateur</h3>
+                        <p>Seules les etapes deja atteintes sont proposees. Quand vous rembobinez le dossier, le systeme neutralise aussi les rendez-vous, paiements et champs derives qui forceraient le client a repartir aussitot vers l'avant.</p>
+                    </div>
+                    <div class="status-control-note">Etape actuelle: ${getStatusLabel(effectiveStatus)}</div>
+                </div>
+                ${mismatchWarning}
                 <div class="status-control-grid">${cards}</div>
             `;
         }
@@ -2705,6 +2941,9 @@
                 await selectClientById(currentClient.id);
                 await loadDashboard();
             } catch (err) {
+                if (err && err.status === 409 && currentClient && currentClient.id) {
+                    await selectClientById(currentClient.id);
+                }
                 showErrorMessage('Erreur lors de l annulation du scan: ' + err.message);
             }
         }
@@ -3156,6 +3395,112 @@
             } catch (err) {
                 console.error('Rewind error:', err);
                 showErrorMessage(err.message || 'Impossible de revenir à cette étape.');
+            }
+        }
+
+        async function rewindClientToStatus(targetStatus) {
+            if (!currentClient) return;
+
+            const currentStatus = getDashboardEffectiveStatus(currentClient);
+            const currentIndex = PIPELINE_STATUSES.indexOf(currentStatus);
+            const targetIndex = PIPELINE_STATUSES.indexOf(targetStatus);
+
+            if (targetIndex === -1 || currentIndex === -1 || targetIndex >= currentIndex) {
+                showErrorMessage('Choisissez une etape anterieure reellement atteinte par le dossier.');
+                return;
+            }
+
+            const confirmed = window.confirm(
+                `Revenir le dossier de "${getStatusLabel(currentStatus)}" a "${getStatusLabel(targetStatus)}" ?\n\n`
+                + 'Les rendez-vous, paiements et contenus des etapes suivantes seront neutralises si necessaire pour eviter que le dossier reparte immediatement vers l avant.'
+            );
+            if (!confirmed) {
+                return;
+            }
+
+            try {
+                const data = await adminFetch('/.netlify/functions/admin-rewind-client-stage', {
+                    clientId: currentClient.id,
+                    targetStatus
+                });
+
+                currentClient = {
+                    ...data.client,
+                    status: normalizeDashboardStatus(data.client.status)
+                };
+                dashboardClients = dashboardClients.map(client =>
+                    client.id === currentClient.id ? currentClient : client
+                );
+
+                clearMarcelChat();
+                renderClientProfile(currentClient);
+                await syncCockpitTasks(currentClient.id);
+                await loadClientTasks(currentClient.id);
+                await loadDashboard();
+
+                showSuccessMessage(`Dossier replace sur "${getStatusLabel(targetStatus)}".${buildRewindSummary(data.cleanup)}`);
+            } catch (err) {
+                console.error('Rewind error:', err);
+                showErrorMessage(err.message || 'Impossible de revenir a cette etape.');
+            }
+        }
+
+        async function rewindClientToStatus(targetStatus) {
+            if (!currentClient) return;
+
+            const currentStatus = getDashboardEffectiveStatus(currentClient);
+            const reachedStatuses = getReachedDashboardStatuses(currentClient, currentStatus);
+            const targetIndex = PIPELINE_STATUSES.indexOf(targetStatus);
+            const currentIndex = PIPELINE_STATUSES.indexOf(currentStatus);
+            const canRewindToTarget = targetIndex !== -1
+                && currentIndex !== -1
+                && targetIndex < currentIndex
+                && reachedStatuses.includes(targetStatus);
+
+            if (!canRewindToTarget) {
+                showErrorMessage('Choisissez une etape anterieure reellement atteinte par le dossier.');
+                return;
+            }
+
+            const confirmed = window.confirm(
+                `Revenir le dossier de "${getStatusLabel(currentStatus)}" a "${getStatusLabel(targetStatus)}" ?\n\n`
+                + 'Les rendez-vous, paiements et contenus des etapes suivantes seront neutralises si necessaire pour eviter que le dossier reparte immediatement vers l avant.'
+            );
+            if (!confirmed) {
+                return;
+            }
+
+            try {
+                const data = await adminFetch('/.netlify/functions/admin-rewind-client-stage', {
+                    clientId: currentClient.id,
+                    targetStatus
+                });
+
+                currentClient = {
+                    ...data.client,
+                    status: normalizeDashboardStatus(data.client.status)
+                };
+                dashboardClients = dashboardClients.map(client =>
+                    client.id === currentClient.id ? currentClient : client
+                );
+
+                clearMarcelChat();
+                renderClientProfile(currentClient);
+                await syncCockpitTasks(currentClient.id);
+                await loadClientTasks(currentClient.id);
+                await loadDashboard();
+
+                showSuccessMessage(`Dossier replace sur "${getStatusLabel(targetStatus)}".${buildRewindSummary(data.cleanup)}`);
+            } catch (err) {
+                console.error('Rewind error:', err);
+
+                if (err && err.status === 409 && currentClient && currentClient.id) {
+                    await selectClientById(currentClient.id);
+                    showErrorMessage(err.message || 'Le dossier a ete resynchronise avant de proposer un nouveau retour arriere.');
+                    return;
+                }
+
+                showErrorMessage(err.message || 'Impossible de revenir a cette etape.');
             }
         }
 
