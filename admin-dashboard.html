@@ -1835,6 +1835,9 @@
         let phoneSummaryDraftClientId = null;
         let phoneSummaryDraft = null;
         let phoneSummaryFormOpen = false;
+        let scanObservationDraftClientId = null;
+        let scanObservationDraft = null;
+        let scanObservationFormOpen = false;
 
         // ========== DOM ELEMENTS ==========
         const authScreen = document.getElementById('authScreen');
@@ -2166,8 +2169,9 @@
             // Action panel
             renderActionPanel(client, status);
 
-            // Matterport toujours visible pour permettre la saisie du model ID
-            document.getElementById('matterportSection').style.display = 'block';
+            // Matterport visible uniquement a partir de scan_completed
+            const matterportFromStatus = ['scan_completed', 'analysis_ready', 'avant_projet_ready', 'avant_projet_transmitted', 'accompaniment_subscribed'];
+            document.getElementById('matterportSection').style.display = matterportFromStatus.includes(status) ? 'block' : 'none';
 
             // Pré-remplir le model ID si existant
             if (client.matterport_model_id) {
@@ -2554,10 +2558,15 @@
                     `;
                 }
             } else if (status === 'scan_completed') {
+                const scanObsSection = renderScanObservationFormSection(client, status);
                 html = `
-                    <h3>Fichiers du scan</h3>
-                    <p class="action-panel-description">Telechargez les fichiers et donnees du scan 3D.</p>
-                    <button class="action-button" onclick="openMarcelChat()">Discuter avec Marcel</button>
+                    <h3>Observations de visite</h3>
+                    <p class="action-panel-description">Renseignez vos observations de la visite scan pour enrichir le contexte de Marcel. La synthese d appel reste accessible ci-dessous.</p>
+                    ${scanObsSection}
+                    ${phoneSummarySection}
+                    <div style="margin-top:12px;">
+                        <button class="action-button" onclick="openMarcelChat()">Discuter avec Marcel</button>
+                    </div>
                 `;
                 document.getElementById('filesSection').style.display = 'block';
             } else if (status === 'analysis_ready') {
@@ -2870,7 +2879,9 @@
 
         function canOpenPhoneSummaryForm(status, appointment) {
             const normalizedStatus = normalizeDashboardStatus(status);
-            return normalizedStatus === 'call_done' || hasConfirmedPhoneAppointment(appointment);
+            const statusIdx = PIPELINE_STATUSES.indexOf(normalizedStatus);
+            const callDoneIdx = PIPELINE_STATUSES.indexOf('call_done');
+            return (callDoneIdx >= 0 && statusIdx >= callDoneIdx) || hasConfirmedPhoneAppointment(appointment);
         }
 
         function togglePhoneSummaryForm(forceOpen) {
@@ -3080,6 +3091,146 @@
                 showSuccessMessage('Formulaire d appel enregistre et transmis a Marcel.');
             } catch (err) {
                 showErrorMessage(err.message || 'Impossible d envoyer le formulaire a Marcel.');
+            }
+        }
+
+        // ========== SCAN OBSERVATION FORM ==========
+
+        function canOpenScanObservationForm(status) {
+            const normalizedStatus = normalizeDashboardStatus(status);
+            const statusIdx = PIPELINE_STATUSES.indexOf(normalizedStatus);
+            const scanCompletedIdx = PIPELINE_STATUSES.indexOf('scan_completed');
+            return scanCompletedIdx >= 0 && statusIdx >= scanCompletedIdx;
+        }
+
+        function createEmptyScanObservationDraft() {
+            return { summary: '', observations: '', technicalNotes: '', vigilance: '', recommendations: '' };
+        }
+
+        function buildScanObservationDraftFromNote(note) {
+            if (!note) return createEmptyScanObservationDraft();
+            let parsed = {};
+            try { parsed = JSON.parse(note.internal_notes || '{}'); } catch (e) {}
+            return {
+                summary: note.summary || parsed.summary || '',
+                observations: parsed.observations || '',
+                technicalNotes: parsed.technicalNotes || '',
+                vigilance: parsed.vigilance || '',
+                recommendations: parsed.recommendations || ''
+            };
+        }
+
+        function ensureScanObservationDraft(client) {
+            if (!client || !client.id) {
+                scanObservationDraftClientId = null;
+                scanObservationDraft = createEmptyScanObservationDraft();
+                scanObservationFormOpen = false;
+                return;
+            }
+            if (scanObservationDraftClientId === client.id && scanObservationDraft) return;
+            scanObservationDraftClientId = client.id;
+            scanObservationDraft = buildScanObservationDraftFromNote(getLatestProjectNote('scan_observation'));
+            scanObservationFormOpen = false;
+        }
+
+        function updateScanObservationDraftField(field, value) {
+            if (!scanObservationDraft) scanObservationDraft = createEmptyScanObservationDraft();
+            scanObservationDraft[field] = typeof value === 'string' ? value : '';
+        }
+
+        function toggleScanObservationForm(forceOpen) {
+            if (!currentClient) return;
+            ensureScanObservationDraft(currentClient);
+            scanObservationFormOpen = typeof forceOpen === 'boolean' ? forceOpen : !scanObservationFormOpen;
+            renderActionPanel(currentClient, getDashboardEffectiveStatus(currentClient));
+        }
+
+        function renderScanObservationFormSection(client, status) {
+            if (!canOpenScanObservationForm(status)) return '';
+            ensureScanObservationDraft(client);
+            const latestNote = getLatestProjectNote('scan_observation');
+            const toggleLabel = scanObservationFormOpen ? 'Masquer le formulaire de visite' : 'Ouvrir le formulaire de visite';
+            const savedNote = latestNote && latestNote.created_at
+                ? `Derniere synthese enregistree le ${formatShortDate(latestNote.created_at)}.`
+                : 'Ce formulaire enrichit le contexte transmis a Marcel pour l analyse.';
+
+            if (!scanObservationFormOpen) {
+                return `
+                    <div style="display:flex;gap:12px;flex-wrap:wrap;margin-top:12px;">
+                        <button class="action-button" onclick="toggleScanObservationForm(true)">${toggleLabel}</button>
+                    </div>
+                `;
+            }
+
+            return `
+                <div style="display:flex;gap:12px;flex-wrap:wrap;margin-top:12px;">
+                    <button class="action-button" onclick="toggleScanObservationForm(false)">${toggleLabel}</button>
+                </div>
+                <div class="call-summary-form">
+                    <h4>Observations de visite scan</h4>
+                    <div class="call-summary-form-note">${savedNote}</div>
+                    <div class="call-summary-grid">
+                        <div class="call-summary-field call-summary-field-full">
+                            <label for="scanObsSummary">Resume de la visite</label>
+                            <textarea id="scanObsSummary" oninput="updateScanObservationDraftField('summary', this.value)">${escapeHtml(scanObservationDraft.summary || '')}</textarea>
+                        </div>
+                        <div class="call-summary-field call-summary-field-full">
+                            <label for="scanObsObservations">Observations cles (etat des pieces, acces, contraintes)</label>
+                            <textarea id="scanObsObservations" oninput="updateScanObservationDraftField('observations', this.value)">${escapeHtml(scanObservationDraft.observations || '')}</textarea>
+                        </div>
+                        <div class="call-summary-field call-summary-field-full">
+                            <label for="scanObsTechnical">Notes techniques (dimensions, equipements, reseaux)</label>
+                            <textarea id="scanObsTechnical" oninput="updateScanObservationDraftField('technicalNotes', this.value)">${escapeHtml(scanObservationDraft.technicalNotes || '')}</textarea>
+                        </div>
+                        <div class="call-summary-field call-summary-field-full">
+                            <label for="scanObsVigilance">Points de vigilance internes</label>
+                            <textarea id="scanObsVigilance" oninput="updateScanObservationDraftField('vigilance', this.value)">${escapeHtml(scanObservationDraft.vigilance || '')}</textarea>
+                        </div>
+                        <div class="call-summary-field call-summary-field-full">
+                            <label for="scanObsRecommendations">Recommandations pour l analyse</label>
+                            <textarea id="scanObsRecommendations" oninput="updateScanObservationDraftField('recommendations', this.value)">${escapeHtml(scanObservationDraft.recommendations || '')}</textarea>
+                        </div>
+                    </div>
+                    <div class="call-summary-actions">
+                        <button class="action-button" onclick="saveScanObservationForm()">Enregistrer</button>
+                        <button class="action-button" onclick="sendScanObservationToMarcel()" style="background-color:#3F6E52;">Envoyer a Marcel</button>
+                    </div>
+                </div>
+            `;
+        }
+
+        async function saveScanObservationForm() {
+            if (!currentClient) throw new Error('Aucun client selectionne.');
+            ensureScanObservationDraft(currentClient);
+            if (!scanObservationDraft.summary || !scanObservationDraft.summary.trim()) {
+                throw new Error('Le resume de la visite est requis.');
+            }
+            const data = await adminFetch('/.netlify/functions/save-scan-observation', {
+                clientId: currentClient.id,
+                summary: scanObservationDraft.summary,
+                observations: scanObservationDraft.observations,
+                technicalNotes: scanObservationDraft.technicalNotes,
+                vigilance: scanObservationDraft.vigilance,
+                recommendations: scanObservationDraft.recommendations
+            });
+            if (data && data.note) {
+                upsertProjectNoteInMemory(data.note);
+                scanObservationDraft = buildScanObservationDraftFromNote(data.note);
+            }
+            renderActionPanel(currentClient, getDashboardEffectiveStatus(currentClient));
+            return data;
+        }
+
+        async function sendScanObservationToMarcel() {
+            if (!currentClient) return;
+            try {
+                await saveScanObservationForm();
+                clearMarcelChat();
+                await bootstrapMarcelPanel();
+                document.getElementById('chatPanel').scrollIntoView({ behavior: 'smooth' });
+                showSuccessMessage('Observations de visite enregistrees et transmises a Marcel.');
+            } catch (err) {
+                showErrorMessage(err.message || 'Impossible d envoyer les observations a Marcel.');
             }
         }
 
