@@ -2193,10 +2193,10 @@
             // Afficher la visite 3D si on a l'iframe ou l'URL
             if (client.matterport_iframe || client.matterport_url || client.matterport_model_id) {
                 document.getElementById('matterportTabs').style.display = 'block';
-                if (client.matterport_iframe) {
+                if (client.matterport_iframe && client.matterport_iframe.startsWith('http')) {
+                    document.getElementById('matterportIframe').src = client.matterport_iframe;
+                } else if (client.matterport_iframe) {
                     document.getElementById('matterportIframe').srcdoc = client.matterport_iframe;
-                } else if (client.matterport_url) {
-                    document.getElementById('matterportIframe').src = client.matterport_url;
                 } else if (client.matterport_model_id) {
                     document.getElementById('matterportIframe').src =
                         `https://my.matterport.com/show/?m=${client.matterport_model_id}`;
