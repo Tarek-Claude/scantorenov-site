@@ -3395,6 +3395,66 @@
 
         document.getElementById('uploadBtn')?.addEventListener('click', uploadFiles);
 
+        // --- Agent local: creation de dossier client ---
+        const AGENT_LOCAL_URL = 'http://localhost:3500';
+
+        async function checkAgentLocal() {
+            try {
+                const r = await fetch(`${AGENT_LOCAL_URL}/health`, { signal: AbortSignal.timeout(2000) });
+                return r.ok;
+            } catch { return false; }
+        }
+
+        async function createLocalClientFolder() {
+            if (!currentClient) return;
+            try {
+                const alive = await checkAgentLocal();
+                if (!alive) {
+                    console.log('Agent local non disponible — creation dossier ignoree');
+                    return;
+                }
+                const res = await fetch(`${AGENT_LOCAL_URL}/creer-dossier`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        clientId: currentClient.id,
+                        nom: currentClient.nom || '',
+                        prenom: currentClient.prenom || ''
+                    })
+                });
+                const data = await res.json();
+                if (data.success) {
+                    console.log('Dossier local cree:', data.folder_name);
+                }
+            } catch (err) {
+                console.warn('Agent local erreur:', err.message);
+            }
+        }
+
+        // --- Upload fichiers vers Supabase Storage ---
+        async function uploadSingleFile(email, file, prefix) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onload = async function() {
+                    const base64 = reader.result.split(',')[1];
+                    const safeName = `${prefix}_${file.name}`;
+                    try {
+                        const data = await adminFetch('/.netlify/functions/admin-upload-file', {
+                            email: email,
+                            filename: safeName,
+                            contentType: file.type || 'application/octet-stream',
+                            data: base64
+                        });
+                        resolve(data.url);
+                    } catch (err) {
+                        reject(err);
+                    }
+                };
+                reader.onerror = () => reject(new Error('Erreur lecture fichier'));
+                reader.readAsDataURL(file);
+            });
+        }
+
         async function uploadFiles() {
             if (!currentClient) return;
 
@@ -3403,41 +3463,83 @@
             const csvInput = document.getElementById('csvInput');
             const matterportInput = document.getElementById('matterportIframeInput');
 
-            const files = {
-                photos: Array.from(photosInput.files),
-                plans: Array.from(plansInput.files),
-                csv: csvInput.files[0],
-                matterportIframe: matterportInput.value
-            };
+            const photoFiles = Array.from(photosInput.files);
+            const planFiles = Array.from(plansInput.files);
+            const csvFile = csvInput.files[0];
+            const iframeValue = matterportInput.value.trim();
+
+            const totalFiles = photoFiles.length + planFiles.length + (csvFile ? 1 : 0);
+            if (totalFiles === 0 && !iframeValue) {
+                showErrorMessage('Aucun fichier selectionne');
+                return;
+            }
+
+            const email = currentClient.email;
+            if (!email) {
+                showErrorMessage('Email client manquant');
+                return;
+            }
 
             try {
-                // Upload to storage or API
-                const formData = new FormData();
-                files.photos.forEach(f => formData.append('photos', f));
-                files.plans.forEach(f => formData.append('plans', f));
-                if (files.csv) formData.append('csv', files.csv);
-                formData.append('matterportIframe', files.matterportIframe);
-                formData.append('clientId', currentClient.id);
+                showSuccessMessage('Upload en cours...');
 
-                const response = await fetch('/.netlify/functions/admin-update-client', {
-                    method: 'POST',
-                    headers: {
-                        'Authorization': `Bearer ${adminSessionToken}`
-                    },
-                    body: formData
-                });
-
-                if (response.ok) {
-                    showSuccessMessage('Fichiers téléchargés');
-                    photosInput.value = '';
-                    plansInput.value = '';
-                    csvInput.value = '';
-                    matterportInput.value = '';
-                } else {
-                    showErrorMessage('Erreur lors du téléchargement');
+                // Upload photos
+                const photoUrls = [];
+                for (const f of photoFiles) {
+                    const url = await uploadSingleFile(email, f, 'photo');
+                    photoUrls.push(url);
                 }
+
+                // Upload plans
+                const planUrls = [];
+                for (const f of planFiles) {
+                    const url = await uploadSingleFile(email, f, 'plan');
+                    planUrls.push(url);
+                }
+
+                // Upload CSV as file
+                if (csvFile) {
+                    await uploadSingleFile(email, csvFile, 'csv');
+                }
+
+                // Save URLs and iframe to client record
+                const fields = {};
+                if (photoUrls.length > 0) {
+                    const existing = currentClient.photos_urls || [];
+                    fields.photos_urls = [...existing, ...photoUrls];
+                }
+                if (planUrls.length > 0) {
+                    const existing = currentClient.plans_urls || [];
+                    fields.plans_urls = [...existing, ...planUrls];
+                }
+                if (iframeValue) {
+                    fields.matterport_iframe = iframeValue;
+                }
+
+                if (Object.keys(fields).length > 0) {
+                    const saveResult = await adminFetch('/.netlify/functions/admin-save-client', {
+                        clientId: currentClient.id,
+                        fields: fields
+                    });
+                    if (saveResult.client) {
+                        currentClient = {
+                            ...saveResult.client,
+                            status: normalizeDashboardStatus(saveResult.client.status)
+                        };
+                        dashboardClients = dashboardClients.map(c =>
+                            c.id === currentClient.id ? currentClient : c
+                        );
+                        renderFilesSection(currentClient);
+                    }
+                }
+
+                showSuccessMessage(`${totalFiles} fichier(s) uploade(s) avec succes`);
+                photosInput.value = '';
+                plansInput.value = '';
+                csvInput.value = '';
+                matterportInput.value = '';
             } catch (err) {
-                showErrorMessage('Erreur: ' + err.message);
+                showErrorMessage('Erreur upload: ' + err.message);
             }
         }
 
@@ -3719,6 +3821,15 @@
                     await loadClientTasks(currentClient.id);
                     await loadDashboard();
                 }
+
+                // Auto-fill iframe field
+                const iframeField = document.getElementById('matterportIframeInput');
+                if (iframeField) {
+                    iframeField.value = `https://my.matterport.com/show/?m=${modelId}`;
+                }
+
+                // Create local client folder via agent local
+                await createLocalClientFolder();
 
                 showMpSyncStatus(
                     `Synchronisation reussie - ${mpData.locations.length} panoramiques, ` +
