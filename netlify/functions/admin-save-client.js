@@ -23,7 +23,6 @@ const ALLOWED_FIELDS = [
   'budget',
   'echeance',
   'matterport_model_id',
-  'matterport_url',
   'matterport_iframe',
   'matterport_data',
   'photos_urls',
