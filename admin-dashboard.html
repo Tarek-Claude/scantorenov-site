@@ -2618,33 +2618,25 @@
                 }
 
                 currentClientTasks = tasks || [];
-                const shouldKeepActionPanel =
-                    currentClient
-                    && (
-                        currentClient.status === 'call_requested'
-                        || (
-                            currentClient.status === 'scan_scheduled'
-                            && (
-                                !!getPrimaryPendingScanAppointment(currentClientAppointments)
-                                || (!!getPrimaryActiveScanAppointment(currentClientAppointments) && !isCurrentScanActuallyPaid())
-                            )
-                        )
-                        || (
-                            currentClient.status === 'scan_payment_completed'
-                            && !!getPrimaryActiveScanAppointment(currentClientAppointments)
-                            && !isCurrentScanActuallyPaid()
-                        )
-                    );
 
-                if (shouldKeepActionPanel) {
-                    renderActionPanel(currentClient, currentClient.status);
+                // Always use the derived effective status, never the raw DB status
+                if (!currentClient) return;
+                const effectiveStatus = getDashboardEffectiveStatus(currentClient);
+
+                // Statuses that need their dedicated action panel (not task cards)
+                const statusesWithDedicatedPanel = [
+                    'call_requested', 'call_done',
+                    'scan_scheduled', 'scan_payment_completed', 'scan_completed',
+                    'analysis_ready', 'avant_projet_ready'
+                ];
+
+                if (statusesWithDedicatedPanel.includes(effectiveStatus)) {
+                    renderActionPanel(currentClient, effectiveStatus);
                     return;
                 }
 
                 if (!currentClientTasks.length) {
-                    if (currentClient) {
-                        renderActionPanel(currentClient, currentClient.status);
-                    }
+                    renderActionPanel(currentClient, effectiveStatus);
                     return;
                 }
 
@@ -2655,11 +2647,11 @@
                             <div class="task-card-title">${task.title}</div>
                             <div class="task-state-badge">${TASK_STATE_LABELS[task.status] || task.status}</div>
                         </div>
-                        <div class="task-card-desc">${task.description || "Aucune description dÃ©taillÃ©e pour le moment."}</div>
+                        <div class="task-card-desc">${task.description || "Aucune description detaillee pour le moment."}</div>
                         <div class="task-meta">
-                            <span>PrioritÃ© ${task.priority || 0}</span>
+                            <span>Priorite ${task.priority || 0}</span>
                             <span>${task.screen_target || 'client_overview'}</span>
-                            ${task.due_date ? `<span>Ã‰chÃ©ance ${formatShortDate(task.due_date)}</span>` : ""}
+                            ${task.due_date ? `<span>Echeance ${formatShortDate(task.due_date)}</span>` : ""}
                         </div>
                     </div>
                 `).join('');
@@ -3466,17 +3458,14 @@
                 dashboardClients = dashboardClients.map(client =>
                     client.id === currentClient.id ? currentClient : client
                 );
-                if (shouldShowMarcelForStatus(currentClient.status)) {
-                    clearMarcelChat();
-                    await bootstrapMarcelPanel();
-                }
                 renderClientProfile(currentClient);
                 await syncCockpitTasks(currentClient.id);
                 await loadClientTasks(currentClient.id);
                 await loadDashboard();
+                showSuccessMessage('Statut mis a jour en base: ' + getStatusLabel(normalizedStatus));
             } catch (err) {
                 console.error('Update error:', err);
-                throw err;
+                showErrorMessage('Erreur lors de la mise a jour du statut: ' + (err.message || err));
             }
         }
 
