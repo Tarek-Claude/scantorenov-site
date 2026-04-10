@@ -52,7 +52,8 @@ exports.handler = async function handler(event) {
     return { statusCode: 400, headers, body: JSON.stringify({ error: 'Corps invalide' }) };
   }
 
-  const { clientId, photos_urls, plans_urls, matterport_model_id, matterport_data } = body;
+  const { clientId, photos_urls, plans_urls, matterport_model_id, matterport_data, mode } = body;
+  const replace = mode === 'replace';
 
   if (!clientId) {
     return { statusCode: 400, headers, body: JSON.stringify({ error: 'clientId requis' }) };
@@ -74,14 +75,26 @@ exports.handler = async function handler(event) {
       is_primary: true,
     };
 
-    // Fusionner les URLs (évite d'écraser les existantes)
+    // Mode 'replace' : on remplace, sinon on fusionne (sans doublons)
     if (photos_urls !== undefined) {
-      const existing = (existingScan && existingScan.photos_urls) || [];
-      payload.photos_urls = [...existing, ...photos_urls];
+      if (replace) {
+        payload.photos_urls = photos_urls;
+      } else {
+        const existing = (existingScan && existingScan.photos_urls) || [];
+        const merged = [...existing];
+        for (const u of photos_urls) if (!merged.includes(u)) merged.push(u);
+        payload.photos_urls = merged;
+      }
     }
     if (plans_urls !== undefined) {
-      const existing = (existingScan && existingScan.plans_urls) || [];
-      payload.plans_urls = [...existing, ...plans_urls];
+      if (replace) {
+        payload.plans_urls = plans_urls;
+      } else {
+        const existing = (existingScan && existingScan.plans_urls) || [];
+        const merged = [...existing];
+        for (const u of plans_urls) if (!merged.includes(u)) merged.push(u);
+        payload.plans_urls = merged;
+      }
     }
     if (matterport_model_id !== undefined) {
       payload.matterport_model_id = matterport_model_id;

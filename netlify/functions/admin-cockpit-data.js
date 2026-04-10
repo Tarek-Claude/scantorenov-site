@@ -70,9 +70,26 @@ exports.handler = async function handler(event) {
 
     let appointmentsByClientId = new Map();
     let paymentsByClientId = new Map();
+    let scansByClientId = new Map();
     const clientIds = (clients || []).map((client) => client.id).filter(Boolean);
 
     if (clientIds.length > 0) {
+      const { data: scans, error: scansError } = await supabase
+        .from('scans')
+        .select('client_id,is_primary,photos_urls,plans_urls,matterport_model_id,matterport_data')
+        .in('client_id', clientIds);
+
+      if (scansError && !isMissingTableError(scansError)) {
+        throw new Error(`Lecture scans: ${scansError.message}`);
+      }
+
+      for (const scan of scans || []) {
+        const existing = scansByClientId.get(scan.client_id);
+        if (!existing || scan.is_primary) {
+          scansByClientId.set(scan.client_id, scan);
+        }
+      }
+
       const { data: appointments, error: appointmentError } = await supabase
         .from('appointments')
         .select('client_id,type,status,scheduled_at,notes')
@@ -109,9 +126,17 @@ exports.handler = async function handler(event) {
     const enrichedClients = (clients || []).map((client) => {
       const appointments = appointmentsByClientId.get(client.id) || [];
       const payments = paymentsByClientId.get(client.id) || [];
+      const scan = scansByClientId.get(client.id) || null;
+      const merged = {
+        ...client,
+        photos_urls: (scan && scan.photos_urls) || [],
+        plans_urls: (scan && scan.plans_urls) || [],
+        matterport_model_id: client.matterport_model_id || (scan && scan.matterport_model_id) || null,
+        matterport_data: client.matterport_data || (scan && scan.matterport_data) || null,
+      };
       return {
-        ...enrichClientProgress(client, appointments, payments),
-        payment_access: buildPaymentAccessSummary(payments, client),
+        ...enrichClientProgress(merged, appointments, payments),
+        payment_access: buildPaymentAccessSummary(payments, merged),
       };
     });
 
