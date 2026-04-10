@@ -25,8 +25,6 @@ const ALLOWED_FIELDS = [
   'matterport_model_id',
   'matterport_iframe',
   'matterport_data',
-  'photos_urls',
-  'plans_urls',
   'proposal_url',
   'marcel_enabled',
   'avant_projet_enabled',

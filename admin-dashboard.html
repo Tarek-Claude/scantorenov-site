@@ -3502,34 +3502,31 @@
                     await uploadSingleFile(email, csvFile, 'csv');
                 }
 
-                // Save URLs and iframe to client record
-                const fields = {};
-                if (photoUrls.length > 0) {
-                    const existing = currentClient.photos_urls || [];
-                    fields.photos_urls = [...existing, ...photoUrls];
-                }
-                if (planUrls.length > 0) {
-                    const existing = currentClient.plans_urls || [];
-                    fields.plans_urls = [...existing, ...planUrls];
-                }
+                // Sauvegarder iframe dans clients (admin-save-client)
                 if (iframeValue) {
-                    fields.matterport_iframe = iframeValue;
+                    await adminFetch('/.netlify/functions/admin-save-client', {
+                        clientId: currentClient.id,
+                        fields: { matterport_iframe: iframeValue }
+                    });
                 }
 
-                if (Object.keys(fields).length > 0) {
-                    const saveResult = await adminFetch('/.netlify/functions/admin-save-client', {
+                // Sauvegarder photos_urls et plans_urls dans scans (admin-update-scan)
+                const scanFields = {};
+                if (photoUrls.length > 0) scanFields.photos_urls = photoUrls;
+                if (planUrls.length > 0) scanFields.plans_urls = planUrls;
+
+                if (Object.keys(scanFields).length > 0) {
+                    const scanResult = await adminFetch('/.netlify/functions/admin-update-scan', {
                         clientId: currentClient.id,
-                        fields: fields
+                        ...scanFields
                     });
-                    if (saveResult.client) {
-                        currentClient = {
-                            ...saveResult.client,
-                            status: normalizeDashboardStatus(saveResult.client.status)
-                        };
-                        dashboardClients = dashboardClients.map(c =>
-                            c.id === currentClient.id ? currentClient : c
-                        );
-                        renderFilesSection(currentClient);
+                    if (scanResult.scan) {
+                        // Mettre à jour l'affichage avec les données du scan
+                        renderFilesSection({
+                            ...currentClient,
+                            photos_urls: scanResult.scan.photos_urls || [],
+                            plans_urls: scanResult.scan.plans_urls || []
+                        });
                     }
                 }
 
