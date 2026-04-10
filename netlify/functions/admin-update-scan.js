@@ -72,7 +72,6 @@ exports.handler = async function handler(event) {
     const payload = {
       client_id: clientId,
       is_primary: true,
-      updated_at: new Date().toISOString(),
     };
 
     // Fusionner les URLs (évite d'écraser les existantes)
