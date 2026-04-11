@@ -69,7 +69,8 @@ exports.handler = async function handler(event) {
     const [
       { data: client, error: clientError },
       { data: tasks, error: taskError },
-      { data: projectNotes, error: projectNotesError }
+      { data: projectNotes, error: projectNotesError },
+      { data: primaryScan, error: primaryScanError }
     ] = await Promise.all([
       supabase
         .from('clients')
@@ -90,6 +91,12 @@ exports.handler = async function handler(event) {
         .in('type', ['client_brief', 'phone_summary', 'scan_observation'])
         .order('created_at', { ascending: false })
         .limit(6),
+      supabase
+        .from('scans')
+        .select('id, client_id, is_primary, photos_urls, plans_urls, matterport_model_id, matterport_data')
+        .eq('client_id', body.clientId)
+        .eq('is_primary', true)
+        .maybeSingle(),
     ]);
 
     if (clientError) {
@@ -101,6 +108,9 @@ exports.handler = async function handler(event) {
     if (projectNotesError && !isMissingTableError(projectNotesError)) {
       throw new Error(`Lecture notes projet: ${projectNotesError.message}`);
     }
+    if (primaryScanError && !isMissingTableError(primaryScanError)) {
+      throw new Error(`Lecture scan: ${primaryScanError.message}`);
+    }
 
     const { data: appointments, error: appointmentError } = await supabase
       .from('appointments')
@@ -111,10 +121,18 @@ exports.handler = async function handler(event) {
       throw new Error(`Lecture rendez-vous: ${appointmentError.message}`);
     }
 
+    const mergedClient = {
+      ...client,
+      photos_urls: primaryScan?.photos_urls || client.photos_urls || [],
+      plans_urls: primaryScan?.plans_urls || client.plans_urls || [],
+      matterport_model_id: client.matterport_model_id || primaryScan?.matterport_model_id || null,
+      matterport_data: client.matterport_data || primaryScan?.matterport_data || null,
+    };
+
     const payments = await fetchClientPayments(supabase, body.clientId);
     const enrichedClient = {
-      ...enrichClientProgress(client, appointments || [], payments),
-      payment_access: buildPaymentAccessSummary(payments, client),
+      ...enrichClientProgress(mergedClient, appointments || [], payments),
+      payment_access: buildPaymentAccessSummary(payments, mergedClient),
     };
     let activeTasks = tasks || [];
 
