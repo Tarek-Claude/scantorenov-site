@@ -22,12 +22,17 @@ const ALLOWED_FIELDS = [
   'surface',
   'budget',
   'echeance',
+  'scan_date_proposed',
+  'scan_date_confirmed',
+  'scan_confirmed_by_client',
   'matterport_model_id',
+  'matterport_url',
   'matterport_iframe',
   'matterport_data',
   'proposal_url',
   'marcel_enabled',
   'avant_projet_enabled',
+  'last_action_required',
 ];
 
 function getSupabaseAdmin() {

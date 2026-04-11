@@ -1474,11 +1474,7 @@
                         <div style="padding: 20px;">
                             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
                                 <h3 style="margin: 0;">Visite 3D Matterport</h3>
-                                <div style="display: flex; gap: 8px; flex-wrap: wrap;">
-                                    <button class="action-button" onclick="fetchMatterportData()" id="btnFetchMatterport" style="font-size: 12px; padding: 8px 14px;">
-                                        Synchroniser depuis Matterport
-                                    </button>
-                                </div>
+                                <div style="display: flex; gap: 8px; flex-wrap: wrap;"></div>
                             </div>
 
                             <!-- Matterport Model ID Input -->
@@ -1488,7 +1484,7 @@
                                     <input type="text" id="matterportModelId" placeholder="Ex: SxQL3iGyoDo" style="flex: 1; min-width: 220px;">
                                     <input type="text" id="matterportTokenId" placeholder="Matterport Token ID" style="flex: 1; min-width: 220px;">
                                     <input type="password" id="matterportTokenSecret" placeholder="Matterport Token Secret" style="flex: 1; min-width: 220px;">
-                                    <button class="action-button" onclick="fetchMatterportData()" style="white-space: nowrap; font-size: 12px; padding: 8px 14px;">
+                                    <button class="action-button" onclick="retrieveMatterportAssets()" id="btnFetchMatterport" style="white-space: nowrap; font-size: 12px; padding: 8px 14px;">
                                         Récupérer
                                     </button>
                                 </div>
@@ -1497,20 +1493,45 @@
                                 </p>
                             </div>
 
+                            <div class="files-section" id="filesSection" style="display: block; margin-bottom: 16px;">
+                                <h3>Gestion des fichiers</h3>
+                                <p style="font-size: 12px; color: var(--muted); margin-bottom: 14px;">
+                                    Ajoutez les sources locales du poste, puis cliquez une seule fois sur <strong>R&eacute;cup&eacute;rer</strong>.
+                                </p>
+                                <div class="file-inputs">
+                                    <div class="file-input-group">
+                                        <label>Photos du PC</label>
+                                        <input type="file" id="photosInput" multiple accept="image/*">
+                                    </div>
+                                    <div class="file-input-group">
+                                        <label>Plans PNG / PDFs</label>
+                                        <input type="file" id="plansInput" multiple accept=".pdf,image/*">
+                                    </div>
+                                    <div class="file-input-group">
+                                        <label>Fichier CSV Matterport</label>
+                                        <input type="file" id="csvInput" accept=".csv">
+                                    </div>
+                                    <div class="file-input-group">
+                                        <label>iframe Matterport (optionnel si l'ID mod&egrave;le suffit)</label>
+                                        <textarea id="matterportIframeInput" placeholder="Collez le code iframe ou l'URL Matterport..."></textarea>
+                                    </div>
+                                </div>
+                            </div>
+
                             <!-- Matterport Sync Status -->
                             <div id="matterportSyncStatus" style="display: none; padding: 12px 16px; border-radius: 8px; margin-bottom: 16px; font-size: 13px;"></div>
 
                             <!-- Matterport Data Tabs -->
                             <div id="matterportTabs" style="display: none; margin-bottom: 16px;">
                                 <div style="display: flex; gap: 4px; border-bottom: 2px solid var(--border); margin-bottom: 16px;">
-                                    <button class="mp-tab active" onclick="switchMpTab('viewer')">Visite 3D</button>
-                                    <button class="mp-tab" onclick="switchMpTab('panoramas')">Panoramas</button>
-                                    <button class="mp-tab" onclick="switchMpTab('dimensions')">Dimensions</button>
-                                    <button class="mp-tab" onclick="switchMpTab('floorplans')">Plans</button>
+                                    <button class="mp-tab active" data-mp-tab="iframe" onclick="switchMpTab(event, 'iframe')">Iframe Matterport</button>
+                                    <button class="mp-tab" data-mp-tab="panoramas" onclick="switchMpTab(event, 'panoramas')">Panoramas</button>
+                                    <button class="mp-tab" data-mp-tab="dimensions" onclick="switchMpTab(event, 'dimensions')">Dimensions</button>
+                                    <button class="mp-tab" data-mp-tab="floorplans" onclick="switchMpTab(event, 'floorplans')">Plans</button>
                                 </div>
 
-                                <!-- Tab: 3D Viewer -->
-                                <div class="mp-tab-content active" id="mpTabViewer">
+                                <!-- Tab: Matterport iframe -->
+                                <div class="mp-tab-content active" id="mpTabIframe">
                                     <iframe class="matterport-viewer" id="matterportIframe" style="border: none;"></iframe>
                                 </div>
 
@@ -1535,33 +1556,42 @@
                                     <div id="floorplansGrid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 16px;"></div>
                                 </div>
                             </div>
+
+                            <div id="matterportActions" style="display: flex; gap: 8px; flex-wrap: wrap;">
+                                <button class="action-button" onclick="transmitMatterportToMarcel()" style="background-color:#3F6E52;">
+                                    Transmettre &agrave; Marcel
+                                </button>
+                                <button class="action-button" onclick="grantMatterportAccessToClient()">
+                                    Donner acc&egrave;s au client
+                                </button>
+                            </div>
                         </div>
                     </div>
 
-                    <!-- FILES (manual upload + Matterport auto) -->
-                    <div class="files-section" id="filesSection" style="display: none;">
+                    <!-- LEGACY FILES BLOCK (kept hidden during transition) -->
+                    <div class="files-section" id="legacyFilesSection" style="display: none;">
                         <h3>Gestion des fichiers</h3>
                         <div class="file-inputs">
                             <div class="file-input-group">
                                 <label>Photos du bien</label>
-                                <input type="file" id="photosInput" multiple accept="image/*">
+                                <input type="file" id="legacyPhotosInput" multiple accept="image/*">
                             </div>
                             <div class="file-input-group">
                                 <label>Plans / PDFs</label>
-                                <input type="file" id="plansInput" multiple accept=".pdf,image/*">
+                                <input type="file" id="legacyPlansInput" multiple accept=".pdf,image/*">
                             </div>
                             <div class="file-input-group">
                                 <label>Fichier CSV Matterport</label>
-                                <input type="file" id="csvInput" accept=".csv">
+                                <input type="file" id="legacyCsvInput" accept=".csv">
                             </div>
                             <div class="file-input-group">
                                 <label>iframe Matterport (ou ID modèle ci-dessus)</label>
-                                <textarea id="matterportIframeInput" placeholder="Collez le code iframe ou utilisez la synchronisation automatique..."></textarea>
+                                <textarea id="legacyMatterportIframeInput" placeholder="Collez le code iframe ou utilisez la synchronisation automatique..."></textarea>
                             </div>
                         </div>
-                        <button class="file-upload-button" id="uploadBtn">Envoyer les fichiers</button>
+                        <button class="file-upload-button" id="legacyUploadBtn">Envoyer les fichiers</button>
 
-                        <div class="file-previews" id="filePreviews"></div>
+                        <div class="file-previews" id="legacyFilePreviews"></div>
                     </div>
                 </div>
 
@@ -1825,6 +1855,7 @@
         let chatHistory = [];
         let chatHistoryClientId = null;
         let currentClientProjectNotes = [];
+        let currentMatterportViewState = null;
         let matterportCache = {}; // Cache des données Matterport par client
 
         let currentClientTasks = [];
@@ -2174,11 +2205,13 @@
             document.getElementById('matterportSection').style.display = matterportFromStatus.includes(status) ? 'block' : 'none';
 
             // Pré-remplir le model ID si existant
-            if (client.matterport_model_id) {
-                document.getElementById('matterportModelId').value = client.matterport_model_id;
-            } else {
-                document.getElementById('matterportModelId').value = '';
-            }
+            const storedMatterportData = client && client.matterport_data && typeof client.matterport_data === 'object'
+                ? client.matterport_data
+                : null;
+            const resolvedMatterportModelId = client.matterport_model_id
+                || storedMatterportData?.model_id
+                || extractMatterportModelId(client.matterport_iframe || client.matterport_url || '');
+            document.getElementById('matterportModelId').value = resolvedMatterportModelId || '';
 
             // Récupérer le token stocké en session
             const storedTokenId = sessionStorage.getItem('mp_token_id');
@@ -2213,6 +2246,13 @@
             if (client.matterport_data) {
                 renderMatterportDataFromDb(client.matterport_data);
             }
+
+            const iframeInput = document.getElementById('matterportIframeInput');
+            if (iframeInput) {
+                iframeInput.value = client.matterport_iframe || client.matterport_url || storedMatterportData?.iframe_url || '';
+            }
+
+            renderMatterportSection(client);
 
             // Files section
             if (['scan_completed', 'analysis_ready', 'avant_projet_ready', 'accompaniment_subscribed'].includes(status)) {
@@ -3357,43 +3397,7 @@
         function renderFilesSection(client) {
             const section = document.getElementById('filesSection');
             section.style.display = 'block';
-
-            let previewsHtml = '';
-
-            if (client.photos_urls && client.photos_urls.length > 0) {
-                previewsHtml += `
-                    <div class="file-preview-section">
-                        <h4>Photos du bien</h4>
-                        <div class="file-preview-grid">
-                            ${client.photos_urls.map(url => `
-                                <div class="file-preview-item">
-                                    <img src="${url}" alt="Photo du bien">
-                                </div>
-                            `).join('')}
-                        </div>
-                    </div>
-                `;
-            }
-
-            if (client.plans_urls && client.plans_urls.length > 0) {
-                previewsHtml += `
-                    <div class="file-preview-section">
-                        <h4>Plans</h4>
-                        <div class="file-preview-grid">
-                            ${client.plans_urls.map(url => `
-                                <div class="file-preview-item">
-                                    <img src="${url}" alt="Plan">
-                                </div>
-                            `).join('')}
-                        </div>
-                    </div>
-                `;
-            }
-
-            document.getElementById('filePreviews').innerHTML = previewsHtml;
         }
-
-        document.getElementById('uploadBtn')?.addEventListener('click', uploadFiles);
 
         // --- Agent local: creation de dossier client ---
         const AGENT_LOCAL_URL = 'https://localhost:3500';
@@ -3455,22 +3459,250 @@
             });
         }
 
-        async function uploadFiles() {
+        function extractMatterportModelId(value) {
+            const text = (value || '').trim();
+            if (!text) return '';
+            const match = text.match(/[?&]m=([A-Za-z0-9]+)/) || text.match(/\b([A-Za-z0-9]{8,})\b/);
+            return match ? match[1] : '';
+        }
+
+        function buildMatterportIframeUrl(modelId, rawIframeValue) {
+            const rawValue = (rawIframeValue || '').trim();
+            if (rawValue.startsWith('http')) {
+                return rawValue;
+            }
+            const srcMatch = rawValue.match(/src="([^"]+)"/i);
+            if (srcMatch && srcMatch[1]) {
+                return srcMatch[1];
+            }
+            return modelId ? `https://my.matterport.com/show/?m=${modelId}` : '';
+        }
+
+        function readFileAsText(file) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onload = () => resolve(String(reader.result || ''));
+                reader.onerror = () => reject(new Error('Erreur lecture fichier texte'));
+                reader.readAsText(file);
+            });
+        }
+
+        function parseMatterportCsvLine(line) {
+            const values = [];
+            let current = '';
+            let inQuotes = false;
+
+            for (let index = 0; index < line.length; index++) {
+                const char = line[index];
+                if (char === '"') {
+                    inQuotes = !inQuotes;
+                } else if (char === ',' && !inQuotes) {
+                    values.push(current);
+                    current = '';
+                } else {
+                    current += char;
+                }
+            }
+
+            values.push(current);
+            return values;
+        }
+
+        function parseMatterportCsvToData(csvText, titreScan) {
+            const lines = String(csvText || '').replace(/\r/g, '').split('\n').filter(line => line.trim().length > 0);
+            if (lines.length < 2) {
+                throw new Error('Le CSV Matterport est vide ou invalide.');
+            }
+
+            const headers = parseMatterportCsvLine(lines[0]).map(value => value.trim());
+            const rows = [];
+
+            for (let index = 1; index < lines.length; index++) {
+                const values = parseMatterportCsvLine(lines[index]);
+                if (values.length < headers.length) continue;
+
+                const row = {};
+                headers.forEach((header, headerIndex) => {
+                    row[header] = (values[headerIndex] || '').trim();
+                });
+                rows.push(row);
+            }
+
+            const niveauxMap = {};
+            const annexes = [];
+
+            rows.forEach((row) => {
+                const piece = row['PiÃ¨ce'] || row['Pièce'] || '';
+                const niveau = row['Niveau'] || '';
+                const emplacement = row['Emplacement de la chambre'] || row['Emplacement'] || '';
+                const surface = row['Zone (m2)'] || row['Zone (m²)'] || '';
+                const dimensions = row['Dimensions'] || '';
+                const surfaceNum = Number.parseFloat(String(surface).replace(',', '.')) || 0;
+                const nomPiece = piece.trim();
+
+                if (emplacement === 'Extérieur' || emplacement === 'ExtÃ©rieur') {
+                    if (surfaceNum > 0 || /garage|terrasse|balcon/i.test(nomPiece)) {
+                        annexes.push({
+                            nom: nomPiece,
+                            dimensions: dimensions && dimensions !== '-' ? dimensions : undefined,
+                            emplacement: `Extérieur ${niveau}`.trim()
+                        });
+                    }
+                    return;
+                }
+
+                if (surfaceNum === 0 && !dimensions) return;
+
+                if (!niveauxMap[niveau]) {
+                    niveauxMap[niveau] = { nom: niveau || 'Niveau', pieces: [], surfaceTotal: 0 };
+                }
+
+                const pieceData = {
+                    nom: nomPiece || 'Pièce',
+                    surface: surfaceNum > 0 ? `${surfaceNum.toFixed(1).replace('.', ',')} m²` : undefined
+                };
+
+                if (dimensions && dimensions !== '-') {
+                    pieceData.dimensions = dimensions;
+                }
+
+                niveauxMap[niveau].pieces.push(pieceData);
+                niveauxMap[niveau].surfaceTotal += surfaceNum;
+            });
+
+            let surfaceTotale = 0;
+            const niveaux = Object.values(niveauxMap).map((niveau) => {
+                surfaceTotale += niveau.surfaceTotal;
+                return {
+                    nom: niveau.nom,
+                    surface: `${niveau.surfaceTotal.toFixed(1).replace('.', ',')} m²`,
+                    pieces: niveau.pieces.sort((a, b) => {
+                        const aValue = Number.parseFloat(String(a.surface || '0').replace(' m²', '').replace(',', '.')) || 0;
+                        const bValue = Number.parseFloat(String(b.surface || '0').replace(' m²', '').replace(',', '.')) || 0;
+                        return bValue - aValue;
+                    })
+                };
+            });
+
+            const result = {
+                surface_totale: `${surfaceTotale.toFixed(1).replace('.', ',')} m²`,
+                titre_scan: titreScan || 'Etat des lieux',
+                source: 'csv_upload'
+            };
+
+            if (niveaux.length > 0) result.niveaux = niveaux;
+            if (annexes.length > 0) result.annexes = annexes;
+
+            return result;
+        }
+
+        function buildMatterportDataFromApi(modelId, mpData) {
+            if (!mpData) return null;
+
+            return {
+                surface_totale: mpData.dimensions?.areaFloor != null
+                    ? `${mpData.dimensions.areaFloor.toFixed(1)} m²`
+                    : null,
+                titre_scan: mpData.modelName || 'Scan 3D',
+                niveaux: (mpData.floors || []).map((floor) => ({
+                    nom: floor.label || 'Niveau',
+                    surface: floor.dimensions?.areaFloor != null
+                        ? `${floor.dimensions.areaFloor.toFixed(1)} m²`
+                        : null,
+                    pieces: (mpData.rooms || []).map((room) => ({
+                        nom: room.label || 'Pièce',
+                        surface: room.dimensions?.areaFloor != null
+                            ? `${room.dimensions.areaFloor.toFixed(1)} m²`
+                            : null,
+                        hauteur: room.dimensions?.height != null
+                            ? `${room.dimensions.height.toFixed(2)} m`
+                            : null,
+                        largeur: room.dimensions?.width != null
+                            ? `${room.dimensions.width.toFixed(2)} m`
+                            : null,
+                        profondeur: room.dimensions?.depth != null
+                            ? `${room.dimensions.depth.toFixed(2)} m`
+                            : null,
+                        volume: room.dimensions?.volume != null
+                            ? `${room.dimensions.volume.toFixed(1)} m3`
+                            : null
+                    }))
+                })),
+                source: 'matterport_api',
+                synced_at: new Date().toISOString(),
+                model_id: modelId || mpData.modelId || '',
+                model_name: mpData.modelName || '',
+                locations: (mpData.locations || []).map((location, index) => ({
+                    id: location.id,
+                    label: `Point ${index + 1}`,
+                    preview_url: location.panos?.[0]?.skybox?.children?.[0] || null
+                })),
+                floorplans: (mpData.floorplans || []).map((floorplan) => ({
+                    url: floorplan.url,
+                    label: floorplan.floor ? (floorplan.floor.label || '') : '',
+                    format: floorplan.format || '',
+                    source: 'matterport'
+                }))
+            };
+        }
+
+        function mergeMatterportPayloads({ modelId, iframeUrl, csvData, csvFileUrl, apiData }) {
+            const baseData = csvData ? { ...csvData } : (apiData ? { ...apiData } : null);
+            if (!baseData) return null;
+
+            if (apiData?.floorplans) baseData.floorplans = apiData.floorplans;
+            if (apiData?.locations) baseData.locations = apiData.locations;
+            if (apiData?.model_name) baseData.model_name = apiData.model_name;
+            if (apiData?.model_id || modelId) baseData.model_id = apiData?.model_id || modelId;
+
+            baseData.source = csvData && apiData ? 'mixed' : (csvData ? 'csv_upload' : 'matterport_api');
+            baseData.synced_at = new Date().toISOString();
+            baseData.iframe_url = iframeUrl || baseData.iframe_url || '';
+            baseData.csv_file_url = csvFileUrl || baseData.csv_file_url || '';
+            return baseData;
+        }
+
+        function resetRetrieveInputs() {
+            const photosInput = document.getElementById('photosInput');
+            const plansInput = document.getElementById('plansInput');
+            const csvInput = document.getElementById('csvInput');
+            const matterportInput = document.getElementById('matterportIframeInput');
+
+            if (photosInput) photosInput.value = '';
+            if (plansInput) plansInput.value = '';
+            if (csvInput) csvInput.value = '';
+            if (matterportInput) matterportInput.value = '';
+        }
+
+        async function retrieveMatterportAssets() {
             if (!currentClient) return;
 
             const photosInput = document.getElementById('photosInput');
             const plansInput = document.getElementById('plansInput');
             const csvInput = document.getElementById('csvInput');
             const matterportInput = document.getElementById('matterportIframeInput');
+            const tokenIdInput = document.getElementById('matterportTokenId');
+            const tokenSecretInput = document.getElementById('matterportTokenSecret');
+            const modelIdInput = document.getElementById('matterportModelId');
 
-            const photoFiles = Array.from(photosInput.files);
-            const planFiles = Array.from(plansInput.files);
-            const csvFile = csvInput.files[0];
-            const iframeValue = matterportInput.value.trim();
+            const photoFiles = Array.from(photosInput?.files || []);
+            const planFiles = Array.from(plansInput?.files || []);
+            const csvFile = csvInput?.files?.[0] || null;
+            const iframeValue = (matterportInput?.value || '').trim();
+            const tokenId = (tokenIdInput?.value || '').trim();
+            const tokenSecret = (tokenSecretInput?.value || '').trim();
+            let modelId = (modelIdInput?.value || '').trim();
 
-            const totalFiles = photoFiles.length + planFiles.length + (csvFile ? 1 : 0);
-            if (totalFiles === 0 && !iframeValue) {
-                showErrorMessage('Aucun fichier selectionne');
+            if (!modelId && iframeValue) {
+                modelId = extractMatterportModelId(iframeValue);
+                if (modelId && modelIdInput) {
+                    modelIdInput.value = modelId;
+                }
+            }
+
+            const totalLocalSources = photoFiles.length + planFiles.length + (csvFile ? 1 : 0);
+            if (totalLocalSources === 0 && !modelId && !iframeValue) {
+                showErrorMessage('Ajoutez au moins une source locale ou un identifiant Matterport.');
                 return;
             }
 
@@ -3480,8 +3712,14 @@
                 return;
             }
 
+            if (tokenId && tokenSecret) {
+                sessionStorage.setItem('mp_token_id', tokenId);
+                sessionStorage.setItem('mp_token_secret', tokenSecret);
+            }
+
+            showMpSyncStatus('Recuperation unifiee en cours...', 'loading');
+
             try {
-                showSuccessMessage('Upload en cours...');
 
                 // Upload photos
                 const photoUrls = [];
@@ -4082,6 +4320,779 @@
             setTimeout(hideMpSyncStatus, 8000);
         }
 
+        function buildMatterportDataFromApi(modelId, mpData) {
+            if (!mpData) return null;
+
+            const rooms = (mpData.rooms || []).map((room) => ({
+                nom: room.label || 'Piece',
+                surface: room.dimensions?.areaFloor != null
+                    ? `${room.dimensions.areaFloor.toFixed(1)} mÂ²`
+                    : null,
+                hauteur: room.dimensions?.height != null
+                    ? `${room.dimensions.height.toFixed(2)} m`
+                    : null,
+                largeur: room.dimensions?.width != null
+                    ? `${room.dimensions.width.toFixed(2)} m`
+                    : null,
+                profondeur: room.dimensions?.depth != null
+                    ? `${room.dimensions.depth.toFixed(2)} m`
+                    : null,
+                volume: room.dimensions?.volume != null
+                    ? `${room.dimensions.volume.toFixed(1)} m3`
+                    : null
+            }));
+
+            const niveaux = (mpData.floors || []).map((floor) => ({
+                nom: floor.label || 'Niveau',
+                surface: floor.dimensions?.areaFloor != null
+                    ? `${floor.dimensions.areaFloor.toFixed(1)} mÂ²`
+                    : null,
+                pieces: []
+            }));
+
+            const result = {
+                surface_totale: mpData.dimensions?.areaFloor != null
+                    ? `${mpData.dimensions.areaFloor.toFixed(1)} mÂ²`
+                    : null,
+                titre_scan: mpData.modelName || 'Scan 3D',
+                source: 'matterport_api',
+                synced_at: new Date().toISOString(),
+                model_id: modelId || mpData.modelId || '',
+                model_name: mpData.modelName || '',
+                rooms,
+                locations: (mpData.locations || []).map((location, index) => {
+                    const previewUrl = location.preview_url
+                        || location.download_url
+                        || location.panos?.[0]?.skybox?.children?.[0]
+                        || null;
+                    return {
+                        id: location.id,
+                        label: location.label || `Point ${index + 1}`,
+                        preview_url: previewUrl,
+                        download_url: location.download_url || previewUrl
+                    };
+                }),
+                floorplans: (mpData.floorplans || []).map((floorplan, index) => ({
+                    url: floorplan.url,
+                    label: floorplan.label || floorplan.floor?.label || `Plan ${index + 1}`,
+                    format: floorplan.format || '',
+                    source: floorplan.source || 'matterport'
+                }))
+            };
+
+            if (niveaux.length > 0) {
+                result.niveaux = niveaux;
+            }
+
+            return result;
+        }
+
+        function mergeMatterportPayloads({ modelId, iframeUrl, csvData, csvFileUrl, apiData }) {
+            const baseData = csvData ? { ...csvData } : (apiData ? { ...apiData } : null);
+            if (!baseData) return null;
+
+            if (apiData?.floorplans) baseData.floorplans = apiData.floorplans;
+            if (apiData?.locations) baseData.locations = apiData.locations;
+            if (apiData?.rooms) baseData.rooms = apiData.rooms;
+            if (apiData?.model_name) baseData.model_name = apiData.model_name;
+            if (apiData?.model_id || modelId) baseData.model_id = apiData?.model_id || modelId;
+
+            baseData.source = csvData && apiData ? 'mixed' : (csvData ? 'csv_upload' : 'matterport_api');
+            baseData.synced_at = new Date().toISOString();
+            baseData.iframe_url = iframeUrl || baseData.iframe_url || '';
+            baseData.csv_file_url = csvFileUrl || baseData.csv_file_url || '';
+            return baseData;
+        }
+
+        async function retrieveMatterportAssets() {
+            if (!currentClient) return;
+
+            const photosInput = document.getElementById('photosInput');
+            const plansInput = document.getElementById('plansInput');
+            const csvInput = document.getElementById('csvInput');
+            const matterportInput = document.getElementById('matterportIframeInput');
+            const tokenIdInput = document.getElementById('matterportTokenId');
+            const tokenSecretInput = document.getElementById('matterportTokenSecret');
+            const modelIdInput = document.getElementById('matterportModelId');
+
+            const photoFiles = Array.from(photosInput?.files || []);
+            const planFiles = Array.from(plansInput?.files || []);
+            const csvFile = csvInput?.files?.[0] || null;
+            const iframeValue = (matterportInput?.value || '').trim();
+            const tokenId = (tokenIdInput?.value || '').trim();
+            const tokenSecret = (tokenSecretInput?.value || '').trim();
+            let modelId = (modelIdInput?.value || '').trim();
+
+            if (!modelId && iframeValue) {
+                modelId = extractMatterportModelId(iframeValue);
+                if (modelId && modelIdInput) {
+                    modelIdInput.value = modelId;
+                }
+            }
+
+            const totalLocalSources = photoFiles.length + planFiles.length + (csvFile ? 1 : 0);
+            if (totalLocalSources === 0 && !modelId && !iframeValue) {
+                showErrorMessage('Ajoutez au moins une source locale ou un identifiant Matterport.');
+                return;
+            }
+
+            const email = currentClient.email;
+            if (!email) {
+                showErrorMessage('Email client manquant');
+                return;
+            }
+
+            if (tokenId && tokenSecret) {
+                sessionStorage.setItem('mp_token_id', tokenId);
+                sessionStorage.setItem('mp_token_secret', tokenSecret);
+            }
+
+            showMpSyncStatus('Recuperation unifiee en cours...', 'loading');
+
+            try {
+                const photoUrls = [];
+                for (const file of photoFiles) {
+                    const url = await uploadSingleFile(email, file, 'photo');
+                    photoUrls.push(url);
+                }
+
+                const planUrls = [];
+                for (const file of planFiles) {
+                    const url = await uploadSingleFile(email, file, 'plan');
+                    planUrls.push(url);
+                }
+
+                let csvData = null;
+                let csvFileUrl = '';
+                if (csvFile) {
+                    const csvText = await readFileAsText(csvFile);
+                    csvFileUrl = await uploadSingleFile(email, csvFile, 'csv');
+                    csvData = parseMatterportCsvToData(csvText, currentClient.nom || 'Etat des lieux');
+                }
+
+                let liveMatterport = null;
+                let apiMatterportData = null;
+                if (modelId) {
+                    const payload = { modelId };
+                    if (tokenId && tokenSecret) {
+                        payload.tokenId = tokenId;
+                        payload.tokenSecret = tokenSecret;
+                    }
+                    const syncData = await adminFetch('/.netlify/functions/admin-sync-matterport', payload);
+                    liveMatterport = syncData?.matterport || null;
+                    apiMatterportData = buildMatterportDataFromApi(modelId, liveMatterport);
+                    if (currentClient?.id && liveMatterport) {
+                        matterportCache[currentClient.id] = liveMatterport;
+                    }
+                }
+
+                const iframeUrl = buildMatterportIframeUrl(modelId, iframeValue || currentClient.matterport_iframe || currentClient.matterport_url || '');
+                const mergedMatterportData = mergeMatterportPayloads({
+                    modelId,
+                    iframeUrl,
+                    csvData,
+                    csvFileUrl,
+                    apiData: apiMatterportData
+                });
+
+                const clientFields = {};
+                if (modelId || currentClient.matterport_model_id) {
+                    clientFields.matterport_model_id = modelId || currentClient.matterport_model_id || '';
+                }
+                if (iframeUrl || currentClient.matterport_url || currentClient.matterport_iframe) {
+                    clientFields.matterport_url = iframeUrl || currentClient.matterport_url || '';
+                    clientFields.matterport_iframe = iframeUrl || currentClient.matterport_iframe || '';
+                }
+                if (mergedMatterportData) {
+                    clientFields.matterport_data = mergedMatterportData;
+                }
+
+                if (Object.keys(clientFields).length > 0) {
+                    await adminFetch('/.netlify/functions/admin-save-client', {
+                        clientId: currentClient.id,
+                        fields: clientFields
+                    });
+                }
+
+                if (photoUrls.length > 0 || planUrls.length > 0) {
+                    await adminFetch('/.netlify/functions/admin-update-scan', {
+                        clientId: currentClient.id,
+                        mode: 'replace',
+                        ...(photoUrls.length > 0 ? { photos_urls: photoUrls } : {}),
+                        ...(planUrls.length > 0 ? { plans_urls: planUrls } : {})
+                    });
+                }
+
+                await selectClientById(currentClient.id);
+                await createLocalClientFolder();
+                await loadDashboard();
+                resetRetrieveInputs();
+
+                const summaryParts = [];
+                if (photoUrls.length > 0) summaryParts.push(`${photoUrls.length} photo(s) PC`);
+                if (planUrls.length > 0) summaryParts.push(`${planUrls.length} plan(s) local(aux)`);
+                if (csvData) summaryParts.push('CSV integre dans Dimensions');
+                if (apiMatterportData) {
+                    const panoCount = (apiMatterportData.locations || []).length;
+                    const floorplanCount = (apiMatterportData.floorplans || []).length;
+                    summaryParts.push(`Matterport: ${panoCount} panorama(s), ${floorplanCount} plan(s)`);
+                }
+                if (iframeUrl) summaryParts.push('iframe mise a jour');
+                if (summaryParts.length === 0) summaryParts.push('aucune nouvelle donnee');
+
+                showMpSyncStatus(`Recuperation terminee : ${summaryParts.join(' ; ')}.`, 'success');
+                setTimeout(hideMpSyncStatus, 6000);
+            } catch (err) {
+                console.error('Unified retrieve error:', err);
+                showMpSyncStatus(`Erreur : ${err.message}`, 'error');
+            }
+        }
+
+        function getMatterportStoredData(client) {
+            if (!client || !client.matterport_data || typeof client.matterport_data !== 'object') {
+                return null;
+            }
+            return client.matterport_data;
+        }
+
+        function normalizeMatterportLocations(rawLocations) {
+            return (rawLocations || []).map((location, index) => {
+                if (!location) return null;
+                const previewUrl = location.preview_url
+                    || location.download_url
+                    || location.panos?.[0]?.skybox?.children?.[0]
+                    || null;
+                return {
+                    id: location.id || '',
+                    label: location.label || `Point ${index + 1}`,
+                    preview_url: previewUrl,
+                    download_url: location.download_url || previewUrl,
+                    source: 'matterport'
+                };
+            }).filter(Boolean);
+        }
+
+        function normalizeMatterportFloorplans(rawFloorplans) {
+            return (rawFloorplans || []).map((floorplan, index) => {
+                const url = floorplan?.url || '';
+                if (!url) return null;
+                return {
+                    url,
+                    label: floorplan.label || floorplan.floor?.label || `Plan ${index + 1}`,
+                    format: floorplan.format || '',
+                    source: floorplan.source || 'matterport'
+                };
+            }).filter(Boolean);
+        }
+
+        function dedupeMatterportFiles(items) {
+            const seen = new Set();
+            return (items || []).filter((item) => {
+                const url = item?.url || item?.download_url || item?.preview_url || item?.open_url || '';
+                const source = item?.source || '';
+                const key = `${source}:${url}`;
+                if (!url || seen.has(key)) return false;
+                seen.add(key);
+                return true;
+            });
+        }
+
+        function getMatterportViewState(client) {
+            if (!client) return null;
+
+            const storedData = getMatterportStoredData(client);
+            const cachedRaw = matterportCache[client.id] || null;
+            const cachedData = !storedData && cachedRaw
+                ? buildMatterportDataFromApi(client.matterport_model_id || cachedRaw.modelId || '', cachedRaw)
+                : null;
+            const matterportData = storedData || cachedData || null;
+            const modelId = client.matterport_model_id
+                || matterportData?.model_id
+                || cachedRaw?.modelId
+                || extractMatterportModelId(client.matterport_iframe || client.matterport_url || '');
+            const iframeUrl = buildMatterportIframeUrl(
+                modelId,
+                client.matterport_iframe || client.matterport_url || matterportData?.iframe_url || ''
+            );
+
+            const localPhotos = Array.isArray(client.photos_urls) ? client.photos_urls.filter(Boolean) : [];
+            const panoramas = localPhotos.length > 0
+                ? localPhotos.map((url, index) => ({
+                    label: `Photo ${index + 1}`,
+                    preview_url: url,
+                    download_url: url,
+                    open_url: url,
+                    source: 'pc'
+                }))
+                : normalizeMatterportLocations(matterportData?.locations || cachedRaw?.locations || []);
+
+            const localPlans = Array.isArray(client.plans_urls)
+                ? client.plans_urls.filter(Boolean).map((url, index) => ({
+                    url,
+                    label: `Plan local ${index + 1}`,
+                    format: /\.pdf($|\?)/i.test(url) ? 'pdf' : 'image',
+                    source: 'pc'
+                }))
+                : [];
+
+            const floorplans = dedupeMatterportFiles([
+                ...normalizeMatterportFloorplans(matterportData?.floorplans || cachedRaw?.floorplans || []),
+                ...localPlans
+            ]);
+
+            return {
+                clientId: client.id,
+                modelId: modelId || '',
+                iframeUrl,
+                panoramas,
+                floorplans,
+                dimensionsData: matterportData,
+                hasContent: Boolean(
+                    iframeUrl
+                    || panoramas.length
+                    || floorplans.length
+                    || matterportData?.surface_totale
+                    || (matterportData?.niveaux && matterportData.niveaux.length)
+                    || (matterportData?.rooms && matterportData.rooms.length)
+                    || (matterportData?.annexes && matterportData.annexes.length)
+                )
+            };
+        }
+
+        function getMatterportSourceLabel(source) {
+            if (source === 'mixed') return 'CSV Matterport + API Matterport';
+            if (source === 'csv_upload') return 'CSV Matterport';
+            if (source === 'matterport_api') return 'API Matterport';
+            return 'Matterport';
+        }
+
+        function buildMatterportDimensionsHtml(matterportData) {
+            if (!matterportData) {
+                return '<p style="color: var(--muted); font-size: 13px;">Aucune donnee de dimensions disponible.</p>';
+            }
+
+            let html = '';
+
+            if (matterportData.surface_totale || matterportData.titre_scan || matterportData.source) {
+                html += `
+                    <div style="margin-bottom: 20px; padding: 16px; background: var(--bg); border-radius: 8px;">
+                        <h4 style="margin-bottom: 8px;">${matterportData.titre_scan || 'Donnees du scan'}</h4>
+                        ${matterportData.surface_totale ? `<div style="font-size: 14px;"><strong>Surface totale :</strong> ${matterportData.surface_totale}</div>` : ''}
+                        <div style="font-size: 11px; color: var(--muted); margin-top: 4px;">
+                            Source : ${getMatterportSourceLabel(matterportData.source)}
+                            ${matterportData.synced_at ? ` - Sync : ${new Date(matterportData.synced_at).toLocaleString('fr-FR')}` : ''}
+                        </div>
+                    </div>
+                `;
+            }
+
+            const niveaux = Array.isArray(matterportData.niveaux) ? matterportData.niveaux : [];
+            niveaux.forEach((niveau) => {
+                html += `<h4 style="margin: 12px 0 8px;">${niveau.nom || 'Niveau'} ${niveau.surface ? `(${niveau.surface})` : ''}</h4>`;
+                if (Array.isArray(niveau.pieces) && niveau.pieces.length > 0) {
+                    html += `
+                        <table class="mp-dim-table">
+                            <thead>
+                                <tr><th>Piece</th><th>Surface</th><th>Hauteur</th><th>Largeur</th><th>Profondeur</th><th>Volume</th></tr>
+                            </thead>
+                            <tbody>
+                                ${niveau.pieces.map((piece) => `
+                                    <tr>
+                                        <td><strong>${piece.nom || '-'}</strong></td>
+                                        <td>${piece.surface || '-'}</td>
+                                        <td>${piece.hauteur || '-'}</td>
+                                        <td>${piece.largeur || '-'}</td>
+                                        <td>${piece.profondeur || '-'}</td>
+                                        <td>${piece.volume || '-'}</td>
+                                    </tr>
+                                `).join('')}
+                            </tbody>
+                        </table>
+                    `;
+                } else {
+                    html += '<p style="color: var(--muted); font-size: 13px;">Aucune piece detaillee pour ce niveau.</p>';
+                }
+            });
+
+            const rooms = Array.isArray(matterportData.rooms) ? matterportData.rooms : [];
+            if (rooms.length > 0) {
+                html += `
+                    <h4 style="margin: 12px 0 8px;">Pieces detectees</h4>
+                    <table class="mp-dim-table">
+                        <thead>
+                            <tr><th>Piece</th><th>Surface</th><th>Hauteur</th><th>Largeur</th><th>Profondeur</th><th>Volume</th></tr>
+                        </thead>
+                        <tbody>
+                            ${rooms.map((room) => `
+                                <tr>
+                                    <td><strong>${room.nom || '-'}</strong></td>
+                                    <td>${room.surface || '-'}</td>
+                                    <td>${room.hauteur || '-'}</td>
+                                    <td>${room.largeur || '-'}</td>
+                                    <td>${room.profondeur || '-'}</td>
+                                    <td>${room.volume || '-'}</td>
+                                </tr>
+                            `).join('')}
+                        </tbody>
+                    </table>
+                `;
+            }
+
+            const annexes = Array.isArray(matterportData.annexes) ? matterportData.annexes : [];
+            if (annexes.length > 0) {
+                html += `
+                    <h4 style="margin: 12px 0 8px;">Annexes</h4>
+                    <table class="mp-dim-table">
+                        <thead>
+                            <tr><th>Element</th><th>Dimensions</th><th>Emplacement</th></tr>
+                        </thead>
+                        <tbody>
+                            ${annexes.map((annexe) => `
+                                <tr>
+                                    <td><strong>${annexe.nom || '-'}</strong></td>
+                                    <td>${annexe.dimensions || '-'}</td>
+                                    <td>${annexe.emplacement || '-'}</td>
+                                </tr>
+                            `).join('')}
+                        </tbody>
+                    </table>
+                `;
+            }
+
+            return html || '<p style="color: var(--muted); font-size: 13px;">Aucune donnee de dimensions disponible.</p>';
+        }
+
+        function activateMpTab(tabName) {
+            const targetId = {
+                iframe: 'mpTabIframe',
+                panoramas: 'mpTabPanoramas',
+                dimensions: 'mpTabDimensions',
+                floorplans: 'mpTabFloorplans'
+            }[tabName] || 'mpTabIframe';
+
+            document.querySelectorAll('.mp-tab').forEach((button) => {
+                button.classList.toggle('active', button.dataset.mpTab === tabName);
+            });
+            document.querySelectorAll('.mp-tab-content').forEach((content) => {
+                content.classList.toggle('active', content.id === targetId);
+            });
+        }
+
+        function switchMpTab(evt, tabName) {
+            if (evt?.preventDefault) evt.preventDefault();
+            activateMpTab(tabName);
+        }
+
+        function renderMatterportSection(client) {
+            const state = getMatterportViewState(client);
+            currentMatterportViewState = state;
+
+            const tabs = document.getElementById('matterportTabs');
+            const iframe = document.getElementById('matterportIframe');
+            const panoramasGrid = document.getElementById('panoramasGrid');
+            const floorplansGrid = document.getElementById('floorplansGrid');
+            const dimensionsContainer = document.getElementById('dimensionsData');
+            const btnDownloadPanos = document.getElementById('btnDownloadPanos');
+            const btnExportCsv = document.getElementById('btnExportCsv');
+
+            if (!tabs || !iframe || !panoramasGrid || !floorplansGrid || !dimensionsContainer) {
+                return;
+            }
+
+            if (!state || !state.hasContent) {
+                tabs.style.display = 'none';
+                iframe.removeAttribute('src');
+                iframe.srcdoc = '';
+                panoramasGrid.innerHTML = '';
+                floorplansGrid.innerHTML = '';
+                dimensionsContainer.innerHTML = '';
+                btnDownloadPanos.style.display = 'none';
+                btnExportCsv.style.display = 'none';
+                return;
+            }
+
+            tabs.style.display = 'block';
+
+            if (state.iframeUrl) {
+                iframe.removeAttribute('srcdoc');
+                iframe.src = state.iframeUrl;
+            } else {
+                iframe.removeAttribute('src');
+                iframe.srcdoc = `
+                    <div style="display:flex;align-items:center;justify-content:center;height:100%;font-family:Arial,sans-serif;color:#666;background:#f6f4ef;">
+                        Aucune iframe Matterport disponible pour le moment.
+                    </div>
+                `;
+            }
+
+            if (state.panoramas.length > 0) {
+                panoramasGrid.innerHTML = state.panoramas.map((pano, index) => `
+                    <div style="background: var(--bg); border-radius: 8px; overflow: hidden; cursor: pointer;" onclick="viewPanorama(${index})">
+                        ${pano.preview_url
+                            ? `<img src="${pano.preview_url}" style="width: 100%; height: 120px; object-fit: cover;" loading="lazy" onerror="this.style.display='none'">`
+                            : `<div style="width: 100%; height: 120px; background: var(--border); display: flex; align-items: center; justify-content: center; color: var(--muted); font-size: 12px;">Pas d'aperÃ§u</div>`
+                        }
+                        <div style="padding: 8px; font-size: 12px;">
+                            <div style="font-weight: 600;">${pano.label || `Point ${index + 1}`}</div>
+                            <div style="color: var(--muted); margin-top: 4px;">${pano.source === 'pc' ? 'Source PC' : 'Source Matterport'}</div>
+                        </div>
+                    </div>
+                `).join('');
+                btnDownloadPanos.style.display = 'inline-block';
+            } else {
+                panoramasGrid.innerHTML = '<p style="color: var(--muted); font-size: 13px;">Aucun panorama disponible.</p>';
+                btnDownloadPanos.style.display = 'none';
+            }
+
+            dimensionsContainer.innerHTML = buildMatterportDimensionsHtml(state.dimensionsData);
+            btnExportCsv.style.display = state.dimensionsData ? 'inline-block' : 'none';
+
+            if (state.floorplans.length > 0) {
+                floorplansGrid.innerHTML = state.floorplans.map((plan) => {
+                    const isPdf = plan.format === 'pdf' || /\.pdf($|\?)/i.test(plan.url);
+                    const sourceLabel = plan.source === 'pc' ? 'Source PC' : 'Source Matterport';
+                    if (isPdf) {
+                        return `
+                            <div style="background: var(--bg); border-radius: 8px; overflow: hidden; padding: 16px;">
+                                <div style="height: 220px; display: flex; align-items: center; justify-content: center; border: 1px dashed var(--border); border-radius: 8px; color: var(--muted);">Document PDF</div>
+                                <div style="padding-top: 12px; font-size: 12px; color: var(--muted);">
+                                    <div style="font-weight: 600; color: var(--text);">${plan.label || 'Plan'}</div>
+                                    <div style="margin-top: 4px;">${sourceLabel}</div>
+                                    <a href="${plan.url}" target="_blank" rel="noopener" style="display:inline-block;margin-top:8px;">Ouvrir le document</a>
+                                </div>
+                            </div>
+                        `;
+                    }
+                    return `
+                        <div style="background: var(--bg); border-radius: 8px; overflow: hidden;">
+                            <img src="${plan.url}" style="width: 100%; object-fit: contain; max-height: 400px;" loading="lazy">
+                            <div style="padding: 8px; font-size: 12px; color: var(--muted);">
+                                <div style="font-weight: 600; color: var(--text);">${plan.label || 'Plan'}</div>
+                                <div style="margin-top: 4px;">${sourceLabel}${plan.format ? ` · ${plan.format}` : ''}</div>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+            } else {
+                floorplansGrid.innerHTML = '<p style="color: var(--muted); font-size: 13px;">Aucun plan disponible.</p>';
+            }
+
+            const activeTab = document.querySelector('.mp-tab.active')?.dataset.mpTab;
+            const tabHasContent = (tabName) => {
+                if (tabName === 'iframe') return Boolean(state.iframeUrl);
+                if (tabName === 'panoramas') return state.panoramas.length > 0;
+                if (tabName === 'dimensions') return Boolean(state.dimensionsData);
+                if (tabName === 'floorplans') return state.floorplans.length > 0;
+                return false;
+            };
+            const preferredTab = tabHasContent(activeTab)
+                ? activeTab
+                : (state.iframeUrl ? 'iframe' : (state.panoramas.length ? 'panoramas' : (state.dimensionsData ? 'dimensions' : 'floorplans')));
+            activateMpTab(preferredTab);
+        }
+
+        async function saveMatterportToClient(modelId, mpData) {
+            if (!currentClient) return;
+
+            const matterportData = buildMatterportDataFromApi(modelId, mpData);
+            const iframeUrl = buildMatterportIframeUrl(modelId, currentClient.matterport_iframe || currentClient.matterport_url || '');
+
+            const data = await adminFetch('/.netlify/functions/admin-save-client', {
+                clientId: currentClient.id,
+                fields: {
+                    matterport_model_id: modelId || currentClient.matterport_model_id || '',
+                    matterport_url: iframeUrl || currentClient.matterport_url || '',
+                    matterport_iframe: iframeUrl || currentClient.matterport_iframe || '',
+                    matterport_data: matterportData
+                }
+            });
+
+            currentClient = {
+                ...data.client,
+                status: normalizeDashboardStatus(data.client.status)
+            };
+            dashboardClients = dashboardClients.map((client) =>
+                client.id === currentClient.id ? currentClient : client
+            );
+            if (mpData) {
+                matterportCache[currentClient.id] = mpData;
+            }
+            renderMatterportSection(currentClient);
+        }
+
+        async function fetchMatterportData() {
+            return retrieveMatterportAssets();
+        }
+
+        function renderMatterportDataFromDb(matterportData) {
+            if (!currentClient) return;
+            renderMatterportSection({
+                ...currentClient,
+                matterport_data: matterportData || currentClient.matterport_data
+            });
+        }
+
+        function renderMatterportData(mpData) {
+            if (currentClient && mpData) {
+                matterportCache[currentClient.id] = mpData;
+            }
+            renderMatterportSection(currentClient);
+        }
+
+        function viewPanorama(index) {
+            const state = currentMatterportViewState;
+            const panorama = state?.panoramas?.[index];
+            if (!panorama) return;
+
+            if (panorama.source === 'pc') {
+                window.open(panorama.open_url || panorama.download_url || panorama.preview_url, '_blank', 'noopener');
+                return;
+            }
+
+            const iframe = document.getElementById('matterportIframe');
+            if (state.modelId && panorama.id && iframe) {
+                iframe.removeAttribute('srcdoc');
+                iframe.src = `https://my.matterport.com/show/?m=${state.modelId}&sr=${panorama.id}`;
+                activateMpTab('iframe');
+                return;
+            }
+
+            if (panorama.download_url || panorama.preview_url) {
+                window.open(panorama.download_url || panorama.preview_url, '_blank', 'noopener');
+            }
+        }
+
+        function exportDimensionsCsv() {
+            const matterportData = currentMatterportViewState?.dimensionsData || currentClient?.matterport_data;
+            if (!matterportData) {
+                showErrorMessage('Aucune donnee de dimensions a exporter.');
+                return;
+            }
+
+            let csvContent = 'Piece;Surface;Hauteur;Largeur;Profondeur;Volume\n';
+            const rows = [];
+
+            if (Array.isArray(matterportData.rooms) && matterportData.rooms.length > 0) {
+                matterportData.rooms.forEach((room) => {
+                    rows.push([
+                        room.nom || '',
+                        room.surface || '',
+                        room.hauteur || '',
+                        room.largeur || '',
+                        room.profondeur || '',
+                        room.volume || ''
+                    ]);
+                });
+            } else if (Array.isArray(matterportData.niveaux)) {
+                matterportData.niveaux.forEach((niveau) => {
+                    (niveau.pieces || []).forEach((piece) => {
+                        rows.push([
+                            piece.nom || '',
+                            piece.surface || '',
+                            piece.hauteur || '',
+                            piece.largeur || '',
+                            piece.profondeur || '',
+                            piece.volume || ''
+                        ]);
+                    });
+                });
+            }
+
+            rows.forEach((row) => {
+                csvContent += `${row.map((value) => String(value || '').replace(/;/g, ',')).join(';')}\n`;
+            });
+
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            const clientName = currentClient ? `${(currentClient.prenom || 'client')}_${currentClient.nom || 'sans-nom'}` : 'export';
+            link.download = `dimensions_${clientName}_${new Date().toISOString().slice(0, 10)}.csv`;
+            link.click();
+            URL.revokeObjectURL(link.href);
+
+            showSuccessMessage('CSV exporte');
+        }
+
+        async function downloadAllPanoramas() {
+            const panoramas = currentMatterportViewState?.panoramas || [];
+            if (!panoramas.length) {
+                showErrorMessage('Aucun panorama a telecharger.');
+                return;
+            }
+
+            showMpSyncStatus('Preparation du telechargement des panoramas...', 'loading');
+
+            let count = 0;
+            panoramas.forEach((panorama, index) => {
+                const url = panorama.open_url || panorama.download_url || panorama.preview_url;
+                if (!url) return;
+                window.open(url, `_pano_${index}`);
+                count += 1;
+            });
+
+            showMpSyncStatus(`${count} panorama(s) ouvert(s) dans de nouveaux onglets.`, 'success');
+            setTimeout(hideMpSyncStatus, 8000);
+        }
+
+        async function transmitMatterportToMarcel() {
+            if (!currentClient) return;
+
+            try {
+                await adminFetch('/.netlify/functions/admin-save-client', {
+                    clientId: currentClient.id,
+                    fields: { marcel_enabled: true }
+                });
+                clearMarcelChat();
+                await selectClientById(currentClient.id);
+                document.getElementById('chatPanel').scrollIntoView({ behavior: 'smooth' });
+                showSuccessMessage('Dossier Matterport transmis a Marcel.');
+            } catch (err) {
+                console.error('Transmit Matterport to Marcel error:', err);
+                showErrorMessage(`Impossible de transmettre a Marcel : ${err.message}`);
+            }
+        }
+
+        async function grantMatterportAccessToClient() {
+            if (!currentClient) return;
+
+            const modelIdInput = document.getElementById('matterportModelId');
+            const matterportInput = document.getElementById('matterportIframeInput');
+            const modelId = (modelIdInput?.value || currentMatterportViewState?.modelId || currentClient.matterport_model_id || '').trim();
+            const iframeValue = (matterportInput?.value || currentClient.matterport_iframe || currentClient.matterport_url || '').trim();
+            const iframeUrl = buildMatterportIframeUrl(modelId, iframeValue);
+
+            if (!currentClient.email) {
+                showErrorMessage('Email client manquant.');
+                return;
+            }
+            if (!modelId) {
+                showErrorMessage('ID du modele Matterport requis avant de donner acces au client.');
+                return;
+            }
+
+            try {
+                await adminFetch('/.netlify/functions/admin-save-client', {
+                    clientId: currentClient.id,
+                    fields: {
+                        matterport_model_id: modelId,
+                        matterport_url: iframeUrl || currentClient.matterport_url || '',
+                        matterport_iframe: iframeUrl || currentClient.matterport_iframe || ''
+                    }
+                });
+
+                const data = await adminFetch('/.netlify/functions/notify-virtual-tour', {
+                    email: currentClient.email,
+                    matterport_id: modelId
+                });
+
+                await selectClientById(currentClient.id);
+                showSuccessMessage(data.warning || data.message || 'Acces client active.');
+            } catch (err) {
+                console.error('Grant Matterport access error:', err);
+                showErrorMessage(`Impossible de donner acces au client : ${err.message}`);
+            }
+        }
+
         // ========== INITIALIZATION ==========
         window.addEventListener('load', async () => {
             configureAuthScreen();
@@ -4101,4 +5112,3 @@
     </script>
 </body>
 </html>
-
