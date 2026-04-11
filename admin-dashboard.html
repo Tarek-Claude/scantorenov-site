@@ -327,6 +327,11 @@
             color: #388E3C;
         }
 
+        .status-visite-payment-completed {
+            background-color: #FFF8E1;
+            color: #F57F17;
+        }
+
         .status-avant-projet-ready {
             background-color: #E8F5E9;
             color: #388E3C;
@@ -1538,9 +1543,6 @@
                                 <!-- Tab: Panoramas -->
                                 <div class="mp-tab-content" id="mpTabPanoramas">
                                     <div id="panoramasGrid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 12px;"></div>
-                                    <button class="action-button" id="btnDownloadPanos" onclick="downloadAllPanoramas()" style="margin-top: 16px; font-size: 12px; padding: 8px 14px; display: none;">
-                                        Télécharger toutes les panoramiques
-                                    </button>
                                 </div>
 
                                 <!-- Tab: Dimensions -->
@@ -1558,10 +1560,10 @@
                             </div>
 
                             <div id="matterportActions" style="display: flex; gap: 8px; flex-wrap: wrap;">
-                                <button class="action-button" onclick="transmitMatterportToMarcel()" style="background-color:#3F6E52;">
+                                <button class="action-button" id="btnTransmitMarcel" onclick="transmitMatterportToMarcel()" style="background-color:#3F6E52;">
                                     Transmettre &agrave; Marcel
                                 </button>
-                                <button class="action-button" onclick="grantMatterportAccessToClient()">
+                                <button class="action-button" id="btnGrantClientAccess" onclick="grantMatterportAccessToClient()" style="display:none;">
                                     Donner acc&egrave;s au client
                                 </button>
                             </div>
@@ -1649,6 +1651,7 @@
             'scan_payment_completed',
             'scan_completed',
             'analysis_ready',
+            'visite_payment_completed',
             'avant_projet_ready',
             'avant_projet_transmitted',
             'accompaniment_subscribed'
@@ -1664,6 +1667,7 @@
             'scan_payment_completed': 'Paiement scan',
             'scan_completed': 'Scan réalisé',
             'analysis_ready': 'Analyse prête',
+            'visite_payment_completed': 'Paiement visite',
             'avant_projet_ready': 'Avant-projet prêt',
             'avant_projet_transmitted': 'Avant-projet transmis',
             'accompaniment_subscribed': 'Accompagnement',
@@ -2618,16 +2622,29 @@
                 document.getElementById('filesSection').style.display = 'block';
             } else if (status === 'analysis_ready') {
                 html = `
-                    <h3>Generer l'avant-projet</h3>
-                    <p class="action-panel-description">Preparez et validez l'avant-projet avec Marcel.</p>
+                    <h3>Analyse prete — en attente du paiement visite</h3>
+                    <p class="action-panel-description">Travaillez avec Marcel pour preparer l'avant-projet, puis validez le paiement de la visite pour debloquer l'acces client.</p>
                     <button class="action-button" onclick="openMarcelChat()">Discuter avec Marcel</button>
-                    <button class="action-button" onclick="generateAvantProjet()" style="background-color: #4CAF50;">Generer avant-projet</button>
+                    <button class="action-button" onclick="markVisitePaymentDone()" style="background-color:#F57F17; color:#fff;">
+                        Valider paiement visite
+                    </button>
+                `;
+            } else if (status === 'visite_payment_completed') {
+                html = `
+                    <h3>Paiement visite valide</h3>
+                    <p class="action-panel-description">Le paiement est confirme. Finalisez l'avant-projet avec Marcel, puis generez-le pour le transmettre au client.</p>
+                    <button class="action-button" onclick="openMarcelChat()">Discuter avec Marcel</button>
+                    <button class="action-button" onclick="generateAvantProjet()" style="background-color:#4CAF50;">Generer avant-projet</button>
                 `;
             } else if (status === 'avant_projet_ready') {
+                const avantProjetTransmitted = client && client.avant_projet_transmitted_at;
                 html = `
-                    <h3>Avant-projet finalise</h3>
-                    <p class="action-panel-description">L'avant-projet est pret. Proposez l'accompagnement.</p>
-                    <button class="action-button" onclick="proposeAccompaniment()">Proposer accompagnement</button>
+                    <h3>Avant-projet ${avantProjetTransmitted ? '✓ Valid&eacute;' : 'en cours'}</h3>
+                    <p class="action-panel-description">${avantProjetTransmitted
+                        ? 'Le client a t&eacute;l&eacute;charg&eacute; son avant-projet. Vous pouvez proposer l\'accompagnement.'
+                        : 'L\'avant-projet est pr&ecirc;t. En attente du t&eacute;l&eacute;chargement PDF par le client.'}</p>
+                    <button class="action-button" onclick="openMarcelChat()">Discuter avec Marcel</button>
+                    ${avantProjetTransmitted ? `<button class="action-button" onclick="proposeAccompaniment()">Proposer accompagnement</button>` : ''}
                 `;
             } else {
                 html = `
@@ -2636,6 +2653,7 @@
                 `;
             }
 
+            // Marcel toujours visible dès qu'un client est sélectionné
             if (chatPanel) chatPanel.style.display = client ? 'flex' : 'none';
             panel.innerHTML = html;
         }
@@ -4387,11 +4405,16 @@
             return result;
         }
 
-        function mergeMatterportPayloads({ modelId, iframeUrl, csvData, csvFileUrl, apiData }) {
+        function mergeMatterportPayloads({ modelId, iframeUrl, csvData, csvFileUrl, apiData, existingData }) {
             const baseData = csvData ? { ...csvData } : (apiData ? { ...apiData } : null);
             if (!baseData) return null;
 
-            if (apiData?.floorplans) baseData.floorplans = apiData.floorplans;
+            // Toujours préserver les floorplans Matterport : depuis l'API si dispo, sinon depuis les données existantes
+            if (apiData?.floorplans && apiData.floorplans.length > 0) {
+                baseData.floorplans = apiData.floorplans;
+            } else if ((!baseData.floorplans || !baseData.floorplans.length) && existingData?.floorplans?.length) {
+                baseData.floorplans = existingData.floorplans;
+            }
             if (apiData?.locations) baseData.locations = apiData.locations;
             if (apiData?.rooms) baseData.rooms = apiData.rooms;
             if (apiData?.model_name) baseData.model_name = apiData.model_name;
@@ -4465,9 +4488,51 @@
                 let csvData = null;
                 let csvFileUrl = '';
                 if (csvFile) {
+                    // CSV sélectionné manuellement
                     const csvText = await readFileAsText(csvFile);
                     csvFileUrl = await uploadSingleFile(email, csvFile, 'csv');
                     csvData = parseMatterportCsvToData(csvText, currentClient.nom || 'Etat des lieux');
+                } else {
+                    // Pas de CSV sélectionné : essayer de le lire depuis l'agent local (dossier dimensions/)
+                    try {
+                        const listRes = await fetch(`${AGENT_LOCAL_URL}/lister-fichiers`, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({
+                                clientId: currentClient.id,
+                                nom: currentClient.nom || '',
+                                prenom: currentClient.prenom || currentClient.nom || ''
+                            })
+                        });
+                        if (listRes.ok) {
+                            const listData = await listRes.json();
+                            const csvFilename = (listData.files?.dimensions || []).find(f => /\.csv$/i.test(f));
+                            if (csvFilename) {
+                                const readRes = await fetch(`${AGENT_LOCAL_URL}/lire-fichier`, {
+                                    method: 'POST',
+                                    headers: { 'Content-Type': 'application/json' },
+                                    body: JSON.stringify({
+                                        clientId: currentClient.id,
+                                        nom: currentClient.nom || '',
+                                        prenom: currentClient.prenom || currentClient.nom || '',
+                                        subfolder: 'dimensions',
+                                        filename: csvFilename
+                                    })
+                                });
+                                if (readRes.ok) {
+                                    const readData = await readRes.json();
+                                    const csvText = atob(readData.data);
+                                    csvData = parseMatterportCsvToData(csvText, currentClient.nom || 'Etat des lieux');
+                                    // Uploader aussi le CSV en storage pour persistance
+                                    try {
+                                        const csvBlob = new Blob([csvText], { type: 'text/csv' });
+                                        const csvFileObj = new File([csvBlob], csvFilename, { type: 'text/csv' });
+                                        csvFileUrl = await uploadSingleFile(email, csvFileObj, 'csv');
+                                    } catch (_) { /* non-bloquant */ }
+                                }
+                            }
+                        }
+                    } catch (_) { /* agent absent — non-bloquant */ }
                 }
 
                 let liveMatterport = null;
@@ -4492,7 +4557,8 @@
                     iframeUrl,
                     csvData,
                     csvFileUrl,
-                    apiData: apiMatterportData
+                    apiData: apiMatterportData,
+                    existingData: currentClient?.matterport_data || null
                 });
 
                 const clientFields = {};
@@ -4792,8 +4858,17 @@
             const panoramasGrid = document.getElementById('panoramasGrid');
             const floorplansGrid = document.getElementById('floorplansGrid');
             const dimensionsContainer = document.getElementById('dimensionsData');
-            const btnDownloadPanos = document.getElementById('btnDownloadPanos');
             const btnExportCsv = document.getElementById('btnExportCsv');
+
+            // P2 : afficher "Donner accès" uniquement si paiement visite validé
+            const btnGrantAccess = document.getElementById('btnGrantClientAccess');
+            if (btnGrantAccess) {
+                const visitePaid = client && isPipelineAtOrPast(
+                    normalizeDashboardStatus(client.status || client.recorded_status || ''),
+                    'visite_payment_completed'
+                );
+                btnGrantAccess.style.display = visitePaid ? 'inline-block' : 'none';
+            }
 
             if (!tabs || !iframe || !panoramasGrid || !floorplansGrid || !dimensionsContainer) {
                 return;
@@ -4806,8 +4881,7 @@
                 panoramasGrid.innerHTML = '';
                 floorplansGrid.innerHTML = '';
                 dimensionsContainer.innerHTML = '';
-                btnDownloadPanos.style.display = 'none';
-                btnExportCsv.style.display = 'none';
+                if (btnExportCsv) btnExportCsv.style.display = 'none';
                 return;
             }
 
@@ -4838,10 +4912,10 @@
                         </div>
                     </div>
                 `).join('');
-                btnDownloadPanos.style.display = 'inline-block';
+                // btnDownloadPanos removed (D3)
             } else {
                 panoramasGrid.innerHTML = '<p style="color: var(--muted); font-size: 13px;">Aucun panorama disponible.</p>';
-                btnDownloadPanos.style.display = 'none';
+                // btnDownloadPanos removed (D3)
             }
 
             dimensionsContainer.innerHTML = buildMatterportDimensionsHtml(state.dimensionsData);
@@ -5037,17 +5111,27 @@
         async function transmitMatterportToMarcel() {
             if (!currentClient) return;
 
+            const btn = document.getElementById('btnTransmitMarcel');
+            const originalLabel = btn ? btn.innerHTML : '';
+            if (btn) { btn.disabled = true; btn.innerHTML = '⏳ Transmission en cours...'; }
+
             try {
                 await adminFetch('/.netlify/functions/admin-save-client', {
                     clientId: currentClient.id,
                     fields: { marcel_enabled: true }
                 });
+                if (btn) { btn.innerHTML = '✓ Transmis !'; }
                 clearMarcelChat();
                 await selectClientById(currentClient.id);
-                document.getElementById('chatPanel').scrollIntoView({ behavior: 'smooth' });
-                showSuccessMessage('Dossier Matterport transmis a Marcel.');
+                const chatPanel = document.getElementById('chatPanel');
+                if (chatPanel) chatPanel.scrollIntoView({ behavior: 'smooth' });
+                showSuccessMessage('Dossier Matterport transmis a Marcel. Le contexte est mis a jour.');
+                setTimeout(() => {
+                    if (btn) { btn.disabled = false; btn.innerHTML = originalLabel; }
+                }, 3000);
             } catch (err) {
                 console.error('Transmit Matterport to Marcel error:', err);
+                if (btn) { btn.disabled = false; btn.innerHTML = originalLabel; }
                 showErrorMessage(`Impossible de transmettre a Marcel : ${err.message}`);
             }
         }
@@ -5090,6 +5174,28 @@
             } catch (err) {
                 console.error('Grant Matterport access error:', err);
                 showErrorMessage(`Impossible de donner acces au client : ${err.message}`);
+            }
+        }
+
+        // ========== HELPERS PIPELINE ==========
+
+        function isPipelineAtOrPast(currentStatus, targetStatus) {
+            const idx = (s) => PIPELINE_STATUSES.indexOf(s);
+            return idx(currentStatus) >= idx(targetStatus) && idx(targetStatus) !== -1;
+        }
+
+        async function markVisitePaymentDone() {
+            if (!currentClient) return;
+            try {
+                await adminFetch('/.netlify/functions/admin-update-status', {
+                    clientId: currentClient.id,
+                    status: 'visite_payment_completed'
+                });
+                showSuccessMessage('Paiement visite validé. Accès client débloqué.');
+                await selectClientById(currentClient.id);
+                await loadDashboard();
+            } catch (err) {
+                showErrorMessage('Erreur lors de la validation du paiement visite : ' + err.message);
             }
         }
 
