@@ -1456,15 +1456,6 @@
                         </div>
                     </div>
 
-                    <div class="chat-panel" id="chatPanel">
-                        <h3>Marcel - Assistant IA</h3>
-                        <div class="chat-messages" id="chatMessages"></div>
-                        <div class="chat-input-group">
-                            <input type="text" id="chatInput" placeholder="Votre message...">
-                            <button class="chat-send" id="chatSend">Envoyer</button>
-                        </div>
-                    </div>
-
                     <div class="status-control-panel" id="statusControlPanel">
                         <!-- Dynamically populated -->
                     </div>
@@ -1472,6 +1463,16 @@
                     <!-- ACTION PANEL -->
                     <div class="action-panel" id="actionPanel">
                         <!-- Dynamically populated -->
+                    </div>
+
+                    <!-- MARCEL — visible en permanence, positionné sous le panneau d'action -->
+                    <div class="chat-panel" id="chatPanel">
+                        <h3>Marcel - Assistant IA</h3>
+                        <div class="chat-messages" id="chatMessages"></div>
+                        <div class="chat-input-group">
+                            <input type="text" id="chatInput" placeholder="Votre message...">
+                            <button class="chat-send" id="chatSend">Envoyer</button>
+                        </div>
                     </div>
 
                     <!-- MATTERPORT INTEGRATION (Pro Account) -->
@@ -3998,13 +3999,18 @@
             };
 
             try {
+                // Sauver iframe dans clients
                 const data = await adminFetch('/.netlify/functions/admin-save-client', {
                     clientId: currentClient.id,
                     fields: {
-                        matterport_model_id: modelId,
-                        matterport_iframe: `https://my.matterport.com/show/?m=${modelId}`,
-                        matterport_data: matterportData
+                        matterport_iframe: `https://my.matterport.com/show/?m=${modelId}`
                     }
+                });
+                // Sauver model_id + matterport_data dans scans
+                await adminFetch('/.netlify/functions/admin-update-scan', {
+                    clientId: currentClient.id,
+                    matterport_model_id: modelId,
+                    matterport_data: matterportData
                 });
 
                 currentClient = {
@@ -4561,32 +4567,23 @@
                     existingData: currentClient?.matterport_data || null
                 });
 
-                const clientFields = {};
-                if (modelId || currentClient.matterport_model_id) {
-                    clientFields.matterport_model_id = modelId || currentClient.matterport_model_id || '';
-                }
-                if (iframeUrl || currentClient.matterport_url || currentClient.matterport_iframe) {
-                    clientFields.matterport_url = iframeUrl || currentClient.matterport_url || '';
-                    clientFields.matterport_iframe = iframeUrl || currentClient.matterport_iframe || '';
-                }
-                if (mergedMatterportData) {
-                    clientFields.matterport_data = mergedMatterportData;
-                }
-
-                if (Object.keys(clientFields).length > 0) {
+                // Sauver matterport_iframe dans clients (seul champ matterport encore sur clients)
+                if (iframeUrl || currentClient.matterport_iframe) {
                     await adminFetch('/.netlify/functions/admin-save-client', {
                         clientId: currentClient.id,
-                        fields: clientFields
+                        fields: { matterport_iframe: iframeUrl || currentClient.matterport_iframe || '' }
                     });
                 }
 
-                if (photoUrls.length > 0 || planUrls.length > 0) {
-                    await adminFetch('/.netlify/functions/admin-update-scan', {
-                        clientId: currentClient.id,
-                        mode: 'replace',
-                        ...(photoUrls.length > 0 ? { photos_urls: photoUrls } : {}),
-                        ...(planUrls.length > 0 ? { plans_urls: planUrls } : {})
-                    });
+                // Sauver model_id, matterport_data, photos, plans dans scans
+                const scanPayload = { clientId: currentClient.id, mode: 'replace' };
+                if (modelId) scanPayload.matterport_model_id = modelId;
+                if (mergedMatterportData) scanPayload.matterport_data = mergedMatterportData;
+                if (photoUrls.length > 0) scanPayload.photos_urls = photoUrls;
+                if (planUrls.length > 0) scanPayload.plans_urls = planUrls;
+
+                if (Object.keys(scanPayload).length > 2) {
+                    await adminFetch('/.netlify/functions/admin-update-scan', scanPayload);
                 }
 
                 await selectClientById(currentClient.id);
@@ -4969,16 +4966,19 @@
             if (!currentClient) return;
 
             const matterportData = buildMatterportDataFromApi(modelId, mpData);
-            const iframeUrl = buildMatterportIframeUrl(modelId, currentClient.matterport_iframe || currentClient.matterport_url || '');
+            const iframeUrl = buildMatterportIframeUrl(modelId, currentClient.matterport_iframe || '');
 
             const data = await adminFetch('/.netlify/functions/admin-save-client', {
                 clientId: currentClient.id,
                 fields: {
-                    matterport_model_id: modelId || currentClient.matterport_model_id || '',
-                    matterport_url: iframeUrl || currentClient.matterport_url || '',
-                    matterport_iframe: iframeUrl || currentClient.matterport_iframe || '',
-                    matterport_data: matterportData
+                    matterport_iframe: iframeUrl || currentClient.matterport_iframe || ''
                 }
+            });
+            // Sauver matterport_data + model_id dans scans
+            await adminFetch('/.netlify/functions/admin-update-scan', {
+                clientId: currentClient.id,
+                matterport_model_id: modelId,
+                matterport_data: matterportData
             });
 
             currentClient = {
@@ -5158,8 +5158,6 @@
                 await adminFetch('/.netlify/functions/admin-save-client', {
                     clientId: currentClient.id,
                     fields: {
-                        matterport_model_id: modelId,
-                        matterport_url: iframeUrl || currentClient.matterport_url || '',
                         matterport_iframe: iframeUrl || currentClient.matterport_iframe || ''
                     }
                 });
