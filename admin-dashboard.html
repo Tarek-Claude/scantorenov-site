@@ -2674,7 +2674,7 @@
             let sections = '';
 
             // Synthèse d'appel — visible dès call_done passé
-            if (isPipelineAtOrPast('call_done') && idx > PIPELINE_STATUSES.indexOf('call_done')) {
+            if (isPipelineAtOrPast(status, 'call_done') && idx > PIPELINE_STATUSES.indexOf('call_done')) {
                 const note = (currentClientProjectNotes || []).find(n => n.type === 'phone_summary');
                 const summary = note?.summary || 'Pas de synthese enregistree.';
                 sections += `
@@ -2689,7 +2689,7 @@
             }
 
             // Observations de visite — visible dès scan_completed passé
-            if (isPipelineAtOrPast('scan_completed') && idx > PIPELINE_STATUSES.indexOf('scan_completed')) {
+            if (isPipelineAtOrPast(status, 'scan_completed') && idx > PIPELINE_STATUSES.indexOf('scan_completed')) {
                 const scanNote = (currentClientProjectNotes || []).find(n => n.type === 'scan_observation');
                 const scanSummary = scanNote?.summary || 'Pas d\'observations enregistrees.';
                 sections += `
@@ -2704,7 +2704,7 @@
             }
 
             // Rendez-vous scan — visible dès scan_payment_completed passé
-            if (isPipelineAtOrPast('scan_payment_completed') && idx > PIPELINE_STATUSES.indexOf('scan_scheduled')) {
+            if (isPipelineAtOrPast(status, 'scan_payment_completed') && idx > PIPELINE_STATUSES.indexOf('scan_scheduled')) {
                 const scanAppt = (currentClientAppointments || []).find(a => a.type === 'scan_3d');
                 if (scanAppt) {
                     sections += `
@@ -3639,35 +3639,31 @@
                     niveauxMap[niveau] = { nom: niveau || 'Niveau', pieces: [], surfaceTotal: 0 };
                 }
 
+                // Lire les colonnes numériques dédiées du CSV Matterport
+                const largeurM = Number.parseFloat(row['Largeur (m)']) || 0;
+                const longueurM = Number.parseFloat(row['Longueur (m)']) || 0;
+                const hauteurM = Number.parseFloat(row['Hauteur (m)']) || 0;
+                // Fallback: colonnes texte "Largeur", "Longueur", "Hauteur"
+                const largeurTxt = row['Largeur'] || '';
+                const longueurTxt = row['Longueur'] || '';
+                const hauteurTxt = row['Hauteur'] || '';
+
                 const pieceData = {
                     nom: nomPiece || 'Pièce',
-                    surface: surfaceNum > 0 ? `${surfaceNum.toFixed(1).replace('.', ',')} m²` : undefined
+                    surface: surfaceNum > 0 ? `${surfaceNum.toFixed(1).replace('.', ',')} m²` : undefined,
+                    largeur: largeurM > 0 ? `${largeurM.toFixed(2)} m` : (largeurTxt && largeurTxt !== '-' ? largeurTxt : undefined),
+                    profondeur: longueurM > 0 ? `${longueurM.toFixed(2)} m` : (longueurTxt && longueurTxt !== '-' ? longueurTxt : undefined),
+                    hauteur: hauteurM > 0 ? `${hauteurM.toFixed(2)} m` : (hauteurTxt && hauteurTxt !== '-' ? hauteurTxt : undefined)
                 };
+
+                // Volume = surface × hauteur
+                const hVal = hauteurM || Number.parseFloat(String(hauteurTxt).replace(',', '.').replace(/\s*m$/, '')) || 0;
+                if (surfaceNum > 0 && hVal > 0) {
+                    pieceData.volume = `${(surfaceNum * hVal).toFixed(1)} m³`;
+                }
 
                 if (dimensions && dimensions !== '-') {
                     pieceData.dimensions = dimensions;
-                    // Parser "L x l x H" ou "3.5m x 4.2m x 2.5m" en champs séparés
-                    const dimParts = dimensions.replace(/m/gi, '').split(/\s*x\s*/i).map(d => Number.parseFloat(d.replace(',', '.')));
-                    if (dimParts.length >= 2) {
-                        pieceData.largeur = `${dimParts[0].toFixed(2)} m`;
-                        pieceData.profondeur = `${dimParts[1].toFixed(2)} m`;
-                        if (dimParts.length >= 3) {
-                            pieceData.hauteur = `${dimParts[2].toFixed(2)} m`;
-                        }
-                        // Volume si hauteur + surface
-                        if (dimParts.length >= 3 && surfaceNum > 0) {
-                            pieceData.volume = `${(surfaceNum * dimParts[2]).toFixed(1)} m³`;
-                        }
-                    }
-                }
-                // Hauteur depuis colonne dédiée si présente
-                const hauteurCol = row['Hauteur sous plafond (m)'] || row['Hauteur (m)'] || row['Hauteur'] || '';
-                if (hauteurCol && !pieceData.hauteur) {
-                    const h = Number.parseFloat(hauteurCol.replace(',', '.'));
-                    if (h > 0) {
-                        pieceData.hauteur = `${h.toFixed(2)} m`;
-                        if (surfaceNum > 0) pieceData.volume = `${(surfaceNum * h).toFixed(1)} m³`;
-                    }
                 }
 
                 niveauxMap[niveau].pieces.push(pieceData);
