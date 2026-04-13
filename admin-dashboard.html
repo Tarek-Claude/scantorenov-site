@@ -2516,7 +2516,7 @@
                         ${actionButtons}
                         ${phoneSummarySection}
                     `;
-                    if (chatPanel) chatPanel.style.display = 'flex';
+                    if (chatPanel) chatPanel.style.display = shouldShowMarcelForStatus(status) ? 'flex' : 'none';
                     panel.innerHTML = html;
                     return;
                 }
@@ -2530,7 +2530,10 @@
                     <h3>Invitation scan 3D</h3>
                     <p class="action-panel-description">Finalisez d'abord la synthese d'appel si besoin, puis invitez le client a choisir et regler son creneau de scan 3D depuis son espace.</p>
                     ${phoneSummarySection}
-                    <button class="action-button" onclick="inviteScan()">Envoyer invitation</button>
+                    <div style="display:flex;gap:12px;flex-wrap:wrap;margin-top:12px;">
+                        <button class="action-button" onclick="inviteScan()">Envoyer invitation</button>
+                        <button class="action-button" onclick="openMarcelChat()" style="background-color:#3F6E52;">Discuter avec Marcel</button>
+                    </div>
                 `;
             } else if (status === 'scan_scheduled') {
                 if (pendingScanAppointment) {
@@ -2664,7 +2667,7 @@
             }
 
             // Marcel toujours visible dès qu'un client est sélectionné
-            if (chatPanel) chatPanel.style.display = client ? 'flex' : 'none';
+            if (chatPanel) chatPanel.style.display = (client && shouldShowMarcelForStatus(status)) ? 'flex' : 'none';
             panel.innerHTML = html;
         }
 
@@ -2906,11 +2909,18 @@
         }
 
         function shouldShowMarcelForStatus(status) {
-            return !!normalizeDashboardStatus(status);
+            // Marcel n'est pertinent qu'à partir de call_done (quand on a la synthèse d'appel)
+            const marcelStatuses = [
+                'call_done', 'scan_scheduled', 'scan_payment_completed',
+                'scan_completed', 'analysis_ready', 'visite_payment_completed',
+                'avant_projet_ready', 'avant_projet_transmitted', 'accompaniment_subscribed'
+            ];
+            return marcelStatuses.includes(normalizeDashboardStatus(status));
         }
 
         function getMatterportContextData(client) {
             if (!client || typeof client !== 'object') return null;
+            // Matterport data peut venir du scan (prioritaire) ou du client
             return client.matterport_data || matterportCache[client.id] || null;
         }
 
@@ -3163,7 +3173,28 @@
             }
 
             if (matterportData) {
-                parts.push(`Donnees Matterport: ${JSON.stringify(matterportData, null, 2)}`);
+                // Résumer les données Matterport au lieu d'envoyer le JSON brut complet
+                const mpSummary = [];
+                if (matterportData.surface_totale) mpSummary.push(`Surface totale: ${matterportData.surface_totale}`);
+                if (matterportData.source) mpSummary.push(`Source: ${matterportData.source}`);
+                const niveaux = matterportData.niveaux || [];
+                niveaux.forEach(n => {
+                    mpSummary.push(`${n.nom} (${n.surface || '-'}):`);
+                    (n.pieces || []).forEach(p => {
+                        mpSummary.push(`  - ${p.nom}: ${p.surface || '-'}${p.hauteur ? ', h=' + p.hauteur : ''}${p.volume ? ', vol=' + p.volume : ''}`);
+                    });
+                });
+                const annexes = matterportData.annexes || [];
+                if (annexes.length) {
+                    mpSummary.push('Annexes:');
+                    annexes.forEach(a => mpSummary.push(`  - ${a.nom}: ${a.dimensions || '-'} (${a.emplacement || '-'})`));
+                }
+                const rooms = matterportData.rooms || [];
+                if (rooms.length && !niveaux.length) {
+                    mpSummary.push('Pieces detectees (API):');
+                    rooms.forEach(r => mpSummary.push(`  - ${r.label || r.nom}: ${r.surface || '-'}${r.hauteur ? ', h=' + r.hauteur : ''}`));
+                }
+                parts.push(`Donnees Matterport:\n${mpSummary.join('\n')}`);
             }
 
             parts.push('', "Reste concis, oriente action, et parle a l'operateur interne.");
@@ -5188,6 +5219,13 @@
 
         async function transmitMatterportToMarcel() {
             if (!currentClient) return;
+
+            // Vérifier que des données Matterport existent avant de transmettre
+            const mpData = getMatterportContextData(currentClient);
+            if (!mpData || (!mpData.niveaux?.length && !mpData.rooms?.length && !mpData.surface_totale)) {
+                showErrorMessage('Aucune donnee Matterport disponible. Lancez d\'abord la recuperation.');
+                return;
+            }
 
             const btn = document.getElementById('btnTransmitMarcel');
             const originalLabel = btn ? btn.innerHTML : '';
