@@ -1465,16 +1465,6 @@
                         <!-- Dynamically populated -->
                     </div>
 
-                    <!-- MARCEL — visible en permanence, positionné sous le panneau d'action -->
-                    <div class="chat-panel" id="chatPanel">
-                        <h3>Marcel - Assistant IA</h3>
-                        <div class="chat-messages" id="chatMessages"></div>
-                        <div class="chat-input-group">
-                            <input type="text" id="chatInput" placeholder="Votre message...">
-                            <button class="chat-send" id="chatSend">Envoyer</button>
-                        </div>
-                    </div>
-
                     <!-- MATTERPORT INTEGRATION (Pro Account) -->
                     <div class="matterport-section" id="matterportSection" style="display: none;">
                         <div style="padding: 20px;">
@@ -1568,6 +1558,16 @@
                                     Donner acc&egrave;s au client
                                 </button>
                             </div>
+                        </div>
+                    </div>
+
+                    <!-- MARCEL — toujours accessible, positionné sous le dernier bloc en cours (Matterport) -->
+                    <div class="chat-panel" id="chatPanel">
+                        <h3>Marcel - Assistant IA</h3>
+                        <div class="chat-messages" id="chatMessages"></div>
+                        <div class="chat-input-group">
+                            <input type="text" id="chatInput" placeholder="Votre message...">
+                            <button class="chat-send" id="chatSend">Envoyer</button>
                         </div>
                     </div>
 
@@ -2654,9 +2654,72 @@
                 `;
             }
 
+            // Ajouter les étapes précédentes sous forme repliable (toujours accessibles)
+            const pastStepsHtml = buildPastStepsHtml(client, status, phoneAppointment);
+            if (pastStepsHtml) {
+                html += `<div class="past-steps-section" style="margin-top: 24px; border-top: 1px solid var(--border); padding-top: 16px;">
+                    <h4 style="font-size: 13px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 12px;">Etapes precedentes</h4>
+                    ${pastStepsHtml}
+                </div>`;
+            }
+
             // Marcel toujours visible dès qu'un client est sélectionné
             if (chatPanel) chatPanel.style.display = client ? 'flex' : 'none';
             panel.innerHTML = html;
+        }
+
+        function buildPastStepsHtml(client, status, phoneAppointment) {
+            const idx = PIPELINE_STATUSES.indexOf(status);
+            if (idx < 0) return '';
+            let sections = '';
+
+            // Synthèse d'appel — visible dès call_done passé
+            if (isPipelineAtOrPast('call_done') && idx > PIPELINE_STATUSES.indexOf('call_done')) {
+                const note = (currentClientProjectNotes || []).find(n => n.type === 'phone_summary');
+                const summary = note?.summary || 'Pas de synthese enregistree.';
+                sections += `
+                <details class="past-step-card" style="margin-bottom: 8px; background: var(--bg); border-radius: 8px; padding: 12px;">
+                    <summary style="cursor: pointer; font-weight: 600; font-size: 13px;">Synthese d'appel telephonique</summary>
+                    <div style="margin-top: 8px; font-size: 13px; color: var(--text);">
+                        <p>${summary.replace(/\n/g, '<br>')}</p>
+                        ${note?.needs?.length ? '<p><strong>Besoins :</strong> ' + note.needs.join(', ') + '</p>' : ''}
+                        ${note?.interest_level ? '<p><strong>Interet :</strong> ' + note.interest_level + '</p>' : ''}
+                    </div>
+                </details>`;
+            }
+
+            // Observations de visite — visible dès scan_completed passé
+            if (isPipelineAtOrPast('scan_completed') && idx > PIPELINE_STATUSES.indexOf('scan_completed')) {
+                const scanNote = (currentClientProjectNotes || []).find(n => n.type === 'scan_observation');
+                const scanSummary = scanNote?.summary || 'Pas d\'observations enregistrees.';
+                sections += `
+                <details class="past-step-card" style="margin-bottom: 8px; background: var(--bg); border-radius: 8px; padding: 12px;">
+                    <summary style="cursor: pointer; font-weight: 600; font-size: 13px;">Observations de visite scan</summary>
+                    <div style="margin-top: 8px; font-size: 13px; color: var(--text);">
+                        <p>${scanSummary.replace(/\n/g, '<br>')}</p>
+                        ${scanNote?.technical_points?.length ? '<p><strong>Points techniques :</strong> ' + scanNote.technical_points.join(', ') + '</p>' : ''}
+                        ${scanNote?.constraints ? '<p><strong>Contraintes :</strong> ' + scanNote.constraints + '</p>' : ''}
+                    </div>
+                </details>`;
+            }
+
+            // Rendez-vous scan — visible dès scan_payment_completed passé
+            if (isPipelineAtOrPast('scan_payment_completed') && idx > PIPELINE_STATUSES.indexOf('scan_scheduled')) {
+                const scanAppt = (currentClientAppointments || []).find(a => a.type === 'scan_3d');
+                if (scanAppt) {
+                    sections += `
+                    <details class="past-step-card" style="margin-bottom: 8px; background: var(--bg); border-radius: 8px; padding: 12px;">
+                        <summary style="cursor: pointer; font-weight: 600; font-size: 13px;">Rendez-vous scan 3D</summary>
+                        <div style="margin-top: 8px; font-size: 13px; color: var(--text);">
+                            <p><strong>Date :</strong> ${formatAppointmentDateTime(scanAppt.scheduled_at)}</p>
+                            <p><strong>Statut :</strong> ${getAppointmentStatusLabel(scanAppt.status)}</p>
+                            ${scanAppt.location ? '<p><strong>Lieu :</strong> ' + scanAppt.location + '</p>' : ''}
+                        </div>
+                    </details>`;
+                }
+            }
+
+            return sections;
         }
 
         async function loadClientTasks(clientId, prefetchedTasks) {
@@ -3583,6 +3646,28 @@
 
                 if (dimensions && dimensions !== '-') {
                     pieceData.dimensions = dimensions;
+                    // Parser "L x l x H" ou "3.5m x 4.2m x 2.5m" en champs séparés
+                    const dimParts = dimensions.replace(/m/gi, '').split(/\s*x\s*/i).map(d => Number.parseFloat(d.replace(',', '.')));
+                    if (dimParts.length >= 2) {
+                        pieceData.largeur = `${dimParts[0].toFixed(2)} m`;
+                        pieceData.profondeur = `${dimParts[1].toFixed(2)} m`;
+                        if (dimParts.length >= 3) {
+                            pieceData.hauteur = `${dimParts[2].toFixed(2)} m`;
+                        }
+                        // Volume si hauteur + surface
+                        if (dimParts.length >= 3 && surfaceNum > 0) {
+                            pieceData.volume = `${(surfaceNum * dimParts[2]).toFixed(1)} m³`;
+                        }
+                    }
+                }
+                // Hauteur depuis colonne dédiée si présente
+                const hauteurCol = row['Hauteur sous plafond (m)'] || row['Hauteur (m)'] || row['Hauteur'] || '';
+                if (hauteurCol && !pieceData.hauteur) {
+                    const h = Number.parseFloat(hauteurCol.replace(',', '.'));
+                    if (h > 0) {
+                        pieceData.hauteur = `${h.toFixed(2)} m`;
+                        if (surfaceNum > 0) pieceData.volume = `${(surfaceNum * h).toFixed(1)} m³`;
+                    }
                 }
 
                 niveauxMap[niveau].pieces.push(pieceData);
@@ -3665,21 +3750,7 @@
             };
         }
 
-        function mergeMatterportPayloads({ modelId, iframeUrl, csvData, csvFileUrl, apiData }) {
-            const baseData = csvData ? { ...csvData } : (apiData ? { ...apiData } : null);
-            if (!baseData) return null;
-
-            if (apiData?.floorplans) baseData.floorplans = apiData.floorplans;
-            if (apiData?.locations) baseData.locations = apiData.locations;
-            if (apiData?.model_name) baseData.model_name = apiData.model_name;
-            if (apiData?.model_id || modelId) baseData.model_id = apiData?.model_id || modelId;
-
-            baseData.source = csvData && apiData ? 'mixed' : (csvData ? 'csv_upload' : 'matterport_api');
-            baseData.synced_at = new Date().toISOString();
-            baseData.iframe_url = iframeUrl || baseData.iframe_url || '';
-            baseData.csv_file_url = csvFileUrl || baseData.csv_file_url || '';
-            return baseData;
-        }
+        // mergeMatterportPayloads — version unique définie plus bas (ligne ~4477)
 
         function resetRetrieveInputs() {
             const photosInput = document.getElementById('photosInput');
@@ -4763,7 +4834,7 @@
                                     <tr>
                                         <td><strong>${piece.nom || '-'}</strong></td>
                                         <td>${piece.surface || '-'}</td>
-                                        <td>${piece.hauteur || '-'}</td>
+                                        <td>${piece.hauteur || piece.dimensions || '-'}</td>
                                         <td>${piece.largeur || '-'}</td>
                                         <td>${piece.profondeur || '-'}</td>
                                         <td>${piece.volume || '-'}</td>
