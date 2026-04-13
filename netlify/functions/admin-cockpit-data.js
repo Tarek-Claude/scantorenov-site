@@ -131,8 +131,8 @@ exports.handler = async function handler(event) {
         ...client,
         photos_urls: (scan && scan.photos_urls) || [],
         plans_urls: (scan && scan.plans_urls) || [],
-        matterport_model_id: client.matterport_model_id || (scan && scan.matterport_model_id) || null,
-        matterport_data: client.matterport_data || (scan && scan.matterport_data) || null,
+        matterport_model_id: (scan && scan.matterport_model_id) || client.matterport_model_id || null,
+        matterport_data: (scan && scan.matterport_data) || client.matterport_data || null,
       };
       return {
         ...enrichClientProgress(merged, appointments, payments),
