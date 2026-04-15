@@ -8,8 +8,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400&family=DM+Sans:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet" />
   <script src="https://identity.netlify.com/v1/netlify-identity-widget.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
-  <!-- Matterport Showcase SDK — pour la capture d'écran intégrée -->
-  <script src="https://static.matterport.com/showcase-sdk/latest.js"></script>
+  <!-- Matterport : iframe seule, données chargées depuis Supabase -->
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     html { scroll-behavior: smooth; }
@@ -4977,7 +4976,7 @@ function addToGallery(imageUrl, description) {
   gallery.insertBefore(card, gallery.firstChild);
 }
 
-/* ── Matterport SDK — extraction des donn\u00e9es du bien ── */
+/* ── Données du bien — chargées depuis Supabase (matterport_data) ── */
 window.__propertyData = null;
 
 function renderPropertyData(data) {
@@ -4991,67 +4990,39 @@ function renderPropertyData(data) {
   if (!loading || !content) return;
 
   // Nom du bien
-  if (data.model && data.model.name) {
-    bienName.textContent = data.model.name;
+  if (data.titre_scan) {
+    bienName.textContent = data.titre_scan;
   }
 
-  // Cartes r\u00e9capitulatives
+  // Compter pièces et niveaux depuis format Supabase
+  var niveaux = data.niveaux || [];
+  var allPieces = [];
+  niveaux.forEach(function(n) {
+    (n.pieces || []).forEach(function(p) { allPieces.push(p); });
+  });
+
   var cards = [];
-  var totalArea = 0;
-  var roomCount = data.rooms ? data.rooms.length : 0;
-  var floorCount = data.floors ? data.floors.length : 0;
-
-  if (data.rooms) {
-    data.rooms.forEach(function(r) {
-      if (r.area) totalArea += r.area;
-    });
-  }
 
   cards.push({
     icon: '\uD83D\uDCCF',
     label: 'Surface totale',
-    value: totalArea > 0 ? (Math.round(totalArea * 10) / 10) + ' m\u00B2' : '\u2014',
+    value: data.surface_totale || '\u2014',
     detail: 'Mesur\u00E9e par scan 3D'
   });
 
   cards.push({
     icon: '\uD83D\uDEAA',
     label: 'Pi\u00E8ces',
-    value: roomCount > 0 ? roomCount : '\u2014',
-    detail: roomCount > 0 ? 'D\u00E9tect\u00E9es automatiquement' : 'En attente du SDK'
+    value: allPieces.length > 0 ? allPieces.length : '\u2014',
+    detail: allPieces.length > 0 ? 'D\u00E9tect\u00E9es automatiquement' : 'Non disponible'
   });
 
   cards.push({
     icon: '\uD83C\uDFE2',
     label: 'Niveaux',
-    value: floorCount > 0 ? floorCount : '\u2014',
-    detail: floorCount > 0 ? data.floors.map(function(f){return f.name}).join(', ') : 'En attente du SDK'
+    value: niveaux.length > 0 ? niveaux.length : '\u2014',
+    detail: niveaux.length > 0 ? niveaux.map(function(n) { return n.nom; }).join(', ') : 'Non disponible'
   });
-
-  cards.push({
-    icon: '\uD83D\uDCCD',
-    label: 'R\u00E9f\u00E9rence scan',
-    value: data.model ? data.model.sid : 'DKQ6zroSLKj',
-    detail: 'Identifiant Matterport'
-  });
-
-  if (data.type) {
-    cards.push({
-      icon: '\uD83C\uDFE0',
-      label: 'Type de bien',
-      value: data.type,
-      detail: data.annee ? 'Ann\u00E9es ' + data.annee : ''
-    });
-  }
-
-  if (data.etat) {
-    cards.push({
-      icon: '\uD83D\uDD27',
-      label: '\u00C9tat g\u00E9n\u00E9ral',
-      value: data.etat,
-      detail: data.etatDetail || ''
-    });
-  }
 
   grid.innerHTML = '';
   cards.forEach(function(c) {
@@ -5064,14 +5035,14 @@ function renderPropertyData(data) {
     grid.appendChild(div);
   });
 
-  // D\u00E9tail par pi\u00E8ce
-  if (data.rooms && data.rooms.length > 0) {
+  // Détail par pièce (format Supabase : niveaux[].pieces[])
+  if (allPieces.length > 0) {
     roomsList.innerHTML = '';
-    data.rooms.forEach(function(r) {
+    allPieces.forEach(function(p) {
       var div = document.createElement('div');
       div.className = 'pd-room';
-      div.innerHTML = '<span class="pd-room-name">' + (r.name || 'Pi\u00E8ce') + '</span>'
-        + '<span class="pd-room-area">' + (r.area ? (Math.round(r.area * 10) / 10) + ' m\u00B2' : '\u2014') + '</span>';
+      div.innerHTML = '<span class="pd-room-name">' + (p.nom || 'Pi\u00E8ce') + '</span>'
+        + '<span class="pd-room-area">' + (p.surface || '\u2014') + '</span>';
       roomsList.appendChild(div);
     });
     roomsSection.style.display = '';
@@ -5079,79 +5050,6 @@ function renderPropertyData(data) {
 
   loading.style.display = 'none';
   content.style.display = '';
-}
-
-// Référence globale au SDK Matterport (utilisée par takeCapture)
-var mpSdkInstance = null;
-
-function initMatterportSDK() {
-  var iframe = document.getElementById('matterportIframe');
-  if (!iframe || !window.MP_SDK) {
-    useFallbackData();
-    return;
-  }
-
-  var sdkKey = 'it5i55rr71n8tmetz6maupmsb';
-
-  window.MP_SDK.connect(iframe, sdkKey, '3.10')
-    .then(function(sdk) {
-      console.log('Matterport SDK connecté');
-      // Stocker l'instance pour les captures d'écran
-      mpSdkInstance = sdk;
-
-      // Activer le bouton de capture maintenant que le SDK est prêt
-      var captureBtn = document.getElementById('wsCaptureBtn');
-      var captureHint = document.getElementById('wsCaptureHint');
-      if (captureBtn) {
-        captureBtn.disabled = false;
-        captureBtn.title = 'Capture la vue actuelle de la visite 3D';
-      }
-      if (captureHint) {
-        captureHint.textContent = '✓ SDK connecté — Capture la vue actuelle de la visite 3D';
-        captureHint.style.color = 'var(--green)';
-      }
-
-      return Promise.all([
-        sdk.Model.getData(),
-        sdk.Floor.getData(),
-        sdk.Room && sdk.Room.getData ? sdk.Room.getData() : Promise.resolve(null)
-      ]).then(function(results) {
-        var modelData = results[0];
-        var floors = results[1];
-        var rooms = results[2];
-
-        window.__propertyData = {
-          model: {
-            sid: modelData.sid || 'DKQ6zroSLKj',
-            name: modelData.name || 'Bien du client'
-          },
-          floors: floors ? floors.map(function(f, i) {
-            return { id: f.id, index: i, name: f.name || ('Niveau ' + i) };
-          }) : [],
-          rooms: rooms ? rooms.map(function(r) {
-            return {
-              id: r.id,
-              name: r.name || 'Pièce',
-              floorIndex: r.floorIndex,
-              area: r.area ? Math.round(r.area * 100) / 100 : null
-            };
-          }) : []
-        };
-
-        console.log('Données du bien extraites:', window.__propertyData);
-        renderPropertyData(window.__propertyData);
-      });
-    })
-    .catch(function(err) {
-      console.warn('SDK Matterport non disponible:', err.message);
-      useFallbackData();
-    });
-}
-
-function useFallbackData() {
-  // Pas de données SDK Matterport disponibles — affichage vide
-  window.__propertyData = null;
-  console.log('Matterport SDK non disponible — données du bien chargées depuis Supabase.');
 }
 
 function initMatterportSection(appMeta) {
@@ -5166,42 +5064,31 @@ function initMatterportSection(appMeta) {
     return;
   }
 
-  var user = currentUser;
-  // Priorité : appMeta enrichi par Supabase, puis app_metadata Netlify Identity, puis user_metadata
-  var meta = appMeta || (user && user.app_metadata) || (user && user.user_metadata) || {};
+  var meta = appMeta || (currentUser && currentUser.app_metadata) || {};
 
-  // Priorité : 1) iframe complète Supabase, 2) model ID metadata
+  // Priorité : 1) iframe complète Supabase, 2) model ID
   var iframeSrc = meta.matterport_iframe || null;
   var modelId = meta.matterport_id || null;
-
   var iframeEl = document.getElementById('matterportIframe');
 
   if (iframeSrc || modelId) {
-    // Visite disponible → afficher l'iframe avec la clé SDK
-    var sdkKey = 'it5i55rr71n8tmetz6maupmsb';
+    // Iframe simple sans SDK — juste l'affichage de la visite
     if (iframeSrc) {
-      // URL iframe complète depuis Supabase — ajouter la clé SDK si absente
-      var src = iframeSrc;
-      if (src.indexOf('applicationKey') === -1) {
-        src += (src.indexOf('?') > -1 ? '&' : '?') + 'applicationKey=' + sdkKey;
-      }
-      iframeEl.src = src;
+      iframeEl.src = iframeSrc;
     } else {
-      iframeEl.src = 'https://my.matterport.com/show/?m=' + modelId + '&play=1&qs=1&applicationKey=' + sdkKey;
+      iframeEl.src = 'https://my.matterport.com/show/?m=' + modelId + '&play=1&qs=1';
     }
     frameEl.style.display = '';
     pendingEl.style.display = 'none';
-    if (dataSection) dataSection.style.display = '';
 
-    // Le SDK est déjà chargé dans le <head>, connecter après un délai
-    if (window.MP_SDK) {
-      setTimeout(initMatterportSDK, 2000);
+    // Données du bien depuis Supabase (matterport_data stocké par le dashboard)
+    var mpData = meta.matterport_data || clientProject.matterport_data || null;
+    if (mpData && (mpData.surface_totale || (mpData.niveaux && mpData.niveaux.length))) {
+      if (dataSection) dataSection.style.display = '';
+      window.__propertyData = mpData;
+      renderPropertyData(mpData);
     } else {
-      // Fallback si le SDK n'a pas chargé
-      setTimeout(function() {
-        if (window.MP_SDK) initMatterportSDK();
-        else useFallbackData();
-      }, 3000);
+      if (dataSection) dataSection.style.display = 'none';
     }
   } else {
     // Pas encore de visite → placeholder
@@ -5265,11 +5152,15 @@ function generateRapport() {
   var typeBien = clientProject.type_bien || 'Non renseign\u00e9';
   var demande = clientProject.demande || 'Aucune description disponible.';
 
-  // Données du bien
+  // Données du bien (format Supabase matterport_data)
   var propData = window.__propertyData || null;
-  var surface = propData && propData.summary ? propData.summary.totalArea : null;
-  var nbPieces = propData && propData.rooms ? propData.rooms.length : null;
-  var nbNiveaux = propData && propData.floors ? propData.floors.length : null;
+  var surface = propData ? propData.surface_totale : null;
+  var allRapportPieces = [];
+  if (propData && propData.niveaux) {
+    propData.niveaux.forEach(function(n) { (n.pieces || []).forEach(function(p) { allRapportPieces.push(p); }); });
+  }
+  var nbPieces = allRapportPieces.length || null;
+  var nbNiveaux = propData && propData.niveaux ? propData.niveaux.length : null;
 
   // Visuels générés
   var visuals = getGeneratedVisuals();
