@@ -925,28 +925,21 @@
       width: 100%; height: 100%; object-fit: cover;
       display: block;
     }
-    /* Sélection expert */
-    .ws-thumb.selectable.selected { border-color: var(--green); }
-    .ws-thumb .ws-check {
-      position: absolute; top: 6px; right: 6px;
-      width: 22px; height: 22px; border-radius: 50%;
-      background: rgba(255,255,255,0.85); border: 2px solid var(--border);
-      display: flex; align-items: center; justify-content: center;
-      font-size: 0.7rem; color: transparent; transition: all 0.2s;
+    /* Sélection expert — cases à cocher */
+    .ws-thumb.selectable.selected { border-color: var(--green); box-shadow: 0 0 0 2px var(--green); }
+    .ws-checkbox-label {
+      position: absolute; top: 6px; left: 6px; z-index: 2; cursor: pointer;
     }
-    .ws-thumb.selected .ws-check {
+    .ws-checkbox { display: none; }
+    .ws-checkbox-mark {
+      display: flex; align-items: center; justify-content: center;
+      width: 22px; height: 22px; border-radius: 4px;
+      background: rgba(255,255,255,0.9); border: 2px solid var(--border);
+      font-size: 0.75rem; color: transparent; transition: all 0.18s;
+    }
+    .ws-checkbox:checked + .ws-checkbox-mark {
       background: var(--green); border-color: var(--green); color: #fff;
     }
-    /* Suppression captures */
-    .ws-thumb .ws-delete {
-      position: absolute; top: 4px; right: 4px;
-      width: 22px; height: 22px; border-radius: 50%;
-      background: rgba(231,76,60,0.85); color: #fff;
-      border: none; cursor: pointer; font-size: 0.72rem;
-      display: flex; align-items: center; justify-content: center;
-      opacity: 0; transition: opacity 0.2s;
-    }
-    .ws-thumb:hover .ws-delete { opacity: 1; }
     /* Épingle propositions Marcel */
     .ws-thumb .ws-pin {
       position: absolute; top: 4px; left: 4px;
@@ -960,32 +953,7 @@
       background: #f39c12; border-color: #f39c12; color: #fff;
     }
 
-    /* Bouton capturer */
-    .ws-capture-bar {
-      display: flex; align-items: center; gap: 12px;
-      margin-bottom: 12px;
-    }
-    .ws-capture-btn {
-      display: flex; align-items: center; gap: 8px;
-      padding: 10px 18px; background: var(--green); color: #fff;
-      border: none; border-radius: 6px; font-size: 0.78rem;
-      font-weight: 600; cursor: pointer; transition: background 0.2s;
-    }
-    .ws-capture-btn:hover { background: var(--green-hover); }
-    .ws-capture-btn:disabled {
-      background: var(--muted); cursor: not-allowed; opacity: 0.5;
-    }
-    .ws-capture-btn.capturing {
-      background: var(--dim); pointer-events: none;
-      animation: capturePulse 1s ease-in-out infinite;
-    }
-    @keyframes capturePulse {
-      0%, 100% { opacity: 0.7; }
-      50% { opacity: 1; }
-    }
-    .ws-capture-hint {
-      font-size: 0.72rem; color: var(--muted); font-style: italic;
-    }
+
 
     /* Barre d'envoi à Marcel */
     .ws-send-bar {
@@ -2753,82 +2721,7 @@
     </div>
   </div>
 
-  <!-- ═══════════  2a. ESPACE DE TRAVAIL VISUEL (Phase 5)  ═══════════ -->
-  <div class="section-block phase-section" data-min-phase="5" data-max-phase="5" data-virtual-tour-locked="true">
-    <div class="workspace-visual" id="workspaceVisual">
-
-      <!-- ── 1. SÉLECTION DE L'EXPERT (lecture seule) ── -->
-      <div class="ws-gallery" id="wsExpertGallery">
-        <div class="ws-gallery-header">
-          <div class="ws-gallery-label">
-            <span class="ws-icon">&#128193;</span> S&#233;lection de l&#8217;expert
-          </div>
-          <span class="ws-gallery-badge" id="wsExpertBadge">0 photo(s)</span>
-        </div>
-        <div class="ws-gallery-grid" id="wsExpertGrid">
-          <div class="ws-gallery-empty" id="wsExpertEmpty">
-            Les photos s&#233;lectionn&#233;es par votre chef de projet appara&#238;tront ici.
-          </div>
-        </div>
-      </div>
-
-      <!-- ── 2. BOUTON CAPTURE + 3. MES CAPTURES ── -->
-      <div class="ws-gallery" id="wsCapturesGallery">
-        <div class="ws-gallery-header">
-          <div class="ws-gallery-label">
-            <span class="ws-icon">&#128248;</span> Mes captures
-          </div>
-          <span class="ws-gallery-badge" id="wsCapturesBadge">0 capture(s)</span>
-        </div>
-        <div class="ws-capture-bar">
-          <!-- Capture réelle via Matterport Showcase SDK (mpSdk.Renderer.takeScreenShot) -->
-          <button class="ws-capture-btn" id="wsCaptureBtn" onclick="takeCapture()" disabled title="En attente de connexion au SDK...">
-            &#128247; Prendre une capture
-          </button>
-          <span class="ws-capture-hint" id="wsCaptureHint">En attente de la visite 3D...</span>
-        </div>
-        <div class="ws-gallery-grid" id="wsCapturesGrid">
-          <div class="ws-gallery-empty" id="wsCapturesEmpty">
-            Aucune capture pour le moment. Utilisez le bouton ci-dessus pour capturer une vue.
-          </div>
-        </div>
-      </div>
-
-      <!-- ── 4. PROPOSITIONS DE MARCEL (Together AI) ── -->
-      <div class="ws-gallery" id="wsProposalsGallery">
-        <div class="ws-gallery-header">
-          <div class="ws-gallery-label">
-            <span class="ws-icon">&#127912;</span> Propositions de Marcel
-          </div>
-          <span class="ws-gallery-badge" id="wsProposalsBadge">0 visuel(s)</span>
-        </div>
-        <div class="ws-gallery-grid" id="wsProposalsGrid">
-          <div class="ws-gallery-empty" id="wsProposalsEmpty">
-            Les visuels de r&#233;novation g&#233;n&#233;r&#233;s par Marcel appara&#238;tront ici.
-          </div>
-        </div>
-      </div>
-
-      <!-- ── BARRE D'ENVOI À MARCEL ── -->
-      <div class="ws-send-bar" id="wsSendBar">
-        <div class="ws-send-count">
-          <strong id="wsSelectedCount">0</strong> photo(s) s&#233;lectionn&#233;e(s)
-        </div>
-        <button class="ws-send-btn" id="wsSendBtn" onclick="sendPhotosToMarcel()" disabled>
-          &#x1F418; Envoyer &#224; Marcel &#8594;
-        </button>
-      </div>
-
-    </div>
-  </div>
-
-  <!-- Lightbox pour zoom -->
-  <div class="ws-lightbox" id="wsLightbox" onclick="closeLightbox()">
-    <button class="ws-lightbox-close">&times;</button>
-    <img id="wsLightboxImg" src="" alt="Zoom" />
-  </div>
-
-  <!-- ═══════════  2b. DONNÉES DU BIEN (Phase 5+)  ═══════════ -->
+  <!-- ═══════════  2b. DONNÉES DU BIEN (Phase 5+) — sous la visite virtuelle ═══════════ -->
   <div class="section-block phase-section" data-min-phase="5" data-virtual-tour-locked="true">
     <div class="section-label">Caract&#233;ristiques</div>
     <h2 class="section-title">Donn&#233;es de votre bien</h2>
@@ -2843,17 +2736,50 @@
           <h3 id="pdBienName">Votre bien</h3>
           <span class="pd-source">Source : Scan Matterport 3D</span>
         </div>
-        <div class="pd-grid" id="pdGrid">
-          <!-- Rempli dynamiquement par JS -->
-        </div>
+        <div class="pd-grid" id="pdGrid"></div>
         <div id="pdRoomsSection" style="display:none">
           <div class="pd-rooms-title">D&#233;tail par pi&#232;ce</div>
-          <div class="pd-rooms-list" id="pdRoomsList">
-            <!-- Rempli dynamiquement par JS -->
-          </div>
+          <div class="pd-rooms-list" id="pdRoomsList"></div>
         </div>
       </div>
     </div>
+  </div>
+
+  <!-- ═══════════  2a. ESPACE DE TRAVAIL VISUEL (Phase 5)  ═══════════ -->
+  <div class="section-block phase-section" data-min-phase="5" data-max-phase="5" data-virtual-tour-locked="true">
+    <div class="workspace-visual" id="workspaceVisual">
+
+      <!-- ── 1. SÉLECTION DE L'EXPERT — avec cases à cocher + bouton Envoyer à Marcel ── -->
+      <div class="ws-gallery" id="wsExpertGallery">
+        <div class="ws-gallery-header">
+          <div class="ws-gallery-label">
+            <span class="ws-icon">&#128193;</span> S&#233;lection de l&#8217;expert
+          </div>
+          <span class="ws-gallery-badge" id="wsExpertBadge">0 photo(s)</span>
+        </div>
+        <div class="ws-gallery-grid" id="wsExpertGrid">
+          <div class="ws-gallery-empty" id="wsExpertEmpty">
+            Les photos s&#233;lectionn&#233;es par votre chef de projet appara&#238;tront ici.
+          </div>
+        </div>
+        <!-- Barre d'envoi intégrée dans le bloc expert -->
+        <div class="ws-send-bar" id="wsSendBar" style="display:none">
+          <div class="ws-send-count">
+            <strong id="wsSelectedCount">0</strong> photo(s) s&#233;lectionn&#233;e(s)
+          </div>
+          <button class="ws-send-btn" id="wsSendBtn" onclick="sendPhotosToMarcel()" disabled>
+            &#x1F418; Envoyer &#224; Marcel &#8594;
+          </button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Lightbox pour zoom -->
+  <div class="ws-lightbox" id="wsLightbox" onclick="closeLightbox()">
+    <button class="ws-lightbox-close">&times;</button>
+    <img id="wsLightboxImg" src="" alt="Zoom" />
   </div>
 
   <!-- ═══════════  3. MARCEL — ASSISTANT IA (Phase 5, desactive Phase 6+)  ═══════════ -->
@@ -2881,6 +2807,23 @@
                onkeydown="if(event.key==='Enter')sendMarcel()" />
         <button class="marcel-send" onclick="generateVisual()" style="background:rgba(196,116,90,0.9);letter-spacing:0.06em;" title="G&#233;n&#233;rer un visuel IA &#224; partir de votre description">&#x1F3A8; Visuel</button>
         <button class="marcel-send" onclick="sendMarcel()">Envoyer</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════  4. PROPOSITIONS DE MARCEL (Phase 5) — sous Marcel ═══════════ -->
+  <div class="section-block phase-section" data-min-phase="5" data-max-phase="5" data-virtual-tour-locked="true">
+    <div class="ws-gallery" id="wsProposalsGallery" style="border:none;padding:0;">
+      <div class="ws-gallery-header">
+        <div class="ws-gallery-label">
+          <span class="ws-icon">&#127912;</span> Propositions de Marcel
+        </div>
+        <span class="ws-gallery-badge" id="wsProposalsBadge">0 visuel(s)</span>
+      </div>
+      <div class="ws-gallery-grid" id="wsProposalsGrid">
+        <div class="ws-gallery-empty" id="wsProposalsEmpty">
+          Les visuels de r&#233;novation g&#233;n&#233;r&#233;s par Marcel appara&#238;tront ici.
+        </div>
       </div>
     </div>
   </div>
@@ -4256,30 +4199,8 @@ function retryVF() {
 
 // État global des galeries
 var wsExpertPhotos = [];      // URLs des photos expert (depuis Supabase)
-var wsCapturePhotos = [];     // DataURLs des captures utilisateur (localStorage)
 var wsProposalPhotos = [];    // URLs des propositions Marcel (depuis chat/API)
 var wsSelectedPhotos = [];    // Photos sélectionnées pour envoi à Marcel
-
-// ── Clé localStorage pour les captures utilisateur ──
-function getCapturesKey() {
-  var email = '';
-  try { email = currentUser.email || ''; } catch(e) {}
-  return 'scantorenov_captures_' + email;
-}
-
-// ── Chargement des captures depuis localStorage ──
-function loadUserCaptures() {
-  try {
-    var raw = localStorage.getItem(getCapturesKey());
-    return raw ? JSON.parse(raw) : [];
-  } catch(e) { return []; }
-}
-
-function saveUserCaptures(captures) {
-  try {
-    localStorage.setItem(getCapturesKey(), JSON.stringify(captures));
-  } catch(e) { console.warn('Impossible de sauvegarder les captures:', e); }
-}
 
 /* ── Initialisation de l'espace visuel ── */
 function initWorkspaceVisual() {
@@ -4287,12 +4208,9 @@ function initWorkspaceVisual() {
 
   // 1. Charger les photos expert depuis Supabase
   loadExpertPhotos();
-  // 2. Charger les captures utilisateur depuis localStorage
-  wsCapturePhotos = loadUserCaptures();
-  renderCapturesGallery();
-  // 3. Propositions Marcel — seront alimentées par le chat
+  // 2. Propositions Marcel — alimentées par le chat
   renderProposalsGallery();
-  // 4. Mise à jour du compteur
+  // 3. Mise à jour du compteur
   updateSendBar();
 }
 
@@ -4332,25 +4250,32 @@ function renderExpertGallery() {
   var grid = document.getElementById('wsExpertGrid');
   var badge = document.getElementById('wsExpertBadge');
   var empty = document.getElementById('wsExpertEmpty');
+  var sendBar = document.getElementById('wsSendBar');
   if (!grid) return;
 
   if (wsExpertPhotos.length === 0) {
     if (empty) empty.style.display = '';
     if (badge) badge.textContent = '0 photo(s)';
+    if (sendBar) sendBar.style.display = 'none';
     return;
   }
   if (empty) empty.style.display = 'none';
   if (badge) badge.textContent = wsExpertPhotos.length + ' photo(s)';
+  if (sendBar) sendBar.style.display = 'flex';
 
-  // Vider et reconstruire
+  // Vider et reconstruire avec cases à cocher
   grid.innerHTML = '';
   wsExpertPhotos.forEach(function(photo, i) {
     var div = document.createElement('div');
     div.className = 'ws-thumb selectable';
     div.setAttribute('data-ws-type', 'expert');
     div.setAttribute('data-ws-index', i);
-    div.innerHTML = '<img src="' + photo.url + '" alt="' + photo.name + '" loading="lazy" onclick="openLightbox(\'' + photo.url + '\')" />' +
-                    '<div class="ws-check" onclick="event.stopPropagation();toggleExpertSelect(' + i + ', this.parentNode)">✓</div>';
+    div.innerHTML =
+      '<label class="ws-checkbox-label">' +
+        '<input type="checkbox" class="ws-checkbox" onchange="toggleExpertSelect(' + i + ', this.closest(\'.ws-thumb\'))">' +
+        '<span class="ws-checkbox-mark">&#10003;</span>' +
+      '</label>' +
+      '<img src="' + photo.url + '" alt="' + (photo.name || 'Photo') + '" loading="lazy" onclick="openLightbox(\'' + photo.url + '\')" />';
     grid.appendChild(div);
   });
 }
@@ -4368,120 +4293,7 @@ function toggleExpertSelect(index, thumbEl) {
   updateSendBar();
 }
 
-/* ══ 2. CAPTURE D'ÉCRAN MATTERPORT ══ */
-
-function takeCapture() {
-  var btn = document.getElementById('wsCaptureBtn');
-
-  // ── État "en cours" sur le bouton ──
-  function setCaptureLoading(loading) {
-    if (!btn) return;
-    if (loading) {
-      btn.classList.add('capturing');
-      btn.disabled = true;
-      btn.innerHTML = '&#9203; Capture en cours...';
-    } else {
-      btn.classList.remove('capturing');
-      btn.disabled = false;
-      btn.innerHTML = '&#128247; Prendre une capture';
-    }
-  }
-
-  // ── Vérifier que le SDK est connecté ──
-  if (!mpSdkInstance) {
-    // SDK pas encore prêt — fallback avec un message clair
-    alert('Le SDK Matterport n\'est pas encore connecté.\nPatientez quelques secondes que la visite 3D se charge complètement, puis réessayez.');
-    return;
-  }
-
-  setCaptureLoading(true);
-
-  // ── Vraie capture via le Matterport Showcase SDK ──
-  mpSdkInstance.Renderer.takeScreenShot({ width: 1920, height: 1080 })
-    .then(function(screenShotUri) {
-      // screenShotUri = data URI (base64) de l'image capturée
-      addCapture(screenShotUri);
-
-      // Feedback visuel : vert brièvement
-      if (btn) {
-        btn.innerHTML = '&#10004; Capturé !';
-        btn.style.background = '#2ecc71';
-        setTimeout(function() {
-          btn.style.background = '';
-          setCaptureLoading(false);
-        }, 1200);
-      }
-    })
-    .catch(function(err) {
-      console.error('Erreur capture Matterport:', err);
-      alert('Erreur lors de la capture : ' + (err.message || err) + '\nAssurez-vous que la visite 3D est bien chargée.');
-      setCaptureLoading(false);
-    });
-}
-
-function addCapture(dataUrl) {
-  wsCapturePhotos.push({
-    data: dataUrl,
-    date: new Date().toISOString()
-  });
-  saveUserCaptures(wsCapturePhotos);
-  renderCapturesGallery();
-}
-
-function renderCapturesGallery() {
-  var grid = document.getElementById('wsCapturesGrid');
-  var badge = document.getElementById('wsCapturesBadge');
-  var empty = document.getElementById('wsCapturesEmpty');
-  if (!grid) return;
-
-  if (wsCapturePhotos.length === 0) {
-    if (empty) empty.style.display = '';
-    if (badge) badge.textContent = '0 capture(s)';
-    grid.innerHTML = '';
-    if (empty) grid.appendChild(empty);
-    return;
-  }
-  if (empty) empty.style.display = 'none';
-  if (badge) badge.textContent = wsCapturePhotos.length + ' capture(s)';
-
-  grid.innerHTML = '';
-  wsCapturePhotos.forEach(function(cap, i) {
-    var div = document.createElement('div');
-    div.className = 'ws-thumb selectable';
-    div.setAttribute('data-ws-type', 'capture');
-    div.setAttribute('data-ws-index', i);
-    var imgSrc = cap.data || cap;
-    div.innerHTML = '<img src="' + imgSrc + '" alt="Capture ' + (i+1) + '" onclick="openLightbox(\'' + imgSrc + '\')" />' +
-                    '<div class="ws-check" onclick="event.stopPropagation();toggleCaptureSelect(' + i + ', this.parentNode)">✓</div>' +
-                    '<button class="ws-delete" onclick="event.stopPropagation();deleteCapture(' + i + ')" title="Supprimer">✕</button>';
-    grid.appendChild(div);
-  });
-}
-
-function toggleCaptureSelect(index, thumbEl) {
-  var key = 'capture_' + index;
-  var pos = wsSelectedPhotos.indexOf(key);
-  if (pos > -1) {
-    wsSelectedPhotos.splice(pos, 1);
-    thumbEl.classList.remove('selected');
-  } else {
-    wsSelectedPhotos.push(key);
-    thumbEl.classList.add('selected');
-  }
-  updateSendBar();
-}
-
-function deleteCapture(index) {
-  // Retirer de la sélection si besoin
-  var key = 'capture_' + index;
-  var pos = wsSelectedPhotos.indexOf(key);
-  if (pos > -1) wsSelectedPhotos.splice(pos, 1);
-
-  wsCapturePhotos.splice(index, 1);
-  saveUserCaptures(wsCapturePhotos);
-  renderCapturesGallery();
-  updateSendBar();
-}
+/* ── (captures supprimées) ── */
 
 /* ══ 3. PROPOSITIONS DE MARCEL (Together AI) ══ */
 
@@ -4542,17 +4354,54 @@ function updateSendBar() {
 }
 
 function sendPhotosToMarcel() {
-  // TODO: Envoyer les photos sélectionnées dans le contexte du chat Marcel
-  // Pour l'instant, on simule l'envoi
   if (wsSelectedPhotos.length === 0) return;
 
   var count = wsSelectedPhotos.length;
-  alert('📤 ' + count + ' photo(s) envoyée(s) à Marcel !\n\nTODO: Intégrer au chat Marcel pour que les photos soient visibles dans la conversation.');
+  var urls = wsSelectedPhotos.slice();
+
+  // Construire un message texte avec les URLs des photos
+  var msgText = count === 1
+    ? 'Voici une photo de la pièce que je souhaite rénover :'
+    : 'Voici ' + count + ' photos des pièces que je souhaite rénover :';
+
+  // Injecter le message dans le chat Marcel
+  var messagesEl = document.getElementById('marcelMessages');
+  if (messagesEl) {
+    // Message utilisateur
+    var userMsg = document.createElement('div');
+    userMsg.className = 'msg user';
+    var photosHtml = urls.map(function(url) {
+      return '<a href="' + url + '" target="_blank"><img src="' + url + '" style="max-width:120px;max-height:80px;border-radius:6px;margin:4px 4px 0 0;cursor:pointer;" loading="lazy"/></a>';
+    }).join('');
+    userMsg.innerHTML = '<p>' + msgText + '</p>' + photosHtml;
+    messagesEl.appendChild(userMsg);
+    messagesEl.scrollTop = messagesEl.scrollHeight;
+
+    // Faire défiler vers le chat
+    var chatSection = document.getElementById('marcelChat');
+    if (chatSection) chatSection.scrollIntoView({ behavior: 'smooth' });
+
+    // Envoyer le contexte photo à Marcel via le chat
+    var contextMsg = msgText + '\n' + urls.join('\n');
+    if (typeof marcelHistory !== 'undefined') {
+      marcelHistory.push({ role: 'user', content: contextMsg });
+    }
+    // Appeler sendMarcel avec ce contexte
+    setTimeout(function() {
+      var input = document.getElementById('marcelInput');
+      if (input) {
+        input.value = 'Analyse ces ' + count + ' photo(s) et propose des idees de renovation adaptees a ces espaces.';
+        sendMarcel();
+      }
+    }, 300);
+  }
 
   // Réinitialiser la sélection
   wsSelectedPhotos = [];
   document.querySelectorAll('.ws-thumb.selected').forEach(function(el) {
     el.classList.remove('selected');
+    var cb = el.querySelector('.ws-checkbox');
+    if (cb) cb.checked = false;
   });
   updateSendBar();
 }
