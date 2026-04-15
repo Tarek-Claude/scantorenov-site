@@ -45,24 +45,46 @@ async function fetchClientAppointments(clientId) {
   return Array.isArray(data) ? data : [];
 }
 
+async function fetchPrimaryScan(supabase, clientId) {
+  if (!clientId) return null;
+  const { data, error } = await supabase
+    .from('scans')
+    .select('matterport_model_id, matterport_data, photos_urls, plans_urls')
+    .eq('client_id', clientId)
+    .eq('is_primary', true)
+    .maybeSingle();
+  if (error && !isMissingTableError(error)) {
+    console.warn(`[identity-client] lecture scan: ${error.message}`);
+  }
+  return data || null;
+}
+
 async function attachClientProgress(client) {
   if (!client || typeof client !== 'object') {
     return { client, appointments: [], payments: [] };
   }
 
   const supabase = getSupabaseAdmin();
-  const [appointments, payments] = await Promise.all([
+  const [appointments, payments, scan] = await Promise.all([
     fetchClientAppointments(client.id),
     fetchClientPayments(supabase, client.id),
+    fetchPrimaryScan(supabase, client.id),
   ]);
   const paymentAccess = buildPaymentAccessSummary(payments, client);
 
+  // Merge scan fields: scan data takes priority over client columns (v3: matterport_model_id moved to scans)
+  const merged = {
+    ...enrichClientProgress(client, appointments, payments),
+    payment_access: paymentAccess,
+    virtual_tour_unlocked: paymentAccess.virtualTourUnlocked,
+  };
+  if (scan) {
+    if (scan.matterport_model_id) merged.matterport_model_id = scan.matterport_model_id;
+    if (scan.matterport_data) merged.matterport_data = merged.matterport_data || scan.matterport_data;
+  }
+
   return {
-    client: {
-      ...enrichClientProgress(client, appointments, payments),
-      payment_access: paymentAccess,
-      virtual_tour_unlocked: paymentAccess.virtualTourUnlocked,
-    },
+    client: merged,
     appointments,
     payments,
   };

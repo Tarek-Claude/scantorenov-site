@@ -3414,11 +3414,11 @@ function renderPhase(phase, project, appMeta) {
   if (phase >= 3) renderPhase3(project);
   if (phase === 4) renderPhase4(appMeta);
   if (phase === 5 && hasVirtualTourAccess()) {
-    initMatterportSection();
+    initMatterportSection(appMeta);
     initMarcelWelcome();
     initWorkspaceVisual();
   }
-  if (phase >= 6 && hasVirtualTourAccess()) initMatterportSection(); // Visite 3D reste visible sans Marcel
+  if (phase >= 6 && hasVirtualTourAccess()) initMatterportSection(appMeta); // Visite 3D reste visible sans Marcel
   if (phase === 6) renderPhase6(appMeta);
   if (phase === 7) renderPhase7(appMeta);
   if (phase === 8) {
@@ -5154,7 +5154,7 @@ function useFallbackData() {
   console.log('Matterport SDK non disponible — données du bien chargées depuis Supabase.');
 }
 
-function initMatterportSection() {
+function initMatterportSection(appMeta) {
   var frameEl = document.getElementById('matterportFrame');
   var pendingEl = document.getElementById('matterportPending');
   var dataSection = document.getElementById('propertyDataContainer');
@@ -5167,7 +5167,8 @@ function initMatterportSection() {
   }
 
   var user = currentUser;
-  var meta = (user && user.app_metadata) || (user && user.user_metadata) || {};
+  // Priorité : appMeta enrichi par Supabase, puis app_metadata Netlify Identity, puis user_metadata
+  var meta = appMeta || (user && user.app_metadata) || (user && user.user_metadata) || {};
 
   // Priorité : 1) iframe complète Supabase, 2) model ID metadata
   var iframeSrc = meta.matterport_iframe || null;
