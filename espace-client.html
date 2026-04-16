@@ -1140,6 +1140,49 @@
       cursor: pointer; transition: background 0.2s;
     }
     .marcel-send:hover { background: var(--bl); }
+    .marcel-btn-kontext {
+      margin-top: 10px;
+      padding: 10px 14px;
+      background: rgba(27,67,50,0.09);
+      border: 1px solid rgba(27,67,50,0.24);
+      color: var(--blue);
+      font-size: 0.72rem;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .marcel-btn-kontext:hover {
+      background: rgba(27,67,50,0.14);
+      border-color: rgba(27,67,50,0.38);
+    }
+    .marcel-btn-kontext:disabled {
+      opacity: 0.55;
+      cursor: wait;
+    }
+    .marcel-kontext-action { margin-top: 8px; }
+    .marcel-toast {
+      position: fixed;
+      right: 20px;
+      bottom: 20px;
+      max-width: 360px;
+      padding: 12px 14px;
+      background: rgba(33,33,33,0.92);
+      color: #fff;
+      border-radius: 8px;
+      font-size: 0.8rem;
+      line-height: 1.45;
+      z-index: 10000;
+      box-shadow: 0 12px 28px rgba(0,0,0,0.28);
+      opacity: 0;
+      transform: translateY(8px);
+      transition: opacity 0.2s, transform 0.2s;
+    }
+    .marcel-toast.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
 
     /* ── IMAGE DANS LE CHAT ── */
     .msg-image {
@@ -2744,34 +2787,30 @@
     </div>
   </div>
 
-  <!-- ═══════════  2a. ESPACE DE TRAVAIL VISUEL (Phase 5)  ═══════════ -->
-  <div class="section-block phase-section" data-min-phase="5" data-max-phase="5" data-virtual-tour-locked="true">
-    <div class="workspace-visual" id="workspaceVisual">
+  <!-- ═══════════  2a. SÉLECTION DE L'EXPERT (Phase 5)  ═══════════ -->
+  <div class="section-block phase-section" id="workspaceVisual" data-min-phase="5" data-max-phase="5" data-virtual-tour-locked="true">
+    <div class="section-label">Photos du bien</div>
+    <h2 class="section-title">S&#233;lection de l&#8217;expert</h2>
+    <p class="section-desc">Photos s&#233;lectionn&#233;es par votre chef de projet lors de la visite scan. Choisissez celles que vous souhaitez partager avec Marcel pour d&#233;marrer la r&#233;flexion.</p>
 
-      <!-- ── 1. SÉLECTION DE L'EXPERT — avec cases à cocher + bouton Envoyer à Marcel ── -->
-      <div class="ws-gallery" id="wsExpertGallery">
-        <div class="ws-gallery-header">
-          <div class="ws-gallery-label">
-            <span class="ws-icon">&#128193;</span> S&#233;lection de l&#8217;expert
-          </div>
-          <span class="ws-gallery-badge" id="wsExpertBadge">0 photo(s)</span>
-        </div>
-        <div class="ws-gallery-grid" id="wsExpertGrid">
-          <div class="ws-gallery-empty" id="wsExpertEmpty">
-            Les photos s&#233;lectionn&#233;es par votre chef de projet appara&#238;tront ici.
-          </div>
-        </div>
-        <!-- Barre d'envoi intégrée dans le bloc expert -->
-        <div class="ws-send-bar" id="wsSendBar" style="display:none">
-          <div class="ws-send-count">
-            <strong id="wsSelectedCount">0</strong> photo(s) s&#233;lectionn&#233;e(s)
-          </div>
-          <button class="ws-send-btn" id="wsSendBtn" onclick="sendPhotosToMarcel()" disabled>
-            &#x1F418; Envoyer &#224; Marcel &#8594;
-          </button>
+    <div class="ws-gallery" id="wsExpertGallery" style="border:none;padding:0;">
+      <div class="ws-gallery-header">
+        <span class="ws-gallery-badge" id="wsExpertBadge">0 photo(s)</span>
+      </div>
+      <div class="ws-gallery-grid" id="wsExpertGrid">
+        <div class="ws-gallery-empty" id="wsExpertEmpty">
+          Les photos s&#233;lectionn&#233;es par votre chef de projet appara&#238;tront ici.
         </div>
       </div>
-
+      <!-- Barre d'envoi intégrée dans le bloc expert -->
+      <div class="ws-send-bar" id="wsSendBar" style="display:none">
+        <div class="ws-send-count">
+          <strong id="wsSelectedCount">0</strong> photo(s) s&#233;lectionn&#233;e(s)
+        </div>
+        <button class="ws-send-btn" id="wsSendBtn" onclick="sendPhotosToMarcel()" disabled>
+          &#x1F418; Envoyer &#224; Marcel &#8594;
+        </button>
+      </div>
     </div>
   </div>
 
@@ -4370,19 +4409,38 @@ function sendPhotosToMarcel() {
     var chatSection = document.getElementById('marcelChat');
     if (chatSection) chatSection.scrollIntoView({ behavior: 'smooth' });
 
-    // Envoyer le contexte photo à Marcel via le chat
-    var contextMsg = msgText + '\n' + urls.join('\n');
-    if (typeof marcelHistory !== 'undefined') {
-      marcelHistory.push({ role: 'user', content: contextMsg });
-    }
-    // Appeler sendMarcel avec ce contexte
-    setTimeout(function() {
-      var input = document.getElementById('marcelInput');
-      if (input) {
-        input.value = 'Analyse ces ' + count + ' photo(s) et propose des idees de renovation adaptees a ces espaces.';
-        sendMarcel();
+    // Construire le message pour Marcel avec captions enrichies si disponibles
+    // wsSelectedPhotos peut contenir des objets {url, caption, room, view} (Sprint 2)
+    // ou des strings (compatibilité ascendante)
+    var marcelContent = [];
+    marcelContent.push({ type: 'text', text: msgText });
+    urls.forEach(function(entry) {
+      var url = typeof entry === 'string' ? entry : (entry && entry.url);
+      var caption = typeof entry === 'object' && entry ? entry.caption : null;
+      var room = typeof entry === 'object' && entry ? entry.room : null;
+      var view = typeof entry === 'object' && entry ? entry.view : null;
+      if (!url) return;
+      var metaBits = [];
+      if (room) metaBits.push(room);
+      if (view) metaBits.push(view);
+      if (caption) metaBits.push(caption);
+      if (metaBits.length) {
+        marcelContent.push({ type: 'text', text: 'Photo (' + metaBits.join(' \u2014 ') + ') : ' + url });
+      } else {
+        marcelContent.push({ type: 'text', text: 'Photo : ' + url });
       }
-    }, 300);
+      marcelContent.push({ type: 'image_url', url: url });
+    });
+
+    if (typeof marcelHistory !== 'undefined') {
+      marcelHistory.push({ role: 'user', content: marcelContent });
+    }
+
+    // Déclencher l'analyse automatique de Marcel (sans message robotique visible)
+    // Marcel doit répondre spontanément en fonction du contexte stratifié
+    setTimeout(function() {
+      triggerMarcelPhotoAnalysis();
+    }, 400);
   }
 
   // Réinitialiser la sélection
@@ -4799,6 +4857,55 @@ function initMarcelWelcome() {
   });
 }
 
+function triggerMarcelPhotoAnalysis() {
+  // Appelée après que sendPhotosToMarcel a injecté la/les photos dans marcelHistory.
+  // Ne pousse AUCUN texte robotique dans le chat — laisse Marcel analyser spontanément
+  // le contexte (brief initial, synthèse appel, observations, Matterport, photos + captions).
+  var input = document.getElementById('marcelInput');
+  if (input) input.disabled = true;
+  showTyping();
+
+  var userEmail = '';
+  try { userEmail = (currentUser && currentUser.email) || ''; } catch(e) {}
+
+  fetch('/.netlify/functions/chat', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      messages: marcelHistory,
+      propertyData: clientMatterportData || null,
+      email: userEmail,
+      clientContext: {
+        photos: (clientProject && clientProject.photos_urls) || null,
+        photosMeta: (clientProject && Array.isArray(clientProject.photos_meta) && clientProject.photos_meta.length)
+          ? clientProject.photos_meta
+          : null,
+        project: clientProject || null,
+        trigger: 'photo_selection',
+        matterportAvailable: !!(clientMatterportData && (clientMatterportData.surface_totale || (clientMatterportData.niveaux && clientMatterportData.niveaux.length)))
+      }
+    })
+  })
+  .then(function(r) {
+    if (!r.ok) throw new Error('API indisponible');
+    return r.json();
+  })
+  .then(function(data) {
+    hideTyping();
+    var reply = data.content || 'Je r\u00e9fl\u00e9chis\u2026';
+    var replyEl = appendMsg('marcel', reply);
+    marcelHistory.push({ role: 'assistant', content: reply });
+    appendKontextActionIfEligible(replyEl, reply);
+    if (input) { input.disabled = false; input.focus(); }
+  })
+  .catch(function(err) {
+    hideTyping();
+    appendMsg('marcel', 'Je rencontre un probl\u00e8me technique momentan\u00e9. R\u00e9essayez dans un instant. \uD83D\uDC18');
+    console.error('Marcel photo analysis error:', err);
+    if (input) { input.disabled = false; input.focus(); }
+  });
+}
+
 function sendMarcel() {
   var input = document.getElementById('marcelInput');
   var text = input.value.trim();
@@ -4813,12 +4920,24 @@ function sendMarcel() {
   // Indicateur de frappe
   showTyping();
 
+  var userEmail = '';
+  try { userEmail = (currentUser && currentUser.email) || ''; } catch(e) {}
+
   fetch('/.netlify/functions/chat', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
       messages: marcelHistory,
-      propertyData: clientMatterportData || null
+      propertyData: clientMatterportData || null,
+      email: userEmail,
+      clientContext: {
+        photos: (clientProject && clientProject.photos_urls) || null,
+        photosMeta: (clientProject && Array.isArray(clientProject.photos_meta) && clientProject.photos_meta.length)
+          ? clientProject.photos_meta
+          : null,
+        project: clientProject || null,
+        matterportAvailable: !!(clientMatterportData && (clientMatterportData.surface_totale || (clientMatterportData.niveaux && clientMatterportData.niveaux.length)))
+      }
     })
   })
   .then(function(r) {
@@ -4828,14 +4947,15 @@ function sendMarcel() {
   .then(function(data) {
     hideTyping();
     var reply = data.content || 'Je r\u00e9fl\u00e9chis\u2026';
-    appendMsg('marcel', reply);
+    var replyEl = appendMsg('marcel', reply);
     marcelHistory.push({ role: 'assistant', content: reply });
+    appendKontextActionIfEligible(replyEl, reply);
     input.disabled = false;
     input.focus();
   })
   .catch(function(err) {
     hideTyping();
-    appendMsg('marcel', 'Je rencontre un probl\u00e8me technique. V\u00e9rifiez qu\u2019Ollama est bien lanc\u00e9 sur votre machine. \uD83D\uDC18');
+    appendMsg('marcel', 'Je rencontre un probl\u00e8me technique momentan\u00e9. R\u00e9essayez dans un instant. \uD83D\uDC18');
     console.error('Marcel error:', err);
     input.disabled = false;
     input.focus();
@@ -4862,9 +4982,160 @@ function appendMsg(role, text) {
   div.innerHTML = text.replace(/\n/g, '<br>');
   container.appendChild(div);
   container.scrollTop = container.scrollHeight;
+  return div;
 }
 
 /* ── G\u00e9n\u00e9ration de visuels IA (Pollinations.ai) ── */
+function extractImageUrlFromContent(content) {
+  if (!Array.isArray(content)) return null;
+  for (var i = content.length - 1; i >= 0; i--) {
+    var block = content[i];
+    if (!block || typeof block !== 'object') continue;
+    if (block.type === 'image_url' && typeof block.url === 'string' && block.url) {
+      return block.url;
+    }
+    if (
+      block.type === 'image' &&
+      block.source &&
+      typeof block.source.url === 'string' &&
+      block.source.url
+    ) {
+      return block.source.url;
+    }
+  }
+  return null;
+}
+
+function getLastClientPhotoUrl() {
+  if (!Array.isArray(marcelHistory) || marcelHistory.length === 0) return null;
+  for (var i = marcelHistory.length - 1; i >= 0; i--) {
+    var msg = marcelHistory[i];
+    if (!msg || msg.role !== 'user') continue;
+    return extractImageUrlFromContent(msg.content);
+  }
+  return null;
+}
+
+function extractAmbienceSnippet(text) {
+  var source = String(text || '').replace(/\s+/g, ' ').trim();
+  if (!source) return '';
+  var markers = ['ambiance', 'style', 'matériaux', 'materiaux', 'palette', 'tons', 'revêtement', 'revetement'];
+  var sentences = source.match(/[^.!?]+[.!?]?/g) || [source];
+  for (var i = 0; i < sentences.length; i++) {
+    var sentence = sentences[i].trim();
+    if (!sentence) continue;
+    var lower = sentence.toLowerCase();
+    var hasMarker = markers.some(function(marker) { return lower.indexOf(marker) !== -1; });
+    if (hasMarker) return sentence;
+  }
+  return source.length > 400 ? source.substring(0, 400) : source;
+}
+
+function showMarcelToast(message) {
+  var existing = document.getElementById('marcelToast');
+  if (existing) existing.remove();
+
+  var toast = document.createElement('div');
+  toast.id = 'marcelToast';
+  toast.className = 'marcel-toast';
+  toast.textContent = message;
+  document.body.appendChild(toast);
+
+  requestAnimationFrame(function() {
+    toast.classList.add('visible');
+  });
+
+  setTimeout(function() {
+    toast.classList.remove('visible');
+    setTimeout(function() {
+      if (toast.parentNode) toast.parentNode.removeChild(toast);
+    }, 220);
+  }, 2800);
+}
+
+function appendKontextImageMessage(imageUrl) {
+  var container = document.getElementById('marcelMessages');
+  if (!container) return;
+
+  var imgMsg = document.createElement('div');
+  imgMsg.className = 'msg marcel';
+  imgMsg.innerHTML = 'Rendu généré — variante possible pour votre pièce<br>'
+    + '<img src="' + imageUrl + '" class="msg-image" alt="Rendu généré de votre pièce" '
+    + 'onclick="window.open(this.src, \'_blank\')" loading="lazy" />';
+  container.appendChild(imgMsg);
+  container.scrollTop = container.scrollHeight;
+}
+
+function generateKontextVisual(imageUrl, assistantText, buttonEl) {
+  var ambience = extractAmbienceSnippet(assistantText);
+  var prompt = 'photorealistic interior render, same room geometry, ' + ambience;
+  var container = document.getElementById('marcelMessages');
+  if (!container) return;
+
+  if (buttonEl) buttonEl.disabled = true;
+
+  var loadingDiv = document.createElement('div');
+  loadingDiv.className = 'msg marcel';
+  loadingDiv.innerHTML = '<div class="msg-image-loading"><span class="gen-spinner"></span>Génération du rendu de votre pièce…</div>';
+  container.appendChild(loadingDiv);
+  container.scrollTop = container.scrollHeight;
+
+  fetch('/.netlify/functions/generate-image', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      provider: 'together-kontext',
+      prompt: prompt,
+      imageUrl: imageUrl,
+      width: 1024,
+      height: 1024
+    })
+  })
+  .then(function(r) {
+    return r.json().then(function(data) {
+      return { ok: r.ok, data: data };
+    });
+  })
+  .then(function(result) {
+    if (!result.ok || result.data.error) throw new Error('kontext_error');
+    var generatedUrl = result.data.url || result.data.imageUrl;
+    if (!generatedUrl) throw new Error('kontext_missing_url');
+    loadingDiv.remove();
+    appendKontextImageMessage(generatedUrl);
+    addToGallery(generatedUrl, 'Rendu généré — variante possible pour votre pièce');
+    marcelHistory.push({
+      role: 'assistant',
+      content: 'Rendu généré — variante possible pour votre pièce\\nImage : ' + generatedUrl
+    });
+  })
+  .catch(function() {
+    if (loadingDiv.parentNode) loadingDiv.parentNode.removeChild(loadingDiv);
+    showMarcelToast('Le rendu a échoué. Réessayez dans quelques instants.');
+  })
+  .finally(function() {
+    if (buttonEl) buttonEl.disabled = false;
+  });
+}
+
+function appendKontextActionIfEligible(messageEl, assistantText) {
+  if (!messageEl) return;
+  var imageUrl = getLastClientPhotoUrl();
+  if (!imageUrl) return;
+
+  var action = document.createElement('div');
+  action.className = 'marcel-kontext-action';
+  var button = document.createElement('button');
+  button.type = 'button';
+  button.className = 'marcel-btn-kontext';
+  button.innerHTML = '&#127968; Visualiser cette pi&#232;ce r&#233;nov&#233;e';
+  button.addEventListener('click', function() {
+    generateKontextVisual(imageUrl, assistantText, button);
+  });
+
+  action.appendChild(button);
+  messageEl.appendChild(action);
+}
+
 var generatedCount = 0;
 
 function generateVisual() {

@@ -51,4 +51,6 @@
   # PROMO_BYPASS_CODES (optionnel, codes globaux reutilisables)
   # PROMO_VISIT_BYPASS_CODES (optionnel, reserve au paiement visite virtuelle)
   # Optionnel: SITE_URL, EMAIL_FROM, ADMIN_NOTIFICATION_EMAIL
+  # IMG_SOURCE_ALLOWLIST (CSV) domaines autorises pour image_url du provider together-kontext
+  # Par defaut: Supabase Storage du projet
   # Site settings → Environment variables (NE PAS mettre les clés ici)

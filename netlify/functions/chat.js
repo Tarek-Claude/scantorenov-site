@@ -3,17 +3,110 @@
  * Marcel : assistant IA de rénovation
  *
  * Providers :
- *   1. Anthropic Claude (priorité — meilleure qualité)
- *   2. Together.ai / Llama 3.3 (fallback fiable)
+ *   1. Anthropic Claude Sonnet 4.5 (priorité — multimodal, vision)
+ *   2. Together.ai / Llama 3.3 (fallback texte seul)
  *
- * Prompt personnalisé :
- *   Si un marcel_system_prompt existe dans Supabase pour ce client (généré
- *   à la soumission du formulaire contact via marcel-prompt.js), il est
- *   utilisé à la place du prompt par défaut. Il contient les 3 missions :
- *   rôle, scénario client, directives de cohérence budget/surface/travaux.
+ * Contexte stratifié :
+ *   À chaque message, _marcel-context-builder.js recompose le prompt
+ *   système à partir de toutes les sources accumulées dans le pipeline :
+ *   - Formulaire initial (clients)
+ *   - Synthèse d'appel (project_notes type='phone_summary')
+ *   - Observations post-visite (project_notes type='scan_observation')
+ *   - Données Matterport (scans.matterport_data)
+ *   - Photos sélectionnées avec métadonnées
  */
 
-const { createClient } = require('@supabase/supabase-js');
+const { buildMarcelContext, composeMarcelPrompt } = require('./_marcel-context-builder');
+
+/**
+ * Formate les données Matterport en un résumé texte lisible (plutôt que JSON brut).
+ * (Conservée pour compat — le builder l'implémente aussi)
+ */
+function formatMatterportData(data) {
+  if (!data || typeof data !== 'object') return '';
+  const lines = [];
+  if (data.surface_totale) lines.push(`Surface totale : ${data.surface_totale}`);
+  if (data.titre_scan) lines.push(`Scan : ${data.titre_scan}`);
+
+  const niveaux = Array.isArray(data.niveaux) ? data.niveaux : [];
+  niveaux.forEach((n) => {
+    lines.push('');
+    lines.push(`• ${n.nom || 'Niveau'} (${n.surface || '—'}) :`);
+    (n.pieces || []).forEach((p) => {
+      const bits = [p.nom || 'Pièce'];
+      if (p.surface) bits.push(p.surface);
+      if (p.dimensions) bits.push(`(${p.dimensions})`);
+      if (p.hauteur) bits.push(`h ${p.hauteur}`);
+      lines.push(`   - ${bits.join(' — ')}`);
+    });
+  });
+
+  if (Array.isArray(data.annexes) && data.annexes.length) {
+    lines.push('');
+    lines.push('Annexes :');
+    data.annexes.forEach((a) => {
+      lines.push(`   - ${a.nom || 'Annexe'} : ${a.dimensions || ''} (${a.emplacement || ''})`);
+    });
+  }
+
+  return lines.join('\n').trim();
+}
+
+/**
+ * Directive ciblée à injecter en fin de prompt quand des photos ont été transmises
+ * ou quand le client est "peu loquace" (silence, clic photo sans texte).
+ */
+function buildPhotoDirective(clientContext) {
+  if (!clientContext) return '';
+
+  const bits = [];
+  const isPhotoTrigger = clientContext.trigger === 'photo_selection';
+  const hasPhotos = Array.isArray(clientContext.photos) && clientContext.photos.length > 0;
+  const matterportAvailable = !!clientContext.matterportAvailable;
+  const photosMeta = Array.isArray(clientContext.photosMeta) && clientContext.photosMeta.length
+    ? clientContext.photosMeta
+    : null;
+
+  if (isPhotoTrigger || hasPhotos) {
+    bits.push('');
+    bits.push('═══════════════════════════════════════════════════════');
+    bits.push('DIRECTIVES DE RÉACTION — Le client vient d\'envoyer une ou plusieurs photos');
+    bits.push('═══════════════════════════════════════════════════════');
+    bits.push('');
+    bits.push('Le client a déjà rempli le formulaire contact initial, échangé par téléphone avec son chef de projet, puis reçu ce dernier lors de la visite scan. Tu as TOUT ce contexte en mémoire dans les sections précédentes. Ne lui demande JAMAIS de repréciser ce qui figure déjà dans son dossier.');
+    bits.push('');
+    if (photosMeta) {
+      bits.push('Les photos que tu viens de recevoir sont annotées comme suit par le chef de projet :');
+      photosMeta.forEach((meta, index) => {
+        const room = meta && meta.room ? meta.room : 'non renseignée';
+        const view = meta && meta.view ? meta.view : 'non renseignée';
+        const caption = meta && meta.caption ? meta.caption : 'sans caption';
+        bits.push(`${index + 1}. pièce : ${room} — vue : ${view} — ${caption}`);
+      });
+      bits.push('Croise ces annotations avec les données Matterport et le brief.');
+      bits.push('');
+    }
+    bits.push('Même si le client n\'a rien écrit d\'autre que sa sélection de photos, tu DOIS répondre de manière pertinente et proactive :');
+    bits.push('');
+    bits.push(photosMeta
+      ? '1. Priorise les annotations du chef de projet (pièce, vue, caption), puis recoupe avec Matterport et l’analyse visuelle.'
+      : '1. Identifie la ou les pièces depuis les données Matterport ou par analyse visuelle directe.');
+    bits.push('2. Croise avec son brief initial (travaux demandés, budget, échéance, style évoqué).');
+    bits.push(matterportAvailable
+      ? '3. Croise avec les dimensions exactes issues du scan 3D (surface de la pièce, dispositions, ouvertures).'
+      : '3. Exploite au mieux les éléments visuels directement observables.');
+    bits.push('4. Formule DIRECTEMENT 2 à 3 pistes de rénovation concrètes et adaptées à CE client (pas génériques). Mentionne des éléments précis : matériaux, couleurs, dispositions, ambiances.');
+    bits.push('5. Termine par une proposition active de génération visuelle : « Souhaitez-vous voir [piste X] en visuel ? Je peux vous la générer immédiatement via le bouton 🎨 Visuel. »');
+    bits.push('');
+    bits.push('RÈGLES ABSOLUES :');
+    bits.push('- Ne pose AUCUNE question de cadrage sur ce que le client cherche à faire (c\'est déjà dans son brief).');
+    bits.push('- Ne redemande jamais le budget, la surface, le type de projet : tu les as.');
+    bits.push('- Si la photo est ambigüe ET qu\'aucune caption n\'est disponible, formule une hypothèse plausible et propose directement, sans interroger.');
+    bits.push('- Reste chaleureux mais efficace : le client veut AVANCER, pas recommencer.');
+  }
+
+  return bits.join('\n');
+}
 
 const MARCEL_SYSTEM_PROMPT = `Tu es Marcel, l'assistant IA de Scantorenov.
 
@@ -65,19 +158,64 @@ const headers = {
 };
 
 /**
- * Appelle Anthropic Claude (provider principal)
+ * Transforme un message du front en content block Anthropic multimodal.
+ * Accepte:
+ *   - string (texte simple)
+ *   - array de blocks [{type:'text', text}, {type:'image_url', url}]
+ *   - array de blocks Anthropic déjà au bon format
+ */
+function toAnthropicContent(content) {
+  if (typeof content === 'string') return content;
+  if (!Array.isArray(content)) return String(content || '');
+
+  const blocks = [];
+  for (const block of content) {
+    if (!block || typeof block !== 'object') continue;
+    if (block.type === 'text' && typeof block.text === 'string') {
+      blocks.push({ type: 'text', text: block.text });
+    } else if (block.type === 'image_url' && typeof block.url === 'string') {
+      blocks.push({
+        type: 'image',
+        source: { type: 'url', url: block.url }
+      });
+    } else if (block.type === 'image' && block.source) {
+      blocks.push(block);
+    }
+  }
+  return blocks.length ? blocks : '';
+}
+
+/**
+ * Transforme un message en string pour les providers non-multimodaux (Together/Llama).
+ * Les URLs d'images deviennent des mentions textuelles.
+ */
+function toTextOnlyContent(content) {
+  if (typeof content === 'string') return content;
+  if (!Array.isArray(content)) return String(content || '');
+
+  return content.map(block => {
+    if (!block || typeof block !== 'object') return '';
+    if (block.type === 'text') return block.text || '';
+    if (block.type === 'image_url') return `[image: ${block.url}]`;
+    if (block.type === 'image' && block.source?.url) return `[image: ${block.source.url}]`;
+    return '';
+  }).filter(Boolean).join('\n');
+}
+
+/**
+ * Appelle Anthropic Claude (provider principal, multimodal)
  */
 async function callAnthropic(messages, systemPrompt) {
   const Anthropic = require('@anthropic-ai/sdk');
   const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
 
   const response = await client.messages.create({
-    model: 'claude-sonnet-4-20250514',
-    max_tokens: 1024,
+    model: 'claude-sonnet-4-5-20250929',
+    max_tokens: 2048,
     system: systemPrompt,
-    messages: messages.slice(-20).map(m => ({
+    messages: messages.slice(-30).map(m => ({
       role: m.role === 'user' ? 'user' : 'assistant',
-      content: m.content
+      content: toAnthropicContent(m.content)
     }))
   });
 
@@ -104,7 +242,7 @@ async function callTogether(messages, systemPrompt) {
         { role: 'system', content: systemPrompt },
         ...messages.slice(-20).map(m => ({
           role: m.role === 'user' ? 'user' : 'assistant',
-          content: m.content
+          content: toTextOnlyContent(m.content)
         }))
       ]
     })
@@ -117,33 +255,6 @@ async function callTogether(messages, systemPrompt) {
 
   const data = await response.json();
   return data.choices[0]?.message?.content || "Je n'ai pas pu générer une réponse.";
-}
-
-/**
- * Récupère le prompt Marcel personnalisé depuis Supabase pour un client.
- * Ce prompt est généré par marcel-prompt.js à la soumission du formulaire.
- * Il contient : rôle + scénario client + directives de cohérence.
- */
-async function getClientMarcelPrompt(email) {
-  if (!email) return null;
-  const url = process.env.SUPABASE_URL;
-  const key = process.env.SUPABASE_SERVICE_KEY;
-  if (!url || !key) return null;
-
-  try {
-    const supabase = createClient(url, key);
-    const { data, error } = await supabase
-      .from('clients')
-      .select('marcel_system_prompt')
-      .eq('email', email.toLowerCase().trim())
-      .single();
-
-    if (error || !data || !data.marcel_system_prompt) return null;
-    return data.marcel_system_prompt;
-  } catch (err) {
-    console.warn('Marcel: récupération prompt Supabase échouée:', err.message);
-    return null;
-  }
 }
 
 exports.handler = async function(event) {
@@ -162,37 +273,53 @@ exports.handler = async function(event) {
     return { statusCode: 400, headers, body: JSON.stringify({ error: 'Corps de requête invalide' }) };
   }
 
-  const { messages, propertyData, email } = body;
+  const { messages, propertyData, email, clientContext } = body;
   if (!messages || !Array.isArray(messages) || messages.length === 0) {
     return { statusCode: 400, headers, body: JSON.stringify({ error: 'Messages manquants' }) };
   }
 
   // ══════════════════════════════════════════════════════════
-  //  PROMPT SYSTÈME : Personnalisé (Supabase) ou par défaut
+  //  PROMPT SYSTÈME — Recomposé à chaque message depuis TOUTES
+  //  les sources accumulées dans le pipeline (contexte stratifié)
   // ══════════════════════════════════════════════════════════
   let systemPrompt;
   let promptSource = 'default';
 
-  const clientPrompt = await getClientMarcelPrompt(email);
-  if (clientPrompt) {
-    systemPrompt = clientPrompt;
-    promptSource = 'supabase';
-    console.log(`Marcel: prompt personnalisé chargé pour ${email}`);
-
-    if (propertyData) {
-      systemPrompt += `\n\n═══════════════════════════════════════════════════════
-DONNÉES DU SCAN 3D MATTERPORT
-═══════════════════════════════════════════════════════
-${JSON.stringify(propertyData, null, 2)}`;
-    }
-  } else {
-    systemPrompt = MARCEL_SYSTEM_PROMPT;
-    if (propertyData) {
-      systemPrompt = systemPrompt.replace('{{PROPERTY_DATA}}', JSON.stringify(propertyData, null, 2));
-    } else {
-      systemPrompt = systemPrompt.replace('{{PROPERTY_DATA}}', 'Aucune donnée de bien disponible pour le moment.');
+  let ctx = null;
+  if (email) {
+    try {
+      ctx = await buildMarcelContext(email);
+    } catch (err) {
+      console.warn(`Marcel: build context échoué pour ${email} — ${err.message}`);
     }
   }
+
+  if (ctx && ctx.client) {
+    // Enrichir avec les données propertyData passées par le front (redondant mais OK)
+    if (propertyData && (!ctx.scan || !ctx.scan.matterport_data)) {
+      ctx.scan = Object.assign({}, ctx.scan, { matterport_data: propertyData });
+    }
+    // Métadonnées photos passées par le front (Sprint 2)
+    if (clientContext && Array.isArray(clientContext.photosMeta)) {
+      ctx.photosMeta = clientContext.photosMeta;
+    }
+
+    systemPrompt = composeMarcelPrompt(ctx);
+    promptSource = 'stratified';
+    console.log(`Marcel: contexte stratifié chargé pour ${email} (phone_summary=${!!ctx.phoneSummary}, scan_observation=${!!ctx.scanObservation}, matterport=${!!(ctx.scan && ctx.scan.matterport_data)})`);
+  } else {
+    // Fallback : prompt par défaut (cas où email manque ou client inconnu)
+    systemPrompt = MARCEL_SYSTEM_PROMPT;
+    const matterportSummary = formatMatterportData(propertyData);
+    systemPrompt = systemPrompt.replace(
+      '{{PROPERTY_DATA}}',
+      matterportSummary || 'Aucune donnée de bien disponible pour le moment.'
+    );
+    console.log(`Marcel: fallback prompt générique (email=${email || 'absent'}, ctx=${!!ctx})`);
+  }
+
+  // Directives additionnelles selon le contexte interactif (photos envoyées, trigger, etc.)
+  systemPrompt += buildPhotoDirective(clientContext);
 
   // ══════════════════════════════════════════════════════════
   //  CASCADE : Claude → Together.ai

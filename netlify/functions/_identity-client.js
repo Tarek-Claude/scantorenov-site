@@ -49,7 +49,7 @@ async function fetchPrimaryScan(supabase, clientId) {
   if (!clientId) return null;
   const { data, error } = await supabase
     .from('scans')
-    .select('matterport_model_id, matterport_data, photos_urls, plans_urls')
+    .select('matterport_model_id, matterport_data, photos_urls, plans_urls, photos_meta')
     .eq('client_id', clientId)
     .eq('is_primary', true)
     .maybeSingle();
@@ -83,6 +83,7 @@ async function attachClientProgress(client) {
     if (scan.matterport_data) merged.matterport_data = merged.matterport_data || scan.matterport_data;
     if (scan.photos_urls) merged.photos_urls = scan.photos_urls;
     if (scan.plans_urls) merged.plans_urls = scan.plans_urls;
+    if (Array.isArray(scan.photos_meta) && scan.photos_meta.length) merged.photos_meta = scan.photos_meta;
   }
 
   return {
