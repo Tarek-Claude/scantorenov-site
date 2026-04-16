@@ -3090,7 +3090,9 @@ function applySupabaseClientRecord(sb, appMeta) {
     echeance: sb.echeance || clientProject.echeance,
     budget: sb.budget || clientProject.budget,
     telephone: sb.telephone || clientProject.telephone,
-    matterport_data: sb.matterport_data || clientProject.matterport_data
+    matterport_data: sb.matterport_data || clientProject.matterport_data,
+    photos_urls: sb.photos_urls || clientProject.photos_urls,
+    plans_urls: sb.plans_urls || clientProject.plans_urls
   };
   currentPipelineStatus = normalizePipelineStatus(sb.status || 'contact_submitted');
   var sbPhase = resolvePortalPhaseValue(sb.portal_phase != null ? sb.portal_phase : sb.phase, currentPipelineStatus);
@@ -4216,33 +4218,21 @@ function initWorkspaceVisual() {
 /* ══ 1. GALERIE EXPERT (lecture seule, sélectionnable) ══ */
 
 function loadExpertPhotos() {
-  // TODO: Charger depuis Supabase Storage (dossier du client)
-  // Pour l'instant, on cherche les photos uploadées via le script PC
-  var email = '';
-  try { email = currentUser.email || ''; } catch(e) {}
-  if (!email) return;
+  // Les photos sont stockées dans scans.photos_urls (tableau d'URLs) via le dashboard admin
+  var urls = clientProject.photos_urls;
+  wsExpertPhotos = [];
 
-  var safeEmail = email.replace('@', '_at_');
-
-  // Lister les fichiers dans le bucket "plans" pour ce client
-  fetch(SUPABASE_URL + '/storage/v1/object/list/plans/' + safeEmail, {
-    headers: { 'apikey': SUPABASE_ANON, 'Authorization': 'Bearer ' + SUPABASE_ANON }
-  })
-  .then(function(r) { return r.json(); })
-  .then(function(files) {
-    if (!Array.isArray(files)) return;
-    wsExpertPhotos = [];
-    files.forEach(function(f) {
-      if (f.name && /\.(png|jpg|jpeg|webp)$/i.test(f.name)) {
-        wsExpertPhotos.push({
-          url: supabaseUrl + '/storage/v1/object/public/plans/' + safeEmail + '/' + f.name,
-          name: f.name
-        });
+  if (Array.isArray(urls) && urls.length > 0) {
+    urls.forEach(function(url, i) {
+      if (typeof url === 'string' && url.length > 0) {
+        wsExpertPhotos.push({ url: url, name: 'Photo ' + (i + 1) });
+      } else if (url && typeof url === 'object' && url.url) {
+        wsExpertPhotos.push({ url: url.url, name: url.name || ('Photo ' + (i + 1)) });
       }
     });
-    renderExpertGallery();
-  })
-  .catch(function(e) { console.warn('Erreur chargement photos expert:', e); });
+  }
+
+  renderExpertGallery();
 }
 
 function renderExpertGallery() {

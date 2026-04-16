@@ -81,6 +81,8 @@ async function attachClientProgress(client) {
   if (scan) {
     if (scan.matterport_model_id) merged.matterport_model_id = scan.matterport_model_id;
     if (scan.matterport_data) merged.matterport_data = merged.matterport_data || scan.matterport_data;
+    if (scan.photos_urls) merged.photos_urls = scan.photos_urls;
+    if (scan.plans_urls) merged.plans_urls = scan.plans_urls;
   }
 
   return {
