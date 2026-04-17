@@ -47,16 +47,50 @@ async function fetchClientAppointments(clientId) {
 
 async function fetchPrimaryScan(supabase, clientId) {
   if (!clientId) return null;
+  const scanFields = 'matterport_model_id, matterport_data, photos_urls, plans_urls, photos_meta';
   const { data, error } = await supabase
     .from('scans')
-    .select('matterport_model_id, matterport_data, photos_urls, plans_urls, photos_meta')
+    .select(scanFields)
     .eq('client_id', clientId)
     .eq('is_primary', true)
     .maybeSingle();
   if (error && !isMissingTableError(error)) {
     console.warn(`[identity-client] lecture scan: ${error.message}`);
   }
-  return data || null;
+
+  if (data) {
+    return data;
+  }
+
+  // Fallback: certains dossiers historiques n'ont pas is_primary correctement positionné.
+  const { data: fallbackRows, error: fallbackError } = await supabase
+    .from('scans')
+    .select(scanFields)
+    .eq('client_id', clientId)
+    .limit(20);
+
+  if (fallbackError && !isMissingTableError(fallbackError)) {
+    console.warn(`[identity-client] lecture scan fallback: ${fallbackError.message}`);
+    return null;
+  }
+
+  if (!Array.isArray(fallbackRows) || fallbackRows.length === 0) {
+    return null;
+  }
+
+  const withPhotos = fallbackRows.find((row) => Array.isArray(row.photos_urls) && row.photos_urls.length > 0);
+  if (withPhotos) {
+    console.log(`[identity-client] fallback scan with photos for client=${clientId}`);
+    return withPhotos;
+  }
+
+  const withMatterport = fallbackRows.find((row) => !!row.matterport_data);
+  if (withMatterport) {
+    console.log(`[identity-client] fallback scan with matterport for client=${clientId}`);
+    return withMatterport;
+  }
+
+  return fallbackRows[0] || null;
 }
 
 async function attachClientProgress(client) {
