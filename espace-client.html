@@ -4258,99 +4258,19 @@ function initWorkspaceVisual() {
 /* ══ 1. GALERIE EXPERT (lecture seule, sélectionnable) ══ */
 
 function loadExpertPhotos() {
-  function normalizePhotoEntries(source) {
-    if (!source) return [];
+  // Les photos sont stockées dans scans.photos_urls (tableau d'URLs) via le dashboard admin
+  var urls = clientProject.photos_urls;
+  wsExpertPhotos = [];
 
-    if (typeof source === 'string') {
-      var raw = source.trim();
-      if (!raw) return [];
-      try {
-        return normalizePhotoEntries(JSON.parse(raw));
-      } catch (e) {
-        // Legacy: texte CSV/liste simple
-        return raw
-          .split(/[\n,]/)
-          .map(function(part) { return part.trim(); })
-          .filter(Boolean)
-          .map(function(url) { return { url: url }; });
+  if (Array.isArray(urls) && urls.length > 0) {
+    urls.forEach(function(url, i) {
+      if (typeof url === 'string' && url.length > 0) {
+        wsExpertPhotos.push({ url: url, name: 'Photo ' + (i + 1) });
+      } else if (url && typeof url === 'object' && url.url) {
+        wsExpertPhotos.push({ url: url.url, name: url.name || ('Photo ' + (i + 1)) });
       }
-    }
-
-    if (Array.isArray(source)) {
-      var mapped = [];
-      source.forEach(function(item) {
-        if (typeof item === 'string' && item.trim()) {
-          mapped.push({ url: item.trim() });
-        } else if (item && typeof item === 'object') {
-          var itemUrl = typeof item.url === 'string' ? item.url.trim() : '';
-          if (itemUrl) {
-            mapped.push({
-              url: itemUrl,
-              name: item.name || null,
-              room: item.room || null,
-              view: item.view || null,
-              caption: item.caption || null,
-              priority: item.priority || null
-            });
-          }
-        }
-      });
-      return mapped;
-    }
-
-    if (typeof source === 'object') {
-      if (Array.isArray(source.photos_urls)) return normalizePhotoEntries(source.photos_urls);
-      if (Array.isArray(source.photos)) return normalizePhotoEntries(source.photos);
-      if (Array.isArray(source.urls)) return normalizePhotoEntries(source.urls);
-    }
-
-    return [];
-  }
-
-  function dedupeByUrl(entries) {
-    var seen = {};
-    var unique = [];
-    entries.forEach(function(entry) {
-      if (!entry || !entry.url) return;
-      if (seen[entry.url]) return;
-      seen[entry.url] = true;
-      unique.push(entry);
     });
-    return unique;
   }
-
-  var appMetaProject = (currentUser && currentUser.app_metadata && currentUser.app_metadata.project) || null;
-  var candidates = [
-    clientProject && clientProject.photos_urls,
-    clientProject && clientProject.photos,
-    appMetaProject && appMetaProject.photos_urls,
-    appMetaProject && appMetaProject.photos
-  ];
-
-  var entries = [];
-  candidates.forEach(function(candidate) {
-    entries = entries.concat(normalizePhotoEntries(candidate));
-  });
-
-  // Fallback utile sur certains dossiers: photos_meta peut exister même si photos_urls n'est pas hydraté.
-  if (entries.length === 0 && clientProject && Array.isArray(clientProject.photos_meta)) {
-    entries = entries.concat(normalizePhotoEntries(clientProject.photos_meta));
-  }
-  if (entries.length === 0 && appMetaProject && Array.isArray(appMetaProject.photos_meta)) {
-    entries = entries.concat(normalizePhotoEntries(appMetaProject.photos_meta));
-  }
-
-  entries = dedupeByUrl(entries);
-  wsExpertPhotos = entries.map(function(entry, i) {
-    return {
-      url: entry.url,
-      name: entry.name || ('Photo ' + (i + 1)),
-      room: entry.room || null,
-      view: entry.view || null,
-      caption: entry.caption || null,
-      priority: entry.priority || null
-    };
-  });
 
   renderExpertGallery();
 }
