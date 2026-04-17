@@ -29,6 +29,15 @@ function isMissingTableError(error) {
   return error && (error.code === '42P01' || error.code === 'PGRST205');
 }
 
+function isMissingColumnError(error) {
+  if (!error) return false;
+  // Postgres: 42703 undefined_column; PostgREST: PGRST204 schema cache miss
+  if (error.code === '42703' || error.code === 'PGRST204') return true;
+  const msg = typeof error.message === 'string' ? error.message : '';
+  return /column .* does not exist/i.test(msg)
+    || /could not find the .* column/i.test(msg);
+}
+
 async function fetchClientAppointments(clientId) {
   if (!clientId) return [];
 
@@ -47,33 +56,58 @@ async function fetchClientAppointments(clientId) {
 
 async function fetchPrimaryScan(supabase, clientId) {
   if (!clientId) return null;
-  const scanFields = 'matterport_model_id, matterport_data, photos_urls, plans_urls, photos_meta';
-  const { data, error } = await supabase
-    .from('scans')
-    .select(scanFields)
-    .eq('client_id', clientId)
-    .eq('is_primary', true)
-    .maybeSingle();
-  if (error && !isMissingTableError(error)) {
-    console.warn(`[identity-client] lecture scan: ${error.message}`);
+
+  // photos_meta est optionnel : si la migration n'est pas appliquée sur la base,
+  // on retente sans ce champ pour ne pas faire échouer tout le chargement du scan.
+  const fullFields = 'matterport_model_id, matterport_data, photos_urls, plans_urls, photos_meta';
+  const baseFields = 'matterport_model_id, matterport_data, photos_urls, plans_urls';
+
+  async function runPrimaryQuery(fields) {
+    return supabase
+      .from('scans')
+      .select(fields)
+      .eq('client_id', clientId)
+      .eq('is_primary', true)
+      .maybeSingle();
   }
 
-  if (data) {
-    return data;
+  async function runFallbackQuery(fields) {
+    return supabase
+      .from('scans')
+      .select(fields)
+      .eq('client_id', clientId)
+      .limit(20);
+  }
+
+  let scanFields = fullFields;
+  let primary = await runPrimaryQuery(scanFields);
+  if (primary.error && isMissingColumnError(primary.error)) {
+    console.warn('[identity-client] colonne photos_meta absente — retry sans photos_meta');
+    scanFields = baseFields;
+    primary = await runPrimaryQuery(scanFields);
+  }
+
+  if (primary.error && !isMissingTableError(primary.error)) {
+    console.warn(`[identity-client] lecture scan: ${primary.error.message}`);
+  }
+
+  if (primary.data) {
+    return primary.data;
   }
 
   // Fallback: certains dossiers historiques n'ont pas is_primary correctement positionné.
-  const { data: fallbackRows, error: fallbackError } = await supabase
-    .from('scans')
-    .select(scanFields)
-    .eq('client_id', clientId)
-    .limit(20);
+  let fallback = await runFallbackQuery(scanFields);
+  if (fallback.error && isMissingColumnError(fallback.error) && scanFields === fullFields) {
+    scanFields = baseFields;
+    fallback = await runFallbackQuery(scanFields);
+  }
 
-  if (fallbackError && !isMissingTableError(fallbackError)) {
-    console.warn(`[identity-client] lecture scan fallback: ${fallbackError.message}`);
+  if (fallback.error && !isMissingTableError(fallback.error)) {
+    console.warn(`[identity-client] lecture scan fallback: ${fallback.error.message}`);
     return null;
   }
 
+  const fallbackRows = fallback.data;
   if (!Array.isArray(fallbackRows) || fallbackRows.length === 0) {
     return null;
   }

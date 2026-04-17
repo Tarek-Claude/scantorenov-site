@@ -2788,7 +2788,7 @@
   </div>
 
   <!-- ═══════════  2a. SÉLECTION DE L'EXPERT (Phase 5)  ═══════════ -->
-  <div class="section-block phase-section" id="workspaceVisual" data-min-phase="5" data-max-phase="5" data-virtual-tour-locked="true">
+  <div class="section-block phase-section" id="workspaceVisual" data-min-phase="5" data-max-phase="99" data-virtual-tour-locked="true">
     <div class="section-label">Photos du bien</div>
     <h2 class="section-title">S&#233;lection de l&#8217;expert</h2>
     <p class="section-desc">Photos s&#233;lectionn&#233;es par votre chef de projet lors de la visite scan. Choisissez celles que vous souhaitez partager avec Marcel pour d&#233;marrer la r&#233;flexion.</p>
@@ -3459,7 +3459,10 @@ function renderPhase(phase, project, appMeta) {
     initMarcelWelcome();
     initWorkspaceVisual();
   }
-  if (phase >= 6 && hasVirtualTourAccess()) initMatterportSection(appMeta); // Visite 3D reste visible sans Marcel
+  if (phase >= 6 && hasVirtualTourAccess()) {
+    initMatterportSection(appMeta); // Visite 3D reste visible sans Marcel
+    initWorkspaceVisual();           // Galerie photos expert reste disponible tout au long du projet
+  }
   if (phase === 6) renderPhase6(appMeta);
   if (phase === 7) renderPhase7(appMeta);
   if (phase === 8) {
