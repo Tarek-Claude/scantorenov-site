@@ -5142,6 +5142,40 @@ function appendKontextActionIfEligible(messageEl, assistantText) {
 
 var generatedCount = 0;
 
+/* Build a project context snippet so every generation request is
+   anchored to the client's actual property. Prevents irrelevant
+   visuals (sparklers etc.) when the user prompt is vague. */
+function buildVisualProjectContext() {
+  var bits = [];
+  var p = clientProject || {};
+
+  // Type de bien
+  if (p.type_bien) {
+    bits.push(String(p.type_bien).toLowerCase());
+  }
+  // Surface
+  if (p.surface) {
+    bits.push(String(p.surface).trim());
+  }
+  // Première pièce annotée par le chef de projet (photos_meta) si dispo
+  if (Array.isArray(p.photos_meta) && p.photos_meta.length) {
+    var firstWithRoom = p.photos_meta.find(function(m) { return m && m.room; });
+    if (firstWithRoom && firstWithRoom.room) {
+      bits.push(firstWithRoom.room);
+    }
+  }
+  // Fallback : espaces déclarés dans le formulaire initial
+  if (!bits.some(function(b) { return /salon|cuisine|chambre|sdb|wc|bureau|séjour|entr/i.test(b); })) {
+    if (typeof p.espaces === 'string' && p.espaces.trim()) {
+      bits.push(p.espaces.split(',')[0].trim());
+    } else if (Array.isArray(p.espaces) && p.espaces.length) {
+      bits.push(String(p.espaces[0]));
+    }
+  }
+
+  return bits.filter(Boolean).join(', ');
+}
+
 function generateVisual() {
   var input = document.getElementById('marcelInput');
   var text = input.value.trim();
@@ -5149,56 +5183,74 @@ function generateVisual() {
     // Si pas de texte, utiliser le dernier message de Marcel comme contexte
     var lastMarcel = marcelHistory.filter(function(m) { return m.role === 'assistant'; });
     if (lastMarcel.length > 0) {
-      text = 'G\u00e9n\u00e8re un visuel de : ' + lastMarcel[lastMarcel.length - 1].content.substring(0, 200);
+      var lastContent = lastMarcel[lastMarcel.length - 1].content;
+      // content peut être un tableau (multimodal) : extraire le texte
+      if (Array.isArray(lastContent)) {
+        lastContent = lastContent
+          .filter(function(b) { return b && b.type === 'text'; })
+          .map(function(b) { return b.text; })
+          .join(' ');
+      }
+      text = 'Génère un visuel de : ' + String(lastContent || '').substring(0, 200);
     } else {
-      appendMsg('marcel', 'D\u00e9crivez d\u2019abord ce que vous souhaitez visualiser, puis cliquez sur \uD83C\uDFA8 Visuel. \uD83D\uDC18');
+      appendMsg('marcel', 'Décrivez d’abord ce que vous souhaitez visualiser, puis cliquez sur 🎨 Visuel. 🐘');
+      return;
+    }
+  }
+
+  // Si une photo du client est présente dans l'historique, router vers
+  // l'img2img (kontext) qui respecte la géométrie réelle de la pièce.
+  // Évite les rendus hors-sujet quand le prompt texte est trop vague.
+  var clientPhotoUrl = (typeof getLastClientPhotoUrl === 'function') ? getLastClientPhotoUrl() : null;
+  if (clientPhotoUrl) {
+    input.value = '';
+    appendMsg('user', '🎨 Demande de visuel : ' + text);
+    if (typeof generateKontextVisual === 'function') {
+      generateKontextVisual(clientPhotoUrl, text, null);
       return;
     }
   }
 
   input.value = '';
-  appendMsg('user', '\uD83C\uDFA8 Demande de visuel : ' + text);
+  appendMsg('user', '🎨 Demande de visuel : ' + text);
 
   // Afficher le chargement dans le chat
   var container = document.getElementById('marcelMessages');
   var loadingDiv = document.createElement('div');
   loadingDiv.className = 'msg marcel';
-  loadingDiv.innerHTML = '<div class="msg-image-loading"><span class="gen-spinner"></span>Marcel g\u00e9n\u00e8re votre visuel\u2026 \uD83D\uDC18</div>';
+  loadingDiv.innerHTML = '<div class="msg-image-loading"><span class="gen-spinner"></span>Marcel génère votre visuel… 🐘</div>';
   container.appendChild(loadingDiv);
   container.scrollTop = container.scrollHeight;
 
-  // Construire le prompt enrichi pour l'architecture (en anglais pour de meilleurs r\u00e9sultats)
-  var fullPrompt = 'professional architectural interior design visualization, photorealistic, modern renovation, high quality render, natural lighting, French home, contemporary warm minimalist, ' + text;
+  // Enrichir avec le contexte projet (type de bien, surface, pièce) pour
+  // ancrer la génération dans la réalité du client.
+  var projectCtx = buildVisualProjectContext();
+  var basePrompt = 'professional architectural interior design visualization, photorealistic, modern renovation, high quality render, natural lighting, French home, contemporary warm minimalist';
+  var fullPrompt = projectCtx
+    ? basePrompt + ', ' + projectCtx + ', ' + text
+    : basePrompt + ', ' + text;
 
-  // Appel via la Netlify Function (proxy s\u00e9curis\u00e9)
+  // Appel via la Netlify Function (proxy sécurisé)
   fetch('/.netlify/functions/generate-image', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ prompt: fullPrompt })
   })
-  .then(function(r) { return r.json(); })
-  .then(function(data) {
-    if (data.error) throw new Error(data.error);
+  .then(function(r) { return r.json().then(function(d) { return { ok: r.ok, data: d }; }); })
+  .then(function(result) {
+    if (!result.ok || !result.data || result.data.error) {
+      throw new Error((result.data && result.data.error) || 'generate_error');
+    }
+    var generatedUrl = result.data.url || result.data.imageUrl;
+    if (!generatedUrl) throw new Error('missing_url');
     loadingDiv.remove();
-    showGeneratedImage(container, data.imageUrl, text);
+    showGeneratedImage(container, generatedUrl, text);
   })
   .catch(function() {
-    // Fallback : image de d\u00e9mo (picsum) en attendant que Pollinations soit r\u00e9tabli
-    var seed = Math.floor(Math.random() * 1000);
-    var fallbackUrl = 'https://picsum.photos/seed/' + seed + '/1024/768';
-
-    loadingDiv.innerHTML = '<div class="msg-image-loading"><span class="gen-spinner"></span>Marcel pr\u00e9pare un visuel de d\u00e9mo\u2026 \uD83D\uDC18</div>';
-
-    var img = new Image();
-    img.onload = function() {
-      loadingDiv.remove();
-      showGeneratedImage(container, fallbackUrl, text + ' [d\u00e9mo]');
-    };
-    img.onerror = function() {
-      loadingDiv.remove();
-      appendMsg('marcel', 'Le service de g\u00e9n\u00e9ration de visuels est temporairement indisponible. R\u00e9essayez dans quelques minutes. \uD83D\uDC18');
-    };
-    img.src = fallbackUrl;
+    // Pas de fallback picsum : une image aléatoire non pertinente est
+    // pire qu'une erreur claire (cas "cierges magiques" 2026-04-17).
+    loadingDiv.remove();
+    appendMsg('marcel', 'Le service de génération de visuels est temporairement indisponible. Réessayez dans quelques instants. 🐘');
   });
 }
 
