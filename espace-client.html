@@ -2145,6 +2145,118 @@
     .cancel-btn:hover {
       background: rgba(244, 67, 54, 0.25);
     }
+
+    /* ═════════════════════════════════════════════════════════════════
+       HARMONISATION v1.0 (alignement visuel avec index.html refondu)
+       ───────────────────────────────────────────────────────────────── */
+
+    /* Boutons primaires : pill, letter-spacing doux, casse normale */
+    .auth-btn,
+    .callback-btn,
+    .marcel-send,
+    .cta-btn,
+    .primary-btn,
+    .dash-logout {
+      border-radius: 999px !important;
+      text-transform: none !important;
+      letter-spacing: 0.02em !important;
+      font-weight: var(--fw-cta) !important;
+      font-family: var(--font-ui);
+      font-size: 0.95rem !important;
+      padding: 12px 24px;
+      transition: transform .2s var(--ease), background .2s var(--ease), box-shadow .2s var(--ease) !important;
+    }
+    .auth-btn,
+    .callback-btn,
+    .marcel-send,
+    .cta-btn,
+    .primary-btn {
+      background: var(--c-green-dark) !important;
+      color: #fff !important;
+      border: 1.5px solid var(--c-green-dark) !important;
+      box-shadow: 0 4px 14px rgba(14,26,18,0.18);
+    }
+    .auth-btn:hover,
+    .callback-btn:hover,
+    .marcel-send:hover,
+    .cta-btn:hover,
+    .primary-btn:hover {
+      background: var(--c-green-light) !important;
+      border-color: var(--c-green-light) !important;
+      transform: translateY(-1px);
+      box-shadow: 0 8px 24px rgba(14,26,18,0.22);
+    }
+
+    /* Boutons secondaires : pill ghost */
+    .secondary-btn,
+    .auth-link-button,
+    .back-link {
+      border-radius: 999px;
+      text-transform: none;
+      letter-spacing: 0.02em;
+      font-weight: var(--fw-cta);
+      font-family: var(--font-ui);
+    }
+
+    /* Cartes : radius doux + bordure fine + subtle hover */
+    .auth-card,
+    .client-info-card,
+    .project-desc-card,
+    .callback-section,
+    .stepper-section,
+    .scan-date-card,
+    .welcome-pillar,
+    .welcome-marcel,
+    .welcome-team {
+      border-radius: 20px !important;
+      border: 1px solid rgba(26,26,26,0.07) !important;
+      transition: box-shadow .3s var(--ease), transform .3s var(--ease) !important;
+    }
+    .welcome-pillar:hover,
+    .scan-date-card:hover {
+      box-shadow: var(--shadow-md) !important;
+    }
+
+    /* Dash-nav : polish subtle + border accent */
+    .dash-nav {
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      background: rgba(255,255,255,0.92) !important;
+      border-bottom: 1px solid rgba(26,26,26,0.06);
+      box-shadow: 0 2px 14px rgba(14,26,18,0.05);
+    }
+
+    /* Stepper tab number : aligne sur v1.0 */
+    .stepper-tab.completed .stepper-tab-num,
+    .stepper-tab.active .stepper-tab-num {
+      background: var(--c-green-dark) !important;
+      border-color: var(--c-green-dark) !important;
+    }
+
+    /* Signature line en terracotta pour accent v1.0 */
+    .sig-line {
+      background: var(--c-terracotta) !important;
+    }
+
+    /* Phase steps : dot color accent */
+    .phase-step.completed::before,
+    .phase-step.active::before {
+      background: var(--c-green-dark) !important;
+    }
+    .phase-step.active .phase-dot {
+      background: var(--c-green-dark) !important;
+      border-color: var(--c-green-dark) !important;
+    }
+
+    /* Marcel : bulle legere, accent sur avatar */
+    .welcome-marcel-avatar {
+      background: linear-gradient(135deg, var(--c-green-dark), var(--c-teal)) !important;
+      color: #fff;
+    }
+    .welcome-team-avatar {
+      background: linear-gradient(135deg, var(--c-terracotta), var(--c-green-light)) !important;
+      color: #fff;
+    }
   </style>
 </head>
 <body>

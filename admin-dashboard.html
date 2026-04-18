@@ -1366,6 +1366,116 @@
         .error-message.show {
             display: block;
         }
+
+        /* ═════════════════════════════════════════════════════════════
+           HARMONISATION v1.0 (alignement visuel avec index.html refondu)
+           ────────────────────────────────────────────────────────────── */
+
+        /* Boutons primaires : pill doux */
+        .auth-submit,
+        .logout-btn,
+        .primary-btn,
+        .save-btn {
+            border-radius: 999px !important;
+            text-transform: none !important;
+            letter-spacing: 0.02em !important;
+            font-weight: var(--fw-cta) !important;
+            font-family: var(--font-ui);
+            padding: 12px 24px;
+            transition: transform .2s var(--ease), background .2s var(--ease), box-shadow .2s var(--ease);
+        }
+        .auth-submit,
+        .primary-btn,
+        .save-btn {
+            background: var(--c-green-dark) !important;
+            color: #fff !important;
+            border: 1.5px solid var(--c-green-dark) !important;
+        }
+        .auth-submit:hover,
+        .primary-btn:hover,
+        .save-btn:hover {
+            background: var(--c-green-light) !important;
+            border-color: var(--c-green-light) !important;
+            transform: translateY(-1px);
+            box-shadow: 0 6px 18px rgba(14,26,18,0.18);
+        }
+
+        /* Dashboard header : subtle backdrop + polish */
+        .dashboard-header {
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            background: rgba(255,255,255,0.94) !important;
+            border-bottom: 1px solid rgba(26,26,26,0.06) !important;
+            box-shadow: 0 2px 14px rgba(14,26,18,0.04);
+        }
+
+        /* Cartes : rayon doux */
+        .auth-card,
+        .stat-box,
+        .pending-list,
+        .client-profile,
+        .timeline-section,
+        .sidebar-section {
+            border-radius: 18px !important;
+            border: 1px solid rgba(26,26,26,0.07) !important;
+        }
+
+        /* Stats : accent colore sur le chiffre */
+        .stat-number {
+            color: var(--c-green-dark) !important;
+            font-family: var(--font-display) !important;
+            font-weight: var(--fw-display);
+        }
+        .stat-label {
+            text-transform: uppercase;
+            letter-spacing: 0.14em;
+            font-size: 0.72rem !important;
+            color: var(--c-terracotta) !important;
+            font-weight: 600;
+        }
+
+        /* Timeline step cercles avec accent vert dark */
+        .timeline-step.completed .timeline-step-circle,
+        .timeline-step.active .timeline-step-circle {
+            background: var(--c-green-dark) !important;
+            border-color: var(--c-green-dark) !important;
+            color: #fff !important;
+        }
+
+        /* Search box : pill */
+        .search-box,
+        .search-input {
+            border-radius: 999px !important;
+        }
+        .search-input:focus {
+            border-color: var(--c-green-dark) !important;
+            box-shadow: 0 0 0 3px rgba(36,79,51,0.12);
+        }
+
+        /* Inputs & selects globalement : radius doux */
+        .auth-form input,
+        .auth-form select,
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            border-radius: 10px !important;
+            transition: border-color .2s var(--ease), box-shadow .2s var(--ease);
+        }
+        .auth-form input:focus,
+        .auth-form select:focus,
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            border-color: var(--c-green-dark) !important;
+            box-shadow: 0 0 0 3px rgba(36,79,51,0.12);
+            outline: none;
+        }
+
+        /* Status badges : spacing et casse normale */
+        .status-badge {
+            letter-spacing: 0.06em !important;
+            font-weight: 600;
+        }
     </style>
 </head>
 <body>
