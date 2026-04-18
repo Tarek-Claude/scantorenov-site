@@ -1269,11 +1269,16 @@ section .section-intro {
 }
 
 .matterport-section {
-  padding: 60px 36px;
-  background: linear-gradient(135deg, #102822 0%, #17392E 46%, #10383A 100%);
-  border: 1px solid rgba(255,255,255,0.08);
+  padding: 76px 40px;
+  background: var(--c-ink);
+  border: 1px solid rgba(255,255,255,0.06);
   border-radius: 34px;
   box-shadow: var(--shadow-lg);
+  position: relative;
+}
+
+.matterport-section .section-label {
+  color: var(--c-terracotta);
 }
 
 .matterport-header h2,
@@ -1283,19 +1288,91 @@ section .section-intro {
 
 .matterport-header p {
   opacity: 0.78;
+  max-width: 46rem;
 }
 
 .matterport-header {
   text-align: left;
   max-width: none;
-  margin: 0 0 28px;
+  margin: 0 0 32px;
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 24px;
+  flex-wrap: wrap;
 }
 
+.matterport-header > div { max-width: 48rem; }
+
 .matterport-container {
+  position: relative;
   border: 1px solid rgba(255,255,255,0.12);
   border-radius: 28px;
   box-shadow: var(--shadow-lg);
+  overflow: hidden;
+  aspect-ratio: 16 / 9;
+  background: #0A130D;
 }
+
+.matterport-container iframe {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  border: 0;
+  opacity: 0;
+  transition: opacity .5s var(--ease);
+}
+
+.matterport-container.is-loaded iframe { opacity: 1; }
+
+/* Skeleton shimmer pendant le chargement */
+.matterport-skeleton {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  color: rgba(255,255,255,0.55);
+  font-family: var(--font-ui);
+  font-size: 0.85rem;
+  letter-spacing: 0.06em;
+  background:
+    linear-gradient(110deg, rgba(255,255,255,0) 30%, rgba(255,255,255,0.06) 50%, rgba(255,255,255,0) 70%) 0 0 / 200% 100% no-repeat,
+    var(--c-ink);
+  animation: mp-shimmer 2.2s linear infinite;
+  transition: opacity .4s var(--ease);
+}
+.matterport-container.is-loaded .matterport-skeleton {
+  opacity: 0;
+  pointer-events: none;
+}
+@keyframes mp-shimmer {
+  0%   { background-position: 200% 0, 0 0; }
+  100% { background-position: -200% 0, 0 0; }
+}
+
+/* Bouton plein ecran */
+.matterport-fullscreen {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  z-index: 2;
+  width: 42px;
+  height: 42px;
+  display: grid;
+  place-items: center;
+  background: rgba(14,26,18,0.72);
+  color: #fff;
+  border: 1px solid rgba(255,255,255,0.18);
+  border-radius: 12px;
+  cursor: pointer;
+  transition: background .2s var(--ease), transform .2s var(--ease);
+}
+.matterport-fullscreen:hover {
+  background: var(--c-green-dark);
+  transform: translateY(-1px);
+}
+.matterport-fullscreen svg { width: 18px; height: 18px; }
 
 #contact {
   padding-bottom: 54px;
@@ -1729,11 +1806,18 @@ window.location.replace('/connexion'+h);
 <!-- VISITE VIRTUELLE MATTERPORT -->
 <div class="matterport-section" id="visite">
 <div class="matterport-header">
+<div>
+<div class="section-label">Visite 3D</div>
 <h2>Explorez en 3D</h2>
 <p>D&#233;couvrez la qualit&#233; de nos scans Matterport. Naviguez librement dans cet espace comme si vous y &#233;tiez.</p>
 </div>
-<div class="matterport-container">
-<iframe src="https://my.matterport.com/show/?m=DKQ6zroSLKj" allowfullscreen allow="autoplay; fullscreen; web-share; xr-spatial-tracking;"></iframe>
+</div>
+<div class="matterport-container" id="mpContainer">
+<div class="matterport-skeleton" aria-hidden="true">Chargement de la visite 3D&hellip;</div>
+<button type="button" class="matterport-fullscreen" id="mpFullscreen" aria-label="Passer en plein &#233;cran">
+<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 3H5a2 2 0 0 0-2 2v3"/><path d="M21 8V5a2 2 0 0 0-2-2h-3"/><path d="M3 16v3a2 2 0 0 0 2 2h3"/><path d="M16 21h3a2 2 0 0 0 2-2v-3"/></svg>
+</button>
+<iframe id="mpIframe" src="https://my.matterport.com/show/?m=DKQ6zroSLKj" allowfullscreen allow="autoplay; fullscreen; web-share; xr-spatial-tracking;" title="Visite virtuelle Matterport"></iframe>
 </div>
 </div>
 
@@ -2280,6 +2364,30 @@ document.getElementById('contactForm').addEventListener('submit', function(e) {
   };
   toggle();
   window.addEventListener('scroll', toggle, { passive: true });
+})();
+
+/* Matterport : skeleton + bouton plein ecran */
+(function(){
+  var container = document.getElementById('mpContainer');
+  var iframe = document.getElementById('mpIframe');
+  var btn = document.getElementById('mpFullscreen');
+  if (!container || !iframe) return;
+
+  iframe.addEventListener('load', function(){
+    container.classList.add('is-loaded');
+  });
+  // Fallback: si load n'a pas declenche sous 6s, masquer quand meme le skeleton
+  setTimeout(function(){ container.classList.add('is-loaded'); }, 6000);
+
+  if (btn) {
+    btn.addEventListener('click', function(){
+      var target = iframe;
+      var req = target.requestFullscreen || target.webkitRequestFullscreen || target.mozRequestFullScreen || target.msRequestFullscreen;
+      if (req) {
+        try { req.call(target); } catch(e) { /* noop */ }
+      }
+    });
+  }
 })();
 </script>
 </body>
