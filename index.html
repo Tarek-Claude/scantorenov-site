@@ -1551,24 +1551,101 @@ section .section-intro {
   margin-top: 8px !important;
 }
 
-footer {
+/* ═════ LOT G : FOOTER DARK ═════ */
+.site-footer {
   width: min(1260px, calc(100% - 28px));
-  margin: 0 auto 36px;
-  padding: 26px 6px 0;
-  border-top: 1px solid rgba(26,26,26,0.12);
+  margin: 40px auto 28px;
+  padding: 64px 48px 32px;
+  background: var(--c-ink);
+  color: rgba(255,255,255,0.82);
+  border-radius: 34px;
+  box-shadow: var(--shadow-lg);
+  display: block;
 }
-
-footer span {
-  color: rgba(26,26,26,0.58);
-  letter-spacing: 0.04em;
+.site-footer__grid {
+  display: grid;
+  grid-template-columns: 1.4fr repeat(3, 1fr);
+  gap: 48px;
+  padding-bottom: 40px;
+  border-bottom: 1px solid rgba(255,255,255,0.08);
 }
-
-footer a {
-  color: var(--green);
+.site-footer__brand { max-width: 34ch; }
+.site-footer__logo {
+  width: 64px;
+  height: 64px;
+  object-fit: contain;
+  margin-bottom: 18px;
+}
+.site-footer__tagline {
+  font-family: var(--font-ui);
+  font-size: 0.9rem;
+  line-height: 1.6;
+  color: rgba(255,255,255,0.72);
+  margin: 0;
+}
+.site-footer__col h4 {
+  font-family: var(--font-ui);
+  font-size: 0.72rem;
   font-weight: 600;
   text-transform: uppercase;
-  letter-spacing: 0.12em;
-  font-size: 0.74rem;
+  letter-spacing: 0.2em;
+  color: var(--c-terracotta);
+  margin: 0 0 18px;
+}
+.site-footer__col ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.site-footer__col a {
+  color: #fff;
+  text-decoration: none;
+  font-family: var(--font-ui);
+  font-size: 0.92rem;
+  font-weight: 400;
+  letter-spacing: 0;
+  text-transform: none;
+  transition: color .2s var(--ease);
+}
+.site-footer__col a:hover,
+.site-footer__col a:focus-visible {
+  color: var(--c-green-light);
+}
+.site-footer__bottom {
+  margin-top: 28px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 18px;
+  flex-wrap: wrap;
+  font-family: var(--font-ui);
+  font-size: 0.82rem;
+  color: rgba(255,255,255,0.58);
+}
+.site-footer__legal a {
+  color: rgba(255,255,255,0.72);
+  text-decoration: none;
+  transition: color .2s var(--ease);
+}
+.site-footer__legal a:hover,
+.site-footer__legal a:focus-visible {
+  color: var(--c-green-light);
+}
+
+@media (max-width: 900px) {
+  .site-footer__grid {
+    grid-template-columns: 1fr 1fr;
+    gap: 32px;
+  }
+  .site-footer__brand { grid-column: 1 / -1; }
+}
+@media (max-width: 540px) {
+  .site-footer { padding: 48px 26px 26px; }
+  .site-footer__grid { grid-template-columns: 1fr; gap: 28px; }
+  .site-footer__bottom { flex-direction: column; align-items: flex-start; }
 }
 
 @media (max-width: 1080px) {
@@ -2179,15 +2256,15 @@ window.location.replace('/connexion'+h);
     <option value="Monsieur">Monsieur</option>
     <option value="Madame">Madame</option>
   </select>
-  <input type="text" name="prenom" placeholder="Pr&#233;nom" required />
-  <input type="text" name="nom" placeholder="NOM" required />
+  <input type="text" name="prenom" placeholder="Pr&#233;nom" aria-label="Pr&#233;nom" required />
+  <input type="text" name="nom" placeholder="NOM" aria-label="Nom" required />
 </div>
 
 <!-- Email / Téléphone avec indicatif -->
 <div class="form-row">
-  <input type="email" name="email" placeholder="Email" required />
+  <input type="email" name="email" placeholder="Email" aria-label="Adresse email" required />
   <div class="phone-group">
-    <select name="indicatif" id="indicatif" class="phone-prefix">
+    <select name="indicatif" id="indicatif" class="phone-prefix" aria-label="Indicatif t&#233;l&#233;phonique">
       <option value="+33" selected>&#127467;&#127479; +33</option>
       <option value="+32">&#127463;&#127466; +32</option>
       <option value="+41">&#127464;&#127469; +41</option>
@@ -2206,13 +2283,13 @@ window.location.replace('/connexion'+h);
       <option value="+225">&#127464;&#127470; +225</option>
       <option value="+221">&#127480;&#127475; +221</option>
     </select>
-    <input type="tel" name="telephone" placeholder="T&#233;l&#233;phone" required />
+    <input type="tel" name="telephone" placeholder="T&#233;l&#233;phone" aria-label="Num&#233;ro de t&#233;l&#233;phone" required />
   </div>
 </div>
 
 <!-- Adresse avec autocomplétion BAN -->
 <div class="address-autocomplete">
-  <input type="text" name="adresse" id="adresseInput" placeholder="Adresse du bien &#224; r&#233;nover" required autocomplete="off" />
+  <input type="text" name="adresse" id="adresseInput" placeholder="Adresse du bien &#224; r&#233;nover" aria-label="Adresse du bien &#224; r&#233;nover" required autocomplete="off" />
   <div class="address-suggestions" id="adresseSuggestions"></div>
 </div>
 
@@ -2388,7 +2465,7 @@ window.location.replace('/connexion'+h);
 <div class="contact-fullwidth">
 
 <!-- Champ libre optionnel -->
-<textarea name="demande" class="compact" placeholder="Un d&#233;tail sp&#233;cifique &#224; pr&#233;ciser ? (Facultatif - 50 caract&#232;res maximum)" maxlength="50"></textarea>
+<textarea name="demande" class="compact" placeholder="Un d&#233;tail sp&#233;cifique &#224; pr&#233;ciser ? (Facultatif - 50 caract&#232;res maximum)" aria-label="D&#233;tail suppl&#233;mentaire (facultatif)" maxlength="50"></textarea>
 <small class="char-count" id="charCount" style="display:block;text-align:right;max-width:700px;margin:4px auto 0;color:var(--muted);font-size:0.75rem;">0 / 50</small>
 
 <fieldset style="margin: 15px 0; border: 1px solid #e0e0e0; padding: 12px; border-radius: 4px;">
@@ -2789,9 +2866,40 @@ document.getElementById('contactForm').addEventListener('submit', function(e) {
 </div>
 </section>
 
-<footer>
+<footer class="site-footer">
+<div class="site-footer__grid">
+<div class="site-footer__brand">
+<img src="logo-scantorenov.webp" alt="Scantorenov" class="site-footer__logo" />
+<p class="site-footer__tagline">Scan 3D, simulation IA et ma&#238;trise d&#8217;&#339;uvre pour une r&#233;novation haut de gamme, pilot&#233;e par la pr&#233;cision.</p>
+</div>
+<div class="site-footer__col">
+<h4>Navigation</h4>
+<ul>
+<li><a href="#approche">Notre approche</a></li>
+<li><a href="#services">Services</a></li>
+<li><a href="#visite">Visite 3D</a></li>
+<li><a href="#contact">Contact</a></li>
+</ul>
+</div>
+<div class="site-footer__col">
+<h4>Espaces</h4>
+<ul>
+<li><a href="connexion.html">Espace Client</a></li>
+<li><a href="#forfait">Le forfait</a></li>
+</ul>
+</div>
+<div class="site-footer__col">
+<h4>Contact</h4>
+<ul>
+<li><a href="mailto:contact@scantorenov.com">contact@scantorenov.com</a></li>
+<li><a href="https://scantorenov.com">scantorenov.com</a></li>
+</ul>
+</div>
+</div>
+<div class="site-footer__bottom">
 <span>&#169; 2026 Scantorenov &#8212; Pr&#233;cision d&#8217;int&#233;rieur</span>
-<a href="connexion.html">Espace Client</a>
+<span class="site-footer__legal"><a href="#">Mentions l&#233;gales</a> &middot; <a href="#">Confidentialit&#233;</a></span>
+</div>
 </footer>
 
 <script>
