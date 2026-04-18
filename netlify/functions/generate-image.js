@@ -17,6 +17,10 @@ const DEFAULT_KONTEXT_SIZE = 1024;
 const KONTEXT_STEPS = 28;
 const KONTEXT_RETRY_BACKOFF_MS = 2000;
 const KONTEXT_MAX_RETRIES = 1;
+// FLUX.1-kontext-dev exige un endpoint dédié (payant). Les variantes Pro/Max
+// sont serverless (~$0.04/img pour Pro, ~$0.08 pour Max). Override possible
+// via TOGETHER_KONTEXT_MODEL si l'utilisateur a un endpoint dédié custom.
+const KONTEXT_MODEL = process.env.TOGETHER_KONTEXT_MODEL || 'black-forest-labs/FLUX.1-kontext-pro';
 
 const headers = {
   'Access-Control-Allow-Origin': '*',
@@ -199,7 +203,7 @@ async function callTogetherKontext(prompt, imageUrl, width, height) {
       'Content-Type': 'application/json'
     },
     body: JSON.stringify({
-      model: 'black-forest-labs/FLUX.1-kontext-dev',
+      model: KONTEXT_MODEL,
       prompt,
       image_url: imageUrl,
       width,

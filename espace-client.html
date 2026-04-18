@@ -5097,11 +5097,16 @@ function generateKontextVisual(imageUrl, assistantText, buttonEl) {
   })
   .then(function(r) {
     return r.json().then(function(data) {
-      return { ok: r.ok, data: data };
+      return { ok: r.ok, status: r.status, data: data };
     });
   })
   .then(function(result) {
-    if (!result.ok || result.data.error) throw new Error('kontext_error');
+    if (!result.ok || !result.data || result.data.error) {
+      var serverMsg = (result.data && (result.data.error || result.data.message)) || '';
+      var err = new Error(serverMsg || ('kontext_error_' + result.status));
+      err.status = result.status;
+      throw err;
+    }
     var generatedUrl = result.data.url || result.data.imageUrl;
     if (!generatedUrl) throw new Error('kontext_missing_url');
     loadingDiv.remove();
@@ -5112,9 +5117,22 @@ function generateKontextVisual(imageUrl, assistantText, buttonEl) {
       content: 'Rendu généré — variante possible pour votre pièce\\nImage : ' + generatedUrl
     });
   })
-  .catch(function() {
+  .catch(function(err) {
     if (loadingDiv.parentNode) loadingDiv.parentNode.removeChild(loadingDiv);
-    showMarcelToast('Le rendu a échoué. Réessayez dans quelques instants.');
+    var raw = (err && err.message) ? String(err.message) : '';
+    // Log complet en console pour diagnostic, message utilisateur adapté
+    if (window && window.console) console.warn('[kontext] fail:', raw, err);
+    var friendly = 'Le rendu a échoué. Réessayez dans quelques instants.';
+    if (/imageUrl non autorisee|imageUrl invalide|imageUrl doit/i.test(raw)) {
+      friendly = 'Photo source non autorisée pour le rendu (contactez le support).';
+    } else if (/TOGETHER_API_KEY/i.test(raw)) {
+      friendly = 'Service de rendu non configuré côté serveur.';
+    } else if (err && err.status === 429) {
+      friendly = 'Service de rendu surchargé — réessayez dans 1 min.';
+    } else if (err && err.status === 502) {
+      friendly = 'Le provider de rendu a renvoyé une erreur. Réessayez.';
+    }
+    showMarcelToast(friendly);
   })
   .finally(function() {
     if (buttonEl) buttonEl.disabled = false;
