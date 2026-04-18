@@ -1659,6 +1659,149 @@ footer a {
   }
 }
 
+/* ═════ LOT F : MOBILE HAMBURGER + STICKY CTA ═════ */
+.nav-burger {
+  display: none;
+  width: 42px;
+  height: 42px;
+  background: transparent;
+  border: 1px solid rgba(255,255,255,0.4);
+  border-radius: 12px;
+  cursor: pointer;
+  padding: 0;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  gap: 4px;
+  transition: border-color .2s var(--ease), background .2s var(--ease);
+}
+.nav-burger span {
+  width: 18px;
+  height: 2px;
+  background: #fff;
+  border-radius: 2px;
+  transition: background .2s var(--ease);
+}
+nav.is-scrolled .nav-burger { border-color: rgba(26,26,26,0.2); }
+nav.is-scrolled .nav-burger span { background: var(--c-text); }
+
+.mobile-panel {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity .3s var(--ease);
+}
+.mobile-panel.is-open {
+  opacity: 1;
+  pointer-events: auto;
+}
+.mobile-panel__backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(14,26,18,0.62);
+  backdrop-filter: blur(3px);
+}
+.mobile-panel__panel {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: min(80vw, 360px);
+  background: var(--c-ink);
+  color: #fff;
+  padding: 88px 28px 28px;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  transform: translateX(100%);
+  transition: transform .35s var(--ease);
+  box-shadow: -20px 0 48px rgba(0,0,0,0.35);
+}
+.mobile-panel.is-open .mobile-panel__panel {
+  transform: translateX(0);
+}
+.mobile-panel__close {
+  position: absolute;
+  top: 22px;
+  right: 22px;
+  width: 40px;
+  height: 40px;
+  background: rgba(255,255,255,0.08);
+  border: 0;
+  border-radius: 10px;
+  color: #fff;
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+}
+.mobile-panel__close svg { width: 20px; height: 20px; }
+.mobile-panel__links {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.mobile-panel__links a {
+  display: block;
+  padding: 14px 0;
+  color: #fff;
+  text-decoration: none;
+  font-family: var(--font-ui);
+  font-size: 1.1rem;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  border-bottom: 1px solid rgba(255,255,255,0.08);
+  transition: color .2s var(--ease), padding-left .2s var(--ease);
+}
+.mobile-panel__links a:hover,
+.mobile-panel__links a:focus-visible {
+  color: var(--c-terracotta);
+  padding-left: 6px;
+}
+.mobile-panel__cta {
+  margin-top: auto;
+  text-align: center;
+}
+
+/* Bloque scroll body quand panel ouvert */
+body.has-mobile-panel { overflow: hidden; }
+
+/* CTA sticky mobile : apparait quand hero quitte l'ecran */
+.mobile-sticky-cta {
+  position: fixed;
+  left: 16px;
+  right: 16px;
+  bottom: 18px;
+  z-index: 40;
+  display: none;
+  padding: 14px 20px;
+  text-align: center;
+  background: var(--c-green-dark);
+  color: #fff;
+  font-family: var(--font-ui);
+  font-weight: 600;
+  font-size: 0.95rem;
+  letter-spacing: 0.02em;
+  text-decoration: none;
+  border-radius: 999px;
+  box-shadow: 0 10px 28px rgba(14,26,18,0.35);
+  transform: translateY(120%);
+  transition: transform .35s var(--ease);
+}
+.mobile-sticky-cta.is-visible {
+  transform: translateY(0);
+}
+
+@media (max-width: 768px) {
+  .nav-burger { display: inline-flex; }
+  .nav-cta { display: none; }
+  .mobile-sticky-cta { display: block; }
+}
+
 /* ═════ LOT E : FORMULAIRE 4 ETAPES (cadrage v1.0 §5) ═════ */
 /* Reset des boutons du contact-form qui utilisent la classe .btn */
 .contact-form button.btn {
@@ -1833,7 +1976,30 @@ window.location.replace('/connexion'+h);
 <li><a href="#contact">Contact</a></li>
 </ul>
 <a href="connexion.html" class="nav-cta">Espace Client</a>
+<button type="button" class="nav-burger" id="navBurger" aria-label="Ouvrir le menu" aria-expanded="false" aria-controls="mobilePanel">
+<span></span><span></span><span></span>
+</button>
 </nav>
+
+<!-- Panneau mobile slide-in -->
+<div class="mobile-panel" id="mobilePanel" aria-hidden="true">
+<div class="mobile-panel__backdrop" data-close></div>
+<aside class="mobile-panel__panel" role="dialog" aria-modal="true" aria-label="Navigation">
+<button type="button" class="mobile-panel__close" data-close aria-label="Fermer le menu">
+<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+</button>
+<ul class="mobile-panel__links">
+<li><a href="#approche" data-close>Notre approche</a></li>
+<li><a href="#services" data-close>Services</a></li>
+<li><a href="#visite" data-close>Visite 3D</a></li>
+<li><a href="#contact" data-close>Contact</a></li>
+</ul>
+<a href="connexion.html" class="btn btn--primary mobile-panel__cta">Espace Client</a>
+</aside>
+</div>
+
+<!-- CTA sticky mobile (apparait apres le hero) -->
+<a href="#contact" class="mobile-sticky-cta" id="mobileStickyCta" aria-hidden="true">Demander un scan 3D</a>
 
 <section class="hero" id="hero">
 <div class="hero__media">
@@ -2642,6 +2808,55 @@ document.getElementById('contactForm').addEventListener('submit', function(e) {
   };
   toggle();
   window.addEventListener('scroll', toggle, { passive: true });
+})();
+
+/* Mobile : hamburger + panneau slide-in */
+(function(){
+  var burger = document.getElementById('navBurger');
+  var panel = document.getElementById('mobilePanel');
+  if (!burger || !panel) return;
+
+  function open() {
+    panel.classList.add('is-open');
+    panel.setAttribute('aria-hidden', 'false');
+    burger.setAttribute('aria-expanded', 'true');
+    document.body.classList.add('has-mobile-panel');
+  }
+  function close() {
+    panel.classList.remove('is-open');
+    panel.setAttribute('aria-hidden', 'true');
+    burger.setAttribute('aria-expanded', 'false');
+    document.body.classList.remove('has-mobile-panel');
+  }
+
+  burger.addEventListener('click', open);
+  panel.addEventListener('click', function(ev){
+    if (ev.target.closest('[data-close]')) close();
+  });
+  document.addEventListener('keydown', function(ev){
+    if (ev.key === 'Escape' && panel.classList.contains('is-open')) close();
+  });
+})();
+
+/* Mobile : CTA sticky apparait quand le hero quitte le viewport */
+(function(){
+  var hero = document.querySelector('.hero');
+  var cta = document.getElementById('mobileStickyCta');
+  if (!hero || !cta || !('IntersectionObserver' in window)) return;
+
+  var observer = new IntersectionObserver(function(entries){
+    entries.forEach(function(entry){
+      if (entry.isIntersecting) {
+        cta.classList.remove('is-visible');
+        cta.setAttribute('aria-hidden', 'true');
+      } else {
+        cta.classList.add('is-visible');
+        cta.setAttribute('aria-hidden', 'false');
+      }
+    });
+  }, { threshold: 0.1 });
+
+  observer.observe(hero);
 })();
 
 /* Matterport : skeleton + bouton plein ecran */
