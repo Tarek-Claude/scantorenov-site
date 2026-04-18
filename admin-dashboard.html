@@ -1522,6 +1522,7 @@
                                 <div style="display: flex; gap: 4px; border-bottom: 2px solid var(--border); margin-bottom: 16px;">
                                     <button class="mp-tab active" data-mp-tab="iframe" onclick="switchMpTab(event, 'iframe')">Iframe Matterport</button>
                                     <button class="mp-tab" data-mp-tab="panoramas" onclick="switchMpTab(event, 'panoramas')">Panoramas</button>
+                                    <button class="mp-tab" data-mp-tab="annotations" onclick="switchMpTab(event, 'annotations')">Annotations</button>
                                     <button class="mp-tab" data-mp-tab="dimensions" onclick="switchMpTab(event, 'dimensions')">Dimensions</button>
                                     <button class="mp-tab" data-mp-tab="floorplans" onclick="switchMpTab(event, 'floorplans')">Plans</button>
                                 </div>
@@ -1534,6 +1535,22 @@
                                 <!-- Tab: Panoramas -->
                                 <div class="mp-tab-content" id="mpTabPanoramas">
                                     <div id="panoramasGrid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 12px;"></div>
+                                </div>
+
+                                <!-- Tab: Annotations photos (photos_meta) -->
+                                <div class="mp-tab-content" id="mpTabAnnotations">
+                                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; flex-wrap: wrap; gap: 8px;">
+                                        <div style="font-size: 13px; color: var(--muted);">
+                                            Annotez chaque photo pour ancrer les visuels g&eacute;n&eacute;r&eacute;s par Marcel au projet r&eacute;el.
+                                        </div>
+                                        <div style="display: flex; gap: 8px; align-items: center;">
+                                            <span id="photosMetaStatus" style="font-size: 12px; color: var(--muted);"></span>
+                                            <button class="action-button" id="btnSavePhotosMeta" onclick="savePhotosMeta()" style="background-color:#3F6E52;">
+                                                Enregistrer
+                                            </button>
+                                        </div>
+                                    </div>
+                                    <div id="photosMetaGrid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 14px;"></div>
                                 </div>
 
                                 <!-- Tab: Dimensions -->
@@ -4938,6 +4955,7 @@
             const targetId = {
                 iframe: 'mpTabIframe',
                 panoramas: 'mpTabPanoramas',
+                annotations: 'mpTabAnnotations',
                 dimensions: 'mpTabDimensions',
                 floorplans: 'mpTabFloorplans'
             }[tabName] || 'mpTabIframe';
@@ -5057,10 +5075,14 @@
                 floorplansGrid.innerHTML = '<p style="color: var(--muted); font-size: 13px;">Aucun plan disponible.</p>';
             }
 
+            // Rendu des annotations photos_meta (toujours, même si onglet inactif)
+            renderPhotosMetaTab(client);
+
             const activeTab = document.querySelector('.mp-tab.active')?.dataset.mpTab;
             const tabHasContent = (tabName) => {
                 if (tabName === 'iframe') return Boolean(state.iframeUrl);
                 if (tabName === 'panoramas') return state.panoramas.length > 0;
+                if (tabName === 'annotations') return Array.isArray(client.photos_urls) && client.photos_urls.length > 0;
                 if (tabName === 'dimensions') return Boolean(state.dimensionsData);
                 if (tabName === 'floorplans') return state.floorplans.length > 0;
                 return false;
@@ -5069,6 +5091,156 @@
                 ? activeTab
                 : (state.iframeUrl ? 'iframe' : (state.panoramas.length ? 'panoramas' : (state.dimensionsData ? 'dimensions' : 'floorplans')));
             activateMpTab(preferredTab);
+        }
+
+        // =========================================================
+        //  Annotations photos_meta (dashboard-photos-meta-spec.md)
+        // =========================================================
+        const PHOTOS_META_ROOMS = ['salon', 'cuisine', 'chambre', 'sdb', 'wc', 'entrée', 'couloir', 'bureau', 'autre'];
+        const PHOTOS_META_VIEWS = ['large', 'détail', 'avant', 'arrière', 'extérieur'];
+
+        function escapeHtml(value) {
+            return String(value == null ? '' : value)
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#39;');
+        }
+
+        function buildMetaSelectOptions(values, selected) {
+            return values.map((v) => {
+                const isSel = String(selected || '').toLowerCase() === v;
+                return `<option value="${escapeHtml(v)}"${isSel ? ' selected' : ''}>${escapeHtml(v)}</option>`;
+            }).join('');
+        }
+
+        function renderPhotosMetaTab(client) {
+            const grid = document.getElementById('photosMetaGrid');
+            const status = document.getElementById('photosMetaStatus');
+            if (!grid) return;
+
+            const photoUrls = Array.isArray(client && client.photos_urls)
+                ? client.photos_urls.filter(Boolean)
+                : [];
+
+            if (status) status.textContent = '';
+
+            if (photoUrls.length === 0) {
+                grid.innerHTML = '<p style="color: var(--muted); font-size: 13px; grid-column: 1 / -1;">Aucune photo &agrave; annoter. Ajoutez-en dans l\'onglet Panoramas.</p>';
+                return;
+            }
+
+            // Index existing photos_meta par URL pour pré-remplir les champs
+            const existing = Array.isArray(client && client.photos_meta) ? client.photos_meta : [];
+            const byUrl = {};
+            existing.forEach((m) => { if (m && m.url) byUrl[m.url] = m; });
+
+            grid.innerHTML = photoUrls.map((url, index) => {
+                const meta = byUrl[url] || {};
+                const caption = meta.caption || '';
+                const priority = Number.isInteger(meta.priority) ? meta.priority : 3;
+                return `
+                    <div class="photo-meta-card" data-photo-url="${escapeHtml(url)}" style="background: var(--bg); border: 1px solid var(--border); border-radius: 10px; overflow: hidden; display: flex; flex-direction: column;">
+                        <img src="${escapeHtml(url)}" alt="Photo ${index + 1}" loading="lazy" style="width: 100%; height: 160px; object-fit: cover; background: var(--border);" onerror="this.style.display='none'">
+                        <div style="padding: 10px 12px; display: flex; flex-direction: column; gap: 8px;">
+                            <div style="font-size: 11px; color: var(--muted); font-weight: 600; letter-spacing: 0.4px; text-transform: uppercase;">Photo ${index + 1}</div>
+                            <label style="font-size: 11px; color: var(--muted);">Pi&egrave;ce
+                                <select data-meta-field="room" style="width: 100%; padding: 6px 8px; font-size: 13px; border: 1px solid var(--border); border-radius: 6px; margin-top: 2px;">
+                                    <option value="">—</option>
+                                    ${buildMetaSelectOptions(PHOTOS_META_ROOMS, meta.room)}
+                                </select>
+                            </label>
+                            <label style="font-size: 11px; color: var(--muted);">Vue
+                                <select data-meta-field="view" style="width: 100%; padding: 6px 8px; font-size: 13px; border: 1px solid var(--border); border-radius: 6px; margin-top: 2px;">
+                                    <option value="">—</option>
+                                    ${buildMetaSelectOptions(PHOTOS_META_VIEWS, meta.view)}
+                                </select>
+                            </label>
+                            <label style="font-size: 11px; color: var(--muted);">L&eacute;gende (≤ 140 car.)
+                                <input type="text" data-meta-field="caption" maxlength="140" value="${escapeHtml(caption)}" placeholder="Ex : Vue principale du salon" style="width: 100%; padding: 6px 8px; font-size: 13px; border: 1px solid var(--border); border-radius: 6px; margin-top: 2px;">
+                            </label>
+                            <label style="font-size: 11px; color: var(--muted);">Priorit&eacute; Marcel (1 = essentielle)
+                                <select data-meta-field="priority" style="width: 100%; padding: 6px 8px; font-size: 13px; border: 1px solid var(--border); border-radius: 6px; margin-top: 2px;">
+                                    ${[1, 2, 3, 4, 5].map((p) => `<option value="${p}"${p === priority ? ' selected' : ''}>${p}</option>`).join('')}
+                                </select>
+                            </label>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function collectPhotosMetaFromUi() {
+            const cards = document.querySelectorAll('#photosMetaGrid .photo-meta-card');
+            const out = [];
+            const errors = [];
+            cards.forEach((card, idx) => {
+                const url = card.dataset.photoUrl || '';
+                const room = (card.querySelector('[data-meta-field="room"]')?.value || '').trim();
+                const view = (card.querySelector('[data-meta-field="view"]')?.value || '').trim();
+                const caption = (card.querySelector('[data-meta-field="caption"]')?.value || '').trim();
+                const priorityRaw = card.querySelector('[data-meta-field="priority"]')?.value;
+                const priority = Number.parseInt(priorityRaw, 10);
+
+                // Skip les entrées totalement vides (photo non annotée)
+                if (!room && !view && !caption) return;
+
+                if (!room) errors.push(`Photo ${idx + 1} : piece manquante`);
+                if (!view) errors.push(`Photo ${idx + 1} : vue manquante`);
+                if (caption.length > 140) errors.push(`Photo ${idx + 1} : legende > 140 car.`);
+                if (!Number.isInteger(priority) || priority < 1 || priority > 5) {
+                    errors.push(`Photo ${idx + 1} : priorite invalide`);
+                }
+
+                out.push({ url, room, view, caption, priority });
+            });
+            return { photos_meta: out, errors };
+        }
+
+        async function savePhotosMeta() {
+            if (!currentClient || !currentClient.id) return;
+            const btn = document.getElementById('btnSavePhotosMeta');
+            const status = document.getElementById('photosMetaStatus');
+            const { photos_meta, errors } = collectPhotosMetaFromUi();
+
+            if (errors.length > 0) {
+                if (status) {
+                    status.style.color = '#B8634B';
+                    status.textContent = errors[0];
+                }
+                return;
+            }
+
+            if (btn) { btn.disabled = true; btn.textContent = 'Enregistrement…'; }
+            if (status) { status.style.color = 'var(--muted)'; status.textContent = ''; }
+
+            try {
+                const res = await adminFetch('/.netlify/functions/admin-update-scan', {
+                    clientId: currentClient.id,
+                    photos_meta
+                });
+                // Mettre à jour le state local pour refléter l'annotation
+                if (res && res.scan && Array.isArray(res.scan.photos_meta)) {
+                    currentClient.photos_meta = res.scan.photos_meta;
+                } else {
+                    currentClient.photos_meta = photos_meta;
+                }
+                if (status) {
+                    status.style.color = '#3F6E52';
+                    status.textContent = `Enregistré (${photos_meta.length} annotation${photos_meta.length > 1 ? 's' : ''})`;
+                }
+            } catch (err) {
+                if (status) {
+                    status.style.color = '#B8634B';
+                    const msg = (err && err.message) || 'Erreur inconnue';
+                    status.textContent = /503|migration/i.test(msg)
+                        ? 'Migration Supabase requise pour photos_meta'
+                        : msg;
+                }
+            } finally {
+                if (btn) { btn.disabled = false; btn.textContent = 'Enregistrer'; }
+            }
         }
 
         async function saveMatterportToClient(modelId, mpData) {
