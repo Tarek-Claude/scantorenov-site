@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>Scantorenov &#8212; Scan 3D &amp; R&#233;novation haut de gamme</title>
 <meta name="description" content="Scantorenov : scan 3D Matterport et Ma&#238;trise d&#8217;&#338;uvre d&#8217;Ex&#233;cution pour votre r&#233;novation. Exp&#233;rience immersive, &#233;coresponsable et haut de gamme." />
-<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400&family=DM+Sans:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet" />
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500&family=DM+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet" />
 <style>
 *, *::before, *::after {
   box-sizing: border-box;
@@ -14,36 +14,71 @@
 }
 
 :root {
-  --bg: #F5F0E8;
-  --bg-warm: #EBE3D7;
-  --mid: #E2D9CC;
-  --card: #FFFFFF;
-  --card-alt: #FBF8F4;
+  /* ═════ CADRAGE VISUEL v1.0 — Palette stricte (rôles exacts) ═════ */
+  --c-green-dark:  #244F33;  /* CTA primaire, liens nav hover, prix */
+  --c-green-light: #3A7A50;  /* hover CTA, liens secondaires, succès */
+  --c-terracotta:  #B8634B;  /* labels section, badges, bordures cartes alt */
+  --c-teal:        #16505A;  /* tech (scan 3D, IA, jumeau numérique) */
+  --c-text:        #1C1C1C;  /* titres, labels form, contenu fort */
+  --c-text-soft:   #454545;  /* corps de texte, descriptions */
+  --c-cream:       #F7F4EF;  /* fond général, sections alternées */
+  --c-ink:         #0E1A12;  /* fond dramatique section 3D + footer */
 
-  --green: #1B4332;
-  --green-hover: #2D5F3E;
-  --green-light: rgba(27,67,50,0.08);
+  /* ═════ Typo — Cormorant H1/H2, DM Sans partout ailleurs ═════ */
+  --font-display: 'Cormorant Garamond', Georgia, serif;
+  --font-ui:      'DM Sans', system-ui, sans-serif;
+  --font-logo:    'Space Grotesk', system-ui, sans-serif;
 
-  --terracotta: #B5634B;
-  --terracotta-light: rgba(181,99,75,0.10);
+  /* Échelle typographique — clamp() sur H1 */
+  --fs-h1:    clamp(2.2rem, 4vw, 3.2rem);
+  --fs-h2:    2rem;
+  --fs-h3:    1.15rem;
+  --fs-body:  1rem;
+  --fs-label: 0.8rem;
+  --fs-cta:   0.9rem;
+  --fs-nav:   0.9rem;
 
-  --teal: #17555C;
-  --teal-light: rgba(23,85,92,0.08);
+  /* Weights — imposés par le cadrage (JAMAIS 300) */
+  --fw-display: 500;   /* Cormorant Medium */
+  --fw-h3:      600;   /* DM Sans SemiBold */
+  --fw-body:    400;
+  --fw-label:   600;
+  --fw-cta:     600;
+  --fw-nav:     500;
 
-  --text: #1A1A1A;
-  --text-soft: #4A4A4A;
-  --muted: #787878;
-  --border: rgba(26, 26, 26, 0.12);
-  --border-strong: rgba(26, 26, 26, 0.22);
+  /* ═════ Mapping legacy — compat CSS/JS existant ═════ */
+  /* Les anciens tokens pointent vers la nouvelle palette pour ne casser
+     aucun selector existant. Ne pas les supprimer sans auditer. */
+  --bg:             var(--c-cream);
+  --bg-warm:        #EBE3D7;
+  --mid:            #E2D9CC;
+  --card:           #FFFFFF;
+  --card-alt:       #FBF8F4;
 
-  --success: #2E7D4F;
-  --warning: #D4860A;
-  --error: #C23C2E;
-  --info: #17555C;
+  --green:          var(--c-green-dark);
+  --green-hover:    var(--c-green-light);
+  --green-light:    rgba(36, 79, 51, 0.08);
+
+  --terracotta:     var(--c-terracotta);
+  --terracotta-light: rgba(184, 99, 75, 0.10);
+
+  --teal:           var(--c-teal);
+  --teal-light:     rgba(22, 80, 90, 0.08);
+
+  --text:           var(--c-text);
+  --text-soft:      var(--c-text-soft);
+  --muted:          #787878;
+  --border:         rgba(28, 28, 28, 0.12);
+  --border-strong:  rgba(28, 28, 28, 0.22);
+
+  --success:        var(--c-green-light);
+  --warning:        #D4860A;
+  --error:          var(--c-terracotta);
+  --info:           var(--c-teal);
 
   --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.04);
   --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.05);
-  --shadow: 0 4px 20px rgba(0, 0, 0, 0.07);
+  --shadow:    0 4px 20px rgba(0, 0, 0, 0.07);
   --shadow-md: 0 8px 30px rgba(0, 0, 0, 0.09);
   --shadow-lg: 0 16px 48px rgba(0, 0, 0, 0.12);
 
@@ -54,21 +89,28 @@
   --radius-xl: 24px;
   --radius-full: 9999px;
 
-  --font-heading: 'Cormorant Garamond', serif;
-  --font-body: 'DM Sans', 'Inter', sans-serif;
-  --font-accent: 'Space Grotesk', sans-serif;
+  /* Legacy font tokens — mappés vers les nouveaux */
+  --font-heading: var(--font-display);
+  --font-body:    var(--font-ui);
+  --font-accent:  var(--font-logo);
 
-  --text-xs: 0.75rem;
-  --text-sm: 0.8125rem;
-  --text-base: 0.9375rem;
-  --text-lg: 1.125rem;
-  --text-xl: 1.375rem;
-  --text-2xl: 1.75rem;
-  --text-3xl: 2.25rem;
-  --text-4xl: 3rem;
+  --text-xs:   var(--fs-label);
+  --text-sm:   0.8125rem;
+  --text-base: var(--fs-body);
+  --text-lg:   1.125rem;
+  --text-xl:   var(--fs-h3);
+  --text-2xl:  1.75rem;
+  --text-3xl:  var(--fs-h2);
+  --text-4xl:  var(--fs-h1);
 
-  --ease: cubic-bezier(0.4, 0, 0.2, 1);
+  --ease:     cubic-bezier(0.4, 0, 0.2, 1);
   --duration: 0.2s;
+}
+
+/* ═════ Focus-visible — accessibilité AA/AAA ═════ */
+*:focus-visible {
+  outline: 2px solid var(--c-teal);
+  outline-offset: 3px;
 }
 
 html {
@@ -188,7 +230,7 @@ nav {
 .hero-baseline {
   font-family: var(--font-heading);
   font-size: 1.1rem;
-  font-weight: 300;
+  font-weight: var(--fw-display);
   font-style: italic;
   color: var(--green);
   letter-spacing: 0.08em;
@@ -198,9 +240,9 @@ nav {
 
 .hero h1 {
   font-family: var(--font-heading);
-  font-size: clamp(2rem, 4.5vw, 3.4rem);
-  font-weight: 300;
-  line-height: 1.2;
+  font-size: var(--fs-h1);
+  font-weight: var(--fw-display);
+  line-height: 1.05;
   max-width: 780px;
   position: relative;
   color: var(--text);
@@ -252,8 +294,8 @@ section {
 
 section h2 {
   font-family: var(--font-heading);
-  font-size: 2.2rem;
-  font-weight: 300;
+  font-size: var(--fs-h2);
+  font-weight: var(--fw-display);
   margin-bottom: 20px;
   color: var(--text);
 }
@@ -418,8 +460,8 @@ section .section-intro {
 
 .matterport-header h2 {
   font-family: var(--font-heading);
-  font-size: 2rem;
-  font-weight: 300;
+  font-size: var(--fs-h2);
+  font-weight: var(--fw-display);
   margin-bottom: 12px;
   color: var(--text);
 }
@@ -2258,7 +2300,7 @@ document.getElementById('contactForm').addEventListener('submit', function(e) {
     // 3) Message de succès
     form.innerHTML = '<div style="text-align:center;padding:40px 0;">' +
       '<div style="font-size:2.5rem;margin-bottom:16px;">✓</div>' +
-      '<h3 style="font-family:Cormorant Garamond,serif;font-size:1.5rem;font-weight:300;color:var(--green);margin-bottom:12px;">Demande envoy\u00e9e avec succ\u00e8s</h3>' +
+      '<h3 style="font-family:Cormorant Garamond,serif;font-size:1.5rem;font-weight:500;color:var(--green);margin-bottom:12px;">Demande envoy\u00e9e avec succ\u00e8s</h3>' +
       '<p style="color:var(--text-soft);font-size:0.9rem;">Un email de confirmation vous a \u00e9t\u00e9 adress\u00e9.<br/>Nous vous recontacterons tr\u00e8s prochainement.</p>' +
       '</div>';
   }).catch(function() {
