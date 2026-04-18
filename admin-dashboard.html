@@ -6,28 +6,39 @@
     <title>Admin Dashboard - ScantoRenov</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400&family=DM+Sans:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600&family=DM+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
     <style>
         :root {
-            --bg: #F5F0E8;
+            /* ═════ Palette cadrage v1.0 (identique index.html) ═════ */
+            --c-green-dark:  #244F33;
+            --c-green-light: #3A7A50;
+            --c-terracotta:  #B8634B;
+            --c-teal:        #16505A;
+            --c-text:        #1C1C1C;
+            --c-text-soft:   #454545;
+            --c-cream:       #F7F4EF;
+            --c-ink:         #0E1A12;
+
+            /* Legacy mappings pour preserver l'existant */
+            --bg: var(--c-cream);
             --bg-warm: #EBE3D7;
             --mid: #E2D9CC;
             --card: #FFFFFF;
             --card-alt: #FBF8F4;
 
-            --green: #1B4332;
-            --green-hover: #2D5F3E;
-            --green-light: rgba(27,67,50,0.08);
+            --green: var(--c-green-dark);
+            --green-hover: var(--c-green-light);
+            --green-light: rgba(58,122,80,0.10);
 
-            --terracotta: #B5634B;
-            --terracotta-light: rgba(181,99,75,0.10);
+            --terracotta: var(--c-terracotta);
+            --terracotta-light: rgba(184,99,75,0.10);
 
-            --teal: #17555C;
-            --teal-light: rgba(23,85,92,0.08);
+            --teal: var(--c-teal);
+            --teal-light: rgba(22,80,90,0.08);
 
-            --text: #1A1A1A;
-            --text-soft: #4A4A4A;
+            --text: var(--c-text);
+            --text-soft: var(--c-text-soft);
             --muted: #787878;
             --border: rgba(26, 26, 26, 0.12);
             --border-strong: rgba(26, 26, 26, 0.22);
@@ -35,7 +46,7 @@
             --success: #2E7D4F;
             --warning: #D4860A;
             --error: #C23C2E;
-            --info: #17555C;
+            --info: var(--c-teal);
 
             --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.04);
             --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.05);
@@ -50,9 +61,16 @@
             --radius-xl: 24px;
             --radius-full: 9999px;
 
+            /* Typographie cadrage v1.0 */
+            --font-display: 'Cormorant Garamond', serif;
             --font-heading: 'Cormorant Garamond', serif;
-            --font-body: 'DM Sans', 'Inter', sans-serif;
+            --font-ui: 'DM Sans', system-ui, sans-serif;
+            --font-body: 'DM Sans', system-ui, sans-serif;
             --font-accent: 'Space Grotesk', sans-serif;
+            --fw-display: 500;
+            --fw-ui: 400;
+            --fw-nav: 500;
+            --fw-cta: 500;
 
             --text-xs: 0.75rem;
             --text-sm: 0.8125rem;
@@ -65,6 +83,17 @@
 
             --ease: cubic-bezier(0.4, 0, 0.2, 1);
             --duration: 0.2s;
+        }
+
+        /* Focus visible global (conformite AA) */
+        *:focus-visible {
+            outline: 2px solid var(--c-teal);
+            outline-offset: 3px;
+        }
+
+        /* Les titres en Cormorant passent en w500 */
+        h1, h2, h3 {
+            font-weight: var(--fw-display);
         }
 
         * {

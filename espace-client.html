@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Mon Espace &#8212; Scantorenov</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400&family=DM+Sans:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600&family=DM+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet" />
   <script src="https://identity.netlify.com/v1/netlify-identity-widget.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
   <!-- Matterport : iframe seule, données chargées depuis Supabase -->
@@ -20,20 +20,72 @@
       min-height: 100vh;
     }
     :root {
-      --bg: #F5F0E8; --bg-warm: #EBE3D7; --mid: #E2D9CC; --card: #FFFFFF; --card-alt: #FBF8F4;
-      --green: #1B4332; --green-hover: #2D5F3E; --green-light: rgba(27,67,50,0.08);
-      --terracotta: #B5634B; --terracotta-light: rgba(181,99,75,0.10);
-      --teal: #17555C; --teal-light: rgba(23,85,92,0.08);
-      --text: #1A1A1A; --text-soft: #4A4A4A; --muted: #787878;
-      --border: rgba(26,26,26,0.12); --border-strong: rgba(26,26,26,0.22);
-      --success: #2E7D4F; --warning: #D4860A; --error: #C23C2E; --info: #17555C;
-      --blue: var(--green); --bl: var(--green-hover); --dim: var(--teal); --glow: rgba(27,67,50,0.15);
-      --shadow-xs: 0 1px 2px rgba(0,0,0,0.04); --shadow-sm: 0 2px 8px rgba(0,0,0,0.05);
-      --shadow: 0 4px 20px rgba(0,0,0,0.07); --shadow-md: 0 8px 30px rgba(0,0,0,0.09); --shadow-lg: 0 16px 48px rgba(0,0,0,0.12);
+      /* ═════ Palette cadrage v1.0 (identique index.html) ═════ */
+      --c-green-dark:  #244F33;
+      --c-green-light: #3A7A50;
+      --c-terracotta:  #B8634B;
+      --c-teal:        #16505A;
+      --c-text:        #1C1C1C;
+      --c-text-soft:   #454545;
+      --c-cream:       #F7F4EF;
+      --c-ink:         #0E1A12;
+
+      /* Legacy mappings pour ne pas casser les composants existants */
+      --bg: var(--c-cream);
+      --bg-warm: #EBE3D7;
+      --mid: #E2D9CC;
+      --card: #FFFFFF;
+      --card-alt: #FBF8F4;
+      --green: var(--c-green-dark);
+      --green-hover: var(--c-green-light);
+      --green-light: rgba(58,122,80,0.10);
+      --terracotta: var(--c-terracotta);
+      --terracotta-light: rgba(184,99,75,0.10);
+      --teal: var(--c-teal);
+      --teal-light: rgba(22,80,90,0.08);
+      --text: var(--c-text);
+      --text-soft: var(--c-text-soft);
+      --muted: #787878;
+      --border: rgba(26,26,26,0.12);
+      --border-strong: rgba(26,26,26,0.22);
+      --success: #2E7D4F; --warning: #D4860A; --error: #C23C2E; --info: var(--c-teal);
+      --blue: var(--c-green-dark); --bl: var(--c-green-light); --dim: var(--c-teal);
+      --glow: rgba(36,79,51,0.15);
+      --shadow-xs: 0 1px 2px rgba(0,0,0,0.04);
+      --shadow-sm: 0 2px 8px rgba(0,0,0,0.05);
+      --shadow: 0 4px 20px rgba(0,0,0,0.07);
+      --shadow-md: 0 8px 30px rgba(0,0,0,0.09);
+      --shadow-lg: 0 16px 48px rgba(0,0,0,0.12);
       --radius-xs: 4px; --radius-sm: 8px; --radius-md: 12px; --radius-lg: 16px; --radius-xl: 24px; --radius-full: 9999px;
-      --font-heading: 'Cormorant Garamond', serif; --font-body: 'DM Sans', 'Inter', sans-serif; --font-accent: 'Space Grotesk', sans-serif;
-      --text-xs: 0.75rem; --text-sm: 0.8125rem; --text-base: 0.9375rem; --text-lg: 1.125rem; --text-xl: 1.375rem; --text-2xl: 1.75rem; --text-3xl: 2.25rem; --text-4xl: 3rem;
+
+      /* Typographie cadrage v1.0 */
+      --font-display: 'Cormorant Garamond', serif;
+      --font-heading: 'Cormorant Garamond', serif;
+      --font-ui: 'DM Sans', system-ui, sans-serif;
+      --font-body: 'DM Sans', system-ui, sans-serif;
+      --font-accent: 'Space Grotesk', sans-serif;
+      --fw-display: 500;   /* Cormorant w500 obligatoire pour les titres */
+      --fw-ui: 400;
+      --fw-nav: 500;
+      --fw-cta: 500;
+
+      /* Echelle existante conservee */
+      --text-xs: 0.75rem; --text-sm: 0.8125rem; --text-base: 0.9375rem;
+      --text-lg: 1.125rem; --text-xl: 1.375rem; --text-2xl: 1.75rem;
+      --text-3xl: 2.25rem; --text-4xl: 3rem;
       --ease: cubic-bezier(0.4, 0, 0.2, 1); --duration: 0.2s;
+    }
+
+    /* Focus visible global (conformite AA) */
+    *:focus-visible {
+      outline: 2px solid var(--c-teal);
+      outline-offset: 3px;
+    }
+
+    /* Les titres en Cormorant passent obligatoirement en w500 */
+    .auth-guard h1,
+    h1, h2, h3 {
+      font-weight: var(--fw-display);
     }
 
     /* ── AUTH GUARD ── */
@@ -43,7 +95,7 @@
     }
     .auth-guard h1 {
       font-family: var(--font-heading); font-size: 2.2rem;
-      font-weight: 300; margin-bottom: 12px;
+      font-weight: var(--fw-display); margin-bottom: 12px;
     }
     .auth-guard p { color: var(--muted); margin-bottom: 32px; font-size: 0.9rem; }
     .auth-btn {
@@ -164,13 +216,13 @@
     }
     .welcome-greeting {
       font-family: var(--font-heading);
-      font-size: 2.2rem; font-weight: 300; margin-bottom: 12px;
+      font-size: 2.2rem; font-weight: var(--fw-display); margin-bottom: 12px;
       line-height: 1.3;
     }
     .welcome-greeting em { color: var(--blue); font-style: italic; }
     .welcome-baseline {
       font-family: var(--font-heading);
-      font-size: 1rem; font-style: italic; font-weight: 300;
+      font-size: 1rem; font-style: italic; font-weight: var(--fw-display);
       color: var(--blue); letter-spacing: 0.06em;
     }
 
@@ -186,7 +238,7 @@
     }
     .welcome-quote p {
       font-family: var(--font-heading);
-      font-size: 1.2rem; font-weight: 300; font-style: italic;
+      font-size: 1.2rem; font-weight: var(--fw-display); font-style: italic;
       color: var(--text); line-height: 1.8;
     }
 
@@ -393,7 +445,7 @@
     }
     .project-desc-text {
       font-family: var(--font-heading);
-      font-size: 1.15rem; font-style: italic; font-weight: 300;
+      font-size: 1.15rem; font-style: italic; font-weight: var(--fw-display);
       color: var(--text-soft); line-height: 1.8;
       padding: 20px 24px; background: rgba(27,67,50,0.03);
       border-radius: 8px;
@@ -408,7 +460,7 @@
     }
     .callback-section h3 {
       font-family: var(--font-heading);
-      font-size: 1.4rem; font-weight: 300; color: var(--text);
+      font-size: 1.4rem; font-weight: var(--fw-display); color: var(--text);
       margin-bottom: 12px;
     }
     .callback-section p {
@@ -440,7 +492,7 @@
     }
     .stepper-header h3 {
       font-family: var(--font-heading);
-      font-size: 1.5rem; font-weight: 300; color: var(--text);
+      font-size: 1.5rem; font-weight: var(--fw-display); color: var(--text);
       margin-bottom: 4px;
     }
     .stepper-header p {
@@ -741,7 +793,7 @@
     }
     .scan-date-card h3 {
       font-family: var(--font-heading);
-      font-size: 1.4rem; font-weight: 300; margin-bottom: 12px;
+      font-size: 1.4rem; font-weight: var(--fw-display); margin-bottom: 12px;
     }
     .scan-date-value {
       font-family: var(--font-accent);
@@ -817,7 +869,7 @@
     }
     .section-title {
       font-family: var(--font-heading);
-      font-size: 1.6rem; font-weight: 300; margin-bottom: 8px;
+      font-size: 1.6rem; font-weight: var(--fw-display); margin-bottom: 8px;
     }
     .section-desc {
       color: var(--muted); font-size: 0.84rem; margin-bottom: 24px;
@@ -854,7 +906,7 @@
     @keyframes mp-pulse { 0%,100%{ opacity:0.5; transform:scale(1); } 50%{ opacity:0.9; transform:scale(1.05); } }
     .matterport-pending h3 {
       font-family: var(--font-heading); font-size: 1.4rem;
-      font-weight: 300; color: var(--text); margin-bottom: 12px;
+      font-weight: var(--fw-display); color: var(--text); margin-bottom: 12px;
     }
     .matterport-pending p {
       color: var(--muted); font-size: 0.88rem; line-height: 1.7; max-width: 440px;
@@ -1408,7 +1460,7 @@
       margin: 0 auto;
     }
     .proposal-card h3 {
-      font-family: var(--font-heading); font-weight: 300;
+      font-family: var(--font-heading); font-weight: var(--fw-display);
       font-size: 1.5rem; color: var(--green); margin-bottom: 12px;
     }
     .proposal-card p { color: var(--text-soft); font-size: 0.9rem; line-height: 1.7; margin-bottom: 24px; }
@@ -1472,7 +1524,7 @@
       box-shadow: var(--shadow); max-width: 750px; margin: 0 auto;
     }
     .moe-card h3 {
-      font-family: var(--font-heading); font-weight: 300;
+      font-family: var(--font-heading); font-weight: var(--fw-display);
       font-size: 1.5rem; color: var(--green); margin-bottom: 8px;
       text-align: center;
     }
@@ -1617,7 +1669,7 @@
     }
     .archive-card .archive-icon { font-size: 3rem; margin-bottom: 16px; }
     .archive-card h3 {
-      font-family: var(--font-heading); font-weight: 300;
+      font-family: var(--font-heading); font-weight: var(--fw-display);
       font-size: 1.6rem; color: var(--green); margin-bottom: 12px;
     }
     .archive-card p {
@@ -1692,7 +1744,7 @@
     .rp-date { font-size: 0.75rem; color: #888; }
     .rp-title {
       font-family: var(--font-heading); font-size: 1.8rem;
-      font-weight: 300; color: var(--text); margin-bottom: 6px;
+      font-weight: var(--fw-display); color: var(--text); margin-bottom: 6px;
     }
     .rp-subtitle { font-size: 0.82rem; color: #666; margin-bottom: 32px; }
     .rp-section-title {
@@ -1787,7 +1839,7 @@
     .appointment-booking-section h3 {
       font-family: var(--font-heading);
       font-size: 1.4rem;
-      font-weight: 300;
+      font-weight: var(--fw-display);
       color: var(--text);
       margin-bottom: 12px;
       text-align: center;
