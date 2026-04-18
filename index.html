@@ -1658,6 +1658,159 @@ footer a {
     text-align: center;
   }
 }
+
+/* ═════ LOT E : FORMULAIRE 4 ETAPES (cadrage v1.0 §5) ═════ */
+/* Reset des boutons du contact-form qui utilisent la classe .btn */
+.contact-form button.btn {
+  display: inline-block;
+  margin: 0;
+  padding: 0.95rem 1.6rem;
+  font-size: var(--fs-cta);
+  font-weight: var(--fw-cta);
+  letter-spacing: 0.02em;
+  text-transform: none;
+  background: var(--c-green-dark);
+  color: #fff;
+  border: 1.5px solid var(--c-green-dark);
+  border-radius: 999px;
+}
+.contact-form button.btn--ghost {
+  background: transparent;
+  color: var(--c-text);
+  border-color: rgba(26,26,26,0.2);
+}
+.contact-form button.btn--ghost:hover {
+  background: rgba(26,26,26,0.05);
+  color: var(--c-text);
+  border-color: var(--c-text);
+}
+.contact-form button.btn--primary:hover {
+  background: var(--c-green-light);
+  color: #fff;
+  border-color: var(--c-green-light);
+}
+
+
+.form-stepper {
+  position: sticky;
+  top: 88px;
+  z-index: 5;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+  padding: 16px 22px;
+  margin: 0 0 32px;
+  background: rgba(255,255,255,0.94);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(26,26,26,0.08);
+  border-radius: 18px;
+  box-shadow: var(--shadow-sm);
+}
+.form-step-dot {
+  flex: 1 1 0;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  border-radius: 12px;
+  font-family: var(--font-ui);
+  font-size: 0.82rem;
+  color: var(--c-text-soft);
+  cursor: default;
+  border: 1px solid transparent;
+  transition: background .2s var(--ease), color .2s var(--ease), border-color .2s var(--ease);
+}
+.form-step-dot .num {
+  width: 28px;
+  height: 28px;
+  display: grid;
+  place-items: center;
+  border-radius: 999px;
+  background: rgba(26,26,26,0.06);
+  color: var(--c-text);
+  font-weight: 600;
+  font-size: 0.82rem;
+  flex-shrink: 0;
+}
+.form-step-dot[aria-current="step"] {
+  background: rgba(58,122,80,0.10);
+  color: var(--c-green-dark);
+  border-color: rgba(58,122,80,0.25);
+}
+.form-step-dot[aria-current="step"] .num {
+  background: var(--c-green-dark);
+  color: #fff;
+}
+.form-step-dot.is-done .num {
+  background: var(--c-green-light);
+  color: #fff;
+}
+.form-step-dot.is-done { color: var(--c-green-dark); }
+
+.form-step { display: none; }
+.form-step.is-active { display: block; }
+
+.form-step-title {
+  font-family: var(--font-accent);
+  font-size: 1.3rem;
+  font-weight: 600;
+  color: var(--c-text);
+  margin: 0 0 8px;
+}
+.form-step-desc {
+  color: var(--c-text-soft);
+  font-size: 0.92rem;
+  margin: 0 0 28px;
+}
+
+.form-nav {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 28px;
+  padding-top: 24px;
+  border-top: 1px solid rgba(26,26,26,0.08);
+  flex-wrap: wrap;
+}
+.form-nav .btn {
+  min-width: 150px;
+}
+
+/* Tags en pill avec aria-pressed */
+.form-tag {
+  border-radius: 999px !important;
+  padding: 9px 18px !important;
+  cursor: pointer;
+  user-select: none;
+}
+.form-tag[aria-pressed="true"] {
+  background: var(--c-green-dark) !important;
+  color: #fff !important;
+  border-color: var(--c-green-dark) !important;
+}
+.form-tag[aria-pressed="true"] .tag-icon { filter: none; }
+
+/* Mobile stepper compact */
+@media (max-width: 768px) {
+  .form-stepper {
+    top: 76px;
+    padding: 10px 12px;
+    gap: 6px;
+  }
+  .form-step-dot {
+    padding: 6px;
+    font-size: 0;
+    flex: 0 0 auto;
+  }
+  .form-step-dot .num { width: 30px; height: 30px; }
+  .form-step-dot[aria-current="step"] {
+    flex: 1 1 auto;
+    font-size: 0.78rem;
+  }
+  .form-nav { justify-content: stretch; }
+  .form-nav .btn { flex: 1 1 45%; min-width: 0; }
+}
 </style>
 </head>
 <body>
@@ -1828,6 +1981,19 @@ window.location.replace('/connexion'+h);
 
 <!-- ── ZONE HAUTE : Identification (2 colonnes) ── -->
 <form class="contact-form" name="contact" method="POST" data-netlify="true" id="contactForm">
+
+<!-- Stepper 4 etapes -->
+<nav class="form-stepper" aria-label="Progression du formulaire">
+  <div class="form-step-dot" data-step="1" aria-current="step"><span class="num">1</span><span>Identification</span></div>
+  <div class="form-step-dot" data-step="2"><span class="num">2</span><span>Le projet</span></div>
+  <div class="form-step-dot" data-step="3"><span class="num">3</span><span>Les d&#233;tails</span></div>
+  <div class="form-step-dot" data-step="4"><span class="num">4</span><span>Finalisation</span></div>
+</nav>
+
+<!-- ── ETAPE 1 : Identification ── -->
+<div class="form-step is-active" data-step="1">
+<h3 class="form-step-title">Vous &amp; votre bien</h3>
+<p class="form-step-desc">Pour commencer, quelques informations pour vous recontacter et situer votre projet.</p>
 <div class="contact-grid">
 <div class="contact-info">
 <p class="contact-phrase">Vous avez un projet de r&#233;novation&nbsp;?</p>
@@ -1906,12 +2072,19 @@ window.location.replace('/connexion'+h);
 
 </div><!-- fin colonne droite formulaire -->
 </div><!-- fin contact-grid (2 colonnes) -->
+<div class="form-nav">
+  <span></span>
+  <button type="button" class="btn btn--primary" data-form-next>Suivant &rarr;</button>
+</div>
+</div><!-- fin etape 1 -->
 
-<!-- ── ZONE BASSE : Projet + Tags (pleine largeur) ── -->
+<!-- ── ETAPE 2 : Le projet ── -->
+<div class="form-step" data-step="2">
+<h3 class="form-step-title">Votre projet</h3>
+<p class="form-step-desc">D&#233;crivez la nature et l'ampleur de la r&#233;novation envisag&#233;e.</p>
 <div class="contact-fullwidth">
 
 <!-- ══════════ GROUPE 1 : LE PROJET ══════════ -->
-<div class="form-divider"></div>
 <div class="form-group">
   <div class="form-group-label">Votre projet</div>
   <div class="form-group-question">Type de projet</div>
@@ -1936,8 +2109,20 @@ window.location.replace('/connexion'+h);
   </div>
 </div>
 
+</div><!-- fin contact-fullwidth etape 2 -->
+<div class="form-nav">
+  <button type="button" class="btn btn--ghost" data-form-prev>&larr; Pr&#233;c&#233;dent</button>
+  <button type="button" class="btn btn--primary" data-form-next>Suivant &rarr;</button>
+</div>
+</div><!-- fin etape 2 -->
+
+<!-- ── ETAPE 3 : Les detalis ── -->
+<div class="form-step" data-step="3">
+<h3 class="form-step-title">Les d&#233;tails</h3>
+<p class="form-step-desc">Espaces, travaux, surface, budget et &#233;ch&#233;ance vis&#233;e.</p>
+<div class="contact-fullwidth">
+
 <!-- ══════════ GROUPE 2 : LES DÉTAILS ══════════ -->
-<div class="form-divider"></div>
 <div class="form-group">
   <div class="form-group-label">Les d&#233;tails</div>
   <div class="form-group-question">Espaces concern&#233;s</div>
@@ -2023,9 +2208,20 @@ window.location.replace('/connexion'+h);
 </div>
 </div><!-- fin form-group échéance -->
 <input type="hidden" name="echeance" id="echeanceHidden" />
+</div><!-- fin contact-fullwidth etape 3 -->
+<div class="form-nav">
+  <button type="button" class="btn btn--ghost" data-form-prev>&larr; Pr&#233;c&#233;dent</button>
+  <button type="button" class="btn btn--primary" data-form-next>Suivant &rarr;</button>
+</div>
+</div><!-- fin etape 3 -->
+
+<!-- ── ETAPE 4 : Finalisation ── -->
+<div class="form-step" data-step="4">
+<h3 class="form-step-title">Finalisation</h3>
+<p class="form-step-desc">Une pr&#233;cision &#224; ajouter&#160;? Choisissez ensuite le type de r&#233;ponse souhait&#233;.</p>
+<div class="contact-fullwidth">
 
 <!-- Champ libre optionnel -->
-<div class="form-divider"></div>
 <textarea name="demande" class="compact" placeholder="Un d&#233;tail sp&#233;cifique &#224; pr&#233;ciser ? (Facultatif - 50 caract&#232;res maximum)" maxlength="50"></textarea>
 <small class="char-count" id="charCount" style="display:block;text-align:right;max-width:700px;margin:4px auto 0;color:var(--muted);font-size:0.75rem;">0 / 50</small>
 
@@ -2053,8 +2249,12 @@ window.location.replace('/connexion'+h);
 <input type="hidden" name="budget" id="tagBudget" />
 
 <p id="contactFormError" style="color:#ff9090;font-size:0.82rem;display:none;margin:-4px 0 0 0;"></p>
-<button type="submit">Envoyer ma demande</button>
-</div><!-- fin contact-fullwidth -->
+</div><!-- fin contact-fullwidth etape 4 -->
+<div class="form-nav">
+  <button type="button" class="btn btn--ghost" data-form-prev>&larr; Pr&#233;c&#233;dent</button>
+  <button type="submit" class="btn btn--primary">Envoyer ma demande</button>
+</div>
+</div><!-- fin etape 4 -->
 </form>
 
 <script>
@@ -2069,21 +2269,99 @@ window.location.replace('/connexion'+h);
     var groupName = group.getAttribute('data-tag-group');
     var tags = group.querySelectorAll('.form-tag');
 
+    // Initialiser aria-pressed et role
     tags.forEach(function(tag) {
-      tag.addEventListener('click', function() {
+      if (!tag.hasAttribute('role')) tag.setAttribute('role', 'button');
+      if (!tag.hasAttribute('tabindex')) tag.setAttribute('tabindex', '0');
+      tag.setAttribute('aria-pressed', tag.classList.contains('active') ? 'true' : 'false');
+    });
+
+    tags.forEach(function(tag) {
+      var doToggle = function() {
         if (mode === 'single') {
-          // Désélectionner tous les autres du même groupe
-          tags.forEach(function(t) { t.classList.remove('active'); });
+          tags.forEach(function(t) {
+            t.classList.remove('active');
+            t.setAttribute('aria-pressed', 'false');
+          });
           tag.classList.add('active');
+          tag.setAttribute('aria-pressed', 'true');
         } else {
-          // Toggle multi-sélection
-          tag.classList.toggle('active');
+          var on = tag.classList.toggle('active');
+          tag.setAttribute('aria-pressed', on ? 'true' : 'false');
         }
-        // Synchroniser le champ caché
         syncTagHidden(groupName, group, mode);
+      };
+      tag.addEventListener('click', doToggle);
+      tag.addEventListener('keydown', function(ev) {
+        if (ev.key === ' ' || ev.key === 'Enter') { ev.preventDefault(); doToggle(); }
       });
     });
   });
+
+  /* ═════ Stepper 4 etapes ═════ */
+  (function(){
+    var form = document.getElementById('contactForm');
+    if (!form) return;
+    var steps = form.querySelectorAll('.form-step');
+    var dots = form.querySelectorAll('.form-step-dot');
+    if (!steps.length) return;
+
+    var current = 1;
+    var max = steps.length;
+
+    function show(n) {
+      if (n < 1 || n > max) return;
+      current = n;
+      steps.forEach(function(s){
+        s.classList.toggle('is-active', parseInt(s.getAttribute('data-step'), 10) === n);
+      });
+      dots.forEach(function(d){
+        var step = parseInt(d.getAttribute('data-step'), 10);
+        d.classList.toggle('is-done', step < n);
+        if (step === n) d.setAttribute('aria-current', 'step');
+        else d.removeAttribute('aria-current');
+      });
+      // scroll top du formulaire, pas en haut de page
+      var y = form.getBoundingClientRect().top + window.scrollY - 120;
+      window.scrollTo({ top: y < 0 ? 0 : y, behavior: 'smooth' });
+    }
+
+    function validateStep(n) {
+      var step = form.querySelector('.form-step[data-step="' + n + '"]');
+      if (!step) return true;
+      var required = step.querySelectorAll('input[required], select[required], textarea[required]');
+      for (var i = 0; i < required.length; i++) {
+        var f = required[i];
+        if (!f.value || (f.tagName === 'SELECT' && f.value === '')) {
+          f.focus();
+          if (typeof f.reportValidity === 'function') f.reportValidity();
+          return false;
+        }
+      }
+      return true;
+    }
+
+    form.addEventListener('click', function(ev){
+      var next = ev.target.closest('[data-form-next]');
+      var prev = ev.target.closest('[data-form-prev]');
+      if (next) {
+        ev.preventDefault();
+        if (validateStep(current)) show(current + 1);
+      } else if (prev) {
+        ev.preventDefault();
+        show(current - 1);
+      }
+    });
+
+    // Permet de cliquer une pastille deja validee pour revenir en arriere
+    dots.forEach(function(d){
+      d.style.cursor = 'pointer';
+      d.addEventListener('click', function(){
+        var target = parseInt(d.getAttribute('data-step'), 10);
+        if (target < current) show(target);
+      });
+    });
+  })();
 
   function syncTagHidden(name, group, mode) {
     var hidden = document.getElementById('tag' + name.charAt(0).toUpperCase() + name.slice(1));
