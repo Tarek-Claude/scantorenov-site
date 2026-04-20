@@ -4402,7 +4402,6 @@ function retryVF() {
 
 // État global des galeries
 var wsExpertPhotos = [];      // URLs des photos expert (depuis Supabase)
-var wsProposalPhotos = [];    // URLs des propositions Marcel (depuis chat/API)
 var wsSelectedPhotos = [];    // Photos sélectionnées pour envoi à Marcel
 
 /* ── Initialisation de l'espace visuel ── */
@@ -4411,9 +4410,7 @@ function initWorkspaceVisual() {
 
   // 1. Charger les photos expert depuis Supabase
   loadExpertPhotos();
-  // 2. Propositions Marcel — alimentées par le chat
-  renderProposalsGallery();
-  // 3. Mise à jour du compteur
+  // 2. Mise à jour du compteur
   updateSendBar();
 }
 
@@ -4482,56 +4479,6 @@ function toggleExpertSelect(index, thumbEl) {
     thumbEl.classList.add('selected');
   }
   updateSendBar();
-}
-
-/* ── (captures supprimées) ── */
-
-/* ══ 3. PROPOSITIONS DE MARCEL (Together AI) ══ */
-
-function addProposal(imageUrl, description) {
-  // Appelé depuis le chat Marcel quand Together AI génère un visuel
-  wsProposalPhotos.push({
-    url: imageUrl,
-    description: description || '',
-    date: new Date().toISOString(),
-    pinned: false
-  });
-  renderProposalsGallery();
-}
-
-function renderProposalsGallery() {
-  var grid = document.getElementById('wsProposalsGrid');
-  var badge = document.getElementById('wsProposalsBadge');
-  var empty = document.getElementById('wsProposalsEmpty');
-  if (!grid) return;
-
-  if (wsProposalPhotos.length === 0) {
-    if (empty) empty.style.display = '';
-    if (badge) badge.textContent = '0 visuel(s)';
-    return;
-  }
-  if (empty) empty.style.display = 'none';
-  if (badge) badge.textContent = wsProposalPhotos.length + ' visuel(s)';
-
-  grid.innerHTML = '';
-  wsProposalPhotos.forEach(function(prop, i) {
-    var div = document.createElement('div');
-    div.className = 'ws-thumb';
-    div.innerHTML = '<img src="' + prop.url + '" alt="Proposition ' + (i+1) + '" loading="lazy" onclick="openLightbox(\'' + prop.url + '\')" />' +
-                    '<button class="ws-pin ' + (prop.pinned ? 'pinned' : '') + '" onclick="event.stopPropagation();togglePin(' + i + ')" title="Épingler">📌</button>' +
-                    '<button class="ws-delete" onclick="event.stopPropagation();deleteProposal(' + i + ')" title="Retirer">✕</button>';
-    grid.appendChild(div);
-  });
-}
-
-function togglePin(index) {
-  wsProposalPhotos[index].pinned = !wsProposalPhotos[index].pinned;
-  renderProposalsGallery();
-}
-
-function deleteProposal(index) {
-  wsProposalPhotos.splice(index, 1);
-  renderProposalsGallery();
 }
 
 /* ══ BARRE D'ENVOI À MARCEL ══ */
