@@ -3306,6 +3306,11 @@ function applySupabaseClientRecord(sb, appMeta) {
       startVirtualTourUnlockPolling();
     }
   }
+
+  // Rehydrate la galerie IA depuis clients.simulations (persistance Supabase)
+  if (typeof rehydrateGalleryFromSimulations === 'function') {
+    rehydrateGalleryFromSimulations(sb.simulations);
+  }
 }
 
 async function findOrCreateClientRecord(user, meta, appMeta) {
@@ -5202,7 +5207,9 @@ function generateKontextVisual(imageUrl, assistantText, buttonEl) {
       prompt: prompt,
       imageUrl: imageUrl,
       width: 1024,
-      height: 1024
+      height: 1024,
+      clientId: currentClientId,
+      description: 'Rendu généré — variante possible pour votre pièce'
     })
   })
   .then(function(r) {
@@ -5362,7 +5369,11 @@ function generateVisual() {
   fetch('/.netlify/functions/generate-image', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ prompt: fullPrompt })
+    body: JSON.stringify({
+      prompt: fullPrompt,
+      clientId: currentClientId,
+      description: text
+    })
   })
   .then(function(r) { return r.json().then(function(d) { return { ok: r.ok, data: d }; }); })
   .then(function(result) {
@@ -5393,7 +5404,16 @@ function showGeneratedImage(container, imageUrl, description) {
   addToGallery(imageUrl, description);
 }
 
-function addToGallery(imageUrl, description) {
+// Deduplication set pour la rehydratation (evite les doublons quand on
+// reapplique le record Supabase apres polling / reload).
+window.__galleryRenderedUrls = window.__galleryRenderedUrls || {};
+
+function addToGallery(imageUrl, description, options) {
+  if (!imageUrl) return;
+  if (window.__galleryRenderedUrls[imageUrl]) return;
+  window.__galleryRenderedUrls[imageUrl] = true;
+
+  options = options || {};
   generatedCount++;
   var gallery = document.getElementById('generatedGallery');
   var section = document.getElementById('generatedSection');
@@ -5406,19 +5426,58 @@ function addToGallery(imageUrl, description) {
   var card = document.createElement('div');
   card.className = 'gen-card';
 
-  var shortDesc = description.length > 60 ? description.substring(0, 60) + '\u2026' : description;
-  var now = new Date();
-  var time = now.getHours() + 'h' + (now.getMinutes() < 10 ? '0' : '') + now.getMinutes();
+  var safeDesc = String(description || '');
+  var shortDesc = safeDesc.length > 60 ? safeDesc.substring(0, 60) + '\u2026' : safeDesc;
+
+  // Support d'un timestamp passe pour la rehydratation (ISO string)
+  var time;
+  if (options.createdAt) {
+    var d = new Date(options.createdAt);
+    if (!isNaN(d.getTime())) {
+      time = d.getHours() + 'h' + (d.getMinutes() < 10 ? '0' : '') + d.getMinutes();
+    }
+  }
+  if (!time) {
+    var now = new Date();
+    time = now.getHours() + 'h' + (now.getMinutes() < 10 ? '0' : '') + now.getMinutes();
+  }
 
   card.innerHTML = '<img src="' + imageUrl + '" alt="Visuel #' + generatedCount + '" '
-    + 'onclick="window.open(this.src, \'_blank\')" style="cursor:pointer" />'
+    + 'onclick="window.open(this.src, \'_blank\')" style="cursor:pointer" loading="lazy" />'
     + '<div class="gen-card-body">'
     + '<h4>Visuel #' + generatedCount + ' \u2014 ' + time + '</h4>'
     + '<p>' + shortDesc + '</p>'
     + '<span class="gen-card-badge">\uD83C\uDFA8 G\u00e9n\u00e9r\u00e9 par Marcel IA</span>'
     + '</div>';
 
-  gallery.insertBefore(card, gallery.firstChild);
+  // Rehydratation : ajouter a la fin (ordre chronologique), sinon en tete
+  if (options.append) {
+    gallery.appendChild(card);
+  } else {
+    gallery.insertBefore(card, gallery.firstChild);
+  }
+}
+
+/**
+ * Rehydrate la galerie "Mes simulations IA" depuis clients.simulations.
+ * Appelee apres chaque applySupabaseClientRecord.
+ */
+function rehydrateGalleryFromSimulations(simulations) {
+  if (!Array.isArray(simulations) || simulations.length === 0) return;
+  // Tri chronologique ascendant pour preserver l'ordre de generation
+  var sorted = simulations.slice().sort(function(a, b) {
+    var ta = a && a.created_at ? Date.parse(a.created_at) : 0;
+    var tb = b && b.created_at ? Date.parse(b.created_at) : 0;
+    return ta - tb;
+  });
+  for (var i = 0; i < sorted.length; i++) {
+    var entry = sorted[i];
+    if (!entry || !entry.url) continue;
+    addToGallery(entry.url, entry.description || '', {
+      createdAt: entry.created_at,
+      append: true
+    });
+  }
 }
 
 /* ── Données du bien — chargées depuis Supabase (matterport_data) ── */

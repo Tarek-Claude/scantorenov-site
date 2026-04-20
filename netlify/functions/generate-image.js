@@ -9,7 +9,13 @@
  * - replicate
  * - huggingface
  * - openai
+ *
+ * Persistance : apres generation, on re-heberge le visuel sur Supabase
+ * Storage + on ecrit la metadata dans clients.simulations pour que les
+ * rendus survivent aux deploiements (les URLs Together sont ephemeres).
  */
+
+const { persistSimulation } = require('./_simulations-storage');
 
 const PROVIDER = process.env.IMAGE_PROVIDER || 'together';
 const KONTEXT_PROVIDER = 'together-kontext';
@@ -439,14 +445,43 @@ exports.handler = async function(event) {
       })
       : await generator(fullPrompt);
 
+    const ephemeralUrl = result.url || result.imageUrl;
+    const clientId = String(body?.clientId || '').trim();
+    const description = String(body?.description || '').trim();
+
+    // Re-hebergement Supabase Storage + persistance metadata.
+    // Degradation gracieuse : si ca echoue, on renvoie quand meme l'URL ephemere.
+    let persistedUrl = ephemeralUrl;
+    let persisted = false;
+    let persistedEntry = null;
+
+    if (clientId && ephemeralUrl && !ephemeralUrl.startsWith('data:')) {
+      try {
+        const persistResult = await persistSimulation({
+          clientId,
+          ephemeralUrl,
+          description,
+          prompt: fullPrompt,
+          provider: result.provider
+        });
+        persistedUrl = persistResult.url;
+        persisted = Boolean(persistResult.persisted);
+        persistedEntry = persistResult.entry || null;
+      } catch (persistErr) {
+        console.warn('[generate-image] persistSimulation threw:', persistErr && persistErr.message);
+      }
+    }
+
     return {
       statusCode: 200,
       headers,
       body: JSON.stringify({
-        url: result.url || result.imageUrl,
-        imageUrl: result.imageUrl || result.url,
+        url: persistedUrl,
+        imageUrl: persistedUrl,
         provider: result.provider,
-        prompt: fullPrompt
+        prompt: fullPrompt,
+        persisted,
+        entry: persistedEntry
       })
     };
   } catch (error) {
