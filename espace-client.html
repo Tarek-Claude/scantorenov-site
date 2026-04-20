@@ -3293,6 +3293,15 @@ function applySupabaseClientRecord(sb, appMeta) {
   if (sb.chantier) appMeta.chantier = sb.chantier;
   appMeta.virtual_tour_unlocked = window.__virtualTourUnlocked;
   renderPhase(currentPhase, clientProject, appMeta);
+
+  // Demarre (ou arrete) le polling de deblocage visite selon l'etat courant
+  if (typeof startVirtualTourUnlockPolling === 'function') {
+    if (hasVirtualTourAccess()) {
+      stopVirtualTourUnlockPolling();
+    } else if (currentPhase >= 5) {
+      startVirtualTourUnlockPolling();
+    }
+  }
 }
 
 async function findOrCreateClientRecord(user, meta, appMeta) {
@@ -3466,6 +3475,9 @@ function applyDashboardData(user, meta, appMeta) {
 function showLogin() {
   currentUser = null;
   window.__virtualTourUnlocked = false;
+  if (typeof stopVirtualTourUnlockPolling === 'function') {
+    stopVirtualTourUnlockPolling();
+  }
   setSlotPickerClientContext(null, 'Connectez-vous pour reserver un creneau.');
   setAuthLoginFeedback('', false);
   document.getElementById('authGuard').style.display = '';
@@ -6785,6 +6797,48 @@ async function refreshResolvedClientRecord() {
   if (currentPhase >= 3) {
     await loadAppointments();
   }
+}
+
+// ═══════════  POLLING DÉBLOCAGE VISITE VIRTUELLE  ═══════════
+// Re-fetch silencieux du dossier client tant que la visite est verrouillée,
+// pour faire disparaître le bloc d'activation dès que l'admin valide le
+// paiement (sans que l'utilisateur ait à recharger la page).
+window.__virtualTourPollTimer = null;
+
+function stopVirtualTourUnlockPolling() {
+  if (window.__virtualTourPollTimer) {
+    clearInterval(window.__virtualTourPollTimer);
+    window.__virtualTourPollTimer = null;
+  }
+}
+
+function startVirtualTourUnlockPolling() {
+  stopVirtualTourUnlockPolling();
+  // Ne démarre que si l'utilisateur est en phase 5+ et visite encore verrouillée
+  if (!currentUser) return;
+  if (currentPhase < 5) return;
+  if (hasVirtualTourAccess()) return;
+
+  window.__virtualTourPollTimer = setInterval(async function() {
+    // Arrêt immédiat si on a perdu l'utilisateur ou si l'accès est débloqué
+    if (!currentUser || hasVirtualTourAccess()) {
+      stopVirtualTourUnlockPolling();
+      return;
+    }
+    try {
+      var meta = currentUser.user_metadata || {};
+      var appMeta = currentUser.app_metadata || {};
+      var clientRecord = await findOrCreateClientRecord(currentUser, meta, appMeta);
+      if (!clientRecord) return;
+      applySupabaseClientRecord(clientRecord, appMeta);
+      if (hasVirtualTourAccess()) {
+        stopVirtualTourUnlockPolling();
+      }
+    } catch (err) {
+      // Silencieux : on retentera au tick suivant
+      console.debug('virtualTourPoll:', err && err.message);
+    }
+  }, 30000); // 30 s
 }
 
 async function applyScanPromoCode() {
