@@ -807,6 +807,10 @@
     /* ── PHASE SECTION VISIBILITY ── */
     .phase-section { display: none; }
     .phase-section.phase-visible { display: block; }
+    /* L'attribut [hidden] doit gagner contre .phase-visible (meme specificite
+       mais ordre source ; on force avec !important pour couvrir l'ensemble
+       des sections a gate, notamment #activationNotice et [data-virtual-tour-locked]). */
+    .phase-section[hidden] { display: none !important; }
     .scan-booking-section {
       background: var(--card-bg, #fff);
       border: 1px solid var(--border-color, #E8E8E8);

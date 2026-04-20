@@ -2781,14 +2781,27 @@
                 `;
                 document.getElementById('filesSection').style.display = 'block';
             } else if (status === 'analysis_ready') {
-                html = `
-                    <h3>Analyse prete — en attente du paiement visite</h3>
-                    <p class="action-panel-description">Travaillez avec Marcel pour preparer l'avant-projet, puis validez le paiement de la visite pour debloquer l'acces client.</p>
-                    <button class="action-button" onclick="openMarcelChat()">Discuter avec Marcel</button>
-                    <button class="action-button" onclick="markVisitePaymentDone()" style="background-color:#F57F17; color:#fff;">
-                        Valider paiement visite
-                    </button>
-                `;
+                const virtualTourAlreadyUnlocked = !!(
+                    currentClient && currentClient.payment_access
+                    && currentClient.payment_access.virtualTourUnlocked === true
+                );
+                if (virtualTourAlreadyUnlocked) {
+                    html = `
+                        <h3>Paiement visite valide ✓</h3>
+                        <p class="action-panel-description">L'acces client est debloque (visite virtuelle, Marcel, simulations, avant-projet). Finalisez l'avant-projet avec Marcel, puis generez-le pour le transmettre au client.</p>
+                        <button class="action-button" onclick="openMarcelChat()">Discuter avec Marcel</button>
+                        <button class="action-button" onclick="generateAvantProjet()" style="background-color:#4CAF50;">Generer avant-projet</button>
+                    `;
+                } else {
+                    html = `
+                        <h3>Analyse prete — en attente du paiement visite</h3>
+                        <p class="action-panel-description">Travaillez avec Marcel pour preparer l'avant-projet, puis validez le paiement de la visite pour debloquer l'acces client.</p>
+                        <button class="action-button" onclick="openMarcelChat()">Discuter avec Marcel</button>
+                        <button class="action-button" onclick="markVisitePaymentDone()" style="background-color:#F57F17; color:#fff;">
+                            Valider paiement visite
+                        </button>
+                    `;
+                }
             } else if (status === 'visite_payment_completed') {
                 html = `
                     <h3>Paiement visite valide</h3>
