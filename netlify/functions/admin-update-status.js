@@ -73,6 +73,59 @@ exports.handler = async function handler(event) {
       throw new Error(clientError ? clientError.message : 'Client introuvable');
     }
 
+    // Cas special : validation manuelle du paiement visite virtuelle.
+    // Ce statut n est pas dans la pipeline canonique, on enregistre donc
+    // directement une ligne payments (type=virtual_tour, status=completed)
+    // pour que buildPaymentAccessSummary retourne virtualTourUnlocked=true.
+    if (requestedStatus === 'visite_payment_completed') {
+      const { data: existingPayments, error: paymentsError } = await supabase
+        .from('payments')
+        .select('id')
+        .eq('client_id', clientId)
+        .eq('type', 'virtual_tour')
+        .eq('status', 'completed')
+        .limit(1);
+
+      if (paymentsError) {
+        throw new Error(`Lecture paiements: ${paymentsError.message}`);
+      }
+
+      if (!existingPayments || existingPayments.length === 0) {
+        const { error: insertError } = await supabase
+          .from('payments')
+          .insert([{
+            client_id: clientId,
+            type: 'virtual_tour',
+            amount_cents: 12000,
+            currency: 'eur',
+            status: 'completed',
+            paid_at: new Date().toISOString(),
+            description: 'Acces visite virtuelle 3D - Paiement valide manuellement par admin'
+          }]);
+
+        if (insertError) {
+          throw new Error(`Enregistrement paiement visite: ${insertError.message}`);
+        }
+      }
+
+      const { data: refreshedClient } = await supabase
+        .from('clients')
+        .select('*')
+        .eq('id', clientId)
+        .single();
+
+      return {
+        statusCode: 200,
+        headers,
+        body: JSON.stringify({
+          success: true,
+          client: refreshedClient || client,
+          status: (refreshedClient && refreshedClient.status) || client.status,
+          virtualTourUnlocked: true,
+        }),
+      };
+    }
+
     const result = await upsertClientPipeline({
       email: client.email,
       status: requestedStatus,
